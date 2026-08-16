@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			height: 500vh; 
+		}
+		body.before-load {
+			overflow-y: hidden;
+		}
+		.sample-video {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+		}
+	</style>
+</head>
+<body class="before-load">
+	<!-- 비디오를 직접처리하게 되면 비디오의 해상도가 조금만 고화질이여도 버벅인다 
+		=> 다른 방법이 필요 
+		=> -->
+	<video class="sample-video" src="../video/sample-low.mp4" muted></video>
+	<!-- <video class="sample-video" src="../video/sample-high.mp4" muted></video> -->
+
+	<script>
+		const videoElem = document.querySelector('.sample-video');
+		let progress;
+		let currentFrame;
+		function init() {
+			document.body.classList.remove('before-load');
+
+			window.addEventListener('scroll', function () {
+				/* pageYOffset : 현재 스크롤의 위치
+				document.body.offsetHeight : <body> 요소의 높이 (body안에 들어있는 콘텐츠가 많아지면 커진다)
+				window.innerHeight : 브라우저 창의 높이 (body안에 콘텐츠 양에 상관 없이 창의 크기) 
+				스크롤 가동 범위 = 두개의 차이 
+				progress : 현재 얼만큼 스크롤이 됬는지의 비율 */
+				progress = pageYOffset / (document.body.offsetHeight - window.innerHeight);
+				console.log(progress);
+				if (progress < 0) progress = 0;
+				if (progress > 1) progress = 1;
+
+				// currentTime : 현재 재생 시간
+				// duration : 비디오의 전체 재생 시간
+				videoElem.currentTime = videoElem.duration * progress;
+			});
+		}
+
+		window.addEventListener('load', init);
+	</script>
+</body>
+</html>

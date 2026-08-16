@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>부드러운 스크롤</title>
+	<style>
+		body {
+			height: 500vh;
+		}
+
+		.box {
+			position: fixed;
+			top: 100px;
+			left: 0;
+			width: 0;
+			height: 100px;
+			background: orange;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="box"></div>
+
+	<script>
+		const box = document.querySelector('.box');
+		let acc = 0.1;
+		let delayedYOffset = 0;
+		let rafId;
+		let rafState;
+
+		window.addEventListener('scroll', () => {
+			// box.style.width = `${window.pageYOffset}px`;
+			// 스크롤을 멈췄을 때 loop에서 탈출해 더이상 실행이 안 되는 것을 방지
+			if (!rafState) {
+				rafId = requestAnimationFrame(loop);
+				rafState = true;
+			}
+		});
+
+		function loop() {
+			// O o . -> 거리가 점점 작아지면서 0에 수렴하는 원리
+			delayedYOffset = delayedYOffset + (pageYOffset - delayedYOffset) * acc;
+			box.style.width = `${delayedYOffset}px`;
+			console.log('loop');
+
+			rafId = requestAnimationFrame(loop);
+
+			// 무한 loop 해결
+			if (Math.abs(pageYOffset - delayedYOffset) < 1) {
+				cancelAnimationFrame(rafId);
+				rafState = false;
+			}
+		}
+
+		loop();
+	</script>
+</body>
+
+</html>
