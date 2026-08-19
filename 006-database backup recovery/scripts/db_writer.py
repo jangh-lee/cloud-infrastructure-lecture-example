@@ -2,6 +2,7 @@
 import argparse
 import os
 import random
+import re
 import socket
 import sys
 import time
@@ -31,13 +32,24 @@ def get_config():
     }
 
 
-def connect(config):
+IDENTIFIER_RE = re.compile(r"^[A-Za-z0-9_]+$")
+
+
+def quote_identifier(value):
+    if not IDENTIFIER_RE.match(value):
+        raise RuntimeError(
+            f"Invalid MySQL identifier: {value!r}. Use letters, numbers, and underscores only."
+        )
+    return f"`{value}`"
+
+
+def connect(config, use_database=True):
     return pymysql.connect(
         host=config["host"],
         port=config["port"],
         user=config["user"],
         password=config["password"],
-        database=config["database"],
+        database=config["database"] if use_database else None,
         charset="utf8mb4",
         autocommit=True,
         connect_timeout=config["connect_timeout"],
@@ -52,7 +64,7 @@ def insert_event(config):
     metric_value = random.randint(1, 100)
 
     sql = (
-        f"INSERT INTO `{config['table']}` "
+        f"INSERT INTO {quote_identifier(config['table'])} "
         "(source_id, event_message, metric_value) VALUES (%s, %s, %s)"
     )
 
@@ -64,6 +76,70 @@ def insert_event(config):
     print(
         f"inserted id={event_id} source_id={config['source_id']} "
         f"metric_value={metric_value}",
+        flush=True,
+    )
+
+
+def check_config(config):
+    print("checking MySQL server login...", flush=True)
+    with connect(config, use_database=False) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT VERSION(), CURRENT_USER()")
+            version, current_user = cursor.fetchone()
+            print(f"server login ok: version={version} current_user={current_user}", flush=True)
+
+            cursor.execute(
+                "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = %s",
+                (config["database"],),
+            )
+            database_exists = cursor.fetchone() is not None
+
+    if not database_exists:
+        raise RuntimeError(
+            f"database {config['database']!r} does not exist or is not visible to this user. "
+            "Create it first with an admin account, or run init-schema with an account that has CREATE privilege."
+        )
+
+    print(f"checking database access: {config['database']}...", flush=True)
+    with connect(config) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT DATABASE()")
+            print(f"database access ok: {cursor.fetchone()[0]}", flush=True)
+
+            table_name = quote_identifier(config["table"])
+            cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+            row_count = cursor.fetchone()[0]
+            print(f"table access ok: {config['table']} rows={row_count}", flush=True)
+
+
+def init_schema(config):
+    database_name = quote_identifier(config["database"])
+    table_name = quote_identifier(config["table"])
+
+    with connect(config, use_database=False) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                f"CREATE DATABASE IF NOT EXISTS {database_name} "
+                "DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_unicode_ci"
+            )
+            cursor.execute(f"USE {database_name}")
+            cursor.execute(
+                f"""
+                CREATE TABLE IF NOT EXISTS {table_name} (
+                  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                  source_id VARCHAR(80) NOT NULL,
+                  event_message VARCHAR(255) NOT NULL,
+                  metric_value INT NOT NULL,
+                  created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+                  PRIMARY KEY (id),
+                  KEY idx_created_at (created_at),
+                  KEY idx_source_created_at (source_id, created_at)
+                ) ENGINE=InnoDB
+                """
+            )
+
+    print(
+        f"schema ready: database={config['database']} table={config['table']}",
         flush=True,
     )
 
@@ -85,7 +161,7 @@ def run_forever(config):
 
 def main():
     parser = argparse.ArgumentParser(description="Write periodic recovery lab events to MySQL.")
-    parser.add_argument("command", choices=["run", "send-once"])
+    parser.add_argument("command", choices=["run", "send-once", "check", "init-schema"])
     args = parser.parse_args()
 
     try:
@@ -94,6 +170,10 @@ def main():
             run_forever(config)
         elif args.command == "send-once":
             insert_event(config)
+        elif args.command == "check":
+            check_config(config)
+        elif args.command == "init-schema":
+            init_schema(config)
     except Exception as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
@@ -103,4 +183,3 @@ def main():
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

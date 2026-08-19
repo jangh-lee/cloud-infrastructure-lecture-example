@@ -19,10 +19,28 @@ MySQL 호환 DB
 
 ## 1. DB 준비
 
-DB 관리자 계정으로 접속해서 [sql/mysql_schema.sql](./sql/mysql_schema.sql)을 실행합니다.
+먼저 DB 서버에 로그인할 수 있는지 확인합니다. 이 단계는 “서버 접속 가능 여부”만 확인합니다.
+
+```bash
+mysql -h DB_HOST -P 3306 -u DB_USER -p
+```
+
+로그인이 된다고 해서 `lecture_recovery_lab` 데이터베이스 접근 권한까지 있는 것은 아닙니다. 아래처럼 DB 이름까지 지정해서 접속되는지 확인해야 합니다.
+
+```bash
+mysql -h DB_HOST -P 3306 -u DB_USER -p lecture_recovery_lab
+```
+
+DB와 테이블이 아직 없다면 DB 관리자 계정으로 접속해서 [sql/mysql_schema.sql](./sql/mysql_schema.sql)을 실행합니다.
 
 ```bash
 mysql -h DB_HOST -P 3306 -u 관리자계정 -p < sql/mysql_schema.sql
+```
+
+또는 `configure`에 관리자 권한이 있는 계정을 입력했다면 스크립트로 기본 DB와 테이블을 만들 수 있습니다.
+
+```bash
+sudo ./scripts/db-writer.sh init-schema
 ```
 
 생성되는 기본 구성:
@@ -93,7 +111,19 @@ sudo ./scripts/db-writer.sh show-config
 
 ## 4. 연결 테스트
 
-서비스를 켜기 전에 한 건만 넣어 봅니다.
+서비스를 켜기 전에 접속 상태를 단계별로 확인합니다.
+
+```bash
+sudo ./scripts/db-writer.sh check
+```
+
+`check`는 다음을 분리해서 확인합니다.
+
+- MySQL 서버 로그인 가능 여부
+- 설정한 데이터베이스 존재 및 접근 가능 여부
+- 설정한 테이블 조회 가능 여부
+
+문제가 없다면 한 건만 넣어 봅니다.
 
 ```bash
 sudo ./scripts/db-writer.sh send-once
@@ -171,6 +201,12 @@ DB 접속 실패:
 - DB 사용자 권한이 `INSERT`, `SELECT`를 포함하는지 확인합니다.
 - `mysql -h DB_HOST -P 3306 -u DB_USER -p DB_NAME`으로 직접 접속이 되는지 확인합니다.
 - 직접 접속은 되는데 스크립트만 실패하면 `sudo ./scripts/db-writer.sh configure`를 다시 실행해 비밀번호를 직접 타이핑합니다.
+
+`Access denied for user 'USER'@'%' to database 'lecture_recovery_lab'`:
+
+- MySQL 서버 로그인은 성공했지만 해당 데이터베이스 권한이 없는 상태입니다.
+- DB가 아직 없거나, 현재 사용자에게 `lecture_recovery_lab` 권한이 부여되지 않았을 때 발생합니다.
+- 관리자 계정으로 `sql/mysql_schema.sql`을 실행하거나, 현재 계정에 `SELECT`, `INSERT` 권한을 부여하세요.
 
 서비스가 실행되지 않음:
 

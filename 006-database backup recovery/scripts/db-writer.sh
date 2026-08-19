@@ -18,6 +18,8 @@ Usage:
   sudo ./db-writer.sh restart
   sudo ./db-writer.sh status
   sudo ./db-writer.sh logs
+  sudo ./db-writer.sh check
+  sudo ./db-writer.sh init-schema
   sudo ./db-writer.sh send-once
   sudo ./db-writer.sh show-config
 
@@ -31,6 +33,8 @@ Commands:
   restart     Restart the service.
   status      Show systemd status.
   logs        Tail service logs.
+  check       Check server login, database access, and table access.
+  init-schema Create the configured database and table if the DB user has permission.
   send-once   Insert one test row using saved DB settings.
   show-config Show saved settings with password masked.
 USAGE
@@ -240,14 +244,26 @@ logs_app() {
   journalctl -u "${APP_NAME}" -f
 }
 
-send_once() {
+run_python_command() {
   require_root
   ensure_installed
   set -a
   # shellcheck disable=SC1090
   source "${ENV_FILE}"
   set +a
-  "${APP_DIR}/venv/bin/python" "${APP_DIR}/db_writer.py" send-once
+  "${APP_DIR}/venv/bin/python" "${APP_DIR}/db_writer.py" "$1"
+}
+
+check_app() {
+  run_python_command check
+}
+
+init_schema() {
+  run_python_command init-schema
+}
+
+send_once() {
+  run_python_command send-once
 }
 
 show_config() {
@@ -288,6 +304,8 @@ main() {
     restart) restart_app ;;
     status) status_app ;;
     logs) logs_app ;;
+    check) check_app ;;
+    init-schema) init_schema ;;
     send-once) send_once ;;
     show-config) show_config ;;
     ""|-h|--help|help) usage ;;
