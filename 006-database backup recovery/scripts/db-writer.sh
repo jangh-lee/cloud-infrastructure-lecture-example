@@ -12,6 +12,7 @@ usage() {
 Usage:
   sudo ./db-writer.sh install
   sudo ./db-writer.sh configure
+  sudo ./db-writer.sh configure-plain
   sudo ./db-writer.sh start
   sudo ./db-writer.sh stop
   sudo ./db-writer.sh restart
@@ -23,6 +24,8 @@ Usage:
 Commands:
   install      Install Python runtime, app files, and systemd service.
   configure   Prompt for DB connection values and save them to /etc/ncp-db-writer.env.
+  configure-plain
+               Same as configure, but shows the password while typing.
   start       Start and enable the 30-second DB writer service.
   stop        Stop the service.
   restart     Restart the service.
@@ -136,11 +139,16 @@ configure_app() {
   require_root
 
   local db_host db_port db_user db_password db_name db_table source_id interval
+  local password_mode="${1:-secret}"
 
   db_host="$(read_with_default "DB host" "")"
   db_port="$(read_with_default "DB port" "3306")"
   db_user="$(read_with_default "DB user" "lecture_writer")"
-  db_password="$(read_secret "DB password")"
+  if [[ "${password_mode}" == "plain" ]]; then
+    db_password="$(read_with_default "DB password (visible)" "")"
+  else
+    db_password="$(read_secret "DB password")"
+  fi
   db_name="$(read_with_default "DB name" "lecture_recovery_lab")"
   db_table="$(read_with_default "DB table" "recovery_events")"
   source_id="$(read_with_default "Source ID" "$(hostname)")"
@@ -273,7 +281,8 @@ main() {
 
   case "${command}" in
     install) install_app ;;
-    configure) configure_app ;;
+    configure) configure_app secret ;;
+    configure-plain) configure_app plain ;;
     start) start_app ;;
     stop) stop_app ;;
     restart) restart_app ;;
