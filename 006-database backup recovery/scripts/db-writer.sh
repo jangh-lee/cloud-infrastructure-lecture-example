@@ -62,6 +62,11 @@ read_secret() {
   printf '%s' "${value}"
 }
 
+strip_carriage_returns() {
+  local value="$1"
+  printf '%s' "${value//$'\r'/}"
+}
+
 env_line() {
   local key="$1"
   local value="$2"
@@ -78,7 +83,7 @@ validate_env_value() {
   local label="$1"
   local value="$2"
 
-  if [[ "${value}" == *$'\n'* || "${value}" == *$'\r'* ]]; then
+  if [[ "${value}" == *$'\n'* ]]; then
     echo "${label} contains a newline. Please type the value again without line breaks." >&2
     exit 1
   fi
@@ -140,6 +145,15 @@ configure_app() {
   db_table="$(read_with_default "DB table" "recovery_events")"
   source_id="$(read_with_default "Source ID" "$(hostname)")"
   interval="$(read_with_default "Write interval seconds" "30")"
+
+  db_host="$(strip_carriage_returns "${db_host}")"
+  db_port="$(strip_carriage_returns "${db_port}")"
+  db_user="$(strip_carriage_returns "${db_user}")"
+  db_password="$(strip_carriage_returns "${db_password}")"
+  db_name="$(strip_carriage_returns "${db_name}")"
+  db_table="$(strip_carriage_returns "${db_table}")"
+  source_id="$(strip_carriage_returns "${source_id}")"
+  interval="$(strip_carriage_returns "${interval}")"
 
   if [[ -z "${db_host}" || -z "${db_user}" || -z "${db_password}" ]]; then
     echo "DB host, user, and password are required." >&2
