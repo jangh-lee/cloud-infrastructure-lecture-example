@@ -19,6 +19,7 @@ Usage:
   sudo ./db-writer.sh status
   sudo ./db-writer.sh logs
   sudo ./db-writer.sh check
+  sudo ./db-writer.sh db-shell
   sudo ./db-writer.sh init-schema
   sudo ./db-writer.sh send-once
   sudo ./db-writer.sh show-config
@@ -34,6 +35,7 @@ Commands:
   status      Show systemd status.
   logs        Tail service logs.
   check       Check server login, database access, and table access.
+  db-shell    Open a MySQL shell using the saved DB settings.
   init-schema Create the configured database and table if the DB user has permission.
   send-once   Insert one test row using saved DB settings.
   show-config Show saved settings with password masked.
@@ -105,7 +107,7 @@ install_app() {
   require_root
 
   apt-get update
-  apt-get install -y python3 python3-venv python3-pip
+  apt-get install -y default-mysql-client python3 python3-venv python3-pip
 
   mkdir -p "${APP_DIR}"
   cp "${SCRIPT_DIR}/db_writer.py" "${APP_DIR}/db_writer.py"
@@ -265,6 +267,27 @@ check_app() {
   run_python_command check
 }
 
+db_shell() {
+  require_root
+  ensure_installed
+  command -v mysql >/dev/null 2>&1 || {
+    echo "mysql client is not installed. Run: sudo ./scripts/db-writer.sh install" >&2
+    exit 1
+  }
+
+  set -a
+  # shellcheck disable=SC1090
+  source "${ENV_FILE}"
+  set +a
+
+  MYSQL_PWD="${DB_PASSWORD}" mysql \
+    --protocol=TCP \
+    -h "${DB_HOST}" \
+    -P "${DB_PORT}" \
+    -u "${DB_USER}" \
+    "${DB_NAME}"
+}
+
 init_schema() {
   run_python_command init-schema
 }
@@ -312,6 +335,7 @@ main() {
     status) status_app ;;
     logs) logs_app ;;
     check) check_app ;;
+    db-shell) db_shell ;;
     init-schema) init_schema ;;
     send-once) send_once ;;
     show-config) show_config ;;
