@@ -89,6 +89,8 @@ Write interval seconds
 sudo ./scripts/db-writer.sh show-config
 ```
 
+비밀번호는 한 줄로 입력해야 합니다. 붙여넣기 과정에서 줄바꿈이나 제어문자가 섞이면 DB 로그인에 실패할 수 있으니, 인증 오류가 나면 `configure`를 다시 실행해 비밀번호를 직접 타이핑하세요.
+
 ## 4. 연결 테스트
 
 서비스를 켜기 전에 한 건만 넣어 봅니다.
@@ -167,6 +169,8 @@ DB 접속 실패:
 - DB host/port가 맞는지 확인합니다.
 - DB 보안그룹 또는 ACG에서 Ubuntu 서버의 접속을 허용했는지 확인합니다.
 - DB 사용자 권한이 `INSERT`, `SELECT`를 포함하는지 확인합니다.
+- `mysql -h DB_HOST -P 3306 -u DB_USER -p DB_NAME`으로 직접 접속이 되는지 확인합니다.
+- 직접 접속은 되는데 스크립트만 실패하면 `sudo ./scripts/db-writer.sh configure`를 다시 실행해 비밀번호를 직접 타이핑합니다.
 
 서비스가 실행되지 않음:
 
@@ -181,4 +185,3 @@ sudo ./scripts/db-writer.sh logs
 sudo ./scripts/db-writer.sh configure
 sudo ./scripts/db-writer.sh restart
 ```
-

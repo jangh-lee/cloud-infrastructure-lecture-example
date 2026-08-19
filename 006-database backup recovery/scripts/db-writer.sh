@@ -74,6 +74,21 @@ env_line() {
   printf '%s="%s"\n' "${key}" "${value}"
 }
 
+validate_env_value() {
+  local label="$1"
+  local value="$2"
+
+  if [[ "${value}" == *$'\n'* || "${value}" == *$'\r'* ]]; then
+    echo "${label} contains a newline. Please type the value again without line breaks." >&2
+    exit 1
+  fi
+
+  if [[ "${value}" =~ [[:cntrl:]] ]]; then
+    echo "${label} contains a control character. Please type the value again." >&2
+    exit 1
+  fi
+}
+
 install_app() {
   require_root
 
@@ -135,6 +150,15 @@ configure_app() {
     echo "DB port and write interval seconds must be numbers." >&2
     exit 1
   fi
+
+  validate_env_value "DB host" "${db_host}"
+  validate_env_value "DB port" "${db_port}"
+  validate_env_value "DB user" "${db_user}"
+  validate_env_value "DB password" "${db_password}"
+  validate_env_value "DB name" "${db_name}"
+  validate_env_value "DB table" "${db_table}"
+  validate_env_value "Source ID" "${source_id}"
+  validate_env_value "Write interval seconds" "${interval}"
 
   {
     env_line "DB_HOST" "${db_host}"
@@ -212,7 +236,22 @@ show_config() {
     exit 1
   fi
 
-  sed -E 's/^(DB_PASSWORD=).*/\1********/' "${ENV_FILE}"
+  awk '
+    /^DB_PASSWORD=/ {
+      print "DB_PASSWORD=********"
+      in_password = 1
+      next
+    }
+    /^[A-Z0-9_]+=/ {
+      in_password = 0
+    }
+    in_password {
+      next
+    }
+    {
+      print
+    }
+  ' "${ENV_FILE}"
 }
 
 main() {
