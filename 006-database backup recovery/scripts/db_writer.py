@@ -2,7 +2,6 @@
 import argparse
 import os
 import random
-import re
 import socket
 import sys
 import time
@@ -32,15 +31,10 @@ def get_config():
     }
 
 
-IDENTIFIER_RE = re.compile(r"^[A-Za-z0-9_]+$")
-
-
 def quote_identifier(value):
-    if not IDENTIFIER_RE.match(value):
-        raise RuntimeError(
-            f"Invalid MySQL identifier: {value!r}. Use letters, numbers, and underscores only."
-        )
-    return f"`{value}`"
+    if not value or "\x00" in value:
+        raise RuntimeError(f"Invalid MySQL identifier: {value!r}")
+    return f"`{value.replace('`', '``')}`"
 
 
 def connect(config, use_database=True):
