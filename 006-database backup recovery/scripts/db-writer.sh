@@ -247,6 +247,13 @@ logs_app() {
 run_python_command() {
   require_root
   ensure_installed
+
+  if [[ "$1" == "check" || "$1" == "init-schema" ]] && ! grep -q "\"$1\"" "${APP_DIR}/db_writer.py"; then
+    echo "The installed app in ${APP_DIR} is older than this script." >&2
+    echo "Run this first: sudo ./scripts/db-writer.sh install" >&2
+    exit 1
+  fi
+
   set -a
   # shellcheck disable=SC1090
   source "${ENV_FILE}"
