@@ -1125,21 +1125,23 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>ncloud<span class="w"> </span>vserver<span class="w"> </span>getServerSpecList<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span>--zoneCode<span class="w"> </span><span class="s2">"</span><span class="nv">$ZONE_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span>--serverImageNo<span class="w"> </span><span class="s2">"SERVER_IMAGE_NO"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span>--serverImageNo<span class="w"> </span><span class="s2">"</span><span class="nv">$SERVER_IMAGE_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span>--hypervisorTypeCodeList<span class="w"> </span>KVM<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span>--output<span class="w"> </span>json
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span>--output<span class="w"> </span>json<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.getServerSpecListResponse.serverSpecList[]</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="s1">    | [.serverSpecCode, .serverSpecNo, .serverSpecDescription, .generationCode, .hypervisorType.code] | @tsv'</span>
 </code></pre></div>
-<p>조회 결과에서 실제 값을 변수로 저장합니다.</p>
+<p>조회 결과에서 실제 값을 변수로 저장합니다. <code>SERVER_SPEC_CODE</code>에는 숫자인 <code>serverSpecNo</code>가 아니라 <code>c2-g3</code>, <code>s2-g3</code> 같은 <code>serverSpecCode</code> 값을 넣습니다.</p>
 <p>Linux/macOS:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nv">SERVER_IMAGE_NO</span><span class="o">=</span><span class="s2">"SERVER_IMAGE_NO"</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nv">SERVER_SPEC_CODE</span><span class="o">=</span><span class="s2">"SERVER_SPEC_CODE"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nv">SERVER_IMAGE_NO</span><span class="o">=</span><span class="s2">"104630229"</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nv">SERVER_SPEC_CODE</span><span class="o">=</span><span class="s2">"c2-g3"</span>
 <a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
 <a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$SERVER_IMAGE_NO</span><span class="s2">"</span>
 <a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$SERVER_SPEC_CODE</span><span class="s2">"</span>
 </code></pre></div>
 <p>Windows PowerShell:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nv">$SERVER_IMAGE_NO</span> <span class="p">=</span> <span class="s2">"SERVER_IMAGE_NO"</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nv">$SERVER_SPEC_CODE</span> <span class="p">=</span> <span class="s2">"SERVER_SPEC_CODE"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nv">$SERVER_IMAGE_NO</span> <span class="p">=</span> <span class="s2">"104630229"</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nv">$SERVER_SPEC_CODE</span> <span class="p">=</span> <span class="s2">"c2-g3"</span>
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
 <a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="nv">$SERVER_IMAGE_NO</span>
 <a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="nv">$SERVER_SPEC_CODE</span>
@@ -1305,91 +1307,95 @@
 <p>아래 오류가 나오면 <code>SERVER_IMAGE_NO</code> 또는 <code>SERVER_SPEC_CODE</code> 값이 비어 있거나 잘못된 상태입니다. Ubuntu G3 이미지 조회 결과에서 실제 <code>serverImageNo</code>를, 스펙 조회 결과에서 실제 <code>serverSpecCode</code>를 변수에 넣었는지 확인합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>Required field is not specified. location : memberServerImageInstanceNo or serverImageProductCode or serverSpecCode.
 </code></pre></div>
+<p>아래 오류가 나오면 <code>serverSpecNo</code> 숫자를 <code>SERVER_SPEC_CODE</code>에 넣었거나, 이미지와 스펙의 하이퍼바이저 세대가 맞지 않는 상태입니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>No hypervisor was found that matches the server image, specification, or product code you requested.
+</code></pre></div>
+<p>예를 들어 <code>SERVER_SPEC_CODE="1502"</code>처럼 숫자를 넣으면 안 됩니다. G3/KVM 서버는 <code>SERVER_SPEC_CODE="c2-g3"</code>처럼 <code>serverSpecCode</code> 문자열을 넣습니다.</p>
 <p>Linux/macOS:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>ncloud<span class="w"> </span>vserver<span class="w"> </span>createServerInstances<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="w">  </span>--vpcNo<span class="w"> </span><span class="s2">"</span><span class="nv">$VPC_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="w">  </span>--subnetNo<span class="w"> </span><span class="s2">"</span><span class="nv">$PUBLIC_SUBNET_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="w">  </span>--networkInterfaceList<span class="w"> </span><span class="s2">"networkInterfaceOrder='0', accessControlGroupNoList=['</span><span class="nv">$ACG_NO</span><span class="s2">']"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a><span class="w">  </span>--serverImageNo<span class="w"> </span><span class="s2">"</span><span class="nv">$SERVER_IMAGE_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a><span class="w">  </span>--serverSpecCode<span class="w"> </span><span class="s2">"</span><span class="nv">$SERVER_SPEC_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a><span class="w">  </span>--serverName<span class="w"> </span><span class="s2">"</span><span class="nv">$SERVER_NAME</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a><span class="w">  </span>--loginKeyName<span class="w"> </span><span class="s2">"</span><span class="nv">$LOGIN_KEY_NAME</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a><span class="w">  </span>--associateWithPublicIp<span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a><span class="w">  </span>--isProtectServerTermination<span class="w"> </span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-28-12" name="__codelineno-28-12" href="#__codelineno-28-12"></a><span class="w">  </span>--output<span class="w"> </span>json
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>ncloud<span class="w"> </span>vserver<span class="w"> </span>createServerInstances<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="w">  </span>--vpcNo<span class="w"> </span><span class="s2">"</span><span class="nv">$VPC_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="w">  </span>--subnetNo<span class="w"> </span><span class="s2">"</span><span class="nv">$PUBLIC_SUBNET_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="w">  </span>--networkInterfaceList<span class="w"> </span><span class="s2">"networkInterfaceOrder='0', accessControlGroupNoList=['</span><span class="nv">$ACG_NO</span><span class="s2">']"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a><span class="w">  </span>--serverImageNo<span class="w"> </span><span class="s2">"</span><span class="nv">$SERVER_IMAGE_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a><span class="w">  </span>--serverSpecCode<span class="w"> </span><span class="s2">"</span><span class="nv">$SERVER_SPEC_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a><span class="w">  </span>--serverName<span class="w"> </span><span class="s2">"</span><span class="nv">$SERVER_NAME</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-29-9" name="__codelineno-29-9" href="#__codelineno-29-9"></a><span class="w">  </span>--loginKeyName<span class="w"> </span><span class="s2">"</span><span class="nv">$LOGIN_KEY_NAME</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-29-10" name="__codelineno-29-10" href="#__codelineno-29-10"></a><span class="w">  </span>--associateWithPublicIp<span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-29-11" name="__codelineno-29-11" href="#__codelineno-29-11"></a><span class="w">  </span>--isProtectServerTermination<span class="w"> </span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-29-12" name="__codelineno-29-12" href="#__codelineno-29-12"></a><span class="w">  </span>--output<span class="w"> </span>json
 </code></pre></div>
 <p>Windows PowerShell:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="n">ncloud</span> <span class="n">vserver</span> <span class="n">createServerInstances</span> <span class="p">`</span>
-<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>  <span class="p">-</span><span class="n">-regionCode</span> <span class="nv">$REGION_CODE</span> <span class="p">`</span>
-<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>  <span class="p">-</span><span class="n">-vpcNo</span> <span class="nv">$VPC_NO</span> <span class="p">`</span>
-<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>  <span class="p">-</span><span class="n">-subnetNo</span> <span class="nv">$PUBLIC_SUBNET_NO</span> <span class="p">`</span>
-<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>  <span class="p">-</span><span class="n">-networkInterfaceList</span> <span class="s2">"networkInterfaceOrder='0', accessControlGroupNoList=['$ACG_NO']"</span> <span class="p">`</span>
-<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a>  <span class="p">-</span><span class="n">-serverImageNo</span> <span class="nv">$SERVER_IMAGE_NO</span> <span class="p">`</span>
-<a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a>  <span class="p">-</span><span class="n">-serverSpecCode</span> <span class="nv">$SERVER_SPEC_CODE</span> <span class="p">`</span>
-<a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a>  <span class="p">-</span><span class="n">-serverName</span> <span class="nv">$SERVER_NAME</span> <span class="p">`</span>
-<a id="__codelineno-29-9" name="__codelineno-29-9" href="#__codelineno-29-9"></a>  <span class="p">-</span><span class="n">-loginKeyName</span> <span class="nv">$LOGIN_KEY_NAME</span> <span class="p">`</span>
-<a id="__codelineno-29-10" name="__codelineno-29-10" href="#__codelineno-29-10"></a>  <span class="p">-</span><span class="n">-associateWithPublicIp</span> <span class="n">true</span> <span class="p">`</span>
-<a id="__codelineno-29-11" name="__codelineno-29-11" href="#__codelineno-29-11"></a>  <span class="p">-</span><span class="n">-isProtectServerTermination</span> <span class="n">false</span> <span class="p">`</span>
-<a id="__codelineno-29-12" name="__codelineno-29-12" href="#__codelineno-29-12"></a>  <span class="p">-</span><span class="n">-output</span> <span class="n">json</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="n">ncloud</span> <span class="n">vserver</span> <span class="n">createServerInstances</span> <span class="p">`</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>  <span class="p">-</span><span class="n">-regionCode</span> <span class="nv">$REGION_CODE</span> <span class="p">`</span>
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>  <span class="p">-</span><span class="n">-vpcNo</span> <span class="nv">$VPC_NO</span> <span class="p">`</span>
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>  <span class="p">-</span><span class="n">-subnetNo</span> <span class="nv">$PUBLIC_SUBNET_NO</span> <span class="p">`</span>
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>  <span class="p">-</span><span class="n">-networkInterfaceList</span> <span class="s2">"networkInterfaceOrder='0', accessControlGroupNoList=['$ACG_NO']"</span> <span class="p">`</span>
+<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a>  <span class="p">-</span><span class="n">-serverImageNo</span> <span class="nv">$SERVER_IMAGE_NO</span> <span class="p">`</span>
+<a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a>  <span class="p">-</span><span class="n">-serverSpecCode</span> <span class="nv">$SERVER_SPEC_CODE</span> <span class="p">`</span>
+<a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a>  <span class="p">-</span><span class="n">-serverName</span> <span class="nv">$SERVER_NAME</span> <span class="p">`</span>
+<a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a>  <span class="p">-</span><span class="n">-loginKeyName</span> <span class="nv">$LOGIN_KEY_NAME</span> <span class="p">`</span>
+<a id="__codelineno-30-10" name="__codelineno-30-10" href="#__codelineno-30-10"></a>  <span class="p">-</span><span class="n">-associateWithPublicIp</span> <span class="n">true</span> <span class="p">`</span>
+<a id="__codelineno-30-11" name="__codelineno-30-11" href="#__codelineno-30-11"></a>  <span class="p">-</span><span class="n">-isProtectServerTermination</span> <span class="n">false</span> <span class="p">`</span>
+<a id="__codelineno-30-12" name="__codelineno-30-12" href="#__codelineno-30-12"></a>  <span class="p">-</span><span class="n">-output</span> <span class="n">json</span>
 </code></pre></div>
 <h2 id="9">9. 서버 상태 확인<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
 <p>Linux/macOS:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>ncloud<span class="w"> </span>vserver<span class="w"> </span>getServerInstanceList<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="w">  </span>--output<span class="w"> </span>json
-<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>
-<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a><span class="nv">SERVER_INSTANCE_NO</span><span class="o">=</span><span class="s2">"응답의 serverInstanceNo"</span>
-<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a><span class="nv">SERVER_PUBLIC_IP</span><span class="o">=</span><span class="s2">"응답의 publicIp"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>ncloud<span class="w"> </span>vserver<span class="w"> </span>getServerInstanceList<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="w">  </span>--output<span class="w"> </span>json
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a><span class="nv">SERVER_INSTANCE_NO</span><span class="o">=</span><span class="s2">"응답의 serverInstanceNo"</span>
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a><span class="nv">SERVER_PUBLIC_IP</span><span class="o">=</span><span class="s2">"응답의 publicIp"</span>
 </code></pre></div>
 <p>Windows PowerShell:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="n">ncloud</span> <span class="n">vserver</span> <span class="n">getServerInstanceList</span> <span class="p">`</span>
-<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>  <span class="p">-</span><span class="n">-regionCode</span> <span class="nv">$REGION_CODE</span> <span class="p">`</span>
-<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>  <span class="p">-</span><span class="n">-output</span> <span class="n">json</span>
-<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>
-<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a><span class="nv">$SERVER_INSTANCE_NO</span> <span class="p">=</span> <span class="s2">"응답의 serverInstanceNo"</span>
-<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a><span class="nv">$SERVER_PUBLIC_IP</span> <span class="p">=</span> <span class="s2">"응답의 publicIp"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="n">ncloud</span> <span class="n">vserver</span> <span class="n">getServerInstanceList</span> <span class="p">`</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>  <span class="p">-</span><span class="n">-regionCode</span> <span class="nv">$REGION_CODE</span> <span class="p">`</span>
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>  <span class="p">-</span><span class="n">-output</span> <span class="n">json</span>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a><span class="nv">$SERVER_INSTANCE_NO</span> <span class="p">=</span> <span class="s2">"응답의 serverInstanceNo"</span>
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a><span class="nv">$SERVER_PUBLIC_IP</span> <span class="p">=</span> <span class="s2">"응답의 publicIp"</span>
 </code></pre></div>
 <h2 id="10-ssh">10. SSH 접속<a class="headerlink" href="#10-ssh" title="Permanent link">&para;</a></h2>
 <p>Linux/macOS:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>chmod<span class="w"> </span><span class="m">400</span><span class="w"> </span>cli-lab-key.pem
-<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>ssh<span class="w"> </span>-i<span class="w"> </span>cli-lab-key.pem<span class="w"> </span><span class="s2">"USERNAME@</span><span class="nv">$SERVER_PUBLIC_IP</span><span class="s2">"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>chmod<span class="w"> </span><span class="m">400</span><span class="w"> </span>cli-lab-key.pem
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>ssh<span class="w"> </span>-i<span class="w"> </span>cli-lab-key.pem<span class="w"> </span><span class="s2">"USERNAME@</span><span class="nv">$SERVER_PUBLIC_IP</span><span class="s2">"</span>
 </code></pre></div>
 <p>Windows PowerShell:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="n">ssh</span> <span class="n">-i</span> <span class="p">.\</span><span class="n">cli-lab-key</span><span class="p">.</span><span class="n">pem</span> <span class="s2">"USERNAME@$SERVER_PUBLIC_IP"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="n">ssh</span> <span class="n">-i</span> <span class="p">.\</span><span class="n">cli-lab-key</span><span class="p">.</span><span class="n">pem</span> <span class="s2">"USERNAME@$SERVER_PUBLIC_IP"</span>
 </code></pre></div>
 <h2 id="11">11. 실습 정리<a class="headerlink" href="#11" title="Permanent link">&para;</a></h2>
 <p>Linux/macOS:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>ncloud<span class="w"> </span>vserver<span class="w"> </span>stopServerInstances<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="w">  </span>--serverInstanceNoList<span class="w"> </span><span class="s2">"['</span><span class="nv">$SERVER_INSTANCE_NO</span><span class="s2">']"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="w">  </span>--output<span class="w"> </span>json
-<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>
-<a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a>ncloud<span class="w"> </span>vserver<span class="w"> </span>terminateServerInstances<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a><span class="w">  </span>--serverInstanceNoList<span class="w"> </span><span class="s2">"['</span><span class="nv">$SERVER_INSTANCE_NO</span><span class="s2">']"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-9" name="__codelineno-34-9" href="#__codelineno-34-9"></a><span class="w">  </span>--output<span class="w"> </span>json
-<a id="__codelineno-34-10" name="__codelineno-34-10" href="#__codelineno-34-10"></a>
-<a id="__codelineno-34-11" name="__codelineno-34-11" href="#__codelineno-34-11"></a>ncloud<span class="w"> </span>vserver<span class="w"> </span>deleteAccessControlGroup<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-12" name="__codelineno-34-12" href="#__codelineno-34-12"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-13" name="__codelineno-34-13" href="#__codelineno-34-13"></a><span class="w">  </span>--vpcNo<span class="w"> </span><span class="s2">"</span><span class="nv">$VPC_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-14" name="__codelineno-34-14" href="#__codelineno-34-14"></a><span class="w">  </span>--accessControlGroupNo<span class="w"> </span><span class="s2">"</span><span class="nv">$ACG_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-15" name="__codelineno-34-15" href="#__codelineno-34-15"></a><span class="w">  </span>--output<span class="w"> </span>json
-<a id="__codelineno-34-16" name="__codelineno-34-16" href="#__codelineno-34-16"></a>
-<a id="__codelineno-34-17" name="__codelineno-34-17" href="#__codelineno-34-17"></a>ncloud<span class="w"> </span>vpc<span class="w"> </span>deleteSubnet<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-18" name="__codelineno-34-18" href="#__codelineno-34-18"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-19" name="__codelineno-34-19" href="#__codelineno-34-19"></a><span class="w">  </span>--subnetNo<span class="w"> </span><span class="s2">"</span><span class="nv">$PRIVATE_SUBNET_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-20" name="__codelineno-34-20" href="#__codelineno-34-20"></a><span class="w">  </span>--output<span class="w"> </span>json
-<a id="__codelineno-34-21" name="__codelineno-34-21" href="#__codelineno-34-21"></a>
-<a id="__codelineno-34-22" name="__codelineno-34-22" href="#__codelineno-34-22"></a>ncloud<span class="w"> </span>vpc<span class="w"> </span>deleteSubnet<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-23" name="__codelineno-34-23" href="#__codelineno-34-23"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-24" name="__codelineno-34-24" href="#__codelineno-34-24"></a><span class="w">  </span>--subnetNo<span class="w"> </span><span class="s2">"</span><span class="nv">$PUBLIC_SUBNET_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-25" name="__codelineno-34-25" href="#__codelineno-34-25"></a><span class="w">  </span>--output<span class="w"> </span>json
-<a id="__codelineno-34-26" name="__codelineno-34-26" href="#__codelineno-34-26"></a>
-<a id="__codelineno-34-27" name="__codelineno-34-27" href="#__codelineno-34-27"></a>ncloud<span class="w"> </span>vpc<span class="w"> </span>deleteVpc<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-28" name="__codelineno-34-28" href="#__codelineno-34-28"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-29" name="__codelineno-34-29" href="#__codelineno-34-29"></a><span class="w">  </span>--vpcNo<span class="w"> </span><span class="s2">"</span><span class="nv">$VPC_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-34-30" name="__codelineno-34-30" href="#__codelineno-34-30"></a><span class="w">  </span>--output<span class="w"> </span>json
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>ncloud<span class="w"> </span>vserver<span class="w"> </span>stopServerInstances<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="w">  </span>--serverInstanceNoList<span class="w"> </span><span class="s2">"['</span><span class="nv">$SERVER_INSTANCE_NO</span><span class="s2">']"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="w">  </span>--output<span class="w"> </span>json
+<a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a>
+<a id="__codelineno-35-6" name="__codelineno-35-6" href="#__codelineno-35-6"></a>ncloud<span class="w"> </span>vserver<span class="w"> </span>terminateServerInstances<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-7" name="__codelineno-35-7" href="#__codelineno-35-7"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-8" name="__codelineno-35-8" href="#__codelineno-35-8"></a><span class="w">  </span>--serverInstanceNoList<span class="w"> </span><span class="s2">"['</span><span class="nv">$SERVER_INSTANCE_NO</span><span class="s2">']"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-9" name="__codelineno-35-9" href="#__codelineno-35-9"></a><span class="w">  </span>--output<span class="w"> </span>json
+<a id="__codelineno-35-10" name="__codelineno-35-10" href="#__codelineno-35-10"></a>
+<a id="__codelineno-35-11" name="__codelineno-35-11" href="#__codelineno-35-11"></a>ncloud<span class="w"> </span>vserver<span class="w"> </span>deleteAccessControlGroup<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-12" name="__codelineno-35-12" href="#__codelineno-35-12"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-13" name="__codelineno-35-13" href="#__codelineno-35-13"></a><span class="w">  </span>--vpcNo<span class="w"> </span><span class="s2">"</span><span class="nv">$VPC_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-14" name="__codelineno-35-14" href="#__codelineno-35-14"></a><span class="w">  </span>--accessControlGroupNo<span class="w"> </span><span class="s2">"</span><span class="nv">$ACG_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-15" name="__codelineno-35-15" href="#__codelineno-35-15"></a><span class="w">  </span>--output<span class="w"> </span>json
+<a id="__codelineno-35-16" name="__codelineno-35-16" href="#__codelineno-35-16"></a>
+<a id="__codelineno-35-17" name="__codelineno-35-17" href="#__codelineno-35-17"></a>ncloud<span class="w"> </span>vpc<span class="w"> </span>deleteSubnet<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-18" name="__codelineno-35-18" href="#__codelineno-35-18"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-19" name="__codelineno-35-19" href="#__codelineno-35-19"></a><span class="w">  </span>--subnetNo<span class="w"> </span><span class="s2">"</span><span class="nv">$PRIVATE_SUBNET_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-20" name="__codelineno-35-20" href="#__codelineno-35-20"></a><span class="w">  </span>--output<span class="w"> </span>json
+<a id="__codelineno-35-21" name="__codelineno-35-21" href="#__codelineno-35-21"></a>
+<a id="__codelineno-35-22" name="__codelineno-35-22" href="#__codelineno-35-22"></a>ncloud<span class="w"> </span>vpc<span class="w"> </span>deleteSubnet<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-23" name="__codelineno-35-23" href="#__codelineno-35-23"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-24" name="__codelineno-35-24" href="#__codelineno-35-24"></a><span class="w">  </span>--subnetNo<span class="w"> </span><span class="s2">"</span><span class="nv">$PUBLIC_SUBNET_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-25" name="__codelineno-35-25" href="#__codelineno-35-25"></a><span class="w">  </span>--output<span class="w"> </span>json
+<a id="__codelineno-35-26" name="__codelineno-35-26" href="#__codelineno-35-26"></a>
+<a id="__codelineno-35-27" name="__codelineno-35-27" href="#__codelineno-35-27"></a>ncloud<span class="w"> </span>vpc<span class="w"> </span>deleteVpc<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-28" name="__codelineno-35-28" href="#__codelineno-35-28"></a><span class="w">  </span>--regionCode<span class="w"> </span><span class="s2">"</span><span class="nv">$REGION_CODE</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-29" name="__codelineno-35-29" href="#__codelineno-35-29"></a><span class="w">  </span>--vpcNo<span class="w"> </span><span class="s2">"</span><span class="nv">$VPC_NO</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-30" name="__codelineno-35-30" href="#__codelineno-35-30"></a><span class="w">  </span>--output<span class="w"> </span>json
 </code></pre></div>
 <p>PowerShell에서는 같은 명령을 백틱과 <code>$변수명</code> 형식으로 바꿔 실행합니다.</p>
 
