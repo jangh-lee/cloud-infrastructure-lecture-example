@@ -1,0 +1,43 @@
+site_name: 단국대 클라우드 인프라 실습
+site_description: Naver Cloud 기반 클라우드 인프라 실습 교안
+site_url: https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
+repo_url: https://github.com/jangh-lee/cloud-infrastructure-lecture-example
+repo_name: jangh-lee/cloud-infrastructure-lecture-example
+docs_dir: gitbook/dankook-university
+
+theme:
+  name: material
+  language: ko
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - content.code.copy
+    - content.code.select
+    - search.highlight
+    - search.share
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+
+nav:
+  - 강의 소개: README.md
+  - 운영 준비:
+      - GitHub Pages 배포: setup/github-pages.md
+      - GitBook 운영 준비: setup/gitbook.md
+  - Labs:
+      - 002 Init Script: labs/002-init-script.md
+      - 003 Cloud CLI: labs/003-cloud-cli.md
+      - 005 Object Storage 정적 웹사이트: labs/005-static-website.md
+      - 006 Database 백업 및 복구: labs/006-database-backup-recovery.md
+      - 008 Game Server 생성 실습: labs/008-game-server.md
+  - GitBook 목차: SUMMARY.md

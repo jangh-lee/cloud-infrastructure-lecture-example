@@ -1,6 +1,7 @@
 # Summary
 
 * [강의 소개](README.md)
+* [GitHub Pages 배포](setup/github-pages.md)
 * [GitBook 운영 준비](setup/gitbook.md)
 * [002 Init Script](labs/002-init-script.md)
 * [003 Cloud CLI](labs/003-cloud-cli.md)

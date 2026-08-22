@@ -4,6 +4,8 @@
 
 이 저장소의 강의 교안을 GitBook Space와 연결해서, 강의 중 학생들이 명령어를 복사할 수 있는 웹 교안으로 제공합니다.
 
+현재 무료 공개 교안은 GitHub Pages 배포를 권장합니다. GitBook은 조직 정책상 GitBook을 계속 써야 할 때 선택합니다.
+
 ## 권장 구조
 
 ```text
@@ -58,4 +60,3 @@ git push
 ```
 
 GitBook Git sync가 연결되어 있으면 push 이후 GitBook Space에 변경사항이 반영됩니다.
-

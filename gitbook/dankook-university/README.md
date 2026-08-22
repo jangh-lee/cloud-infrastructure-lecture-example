@@ -14,6 +14,14 @@ Naver Cloud 기반 클라우드 인프라 실습 교안입니다.
 | 006 | Database 백업 및 특정시점 복구 | `006-database backup recovery` |
 | 008 | Game Server 생성 실습 | `008-game server` |
 
+## 웹 교안 열람
+
+현재 권장 배포 방식은 MkDocs Material과 GitHub Pages입니다.
+
+```text
+https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
+```
+
 ## GitBook 연결 정보
 
 GitBook Space를 만들 때 아래처럼 설정합니다.
