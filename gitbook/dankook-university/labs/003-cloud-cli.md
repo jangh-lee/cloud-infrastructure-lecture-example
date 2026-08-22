@@ -124,13 +124,13 @@ ncloud vserver getServerSpecList \
     | [.serverSpecCode, .serverSpecNo, .serverSpecDescription, .generationCode, .hypervisorType.code] | @tsv'
 ```
 
-조회 결과에서 실제 값을 변수로 저장합니다. `SERVER_SPEC_CODE`에는 숫자인 `serverSpecNo`가 아니라 `c2-g3`, `s2-g3` 같은 `serverSpecCode` 값을 넣습니다.
+조회 결과에서 실제 값을 변수로 저장합니다. `SERVER_SPEC_CODE`에는 숫자인 `serverSpecNo`가 아니라 `s2-g3a`, `c2-g3` 같은 `serverSpecCode` 값을 넣습니다.
 
 Linux/macOS:
 
 ```bash
 SERVER_IMAGE_NO="104630229"
-SERVER_SPEC_CODE="c2-g3"
+SERVER_SPEC_CODE="s2-g3a"
 
 echo "$SERVER_IMAGE_NO"
 echo "$SERVER_SPEC_CODE"
@@ -140,7 +140,7 @@ Windows PowerShell:
 
 ```powershell
 $SERVER_IMAGE_NO = "104630229"
-$SERVER_SPEC_CODE = "c2-g3"
+$SERVER_SPEC_CODE = "s2-g3a"
 
 $SERVER_IMAGE_NO
 $SERVER_SPEC_CODE
@@ -374,7 +374,7 @@ Required field is not specified. location : memberServerImageInstanceNo or serve
 No hypervisor was found that matches the server image, specification, or product code you requested.
 ```
 
-예를 들어 `SERVER_SPEC_CODE="1502"`처럼 숫자를 넣으면 안 됩니다. G3/KVM 서버는 `SERVER_SPEC_CODE="c2-g3"`처럼 `serverSpecCode` 문자열을 넣습니다.
+예를 들어 `SERVER_SPEC_CODE="1502"`처럼 숫자를 넣으면 안 됩니다. G3/KVM 서버는 `SERVER_SPEC_CODE="s2-g3a"`처럼 `serverSpecCode` 문자열을 넣습니다.
 
 Linux/macOS:
 
@@ -451,39 +451,140 @@ ssh -i .\cli-lab-key.pem "USERNAME@$SERVER_PUBLIC_IP"
 
 ## 11. 실습 정리
 
-Linux/macOS:
+삭제는 의존성이 있는 리소스의 역순으로 진행합니다.
+
+```text
+Server
+→ ACG
+→ Private Subnet
+→ Public Subnet
+→ VPC
+```
+
+서버 번호를 모르면 먼저 조회합니다.
+
+```bash
+ncloud vserver getServerInstanceList \
+  --regionCode "$REGION_CODE" \
+  --vpcNo "$VPC_NO" \
+  --output json
+
+SERVER_INSTANCE_NO="응답의 serverInstanceNo"
+```
+
+서버 정지:
 
 ```bash
 ncloud vserver stopServerInstances \
   --regionCode "$REGION_CODE" \
   --serverInstanceNoList "['$SERVER_INSTANCE_NO']" \
   --output json
+```
 
+서버가 정지될 때까지 상태를 확인합니다.
+
+```bash
+ncloud vserver getServerInstanceList \
+  --regionCode "$REGION_CODE" \
+  --serverInstanceNoList "['$SERVER_INSTANCE_NO']" \
+  --output json
+```
+
+서버 반납:
+
+```bash
 ncloud vserver terminateServerInstances \
   --regionCode "$REGION_CODE" \
   --serverInstanceNoList "['$SERVER_INSTANCE_NO']" \
   --output json
+```
 
+서버가 반납될 때까지 상태를 확인합니다. 서버가 목록에서 사라지거나 반납 상태가 되면 다음 단계로 진행합니다.
+
+```bash
+ncloud vserver getServerInstanceList \
+  --regionCode "$REGION_CODE" \
+  --serverInstanceNoList "['$SERVER_INSTANCE_NO']" \
+  --output json
+```
+
+ACG 삭제:
+
+```bash
 ncloud vserver deleteAccessControlGroup \
   --regionCode "$REGION_CODE" \
   --vpcNo "$VPC_NO" \
   --accessControlGroupNo "$ACG_NO" \
   --output json
+```
 
+ACG가 기본 ACG이거나 다른 서버에서 사용 중이면 삭제할 수 없습니다. 이 실습에서 만든 `lab3-acg`인지 확인합니다.
+
+Private Subnet 삭제:
+
+```bash
 ncloud vpc deleteSubnet \
   --regionCode "$REGION_CODE" \
   --subnetNo "$PRIVATE_SUBNET_NO" \
   --output json
+```
 
+Public Subnet 삭제:
+
+```bash
 ncloud vpc deleteSubnet \
   --regionCode "$REGION_CODE" \
   --subnetNo "$PUBLIC_SUBNET_NO" \
   --output json
+```
 
+VPC 삭제:
+
+```bash
 ncloud vpc deleteVpc \
   --regionCode "$REGION_CODE" \
   --vpcNo "$VPC_NO" \
   --output json
 ```
 
-PowerShell에서는 같은 명령을 백틱과 `$변수명` 형식으로 바꿔 실행합니다.
+PowerShell에서는 같은 순서로 실행합니다.
+
+```powershell
+ncloud vserver getServerInstanceList `
+  --regionCode $REGION_CODE `
+  --vpcNo $VPC_NO `
+  --output json
+
+$SERVER_INSTANCE_NO = "응답의 serverInstanceNo"
+
+ncloud vserver stopServerInstances `
+  --regionCode $REGION_CODE `
+  --serverInstanceNoList "['$SERVER_INSTANCE_NO']" `
+  --output json
+
+ncloud vserver terminateServerInstances `
+  --regionCode $REGION_CODE `
+  --serverInstanceNoList "['$SERVER_INSTANCE_NO']" `
+  --output json
+
+ncloud vserver deleteAccessControlGroup `
+  --regionCode $REGION_CODE `
+  --vpcNo $VPC_NO `
+  --accessControlGroupNo $ACG_NO `
+  --output json
+
+ncloud vpc deleteSubnet `
+  --regionCode $REGION_CODE `
+  --subnetNo $PRIVATE_SUBNET_NO `
+  --output json
+
+ncloud vpc deleteSubnet `
+  --regionCode $REGION_CODE `
+  --subnetNo $PUBLIC_SUBNET_NO `
+  --output json
+
+ncloud vpc deleteVpc `
+  --regionCode $REGION_CODE `
+  --vpcNo $VPC_NO `
+  --output json
+```
