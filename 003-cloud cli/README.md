@@ -146,61 +146,90 @@ ncloud vserver getZoneList `
 
 서버 이미지:
 
+G3/KVM 이미지는 `getServerImageProductList`가 아니라 `getServerImageList`로 조회합니다. `getServerImageProductList`는 구세대 상품 코드 중심이라 G2만 보일 수 있습니다.
+
 ```bash
-ncloud vserver getServerImageProductList \
+ncloud vserver getServerImageList \
   --regionCode "$REGION_CODE" \
+  --serverImageTypeCodeList NCP \
+  --hypervisorTypeCodeList KVM \
+  --osTypeCodeList UBUNTU \
+  --platformCategoryCodeList OS \
+  --pageNo 0 \
+  --pageSize 100 \
   --output json
 ```
 
 PowerShell:
 
 ```powershell
-ncloud vserver getServerImageProductList `
+ncloud vserver getServerImageList `
   --regionCode $REGION_CODE `
+  --serverImageTypeCodeList NCP `
+  --hypervisorTypeCodeList KVM `
+  --osTypeCodeList UBUNTU `
+  --platformCategoryCodeList OS `
+  --pageNo 0 `
+  --pageSize 100 `
   --output json
 ```
 
-Ubuntu 이미지만 보기:
+Ubuntu G3 이미지만 보기:
 
 Linux/macOS:
 
 ```bash
-ncloud vserver getServerImageProductList \
+ncloud vserver getServerImageList \
   --regionCode "$REGION_CODE" \
+  --serverImageTypeCodeList NCP \
+  --hypervisorTypeCodeList KVM \
+  --osTypeCodeList UBUNTU \
+  --platformCategoryCodeList OS \
+  --pageNo 0 \
+  --pageSize 100 \
   --output json \
-  | jq -r '.getServerImageProductListResponse.productList[]
-    | select(((.productName // "") | ascii_downcase | contains("ubuntu"))
-      or ((.productDescription // "") | ascii_downcase | contains("ubuntu")))
-    | [.productCode, .productName, .productDescription] | @tsv'
+  | jq -r '.getServerImageListResponse.serverImageList[]
+    | select((.serverImageProductCode // "") | contains("G003"))
+    | [.serverImageNo, .serverImageName, .serverImageProductCode] | @tsv'
 ```
 
 Windows PowerShell:
 
 ```powershell
-$images = ncloud vserver getServerImageProductList `
+$images = ncloud vserver getServerImageList `
   --regionCode $REGION_CODE `
+  --serverImageTypeCodeList NCP `
+  --hypervisorTypeCodeList KVM `
+  --osTypeCodeList UBUNTU `
+  --platformCategoryCodeList OS `
+  --pageNo 0 `
+  --pageSize 100 `
   --output json | ConvertFrom-Json
 
-$images.getServerImageProductListResponse.productList |
-  Where-Object { $_.productName -match "ubuntu" -or $_.productDescription -match "ubuntu" } |
-  Select-Object productCode, productName, productDescription
+$images.getServerImageListResponse.serverImageList |
+  Where-Object { $_.serverImageProductCode -match "G003" } |
+  Select-Object serverImageNo, serverImageName, serverImageProductCode
 ```
 
 서버 스펙:
 
 ```bash
-ncloud vserver getServerProductList \
+ncloud vserver getServerSpecList \
   --regionCode "$REGION_CODE" \
-  --serverImageProductCode "SERVER_IMAGE_PRODUCT_CODE" \
+  --zoneCode "$ZONE_CODE" \
+  --serverImageNo "SERVER_IMAGE_NO" \
+  --hypervisorTypeCodeList KVM \
   --output json
 ```
 
 PowerShell:
 
 ```powershell
-ncloud vserver getServerProductList `
+ncloud vserver getServerSpecList `
   --regionCode $REGION_CODE `
-  --serverImageProductCode "SERVER_IMAGE_PRODUCT_CODE" `
+  --zoneCode $ZONE_CODE `
+  --serverImageNo "SERVER_IMAGE_NO" `
+  --hypervisorTypeCodeList KVM `
   --output json
 ```
 
@@ -209,15 +238,15 @@ ncloud vserver getServerProductList `
 Linux/macOS:
 
 ```bash
-SERVER_IMAGE_PRODUCT_CODE="SERVER_IMAGE_PRODUCT_CODE"
-SERVER_PRODUCT_CODE="SERVER_PRODUCT_CODE"
+SERVER_IMAGE_NO="SERVER_IMAGE_NO"
+SERVER_SPEC_CODE="SERVER_SPEC_CODE"
 ```
 
 Windows PowerShell:
 
 ```powershell
-$SERVER_IMAGE_PRODUCT_CODE = "SERVER_IMAGE_PRODUCT_CODE"
-$SERVER_PRODUCT_CODE = "SERVER_PRODUCT_CODE"
+$SERVER_IMAGE_NO = "SERVER_IMAGE_NO"
+$SERVER_SPEC_CODE = "SERVER_SPEC_CODE"
 ```
 
 서버 생성 전에 값이 비어 있지 않은지 확인합니다.
@@ -225,15 +254,15 @@ $SERVER_PRODUCT_CODE = "SERVER_PRODUCT_CODE"
 Linux/macOS:
 
 ```bash
-echo "$SERVER_IMAGE_PRODUCT_CODE"
-echo "$SERVER_PRODUCT_CODE"
+echo "$SERVER_IMAGE_NO"
+echo "$SERVER_SPEC_CODE"
 ```
 
 Windows PowerShell:
 
 ```powershell
-$SERVER_IMAGE_PRODUCT_CODE
-$SERVER_PRODUCT_CODE
+$SERVER_IMAGE_NO
+$SERVER_SPEC_CODE
 ```
 
 ## 5. VPC 생성
@@ -568,7 +597,7 @@ chmod 400 cli-lab-key.pem
 
 SSH 접속을 확인할 서버이므로 Public Subnet에 생성합니다.
 
-아래 오류가 나오면 `SERVER_IMAGE_PRODUCT_CODE` 값이 비어 있거나 잘못된 상태입니다. 4번의 Ubuntu 이미지 조회 결과에서 실제 `productCode`를 변수에 넣었는지 확인합니다.
+아래 오류가 나오면 `SERVER_IMAGE_NO` 또는 `SERVER_SPEC_CODE` 값이 비어 있거나 잘못된 상태입니다. 4번의 Ubuntu G3 이미지 조회 결과에서 실제 `serverImageNo`를, 스펙 조회 결과에서 실제 `serverSpecCode`를 변수에 넣었는지 확인합니다.
 
 ```text
 Required field is not specified. location : memberServerImageInstanceNo or serverImageProductCode or serverSpecCode.
@@ -582,8 +611,8 @@ ncloud vserver createServerInstances \
   --vpcNo "$VPC_NO" \
   --subnetNo "$PUBLIC_SUBNET_NO" \
   --networkInterfaceList "networkInterfaceOrder='0', accessControlGroupNoList=['$ACG_NO']" \
-  --serverImageProductCode "$SERVER_IMAGE_PRODUCT_CODE" \
-  --serverProductCode "$SERVER_PRODUCT_CODE" \
+  --serverImageNo "$SERVER_IMAGE_NO" \
+  --serverSpecCode "$SERVER_SPEC_CODE" \
   --serverName "$SERVER_NAME" \
   --loginKeyName "$LOGIN_KEY_NAME" \
   --associateWithPublicIp true \
@@ -599,8 +628,8 @@ ncloud vserver createServerInstances `
   --vpcNo $VPC_NO `
   --subnetNo $PUBLIC_SUBNET_NO `
   --networkInterfaceList "networkInterfaceOrder='0', accessControlGroupNoList=['$ACG_NO']" `
-  --serverImageProductCode $SERVER_IMAGE_PRODUCT_CODE `
-  --serverProductCode $SERVER_PRODUCT_CODE `
+  --serverImageNo $SERVER_IMAGE_NO `
+  --serverSpecCode $SERVER_SPEC_CODE `
   --serverName $SERVER_NAME `
   --loginKeyName $LOGIN_KEY_NAME `
   --associateWithPublicIp true `
@@ -723,5 +752,7 @@ PowerShell에서는 같은 명령을 백틱과 `$변수명` 형식으로 바꿔 
 - ACG 생성 CLI: <https://cli.ncloud-docs.com/docs/en/cli-vserver-acg-createaccesscontrolgroup>
 - ACG inbound rule 추가 CLI: <https://cli.ncloud-docs.com/docs/en/cli-vserver-acg-addaccesscontrolgroupinboundrule>
 - ACG 삭제 CLI: <https://cli.ncloud-docs.com/docs/en/cli-vserver-acg-deleteaccesscontrolgroup>
+- 서버 이미지 조회 CLI: <https://cli.ncloud-docs.com/docs/en/cli-vserver-serverimage-getserverimagelist>
+- 서버 스펙 조회 CLI: <https://cli.ncloud-docs.com/docs/en/cli-vserver-server-common-getserverspeclist>
 - Login Key 생성 CLI: <https://cli.ncloud-docs.com/docs/en/cli-vserver-server-loginkey-createloginkey>
 - 서버 생성 CLI: <https://cli.ncloud-docs.com/docs/en/cli-vserver-server-createserverinstances>

@@ -76,36 +76,49 @@ $MY_PUBLIC_IP = "YOUR_PUBLIC_IP/32"
 
 ## 서버 이미지와 스펙 조회
 
-Ubuntu 이미지를 조회합니다.
+G3/KVM Ubuntu 이미지는 `getServerImageProductList`가 아니라 `getServerImageList`로 조회합니다.
 
 ```bash
-ncloud vserver getServerImageProductList \
+ncloud vserver getServerImageList \
   --regionCode "$REGION_CODE" \
+  --serverImageTypeCodeList NCP \
+  --hypervisorTypeCodeList KVM \
+  --osTypeCodeList UBUNTU \
+  --platformCategoryCodeList OS \
+  --pageNo 0 \
+  --pageSize 100 \
   --output json \
-  | jq -r '.getServerImageProductListResponse.productList[]
-    | select(((.productName // "") | ascii_downcase | contains("ubuntu"))
-      or ((.productDescription // "") | ascii_downcase | contains("ubuntu")))
-    | [.productCode, .productName, .productDescription] | @tsv'
+  | jq -r '.getServerImageListResponse.serverImageList[]
+    | select((.serverImageProductCode // "") | contains("G003"))
+    | [.serverImageNo, .serverImageName, .serverImageProductCode] | @tsv'
 ```
 
 Windows PowerShell:
 
 ```powershell
-$images = ncloud vserver getServerImageProductList `
+$images = ncloud vserver getServerImageList `
   --regionCode $REGION_CODE `
+  --serverImageTypeCodeList NCP `
+  --hypervisorTypeCodeList KVM `
+  --osTypeCodeList UBUNTU `
+  --platformCategoryCodeList OS `
+  --pageNo 0 `
+  --pageSize 100 `
   --output json | ConvertFrom-Json
 
-$images.getServerImageProductListResponse.productList |
-  Where-Object { $_.productName -match "ubuntu" -or $_.productDescription -match "ubuntu" } |
-  Select-Object productCode, productName, productDescription
+$images.getServerImageListResponse.serverImageList |
+  Where-Object { $_.serverImageProductCode -match "G003" } |
+  Select-Object serverImageNo, serverImageName, serverImageProductCode
 ```
 
 선택한 Ubuntu 이미지에 맞는 서버 스펙을 조회합니다.
 
 ```bash
-ncloud vserver getServerProductList \
+ncloud vserver getServerSpecList \
   --regionCode "$REGION_CODE" \
-  --serverImageProductCode "SERVER_IMAGE_PRODUCT_CODE" \
+  --zoneCode "$ZONE_CODE" \
+  --serverImageNo "SERVER_IMAGE_NO" \
+  --hypervisorTypeCodeList KVM \
   --output json
 ```
 
@@ -114,21 +127,21 @@ ncloud vserver getServerProductList \
 Linux/macOS:
 
 ```bash
-SERVER_IMAGE_PRODUCT_CODE="SERVER_IMAGE_PRODUCT_CODE"
-SERVER_PRODUCT_CODE="SERVER_PRODUCT_CODE"
+SERVER_IMAGE_NO="SERVER_IMAGE_NO"
+SERVER_SPEC_CODE="SERVER_SPEC_CODE"
 
-echo "$SERVER_IMAGE_PRODUCT_CODE"
-echo "$SERVER_PRODUCT_CODE"
+echo "$SERVER_IMAGE_NO"
+echo "$SERVER_SPEC_CODE"
 ```
 
 Windows PowerShell:
 
 ```powershell
-$SERVER_IMAGE_PRODUCT_CODE = "SERVER_IMAGE_PRODUCT_CODE"
-$SERVER_PRODUCT_CODE = "SERVER_PRODUCT_CODE"
+$SERVER_IMAGE_NO = "SERVER_IMAGE_NO"
+$SERVER_SPEC_CODE = "SERVER_SPEC_CODE"
 
-$SERVER_IMAGE_PRODUCT_CODE
-$SERVER_PRODUCT_CODE
+$SERVER_IMAGE_NO
+$SERVER_SPEC_CODE
 ```
 
 ## 1. VPC 생성
@@ -347,7 +360,7 @@ ncloud vserver createLoginKey `
 
 ## 8. 서버 생성
 
-아래 오류가 나오면 `SERVER_IMAGE_PRODUCT_CODE` 값이 비어 있거나 잘못된 상태입니다. Ubuntu 이미지 조회 결과에서 실제 `productCode`를 변수에 넣었는지 확인합니다.
+아래 오류가 나오면 `SERVER_IMAGE_NO` 또는 `SERVER_SPEC_CODE` 값이 비어 있거나 잘못된 상태입니다. Ubuntu G3 이미지 조회 결과에서 실제 `serverImageNo`를, 스펙 조회 결과에서 실제 `serverSpecCode`를 변수에 넣었는지 확인합니다.
 
 ```text
 Required field is not specified. location : memberServerImageInstanceNo or serverImageProductCode or serverSpecCode.
@@ -361,8 +374,8 @@ ncloud vserver createServerInstances \
   --vpcNo "$VPC_NO" \
   --subnetNo "$PUBLIC_SUBNET_NO" \
   --networkInterfaceList "networkInterfaceOrder='0', accessControlGroupNoList=['$ACG_NO']" \
-  --serverImageProductCode "$SERVER_IMAGE_PRODUCT_CODE" \
-  --serverProductCode "$SERVER_PRODUCT_CODE" \
+  --serverImageNo "$SERVER_IMAGE_NO" \
+  --serverSpecCode "$SERVER_SPEC_CODE" \
   --serverName "$SERVER_NAME" \
   --loginKeyName "$LOGIN_KEY_NAME" \
   --associateWithPublicIp true \
@@ -378,8 +391,8 @@ ncloud vserver createServerInstances `
   --vpcNo $VPC_NO `
   --subnetNo $PUBLIC_SUBNET_NO `
   --networkInterfaceList "networkInterfaceOrder='0', accessControlGroupNoList=['$ACG_NO']" `
-  --serverImageProductCode $SERVER_IMAGE_PRODUCT_CODE `
-  --serverProductCode $SERVER_PRODUCT_CODE `
+  --serverImageNo $SERVER_IMAGE_NO `
+  --serverSpecCode $SERVER_SPEC_CODE `
   --serverName $SERVER_NAME `
   --loginKeyName $LOGIN_KEY_NAME `
   --associateWithPublicIp true `
