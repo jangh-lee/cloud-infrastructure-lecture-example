@@ -160,6 +160,32 @@ ncloud vserver getServerImageProductList `
   --output json
 ```
 
+Ubuntu 이미지만 보기:
+
+Linux/macOS:
+
+```bash
+ncloud vserver getServerImageProductList \
+  --regionCode "$REGION_CODE" \
+  --output json \
+  | jq -r '.getServerImageProductListResponse.productList[]
+    | select(((.productName // "") | ascii_downcase | contains("ubuntu"))
+      or ((.productDescription // "") | ascii_downcase | contains("ubuntu")))
+    | [.productCode, .productName, .productDescription] | @tsv'
+```
+
+Windows PowerShell:
+
+```powershell
+$images = ncloud vserver getServerImageProductList `
+  --regionCode $REGION_CODE `
+  --output json | ConvertFrom-Json
+
+$images.getServerImageProductListResponse.productList |
+  Where-Object { $_.productName -match "ubuntu" -or $_.productDescription -match "ubuntu" } |
+  Select-Object productCode, productName, productDescription
+```
+
 서버 스펙:
 
 ```bash
@@ -192,6 +218,22 @@ Windows PowerShell:
 ```powershell
 $SERVER_IMAGE_PRODUCT_CODE = "SERVER_IMAGE_PRODUCT_CODE"
 $SERVER_PRODUCT_CODE = "SERVER_PRODUCT_CODE"
+```
+
+서버 생성 전에 값이 비어 있지 않은지 확인합니다.
+
+Linux/macOS:
+
+```bash
+echo "$SERVER_IMAGE_PRODUCT_CODE"
+echo "$SERVER_PRODUCT_CODE"
+```
+
+Windows PowerShell:
+
+```powershell
+$SERVER_IMAGE_PRODUCT_CODE
+$SERVER_PRODUCT_CODE
 ```
 
 ## 5. VPC 생성
@@ -472,9 +514,29 @@ ncloud vserver addAccessControlGroupInboundRule `
   --output json
 ```
 
-## 11. Login Key 생성
+## 11. Login Key 확인/생성 참고
 
-개인키는 생성 응답에서 한 번만 확인할 수 있습니다.
+이미 콘솔이나 CLI에서 Login Key를 만들었다면 이 단계는 건너뛰고 `LOGIN_KEY_NAME` 변수에 기존 키 이름만 넣으면 됩니다.
+
+기존 Login Key 조회:
+
+Linux/macOS:
+
+```bash
+ncloud vserver getLoginKeyList \
+  --regionCode "$REGION_CODE" \
+  --output json
+```
+
+Windows PowerShell:
+
+```powershell
+ncloud vserver getLoginKeyList `
+  --regionCode $REGION_CODE `
+  --output json
+```
+
+새로 생성할 때는 아래 명령을 사용합니다. 개인키는 생성 응답에서 한 번만 확인할 수 있습니다.
 
 Linux/macOS:
 
@@ -505,6 +567,12 @@ chmod 400 cli-lab-key.pem
 ## 12. 서버 생성
 
 SSH 접속을 확인할 서버이므로 Public Subnet에 생성합니다.
+
+아래 오류가 나오면 `SERVER_IMAGE_PRODUCT_CODE` 값이 비어 있거나 잘못된 상태입니다. 4번의 Ubuntu 이미지 조회 결과에서 실제 `productCode`를 변수에 넣었는지 확인합니다.
+
+```text
+Required field is not specified. location : memberServerImageInstanceNo or serverImageProductCode or serverSpecCode.
+```
 
 Linux/macOS:
 
