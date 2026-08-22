@@ -2,7 +2,7 @@
 
 ## 목표
 
-Ncloud CLI를 설치하고 인증한 뒤, CLI로 VPC 서버를 생성합니다.
+Ncloud CLI로 VPC, Subnet, ACG, Login Key, Server를 하나씩 생성합니다.
 
 실습 폴더:
 
@@ -30,6 +30,7 @@ cd CLI_*/cli_linux
 
 ```bash
 export PATH="$PWD:$PATH"
+ncloud help
 ```
 
 ## 인증 설정
@@ -46,13 +47,7 @@ Ncloud Secret Access Key []: <secret-key>
 Ncloud API URL (default:https://ncloud.apigw.ntruss.com) []:
 ```
 
-프로필을 따로 만들려면:
-
-```bash
-ncloud configure --profile lecture
-```
-
-## 리소스 조회
+## 기본 조회
 
 Region:
 
@@ -60,28 +55,12 @@ Region:
 ncloud vserver getRegionList --output json
 ```
 
-VPC:
+Zone:
 
 ```bash
-ncloud vpc getVpcList --regionCode KR --output json
-```
-
-Subnet:
-
-```bash
-ncloud vpc getSubnetList --regionCode KR --output json
-```
-
-ACG:
-
-```bash
-ncloud vserver getAccessControlGroupList --regionCode KR --output json
-```
-
-로그인 키:
-
-```bash
-ncloud vserver getLoginKeyList --regionCode KR --output json
+ncloud vserver getZoneList \
+  --regionCode KR \
+  --output json
 ```
 
 서버 이미지:
@@ -97,49 +76,187 @@ ncloud vserver getServerImageProductList \
 ```bash
 ncloud vserver getServerProductList \
   --regionCode KR \
-  --serverImageProductCode SERVER_IMAGE_PRODUCT_CODE \
+  --serverImageProductCode "SERVER_IMAGE_PRODUCT_CODE" \
   --output json
 ```
 
-## 서버 생성 설정
+## 1. VPC 생성
 
 ```bash
-cd ~/cloud-infrastructure-lecture-example
-cd "003-cloud cli"
-cp scripts/create-server.env.example scripts/create-server.env
+ncloud vpc createVpc \
+  --regionCode KR \
+  --vpcName cli-lab-vpc \
+  --ipv4CidrBlock 10.10.0.0/16 \
+  --responseFormatType json
 ```
 
-`scripts/create-server.env`를 수정합니다.
+VPC 번호 확인:
 
 ```bash
-REGION_CODE="KR"
-VPC_NO="12345678"
-SUBNET_NO="23456789"
-ACG_NO="67890123"
-SERVER_IMAGE_PRODUCT_CODE="SW.VSVR.OS.LNX64.ROCKY.0810.B050"
-SERVER_PRODUCT_CODE="SVR.VSVR.HICPU.C002.M004.NET.SSD.B050.G002"
-SERVER_NAME="cli-lab-001"
-LOGIN_KEY_NAME="my-login-key"
-ASSOCIATE_WITH_PUBLIC_IP="true"
-INIT_SCRIPT_NO=""
-PROFILE=""
+ncloud vpc getVpcList \
+  --regionCode KR \
+  --responseFormatType json
 ```
 
-## 서버 생성 명령 출력
+응답의 `vpcNo`를 이후 `VPC_NO`에 넣습니다.
 
-먼저 dry run으로 생성 명령을 확인합니다.
+## 2. Network ACL 확인
+
+Subnet 생성에는 Network ACL 번호가 필요합니다.
 
 ```bash
-./scripts/create-server.sh
+ncloud vpc getNetworkAclList \
+  --regionCode KR \
+  --vpcNo "VPC_NO" \
+  --responseFormatType json
 ```
 
-값이 맞으면 실행합니다.
+응답의 `networkAclNo`를 이후 `NETWORK_ACL_NO`에 넣습니다.
+
+## 3. Public Subnet 생성
 
 ```bash
-./scripts/create-server.sh --execute
+ncloud vpc createSubnet \
+  --regionCode KR \
+  --zoneCode KR-1 \
+  --vpcNo "VPC_NO" \
+  --subnetName cli-lab-public-subnet \
+  --subnet 10.10.1.0/24 \
+  --networkAclNo "NETWORK_ACL_NO" \
+  --subnetTypeCode PUBLIC \
+  --usageTypeCode GEN \
+  --responseFormatType json
 ```
 
-## 생성 상태 확인
+Subnet 번호 확인:
+
+```bash
+ncloud vpc getSubnetList \
+  --regionCode KR \
+  --vpcNo "VPC_NO" \
+  --responseFormatType json
+```
+
+응답의 `subnetNo`를 이후 `SUBNET_NO`에 넣습니다.
+
+## 4. ACG 생성
+
+```bash
+ncloud vserver createAccessControlGroup \
+  --regionCode KR \
+  --vpcNo "VPC_NO" \
+  --accessControlGroupName cli-lab-acg \
+  --accessControlGroupDescription "CLI lab SSH access" \
+  --output json
+```
+
+ACG 번호 확인:
+
+```bash
+ncloud vserver getAccessControlGroupList \
+  --regionCode KR \
+  --vpcNo "VPC_NO" \
+  --output json
+```
+
+응답의 `accessControlGroupNo`를 이후 `ACG_NO`에 넣습니다.
+
+## 5. SSH Inbound Rule 추가
+
+본인 IP만 허용하는 예시:
+
+```bash
+ncloud vserver addAccessControlGroupInboundRule \
+  --regionCode KR \
+  --vpcNo "VPC_NO" \
+  --accessControlGroupNo "ACG_NO" \
+  --accessControlGroupRuleList "protocolTypeCode='TCP', ipBlock='YOUR_PUBLIC_IP/32', portRange='22', accessControlGroupRuleDescription='SSH'" \
+  --output json
+```
+
+강의 실습 편의상 전체 허용이 필요할 때:
+
+```bash
+ncloud vserver addAccessControlGroupInboundRule \
+  --regionCode KR \
+  --vpcNo "VPC_NO" \
+  --accessControlGroupNo "ACG_NO" \
+  --accessControlGroupRuleList "protocolTypeCode='TCP', ipBlock='0.0.0.0/0', portRange='22', accessControlGroupRuleDescription='SSH lab only'" \
+  --output json
+```
+
+002 init script로 `2200` 포트도 열 예정이면:
+
+```bash
+ncloud vserver addAccessControlGroupInboundRule \
+  --regionCode KR \
+  --vpcNo "VPC_NO" \
+  --accessControlGroupNo "ACG_NO" \
+  --accessControlGroupRuleList "protocolTypeCode='TCP', ipBlock='YOUR_PUBLIC_IP/32', portRange='2200', accessControlGroupRuleDescription='SSH 2200'" \
+  --output json
+```
+
+## 6. Login Key 생성
+
+개인키는 생성 응답에서 한 번만 확인할 수 있습니다.
+
+```bash
+ncloud vserver createLoginKey \
+  --keyName cli-lab-key \
+  --regionCode KR \
+  --output json
+```
+
+`jq`가 있으면 PEM 파일로 바로 저장합니다.
+
+```bash
+ncloud vserver createLoginKey \
+  --keyName cli-lab-key \
+  --regionCode KR \
+  --output json \
+  | jq -r '.createLoginKeyResponse.privateKey' > cli-lab-key.pem
+
+chmod 400 cli-lab-key.pem
+```
+
+## 7. 서버 생성
+
+앞에서 조회한 실제 서버 이미지/스펙 코드를 넣습니다.
+
+```bash
+ncloud vserver createServerInstances \
+  --regionCode KR \
+  --vpcNo "VPC_NO" \
+  --subnetNo "SUBNET_NO" \
+  --networkInterfaceList "networkInterfaceOrder='0', accessControlGroupNoList=['ACG_NO']" \
+  --serverImageProductCode "SERVER_IMAGE_PRODUCT_CODE" \
+  --serverProductCode "SERVER_PRODUCT_CODE" \
+  --serverName cli-lab-server \
+  --loginKeyName cli-lab-key \
+  --associateWithPublicIp true \
+  --isProtectServerTermination false \
+  --output json
+```
+
+002 init script를 같이 쓰려면 `--initScriptNo`를 추가합니다.
+
+```bash
+ncloud vserver createServerInstances \
+  --regionCode KR \
+  --vpcNo "VPC_NO" \
+  --subnetNo "SUBNET_NO" \
+  --networkInterfaceList "networkInterfaceOrder='0', accessControlGroupNoList=['ACG_NO']" \
+  --serverImageProductCode "SERVER_IMAGE_PRODUCT_CODE" \
+  --serverProductCode "SERVER_PRODUCT_CODE" \
+  --serverName cli-lab-server \
+  --loginKeyName cli-lab-key \
+  --associateWithPublicIp true \
+  --isProtectServerTermination false \
+  --initScriptNo "INIT_SCRIPT_NO" \
+  --output json
+```
+
+## 8. 서버 상태 확인
 
 ```bash
 ncloud vserver getServerInstanceList \
@@ -147,19 +264,26 @@ ncloud vserver getServerInstanceList \
   --output json
 ```
 
-## SSH 접속
+```bash
+ncloud vserver getServerInstanceDetail \
+  --regionCode KR \
+  --serverInstanceNo "SERVER_INSTANCE_NO" \
+  --output json
+```
+
+## 9. SSH 접속
 
 ```bash
-ssh -i LOGIN_KEY.pem USERNAME@SERVER_PUBLIC_IP
+ssh -i cli-lab-key.pem USERNAME@SERVER_PUBLIC_IP
 ```
 
 002 init script로 `2200` 포트를 열었다면:
 
 ```bash
-ssh -i LOGIN_KEY.pem -p 2200 USERNAME@SERVER_PUBLIC_IP
+ssh -i cli-lab-key.pem -p 2200 USERNAME@SERVER_PUBLIC_IP
 ```
 
-## 실습 정리
+## 10. 실습 정리
 
 서버 정지:
 
@@ -179,3 +303,30 @@ ncloud vserver terminateServerInstances \
   --output json
 ```
 
+ACG 삭제:
+
+```bash
+ncloud vserver deleteAccessControlGroup \
+  --regionCode KR \
+  --vpcNo "VPC_NO" \
+  --accessControlGroupNo "ACG_NO" \
+  --responseFormatType json
+```
+
+Subnet 삭제:
+
+```bash
+ncloud vpc deleteSubnet \
+  --regionCode KR \
+  --subnetNo "SUBNET_NO" \
+  --responseFormatType json
+```
+
+VPC 삭제:
+
+```bash
+ncloud vpc deleteVpc \
+  --regionCode KR \
+  --vpcNo "VPC_NO" \
+  --responseFormatType json
+```
