@@ -117,18 +117,20 @@ $images.getServerImageListResponse.serverImageList |
 ncloud vserver getServerSpecList \
   --regionCode "$REGION_CODE" \
   --zoneCode "$ZONE_CODE" \
-  --serverImageNo "SERVER_IMAGE_NO" \
+  --serverImageNo "$SERVER_IMAGE_NO" \
   --hypervisorTypeCodeList KVM \
-  --output json
+  --output json \
+  | jq -r '.getServerSpecListResponse.serverSpecList[]
+    | [.serverSpecCode, .serverSpecNo, .serverSpecDescription, .generationCode, .hypervisorType.code] | @tsv'
 ```
 
-조회 결과에서 실제 값을 변수로 저장합니다.
+조회 결과에서 실제 값을 변수로 저장합니다. `SERVER_SPEC_CODE`에는 숫자인 `serverSpecNo`가 아니라 `c2-g3`, `s2-g3` 같은 `serverSpecCode` 값을 넣습니다.
 
 Linux/macOS:
 
 ```bash
-SERVER_IMAGE_NO="SERVER_IMAGE_NO"
-SERVER_SPEC_CODE="SERVER_SPEC_CODE"
+SERVER_IMAGE_NO="104630229"
+SERVER_SPEC_CODE="c2-g3"
 
 echo "$SERVER_IMAGE_NO"
 echo "$SERVER_SPEC_CODE"
@@ -137,8 +139,8 @@ echo "$SERVER_SPEC_CODE"
 Windows PowerShell:
 
 ```powershell
-$SERVER_IMAGE_NO = "SERVER_IMAGE_NO"
-$SERVER_SPEC_CODE = "SERVER_SPEC_CODE"
+$SERVER_IMAGE_NO = "104630229"
+$SERVER_SPEC_CODE = "c2-g3"
 
 $SERVER_IMAGE_NO
 $SERVER_SPEC_CODE
@@ -365,6 +367,14 @@ ncloud vserver createLoginKey `
 ```text
 Required field is not specified. location : memberServerImageInstanceNo or serverImageProductCode or serverSpecCode.
 ```
+
+아래 오류가 나오면 `serverSpecNo` 숫자를 `SERVER_SPEC_CODE`에 넣었거나, 이미지와 스펙의 하이퍼바이저 세대가 맞지 않는 상태입니다.
+
+```text
+No hypervisor was found that matches the server image, specification, or product code you requested.
+```
+
+예를 들어 `SERVER_SPEC_CODE="1502"`처럼 숫자를 넣으면 안 됩니다. G3/KVM 서버는 `SERVER_SPEC_CODE="c2-g3"`처럼 `serverSpecCode` 문자열을 넣습니다.
 
 Linux/macOS:
 
