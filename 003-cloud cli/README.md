@@ -89,7 +89,7 @@ PUBLIC_SUBNET_CIDR="10.0.1.0/24"
 PRIVATE_SUBNET_NAME="sub-lab3-pri-kr1"
 PRIVATE_SUBNET_CIDR="10.0.2.0/24"
 
-ACG_NAME="acg-lab3-ssh"
+ACG_NAME="lab3-acg"
 LOGIN_KEY_NAME="key-lab3"
 SERVER_NAME="svr-lab3-web-kr1"
 
@@ -111,7 +111,7 @@ $PUBLIC_SUBNET_CIDR = "10.0.1.0/24"
 $PRIVATE_SUBNET_NAME = "sub-lab3-pri-kr1"
 $PRIVATE_SUBNET_CIDR = "10.0.2.0/24"
 
-$ACG_NAME = "acg-lab3-ssh"
+$ACG_NAME = "lab3-acg"
 $LOGIN_KEY_NAME = "key-lab3"
 $SERVER_NAME = "svr-lab3-web-kr1"
 
