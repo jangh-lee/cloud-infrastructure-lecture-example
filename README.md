@@ -2,6 +2,8 @@
 
 클라우드 인프라 강의에서 사용하는 실습 예제 모음입니다.
 
+GitBook용 강의 교안은 [`gitbook`](./gitbook/) 폴더에서 학교별로 관리합니다.
+
 ## Examples
 
 | Folder | Topic |

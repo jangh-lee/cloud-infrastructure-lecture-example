@@ -1,0 +1,26 @@
+# 단국대 클라우드 인프라 실습
+
+Naver Cloud 기반 클라우드 인프라 실습 교안입니다.
+
+이 교안은 강의 중 명령어를 바로 복사해서 사용할 수 있도록 구성했습니다. 실습 코드는 같은 저장소의 예제 폴더와 함께 관리합니다.
+
+## 실습 목록
+
+| Chapter | Topic | Lab Folder |
+| --- | --- | --- |
+| 005 | Object Storage 정적 웹사이트 | `005-static website` |
+| 006 | Database 백업 및 특정시점 복구 | `006-database backup recovery` |
+| 008 | Game Server 생성 실습 | `008-game server` |
+
+## GitBook 연결 정보
+
+GitBook Space를 만들 때 아래처럼 설정합니다.
+
+```text
+Repository: cloud-infrastructure-lecture-example
+Branch: main
+Root directory: gitbook/dankook-university
+Entry page: README.md
+Table of contents: SUMMARY.md
+```
+
