@@ -86,7 +86,7 @@ ncloud vserver getServerProductList \
 ncloud vpc createVpc \
   --regionCode KR \
   --vpcName cli-lab-vpc \
-  --ipv4CidrBlock 10.10.0.0/16 \
+  --ipv4CidrBlock 10.0.0.0/16 \
   --output json
 ```
 
@@ -120,15 +120,32 @@ ncloud vpc createSubnet \
   --regionCode KR \
   --zoneCode KR-1 \
   --vpcNo "VPC_NO" \
-  --subnetName cli-lab-public-subnet \
-  --subnet 10.10.1.0/24 \
+  --subnetName sub-lab3-pub-kr1 \
+  --subnet 10.0.1.0/24 \
   --networkAclNo "NETWORK_ACL_NO" \
   --subnetTypeCode PUBLIC \
   --usageTypeCode GEN \
   --output json
 ```
 
-Subnet 번호 확인:
+응답에서 Public Subnet의 `subnetNo`를 확인합니다. 이후 서버 생성 명령의 `PUBLIC_SUBNET_NO` 자리에 넣습니다.
+
+## 4. Private Subnet 생성
+
+```bash
+ncloud vpc createSubnet \
+  --regionCode KR \
+  --zoneCode KR-1 \
+  --vpcNo "VPC_NO" \
+  --subnetName sub-lab3-pri-kr1 \
+  --subnet 10.0.2.0/24 \
+  --networkAclNo "NETWORK_ACL_NO" \
+  --subnetTypeCode PRIVATE \
+  --usageTypeCode GEN \
+  --output json
+```
+
+Subnet 목록 확인:
 
 ```bash
 ncloud vpc getSubnetList \
@@ -137,9 +154,14 @@ ncloud vpc getSubnetList \
   --output json
 ```
 
-응답의 `subnetNo`를 이후 `SUBNET_NO`에 넣습니다.
+Public Subnet과 Private Subnet이 모두 생성되었는지 확인합니다.
 
-## 4. ACG 생성
+```text
+sub-lab3-pub-kr1  10.0.1.0/24  PUBLIC
+sub-lab3-pri-kr1  10.0.2.0/24  PRIVATE
+```
+
+## 5. ACG 생성
 
 ```bash
 ncloud vserver createAccessControlGroup \
@@ -161,7 +183,7 @@ ncloud vserver getAccessControlGroupList \
 
 응답의 `accessControlGroupNo`를 이후 `ACG_NO`에 넣습니다.
 
-## 5. SSH Inbound Rule 추가
+## 6. SSH Inbound Rule 추가
 
 본인 IP만 허용하는 예시:
 
@@ -196,7 +218,7 @@ ncloud vserver addAccessControlGroupInboundRule \
   --output json
 ```
 
-## 6. Login Key 생성
+## 7. Login Key 생성
 
 개인키는 생성 응답에서 한 번만 확인할 수 있습니다.
 
@@ -219,15 +241,15 @@ ncloud vserver createLoginKey \
 chmod 400 cli-lab-key.pem
 ```
 
-## 7. 서버 생성
+## 8. 서버 생성
 
-앞에서 조회한 실제 서버 이미지/스펙 코드를 넣습니다.
+앞에서 조회한 실제 Public Subnet 번호와 서버 이미지/스펙 코드를 넣습니다. SSH 접속을 확인할 서버이므로 Public Subnet에 생성합니다.
 
 ```bash
 ncloud vserver createServerInstances \
   --regionCode KR \
   --vpcNo "VPC_NO" \
-  --subnetNo "SUBNET_NO" \
+  --subnetNo "PUBLIC_SUBNET_NO" \
   --networkInterfaceList "networkInterfaceOrder='0', accessControlGroupNoList=['ACG_NO']" \
   --serverImageProductCode "SERVER_IMAGE_PRODUCT_CODE" \
   --serverProductCode "SERVER_PRODUCT_CODE" \
@@ -244,7 +266,7 @@ ncloud vserver createServerInstances \
 ncloud vserver createServerInstances \
   --regionCode KR \
   --vpcNo "VPC_NO" \
-  --subnetNo "SUBNET_NO" \
+  --subnetNo "PUBLIC_SUBNET_NO" \
   --networkInterfaceList "networkInterfaceOrder='0', accessControlGroupNoList=['ACG_NO']" \
   --serverImageProductCode "SERVER_IMAGE_PRODUCT_CODE" \
   --serverProductCode "SERVER_PRODUCT_CODE" \
@@ -256,7 +278,7 @@ ncloud vserver createServerInstances \
   --output json
 ```
 
-## 8. 서버 상태 확인
+## 9. 서버 상태 확인
 
 ```bash
 ncloud vserver getServerInstanceList \
@@ -271,7 +293,7 @@ ncloud vserver getServerInstanceDetail \
   --output json
 ```
 
-## 9. SSH 접속
+## 10. SSH 접속
 
 ```bash
 ssh -i cli-lab-key.pem USERNAME@SERVER_PUBLIC_IP
@@ -283,7 +305,7 @@ ssh -i cli-lab-key.pem USERNAME@SERVER_PUBLIC_IP
 ssh -i cli-lab-key.pem -p 2200 USERNAME@SERVER_PUBLIC_IP
 ```
 
-## 10. 실습 정리
+## 11. 실습 정리
 
 서버 정지:
 
@@ -313,12 +335,21 @@ ncloud vserver deleteAccessControlGroup \
   --output json
 ```
 
-Subnet 삭제:
+Private Subnet 삭제:
 
 ```bash
 ncloud vpc deleteSubnet \
   --regionCode KR \
-  --subnetNo "SUBNET_NO" \
+  --subnetNo "PRIVATE_SUBNET_NO" \
+  --output json
+```
+
+Public Subnet 삭제:
+
+```bash
+ncloud vpc deleteSubnet \
+  --regionCode KR \
+  --subnetNo "PUBLIC_SUBNET_NO" \
   --output json
 ```
 
