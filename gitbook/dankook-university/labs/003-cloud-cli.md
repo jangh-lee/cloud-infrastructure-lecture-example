@@ -87,7 +87,7 @@ ncloud vpc createVpc \
   --regionCode KR \
   --vpcName cli-lab-vpc \
   --ipv4CidrBlock 10.10.0.0/16 \
-  --responseFormatType json
+  --output json
 ```
 
 VPC 번호 확인:
@@ -95,7 +95,7 @@ VPC 번호 확인:
 ```bash
 ncloud vpc getVpcList \
   --regionCode KR \
-  --responseFormatType json
+  --output json
 ```
 
 응답의 `vpcNo`를 이후 `VPC_NO`에 넣습니다.
@@ -108,7 +108,7 @@ Subnet 생성에는 Network ACL 번호가 필요합니다.
 ncloud vpc getNetworkAclList \
   --regionCode KR \
   --vpcNo "VPC_NO" \
-  --responseFormatType json
+  --output json
 ```
 
 응답의 `networkAclNo`를 이후 `NETWORK_ACL_NO`에 넣습니다.
@@ -125,7 +125,7 @@ ncloud vpc createSubnet \
   --networkAclNo "NETWORK_ACL_NO" \
   --subnetTypeCode PUBLIC \
   --usageTypeCode GEN \
-  --responseFormatType json
+  --output json
 ```
 
 Subnet 번호 확인:
@@ -134,7 +134,7 @@ Subnet 번호 확인:
 ncloud vpc getSubnetList \
   --regionCode KR \
   --vpcNo "VPC_NO" \
-  --responseFormatType json
+  --output json
 ```
 
 응답의 `subnetNo`를 이후 `SUBNET_NO`에 넣습니다.
@@ -310,7 +310,7 @@ ncloud vserver deleteAccessControlGroup \
   --regionCode KR \
   --vpcNo "VPC_NO" \
   --accessControlGroupNo "ACG_NO" \
-  --responseFormatType json
+  --output json
 ```
 
 Subnet 삭제:
@@ -319,7 +319,7 @@ Subnet 삭제:
 ncloud vpc deleteSubnet \
   --regionCode KR \
   --subnetNo "SUBNET_NO" \
-  --responseFormatType json
+  --output json
 ```
 
 VPC 삭제:
@@ -328,5 +328,5 @@ VPC 삭제:
 ncloud vpc deleteVpc \
   --regionCode KR \
   --vpcNo "VPC_NO" \
-  --responseFormatType json
+  --output json
 ```
