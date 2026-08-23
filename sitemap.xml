@@ -2,38 +2,38 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/</loc>
-         <lastmod>2026-08-22</lastmod>
+         <lastmod>2026-08-23</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/SUMMARY/</loc>
-         <lastmod>2026-08-22</lastmod>
+         <lastmod>2026-08-23</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/002-init-script/</loc>
-         <lastmod>2026-08-22</lastmod>
+         <lastmod>2026-08-23</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/003-cloud-cli/</loc>
-         <lastmod>2026-08-22</lastmod>
+         <lastmod>2026-08-23</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/005-static-website/</loc>
-         <lastmod>2026-08-22</lastmod>
+         <lastmod>2026-08-23</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/006-database-backup-recovery/</loc>
-         <lastmod>2026-08-22</lastmod>
+         <lastmod>2026-08-23</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/008-game-server/</loc>
-         <lastmod>2026-08-22</lastmod>
+         <lastmod>2026-08-23</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/setup/gitbook/</loc>
-         <lastmod>2026-08-22</lastmod>
+         <lastmod>2026-08-23</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/setup/github-pages/</loc>
-         <lastmod>2026-08-22</lastmod>
+         <lastmod>2026-08-23</lastmod>
     </url>
 </urlset>
