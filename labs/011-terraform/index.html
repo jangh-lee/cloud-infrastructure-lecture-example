@@ -1310,31 +1310,56 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>terraform<span class="w"> </span>output
 <a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>terraform<span class="w"> </span>output<span class="w"> </span>server_instance_no
 <a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>terraform<span class="w"> </span>output<span class="w"> </span>public_ip
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>terraform<span class="w"> </span>output<span class="w"> </span>http_url
+</code></pre></div>
+<p>관리자 비밀번호는 sensitive output이라 일반 <code>terraform output</code> 화면에서는 숨겨집니다. 직접 확인할 때만 아래 명령을 사용합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>admin_password
 </code></pre></div>
 <p>브라우저 접속:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>http://PUBLIC_IP/
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>http://PUBLIC_IP/
 </code></pre></div>
 <p>Ncloud Terraform provider는 <code>ncloud_init_script.content</code>에 HTML 태그가 들어가면 콘솔 저장 과정에서 일부 태그를 필터링해 Terraform state 비교가 깨질 수 있습니다. 그래서 이 예제의 init script는 HTML 태그 없이 단순 텍스트 페이지를 생성합니다.</p>
 <p>아래 오류가 나오면 init script 내용에 필터링되는 태그가 들어간 경우입니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>Provider produced inconsistent result after apply
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>Provider produced inconsistent result after apply
 </code></pre></div>
 <p>이 경우 init script 내용에서 HTML/XML 태그를 제거하고 다시 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>terraform<span class="w"> </span>apply
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>terraform<span class="w"> </span>apply
+</code></pre></div>
+<p>nginx 접속이 안 되면 먼저 SSH로 서버에 접속해 init script 로그와 서비스 상태를 확인합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>ssh<span class="w"> </span>-i<span class="w"> </span>key-lab11.pem<span class="w"> </span>root@PUBLIC_IP
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>/var/log/lab11-init.log
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>nginx<span class="w"> </span>--no-pager
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>sudo<span class="w"> </span>ss<span class="w"> </span>-tulpen<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':80'</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://localhost
+</code></pre></div>
+<p>확인 순서:</p>
+<ol>
+<li><code>terraform output public_ip</code>의 IP로 접속 중인지 확인합니다.</li>
+<li>ACG에 <code>80/tcp</code> inbound가 있는지 확인합니다.</li>
+<li>서버 내부에서 <code>curl -i http://localhost</code>가 되는지 확인합니다.</li>
+<li><code>/var/log/lab11-init.log</code>에서 <code>apt-get</code>, <code>nginx</code> 설치 실패가 있는지 확인합니다.</li>
+</ol>
+<p>Init Script는 서버 최초 생성 시점에만 실행됩니다. 서버가 이미 만들어진 뒤 init script 내용을 수정했다면 기존 서버에는 자동 재실행되지 않습니다. 실습에서는 아래처럼 서버를 교체하거나 전체 삭제 후 다시 생성합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>terraform<span class="w"> </span>apply<span class="w"> </span>-replace<span class="o">=</span>ncloud_server.web
+</code></pre></div>
+<p>또는:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>terraform<span class="w"> </span>destroy
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>terraform<span class="w"> </span>apply
 </code></pre></div>
 <h2 id="9-state">9. State 확인<a class="headerlink" href="#9-state" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>terraform<span class="w"> </span>state<span class="w"> </span>list
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>ls<span class="w"> </span>-la
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>terraform<span class="w"> </span>state<span class="w"> </span>list
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>ls<span class="w"> </span>-la
 </code></pre></div>
 <p><code>terraform.tfstate</code>는 Terraform이 관리 중인 리소스 상태를 기록합니다. 실무에서는 Object Storage 같은 원격 backend와 state lock을 사용합니다.</p>
 <h2 id="10">10. 삭제<a class="headerlink" href="#10" title="Permanent link">&para;</a></h2>
 <p>실습이 끝나면 반드시 삭제합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>terraform<span class="w"> </span>destroy
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>terraform<span class="w"> </span>destroy
 </code></pre></div>
 <p>자동 승인:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>terraform<span class="w"> </span>destroy<span class="w"> </span>-auto-approve
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>terraform<span class="w"> </span>destroy<span class="w"> </span>-auto-approve
 </code></pre></div>
 <p>삭제 후 확인:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>terraform<span class="w"> </span>state<span class="w"> </span>list
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>terraform<span class="w"> </span>state<span class="w"> </span>list
 </code></pre></div>
 <p>아무것도 출력되지 않으면 Terraform이 관리하던 리소스가 모두 삭제된 상태입니다.</p>
 <h2 id="_4">주의사항<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
