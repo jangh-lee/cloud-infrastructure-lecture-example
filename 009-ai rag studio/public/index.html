@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 4 AI Fortune & RAG Studio</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-badge">AI</div>
+        <div>
+          <h1>Lucky Bloom</h1>
+          <p>Naver Cloud Chapter 4 Demo</p>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-link is-active" data-view="fortune" type="button">오늘의 사주</button>
+        <button class="nav-link" data-view="rag" type="button">RAG 질문</button>
+        <button class="nav-link" data-view="documents" type="button">RAG 문서 관리</button>
+        <button class="nav-link" data-view="admin" type="button">프롬프트 관리자</button>
+      </nav>
+
+      <section class="side-panel">
+        <h2>안내</h2>
+        <p>CLOVA Studio로 오늘의 운세를 생성하고 RAG Reasoning으로 실습 문서를 검색하는 데모입니다.</p>
+        <div id="healthBadge" class="health-badge pending">Checking API</div>
+      </section>
+    </aside>
+
+    <main class="content">
+      <section class="view is-active" data-panel="fortune">
+        <div class="hero">
+          <span class="eyebrow">FORTUNE TEXT</span>
+          <h2>오늘의 사주 운세</h2>
+          <p>생년월일시를 입력하면 오늘의 흐름, 강점, 주의점과 행운 포인트를 귀엽고 부드러운 톤으로 정리해 줍니다.</p>
+        </div>
+
+        <div class="card-grid">
+          <article class="form-card">
+            <form id="fortuneForm" class="stack-form">
+              <div class="row">
+                <label>출생 연도<input id="birthYear" type="number" min="1900" max="2099" placeholder="1994" required></label>
+                <label>출생 월<input id="birthMonth" type="number" min="1" max="12" placeholder="8" required></label>
+              </div>
+              <div class="row">
+                <label>출생 일<input id="birthDay" type="number" min="1" max="31" placeholder="17" required></label>
+                <label>출생 시
+                  <select id="birthHour" required>
+                    <option value="">선택</option>
+                    <option value="자시(23:00~00:59)">자시</option>
+                    <option value="축시(01:00~02:59)">축시</option>
+                    <option value="인시(03:00~04:59)">인시</option>
+                    <option value="묘시(05:00~06:59)">묘시</option>
+                    <option value="진시(07:00~08:59)">진시</option>
+                    <option value="사시(09:00~10:59)">사시</option>
+                    <option value="오시(11:00~12:59)">오시</option>
+                    <option value="미시(13:00~14:59)">미시</option>
+                    <option value="신시(15:00~16:59)">신시</option>
+                    <option value="유시(17:00~18:59)">유시</option>
+                    <option value="술시(19:00~20:59)">술시</option>
+                    <option value="해시(21:00~22:59)">해시</option>
+                  </select>
+                </label>
+              </div>
+              <label>달력 기준
+                <select id="calendarType">
+                  <option value="양력">양력</option>
+                  <option value="음력">음력</option>
+                </select>
+              </label>
+              <button type="submit">오늘의 운세 보기</button>
+            </form>
+          </article>
+
+          <article class="result-card">
+            <div id="fortuneLoading" class="fortune-loading" role="status" aria-live="polite" hidden>
+              <div class="loader-one" aria-hidden="true">
+                <span></span><span></span><span></span>
+              </div>
+              <strong>운세를 불러오는 중...</strong>
+              <p>오늘의 별자리와 기운을 차분히 살펴보고 있어요.</p>
+            </div>
+            <div id="fortuneEmpty" class="empty-box">생년월일시를 입력하면 오늘의 운세가 표시됩니다.</div>
+            <div id="fortuneResult" class="fortune-result" hidden></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" data-panel="rag">
+        <div class="rag-studio">
+          <header class="rag-studio-header">
+            <div>
+              <span class="eyebrow">RAG REASONING</span>
+              <h2>실습 문서에게 질문하기</h2>
+            </div>
+            <div class="rag-header-actions">
+              <span class="model-pill"><i></i> RAG Reasoning</span>
+              <button id="newChatButton" class="secondary-button" type="button">새 대화</button>
+            </div>
+          </header>
+
+          <div id="ragConversation" class="rag-conversation" aria-live="polite">
+            <div id="ragWelcome" class="rag-welcome">
+              <div class="rag-orbit" aria-hidden="true"><span>R</span></div>
+              <h3>무엇이 궁금한가요?</h3>
+              <p>수업 문서를 검색한 뒤 근거와 출처를 포함해 답변합니다.</p>
+              <div class="prompt-suggestions">
+                <button type="button" data-question="로드밸런서 헬스체크 경로는 무엇인가요?">로드밸런서 헬스체크 경로는?</button>
+                <button type="button" data-question="3계층 구조에서 각 서버는 어떤 주소를 알아야 하나요?">3계층 서버 연결 방법</button>
+                <button type="button" data-question="DB 비밀번호를 바꾸려면 어떻게 해야 하나요?">DB 비밀번호 변경 방법</button>
+              </div>
+            </div>
+          </div>
+
+          <form id="ragForm" class="rag-composer">
+            <textarea id="ragPrompt" rows="1" maxlength="4000" placeholder="실습 문서에 대해 질문하세요" required></textarea>
+            <div class="rag-composer-footer">
+              <span><kbd>Enter</kbd> 전송 · <kbd>Shift</kbd> + <kbd>Enter</kbd> 줄바꿈</span>
+              <button id="ragSubmitButton" type="submit" aria-label="질문 전송">전송</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="view" data-panel="documents">
+        <div class="hero document-hero">
+          <div>
+            <span class="eyebrow">KNOWLEDGE BASE</span>
+            <h2>RAG 문서 관리</h2>
+            <p>검색에 사용할 문서를 추가하고 지식 베이스의 구성과 주요 키워드를 한눈에 확인합니다.</p>
+          </div>
+          <form id="documentAdminLoadForm" class="document-login-form">
+            <input id="documentAdminPassword" type="password" placeholder="관리자 비밀번호" required>
+            <button type="submit">문서 불러오기</button>
+          </form>
+        </div>
+
+        <div id="documentDashboard" class="document-dashboard" hidden>
+          <div class="knowledge-stats">
+            <article><span>등록 문서</span><strong id="documentCount">0</strong><small>documents</small></article>
+            <article><span>전체 분량</span><strong id="documentCharacters">0</strong><small>characters</small></article>
+            <article><span>핵심 키워드</span><strong id="documentKeywordCount">0</strong><small>topics</small></article>
+          </div>
+
+          <div class="knowledge-visual-grid">
+            <article class="knowledge-panel">
+              <div class="panel-heading">
+                <div><span class="eyebrow">DOCUMENT MAP</span><h3>지식 베이스 맵</h3></div>
+                <span class="live-indicator">검색 연결됨</span>
+              </div>
+              <div id="knowledgeMap" class="knowledge-map" aria-label="RAG 문서 관계 시각화"></div>
+            </article>
+
+            <article class="knowledge-panel">
+              <div class="panel-heading"><div><span class="eyebrow">TOP KEYWORDS</span><h3>검색 키워드</h3></div></div>
+              <div id="keywordCloud" class="keyword-cloud"></div>
+              <p class="visual-help">여러 문서에 함께 등장하는 키워드일수록 크게 표시됩니다.</p>
+            </article>
+          </div>
+
+          <div class="document-manager-grid">
+            <article class="document-list-panel">
+              <div class="panel-heading">
+                <div><span class="eyebrow">DOCUMENTS</span><h3>등록된 문서</h3></div>
+                <button id="newDocumentButton" class="secondary-button" type="button">+ 새 문서</button>
+              </div>
+              <div id="documentList" class="document-list"></div>
+            </article>
+
+            <article class="document-editor-panel">
+              <div class="panel-heading">
+                <div><span class="eyebrow">EDITOR</span><h3 id="documentEditorTitle">새 문서 추가</h3></div>
+                <span id="documentSaveStatus" class="save-status">작성 중</span>
+              </div>
+              <form id="documentForm" class="stack-form">
+                <label>문서 ID
+                  <input id="documentId" type="text" pattern="[a-z0-9][a-z0-9-]{1,79}" placeholder="example-document" required>
+                  <small>영문 소문자, 숫자, 하이픈만 사용할 수 있습니다.</small>
+                </label>
+                <label>문서 제목<input id="documentTitle" type="text" maxlength="120" placeholder="화면에 표시할 문서 제목" required></label>
+                <label>출처<input id="documentSource" type="text" maxlength="300" placeholder="/009-ai rag studio/README.md 또는 URL" required></label>
+                <label>검색할 문서 내용
+                  <textarea id="documentContent" class="document-content-input" maxlength="50000" placeholder="RAG 검색과 답변 근거로 사용할 내용을 입력하세요." required></textarea>
+                  <small><span id="documentContentLength">0</span> / 50,000자</small>
+                </label>
+                <div class="document-form-actions">
+                  <button id="deleteDocumentButton" class="danger-button" type="button" hidden>문서 삭제</button>
+                  <button id="saveDocumentButton" type="submit">문서 저장</button>
+                </div>
+              </form>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-panel="admin">
+        <div class="hero">
+          <span class="eyebrow">PROMPT ADMIN</span>
+          <h2>프롬프트 관리자</h2>
+          <p>오늘의 운세 생성에 쓰는 시스템 프롬프트와 사용자 템플릿을 수정할 수 있습니다.</p>
+        </div>
+
+        <article class="full-card">
+          <form id="adminLoadForm" class="inline-form">
+            <input id="adminPassword" type="password" placeholder="관리자 비밀번호">
+            <button type="submit">프롬프트 불러오기</button>
+          </form>
+
+          <form id="adminSaveForm" class="stack-form" hidden>
+            <label>운세 시스템 프롬프트<textarea id="fortuneSystemPrompt"></textarea></label>
+            <label>운세 사용자 템플릿<textarea id="fortuneUserPromptTemplate"></textarea></label>
+            <label>RAG 시스템 프롬프트<textarea id="ragSystemPrompt"></textarea></label>
+            <button type="submit">프롬프트 저장</button>
+          </form>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

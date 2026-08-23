@@ -12,8 +12,12 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 
 | Folder | Topic |
 | --- | --- |
+| [`001-api server`](./001-api%20server/) | Todo UI와 REST API로 HTTP, JSON, Postman, CRUD 흐름을 익히는 가장 기본 웹 서버 예제입니다. |
 | [`002-init script`](./002-init%20script/) | 서버 생성 시 init script를 사용해 Ubuntu SSH 포트를 `22`, `2200`으로 재설정하는 예제입니다. |
 | [`003-cloud cli`](./003-cloud%20cli/) | Ncloud CLI를 설치하고 인증한 뒤 VPC 리소스를 조회하고 서버를 생성하는 예제입니다. |
+| [`004-load balancer`](./004-load%20balancer/) | 여러 Ubuntu 웹 노드를 만들고 Load Balancer 뒤에 연결해 헬스체크와 트래픽 분산을 확인하는 예제입니다. |
 | [`005-static website`](./005-static%20website/) | Object Storage, Amazon S3 같은 오브젝트 스토리지 계열 서비스에서 정적 웹사이트를 퍼블리싱하기 위한 자료 예시입니다. |
 | [`006-database backup recovery`](./006-database%20backup%20recovery/) | 데이터베이스 백업, 복구, 특정시점 복구(PITR)를 실습하기 위해 Ubuntu 서버에서 30초마다 DB에 테스트 데이터를 기록하는 예제입니다. |
+| [`007-three tier web app`](./007-three%20tier%20web%20app/) | Web, Backend, DB 서버를 분리해 3계층 게시판과 서버 간 통신, ACG 설계를 실습하는 예제입니다. |
 | [`008-game server`](./008-game%20server/) | Ubuntu 서버에서 SuperTuxKart 게임 서버를 실행하며 서버 생성, ACG, UDP 포트, 공인 IP 접속을 실습하는 예제입니다. |
+| [`009-ai rag studio`](./009-ai%20rag%20studio/) | CLOVA Studio API와 로컬 RAG 문서 관리 화면을 사용해 AI 애플리케이션 구성을 실습하는 예제입니다. |

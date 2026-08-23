@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 1 API Guide</title>
+  <style>
+    :root {
+      --bg: #f6efe4;
+      --panel: #fffaf1;
+      --line: #433c37;
+      --soft: rgba(67, 60, 55, 0.14);
+      --text: #2a2522;
+      --muted: #6b625d;
+      --get: #16a34a;
+      --post: #2563eb;
+      --put: #d97706;
+      --patch: #7c3aed;
+      --delete: #dc2626;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", "Apple SD Gothic Neo", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(251, 191, 36, 0.24), transparent 24%),
+        linear-gradient(180deg, #fbf6ec, #f4ecdf);
+    }
+
+    .page {
+      width: min(1100px, calc(100% - 28px));
+      margin: 24px auto 40px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero,
+    .card {
+      background: rgba(255, 250, 241, 0.92);
+      border: 3px solid var(--line);
+      border-radius: 28px;
+      box-shadow: 0 20px 45px rgba(42, 37, 34, 0.12);
+    }
+
+    .hero {
+      padding: 26px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(34px, 5vw, 54px);
+      line-height: 1.05;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 17px;
+    }
+
+    .hero-links {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .hero-links a {
+      display: inline-block;
+      padding: 10px 14px;
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .info-box {
+      padding: 18px;
+      border: 2px dashed var(--soft);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.74);
+    }
+
+    .info-box strong,
+    .card h2 {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .card {
+      padding: 22px;
+    }
+
+    .endpoint {
+      display: grid;
+      gap: 14px;
+      padding: 18px;
+      border: 2px solid var(--soft);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.76);
+    }
+
+    .endpoint + .endpoint {
+      margin-top: 16px;
+    }
+
+    .method-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .method {
+      min-width: 78px;
+      text-align: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .get { background: var(--get); }
+    .post { background: var(--post); }
+    .put { background: var(--put); }
+    .patch { background: var(--patch); }
+    .delete { background: var(--delete); }
+
+    .path {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .hint {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    pre,
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    pre {
+      margin: 0;
+      padding: 14px;
+      border-radius: 16px;
+      background: #2b2623;
+      color: #f8f4ed;
+      overflow: auto;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .steps {
+      margin: 0;
+      padding-left: 18px;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 760px) {
+      .columns {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <h1>Chapter 1 API Guide</h1>
+      <p>
+        학생들이 Postman 또는 curl로 바로 실습할 수 있도록 만든 간단한 API 안내 페이지입니다.
+        아래 예시 그대로 입력하면 `GET`, `POST`, `PUT`, `PATCH`, `DELETE` 흐름을 순서대로 연습할 수 있습니다.
+      </p>
+      <div class="hero-links">
+        <a href="/">메인 투두 페이지</a>
+        <a href="/api/todos" target="_blank" rel="noreferrer">현재 투두 JSON 보기</a>
+        <a href="/api/health" target="_blank" rel="noreferrer">헬스체크 보기</a>
+      </div>
+    </section>
+
+    <section class="info-grid">
+      <article class="info-box">
+        <strong>Base URL</strong>
+        <code>http://localhost:3000</code>
+      </article>
+      <article class="info-box">
+        <strong>Content-Type</strong>
+        <code>application/json</code>
+      </article>
+      <article class="info-box">
+        <strong>실습 순서 추천</strong>
+        <span>GET → POST → GET by ID → PUT → PATCH → DELETE</span>
+      </article>
+      <article class="info-box">
+        <strong>실시간 반영</strong>
+        <span>열려 있는 페이지는 SSE로 자동 새로고침 없이 반영됩니다.</span>
+      </article>
+    </section>
+
+    <section class="card">
+      <h2>실습 순서</h2>
+      <ol class="steps">
+        <li>`GET /api/todos`로 현재 목록을 확인합니다.</li>
+        <li>`POST /api/todos`로 새 할 일을 추가합니다.</li>
+        <li>응답으로 받은 `id`를 사용해 `GET /api/todos/:id`를 호출합니다.</li>
+        <li>`PUT /api/todos/:id`로 전체 필드를 수정합니다.</li>
+        <li>`PATCH /api/todos/:id`로 일부 필드만 수정합니다.</li>
+        <li>`DELETE /api/todos/:id`로 항목을 지웁니다.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <div class="endpoint">
+        <div class="method-line">
+          <span class="method get">GET</span>
+          <span class="path">/api/health</span>
+        </div>
+        <p class="hint">서버가 살아있는지 가장 먼저 확인합니다.</p>
+        <pre>curl http://localhost:3000/api/health</pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="method-line">
+          <span class="method get">GET</span>
+          <span class="path">/api/todos</span>
+        </div>
+        <p class="hint">현재 전체 할 일 목록을 조회합니다.</p>
+        <pre>curl http://localhost:3000/api/todos</pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="method-line">
+          <span class="method post">POST</span>
+          <span class="path">/api/todos</span>
+        </div>
+        <p class="hint">새 할 일을 만듭니다. Postman에서는 Body → raw → JSON으로 입력하면 됩니다.</p>
+        <div class="columns">
+          <pre>{
+  "title": "Postman으로 새 항목 만들기",
+  "note": "학생용 POST 실습",
+  "weather": "sunny",
+  "plannedHour": "10",
+  "plannedMinute": "30",
+  "checkedHour": "",
+  "checkedMinute": "",
+  "done": false
+}</pre>
+          <pre>curl -X POST http://localhost:3000/api/todos \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Postman으로 새 항목 만들기",
+    "note": "학생용 POST 실습",
+    "weather": "sunny",
+    "plannedHour": "10",
+    "plannedMinute": "30",
+    "checkedHour": "",
+    "checkedMinute": "",
+    "done": false
+  }'</pre>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="method-line">
+          <span class="method get">GET</span>
+          <span class="path">/api/todos/:id</span>
+        </div>
+        <p class="hint">POST 응답에서 받은 `id`를 넣어 단건 조회합니다.</p>
+        <pre>curl http://localhost:3000/api/todos/todo-12345</pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="method-line">
+          <span class="method put">PUT</span>
+          <span class="path">/api/todos/:id</span>
+        </div>
+        <p class="hint">전체 필드를 한 번에 바꿉니다. `title`은 필수입니다.</p>
+        <div class="columns">
+          <pre>{
+  "title": "수정된 할 일 제목",
+  "note": "PUT 전체 수정 예시",
+  "weather": "cloudy",
+  "plannedHour": "14",
+  "plannedMinute": "00",
+  "checkedHour": "14",
+  "checkedMinute": "20",
+  "done": true
+}</pre>
+          <pre>curl -X PUT http://localhost:3000/api/todos/todo-12345 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "수정된 할 일 제목",
+    "note": "PUT 전체 수정 예시",
+    "weather": "cloudy",
+    "plannedHour": "14",
+    "plannedMinute": "00",
+    "checkedHour": "14",
+    "checkedMinute": "20",
+    "done": true
+  }'</pre>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="method-line">
+          <span class="method patch">PATCH</span>
+          <span class="path">/api/todos/:id</span>
+        </div>
+        <p class="hint">일부 필드만 수정합니다. 완료 처리나 체크 시간 갱신 실습에 좋습니다.</p>
+        <div class="columns">
+          <pre>{
+  "done": true,
+  "checkedHour": "16",
+  "checkedMinute": "40"
+}</pre>
+          <pre>curl -X PATCH http://localhost:3000/api/todos/todo-12345 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "done": true,
+    "checkedHour": "16",
+    "checkedMinute": "40"
+  }'</pre>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="method-line">
+          <span class="method delete">DELETE</span>
+          <span class="path">/api/todos/:id</span>
+        </div>
+        <p class="hint">실습이 끝난 항목을 지웁니다. 성공 시 응답 코드는 `204 No Content`입니다.</p>
+        <pre>curl -X DELETE http://localhost:3000/api/todos/todo-12345</pre>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

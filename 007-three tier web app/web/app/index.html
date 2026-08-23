@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 3 Board</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-area">
+      <div class="brand-badge">C3</div>
+      <div>
+        <h1 id="siteTitle">DevForum Practice Board</h1>
+        <p>Chapter 3. Web Server / Backend / DB Server</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span class="status-chip">No Login Mode</span>
+      <span id="healthStatus" class="status-chip status-pending">Backend Checking</span>
+    </div>
+  </header>
+
+  <div class="page">
+    <aside class="sidebar">
+      <div class="side-card">
+        <h2>실습 구성</h2>
+        <ul>
+          <li>웹서버: nginx</li>
+          <li>백엔드: node + express</li>
+          <li>DB: mariadb</li>
+        </ul>
+      </div>
+      <div class="side-card">
+        <h2>접속 주소</h2>
+        <p id="apiBaseUrl" class="mono"></p>
+      </div>
+      <div class="side-card">
+        <h2>실습 포인트</h2>
+        <ul>
+          <li>비로그인 작성</li>
+          <li>백엔드 API 호출</li>
+          <li>DB 저장 확인</li>
+          <li>게시글 삭제</li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="content">
+      <section class="editor-card">
+        <div class="card-header">
+          <div>
+            <span class="eyebrow">CREATE POST</span>
+            <h2>새 게시글 작성</h2>
+          </div>
+          <span class="floating-tag">비가입 유저</span>
+        </div>
+
+        <form id="postForm" class="post-form">
+          <input id="titleInput" type="text" maxlength="120" placeholder="제목을 입력하세요" required>
+          <textarea id="contentInput" maxlength="2000" placeholder="내용을 입력하세요" required></textarea>
+          <div class="form-footer">
+            <p>작성자는 자동으로 <strong>비가입 유저</strong>로 저장됩니다.</p>
+            <button type="submit">게시글 올리기</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="feed-card">
+        <div class="feed-header">
+          <div>
+            <span class="eyebrow">POST LIST</span>
+            <h2>실습 게시글</h2>
+          </div>
+          <button id="refreshButton" class="secondary-button" type="button">새로 불러오기</button>
+        </div>
+        <div id="emptyState" class="empty-state" hidden>아직 게시글이 없습니다.</div>
+        <div id="postList" class="post-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/config.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

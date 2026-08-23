@@ -1,0 +1,41 @@
+[
+  {
+    "id": "todo-1",
+    "title": "Postman으로 GET /api/todos 호출하기",
+    "note": "응답 구조를 먼저 확인해 보세요.",
+    "weather": "sunny",
+    "plannedHour": "09",
+    "plannedMinute": "30",
+    "checkedHour": "",
+    "checkedMinute": "",
+    "done": false,
+    "createdAt": "2026-07-12T00:00:00.000Z",
+    "updatedAt": "2026-07-12T00:00:00.000Z"
+  },
+  {
+    "id": "todo-2",
+    "title": "새 할 일을 POST로 추가하기",
+    "note": "JSON body로 title 값을 보내세요.",
+    "weather": "cloudy",
+    "plannedHour": "11",
+    "plannedMinute": "00",
+    "checkedHour": "",
+    "checkedMinute": "",
+    "done": false,
+    "createdAt": "2026-07-12T00:00:00.000Z",
+    "updatedAt": "2026-07-12T00:00:00.000Z"
+  },
+  {
+    "id": "todo-3",
+    "title": "완료 여부를 PUT 또는 PATCH로 바꾸기",
+    "note": "done 필드를 true로 변경해 보세요.",
+    "weather": "rainy",
+    "plannedHour": "15",
+    "plannedMinute": "00",
+    "checkedHour": "15",
+    "checkedMinute": "20",
+    "done": true,
+    "createdAt": "2026-07-12T00:00:00.000Z",
+    "updatedAt": "2026-07-12T00:00:00.000Z"
+  }
+]

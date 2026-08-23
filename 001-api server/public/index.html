@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 1 - Todo API Practice</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="layout">
+    <section class="planner">
+      <header class="planner-header">
+        <div class="date-grid">
+          <div class="date-box">
+            <span class="label">월</span>
+            <span id="monthValue" class="value"></span>
+          </div>
+          <div class="date-box">
+            <span class="label">일</span>
+            <span id="dayValue" class="value"></span>
+          </div>
+          <div class="date-box">
+            <span class="label">요일</span>
+            <span id="weekdayValue" class="value"></span>
+          </div>
+        </div>
+        <div class="weather-strip">
+          <button class="weather-button is-active" data-weather="sunny" type="button">☀️</button>
+          <button class="weather-button" data-weather="cloudy" type="button">☁️</button>
+          <button class="weather-button" data-weather="rainy" type="button">☔</button>
+          <button class="weather-button" data-weather="snowy" type="button">☃️</button>
+        </div>
+      </header>
+
+      <div class="time-strip">
+        <div class="time-box">
+          <span class="title">해야할 시간</span>
+          <div class="time-values">
+            <span>시</span>
+            <span>분</span>
+          </div>
+        </div>
+        <div class="time-box">
+          <span class="title">체크 시간</span>
+          <div class="time-values">
+            <span>시</span>
+            <span>분</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="paper">
+        <div class="paper-title">
+          <p>오늘의 할일</p>
+          <span class="chapter-badge">Chapter 1</span>
+        </div>
+
+        <form id="todoForm" class="todo-form">
+          <input id="titleInput" name="title" type="text" maxlength="80" placeholder="할 일을 적어보세요" required>
+          <input id="noteInput" name="note" type="text" maxlength="120" placeholder="메모 또는 API 실습 포인트">
+          <div class="time-row">
+            <input id="plannedHourInput" name="plannedHour" type="text" maxlength="2" placeholder="09">
+            <span>:</span>
+            <input id="plannedMinuteInput" name="plannedMinute" type="text" maxlength="2" placeholder="30">
+            <button id="submitButton" type="submit">할 일 저장</button>
+          </div>
+        </form>
+
+        <ul id="todoList" class="todo-list"></ul>
+
+        <div class="stamp">API CRUD</div>
+      </section>
+    </section>
+
+    <aside class="sidebar">
+      <section class="panel">
+        <h2>Postman & API</h2>
+        <p class="panel-copy">이 페이지는 브라우저 UI와 같은 데이터를 `/api/todos`로 다룹니다.</p>
+        <p class="panel-copy">
+          학생용 요청 예시는 <a class="guide-link" href="/guide">API 가이드 페이지</a>에서 바로 볼 수 있습니다.
+        </p>
+        <div class="endpoint-list">
+          <code>GET /api/todos</code>
+          <code>POST /api/todos</code>
+          <code>PUT /api/todos/:id</code>
+          <code>PATCH /api/todos/:id</code>
+          <code>DELETE /api/todos/:id</code>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>선택한 항목 수정</h2>
+        <form id="editForm" class="edit-form">
+          <input id="editId" type="hidden">
+          <label>
+            제목
+            <input id="editTitle" type="text" maxlength="80">
+          </label>
+          <label>
+            메모
+            <input id="editNote" type="text" maxlength="120">
+          </label>
+          <div class="grid-two">
+            <label>
+              예정 시
+              <input id="editPlannedHour" type="text" maxlength="2">
+            </label>
+            <label>
+              예정 분
+              <input id="editPlannedMinute" type="text" maxlength="2">
+            </label>
+            <label>
+              체크 시
+              <input id="editCheckedHour" type="text" maxlength="2">
+            </label>
+            <label>
+              체크 분
+              <input id="editCheckedMinute" type="text" maxlength="2">
+            </label>
+          </div>
+          <label>
+            상태
+            <select id="editDone">
+              <option value="false">진행중</option>
+              <option value="true">완료</option>
+            </select>
+          </label>
+          <button type="submit">PUT으로 전체 수정</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>현재 선택</h2>
+        <pre id="selectedPreview" class="preview">할 일을 선택하면 여기 표시됩니다.</pre>
+      </section>
+    </aside>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+:root {
+  --ink: #25211f;
+  --paper: #fffdf7;
+  --line: #4f4a47;
+  --soft-line: rgba(79, 74, 71, 0.25);
+  --accent: #ef4444;
+  --accent-blue: #3b82f6;
+  --panel: #fff8ea;
+  --shadow: rgba(31, 24, 20, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Trebuchet MS", "Apple SD Gothic Neo", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(251, 191, 36, 0.28), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.18), transparent 20%),
+    linear-gradient(180deg, #f9f4e8, #f4efe7);
+}
+
+.layout {
+  width: min(1200px, calc(100% - 32px));
+  margin: 24px auto;
+  display: grid;
+  grid-template-columns: minmax(320px, 700px) minmax(280px, 420px);
+  gap: 24px;
+  align-items: start;
+}
+
+.planner {
+  border: 4px solid var(--line);
+  border-radius: 36px;
+  overflow: hidden;
+  background: var(--paper);
+  box-shadow: 0 24px 60px var(--shadow);
+}
+
+.planner-header,
+.time-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 3px solid var(--line);
+}
+
+.date-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.date-box,
+.weather-strip,
+.time-box {
+  min-height: 82px;
+  border-right: 3px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+}
+
+.date-box:last-child,
+.time-box:last-child,
+.weather-strip {
+  border-right: 0;
+}
+
+.date-box {
+  flex-direction: column;
+  font-weight: 700;
+}
+
+.label {
+  font-size: 14px;
+}
+
+.value {
+  font-size: 20px;
+}
+
+.weather-strip {
+  gap: 14px;
+}
+
+.weather-button {
+  border: 0;
+  background: transparent;
+  font-size: 34px;
+  cursor: pointer;
+  filter: grayscale(1);
+  opacity: 0.45;
+  transform: rotate(-4deg);
+}
+
+.weather-button.is-active {
+  filter: none;
+  opacity: 1;
+}
+
+.time-box {
+  justify-content: space-between;
+  padding-inline: 20px;
+}
+
+.time-box .title {
+  font-weight: 700;
+}
+
+.time-values {
+  display: flex;
+  gap: 20px;
+  font-weight: 700;
+}
+
+.paper {
+  min-height: 720px;
+  padding: 28px 26px 110px;
+  position: relative;
+  background:
+    linear-gradient(to bottom, transparent 0 80%, rgba(59, 130, 246, 0.18) 80%, rgba(59, 130, 246, 0.18) 80.5%, transparent 80.5%) bottom/100% 110px no-repeat;
+}
+
+.paper-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  font-family: "Comic Sans MS", "Apple SD Gothic Neo", cursive;
+}
+
+.paper-title p {
+  margin: 0;
+  font-size: 44px;
+  font-weight: 700;
+}
+
+.chapter-badge {
+  font-size: 14px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border: 2px dashed var(--line);
+  border-radius: 999px;
+}
+
+.todo-form,
+.edit-form {
+  display: grid;
+  gap: 12px;
+}
+
+.todo-form input,
+.edit-form input,
+.edit-form select {
+  width: 100%;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font: inherit;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.time-row {
+  display: grid;
+  grid-template-columns: 72px 20px 72px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.time-row span {
+  text-align: center;
+  font-weight: 700;
+}
+
+button[type="submit"] {
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: #fff2d8;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 12px 16px;
+}
+
+.todo-list {
+  list-style: none;
+  padding: 10px 0 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.todo-item {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 14px;
+  align-items: start;
+  padding: 12px 4px;
+  border-bottom: 2px dashed rgba(79, 74, 71, 0.18);
+}
+
+.todo-radio {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  margin-top: 4px;
+  position: relative;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.todo-item.done .todo-radio::after {
+  content: "✓";
+  position: absolute;
+  inset: -5px 0 0 2px;
+  color: var(--accent);
+  font-size: 28px;
+  font-weight: 700;
+  transform: rotate(-12deg);
+}
+
+.todo-radio:hover,
+.todo-radio:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.16);
+}
+
+.todo-main {
+  cursor: pointer;
+}
+
+.todo-main strong {
+  display: block;
+  font-size: 21px;
+  margin-bottom: 4px;
+}
+
+.todo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: rgba(37, 33, 31, 0.76);
+  font-size: 14px;
+}
+
+.todo-note {
+  margin-top: 6px;
+  color: rgba(37, 33, 31, 0.84);
+  font-size: 15px;
+}
+
+.todo-actions {
+  display: grid;
+  gap: 8px;
+  align-self: center;
+}
+
+.ghost-button {
+  border: 2px solid var(--line);
+  background: #fff;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ghost-button.danger {
+  color: #b91c1c;
+}
+
+.stamp {
+  position: absolute;
+  right: 28px;
+  bottom: 30px;
+  width: 132px;
+  height: 132px;
+  border: 6px solid var(--accent-blue);
+  color: var(--accent-blue);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 28px;
+  transform: rotate(-18deg);
+  opacity: 0.95;
+}
+
+.sidebar {
+  display: grid;
+  gap: 18px;
+}
+
+.panel {
+  background: rgba(255, 248, 234, 0.92);
+  border: 3px solid var(--line);
+  border-radius: 26px;
+  padding: 20px;
+  box-shadow: 0 18px 40px var(--shadow);
+}
+
+.panel h2 {
+  margin: 0 0 10px;
+  font-size: 26px;
+}
+
+.panel-copy {
+  margin: 0 0 14px;
+  line-height: 1.6;
+}
+
+.endpoint-list {
+  display: grid;
+  gap: 8px;
+}
+
+.endpoint-list code,
+.preview {
+  background: rgba(255, 255, 255, 0.75);
+  border: 2px dashed var(--soft-line);
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 14px;
+  overflow: auto;
+}
+
+.edit-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.grid-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.preview {
+  margin: 0;
+  min-height: 180px;
+  white-space: pre-wrap;
+}
+
+.guide-link {
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.guide-link:hover {
+  color: #1e3a8a;
+}
+
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .layout {
+    width: min(100% - 18px, 100%);
+    margin: 12px auto;
+  }
+
+  .planner-header,
+  .time-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .date-grid {
+    min-height: 92px;
+  }
+
+  .time-box {
+    border-top: 3px solid var(--line);
+  }
+
+  .paper {
+    padding: 18px 16px 100px;
+  }
+
+  .paper-title {
+    align-items: start;
+    gap: 10px;
+    flex-direction: column;
+  }
+
+  .paper-title p {
+    font-size: 34px;
+  }
+
+  .time-row {
+    grid-template-columns: 1fr 20px 1fr;
+  }
+
+  #submitButton {
+    grid-column: 1 / -1;
+  }
+
+  .todo-item {
+    grid-template-columns: 28px 1fr;
+  }
+
+  .todo-actions {
+    grid-column: 2;
+    grid-template-columns: 1fr;
+  }
+
+  .grid-two {
+    grid-template-columns: 1fr;
+  }
+
+  .stamp {
+    width: 110px;
+    height: 110px;
+    font-size: 22px;
+  }
+}
