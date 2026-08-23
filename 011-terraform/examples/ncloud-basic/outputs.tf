@@ -34,7 +34,6 @@ output "login_key_file" {
 }
 
 output "admin_password" {
-  description = "Decrypted server admin password. Use: terraform output -raw admin_password"
-  value       = data.ncloud_root_password.web.root_password
-  sensitive   = true
+  description = "Decrypted server admin password. This is visible for lab convenience only."
+  value       = nonsensitive(data.ncloud_root_password.web.root_password)
 }

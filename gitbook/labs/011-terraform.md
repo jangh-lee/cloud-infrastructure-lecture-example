@@ -129,11 +129,13 @@ terraform output public_ip
 terraform output http_url
 ```
 
-관리자 비밀번호는 sensitive output이라 일반 `terraform output` 화면에서는 숨겨집니다. 직접 확인할 때만 아래 명령을 사용합니다.
+관리자 비밀번호도 실습 편의를 위해 output에 보이도록 설정했습니다.
 
 ```bash
-terraform output -raw admin_password
+terraform output admin_password
 ```
+
+실무에서는 비밀번호를 output에 그대로 노출하지 않는 것이 맞지만, 강의 실습에서는 접속 흐름을 단순하게 만들기 위해 보이게 했습니다.
 
 브라우저 접속:
 
