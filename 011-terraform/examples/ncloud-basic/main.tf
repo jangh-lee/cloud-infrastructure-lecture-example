@@ -128,6 +128,10 @@ resource "ncloud_server" "web" {
 
 resource "ncloud_public_ip" "web" {
   server_instance_no = ncloud_server.web.id
+
+  lifecycle {
+    replace_triggered_by = [ncloud_server.web]
+  }
 }
 
 data "ncloud_root_password" "web" {

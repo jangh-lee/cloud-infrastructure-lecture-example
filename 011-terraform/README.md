@@ -251,7 +251,9 @@ curl -i http://localhost
 Init Script는 서버 최초 생성 시점에만 실행됩니다. 서버가 이미 만들어진 뒤 init script 내용을 수정했다면 기존 서버에는 자동 재실행되지 않습니다. 실습에서는 아래처럼 서버를 교체하거나 전체 삭제 후 다시 생성합니다.
 
 ```bash
-terraform apply -replace=ncloud_server.web
+terraform apply \
+  -replace=ncloud_server.web \
+  -replace=ncloud_public_ip.web
 ```
 
 또는:
@@ -259,6 +261,18 @@ terraform apply -replace=ncloud_server.web
 ```bash
 terraform destroy
 terraform apply
+```
+
+서버만 교체하면 기존 Public IP를 새 서버에 재할당하는 과정에서 아래 오류가 날 수 있습니다.
+
+```text
+Unassigned Authorized IP.
+```
+
+이 예제는 서버가 교체될 때 Public IP도 같이 교체되도록 `replace_triggered_by = [ncloud_server.web]`를 설정합니다. 이미 오류가 난 상태라면 아래 명령으로 Public IP 리소스만 다시 생성합니다.
+
+```bash
+terraform apply -replace=ncloud_public_ip.web
 ```
 
 ## 13. 상태 파일 이해
