@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/005-static-website/">
+        <link rel="canonical" href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/011-terraform/">
       
       
-        <link rel="prev" href="../004-load-balancer/">
+        <link rel="prev" href="../010-linux-commands/">
       
       
-        <link rel="next" href="../006-database-backup-recovery/">
+        <link rel="next" href="../../SUMMARY/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>005 Object Storage 정적 웹사이트 - 클라우드 인프라 실습</title>
+        <title>011 Terraform - 클라우드 인프라 실습</title>
       
     
     
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#005-object-storage" class="md-skip">
+        <a href="#011-terraform" class="md-skip">
           콘텐츠로 이동
         </a>
       
@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              005 Object Storage 정적 웹사이트
+              011 Terraform
             
           </span>
         </div>
@@ -536,37 +536,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    005 Object Storage 정적 웹사이트
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../005-static-website/" class="md-nav__link">
         
   
   
@@ -582,81 +555,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="목차">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      목차
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        목표
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        업로드 전 확인
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#naver-cloud-object-storage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Naver Cloud Object Storage 업로드
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        업로드 확인
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        정적 웹사이트 호스팅 확인
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -806,10 +704,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../011-terraform/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    011 Terraform
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -825,6 +750,191 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="목차">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      목차
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        목표
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        실습 폴더
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        생성 리소스
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-terraform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Terraform 설치 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 예제 폴더 이동
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 입력값 준비
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 초기화
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 포맷과 문법 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 생성 계획 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 생성
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. 결과 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. State 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. 삭제
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        주의사항
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        참고 문서
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -905,18 +1015,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        업로드 전 확인
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#naver-cloud-object-storage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Naver Cloud Object Storage 업로드
+        실습 폴더
       
     </span>
   </a>
@@ -927,7 +1026,117 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        업로드 확인
+        생성 리소스
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-terraform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Terraform 설치 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 예제 폴더 이동
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 입력값 준비
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 초기화
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 포맷과 문법 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 생성 계획 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 생성
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. 결과 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. State 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. 삭제
       
     </span>
   </a>
@@ -938,7 +1147,18 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        정적 웹사이트 호스팅 확인
+        주의사항
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        참고 문서
       
     </span>
   </a>
@@ -965,38 +1185,164 @@
   
 
 
-<h1 id="005-object-storage">005 Object Storage 정적 웹사이트<a class="headerlink" href="#005-object-storage" title="Permanent link">&para;</a></h1>
+<h1 id="011-terraform">011 Terraform<a class="headerlink" href="#011-terraform" title="Permanent link">&para;</a></h1>
 <h2 id="_1">목표<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>Object Storage 계열 서비스에 정적 웹사이트 파일을 업로드하고, 브라우저에서 웹 페이지가 열리는지 확인합니다.</p>
-<p>실습 폴더:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>005-static website
+<p>Terraform으로 Naver Cloud 리소스를 코드로 생성하고 삭제합니다.</p>
+<p>CLI 실습에서는 명령을 하나씩 실행했습니다. Terraform 실습에서는 원하는 인프라 상태를 <code>.tf</code> 파일로 선언하고, Terraform이 생성 순서와 삭제 순서를 계산하게 합니다.</p>
+<h2 id="_2">실습 폴더<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>011-terraform/examples/ncloud-basic
 </code></pre></div>
-<h2 id="_2">업로드 전 확인<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ls<span class="w"> </span><span class="s2">"005-static website"</span>
+<h2 id="_3">생성 리소스<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>리소스</th>
+<th>이름</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VPC</td>
+<td><code>vpc-lab11</code></td>
+</tr>
+<tr>
+<td>Public Subnet</td>
+<td><code>sub-lab11-pub-kr1</code></td>
+</tr>
+<tr>
+<td>Private Subnet</td>
+<td><code>sub-lab11-pri-kr1</code></td>
+</tr>
+<tr>
+<td>ACG</td>
+<td><code>lab11-acg</code></td>
+</tr>
+<tr>
+<td>Login Key</td>
+<td><code>key-lab11</code></td>
+</tr>
+<tr>
+<td>Init Script</td>
+<td><code>init-lab11-nginx</code></td>
+</tr>
+<tr>
+<td>Server</td>
+<td><code>svr-lab11-web-kr1</code></td>
+</tr>
+</tbody>
+</table>
+<p>서버는 시간 요금제로 생성합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="na">fee_system_type_code</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"MTRAT"</span>
 </code></pre></div>
-<p>정적 웹사이트는 서버 코드 없이 HTML, CSS, JavaScript, 이미지, 영상 파일만으로 동작해야 합니다.</p>
-<h2 id="naver-cloud-object-storage">Naver Cloud Object Storage 업로드<a class="headerlink" href="#naver-cloud-object-storage" title="Permanent link">&para;</a></h2>
-<p>폴더 이름에 공백이 있으므로 경로 전체를 따옴표로 감쌉니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>s3<span class="w"> </span>sync<span class="w"> </span><span class="s2">"005-static website/"</span><span class="w"> </span>s3://YOUR_BUCKET_NAME/
+<h2 id="1-terraform">1. Terraform 설치 확인<a class="headerlink" href="#1-terraform" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>terraform<span class="w"> </span>version
 </code></pre></div>
-<p>예시:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>s3<span class="w"> </span>sync<span class="w"> </span><span class="s2">"005-static website/"</span><span class="w"> </span>s3://lab-bucket-james-260816/
+<p>Ubuntu에서 설치:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>wget<span class="w"> </span>gpg<span class="w"> </span>unzip
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>wget<span class="w"> </span>-O-<span class="w"> </span>https://apt.releases.hashicorp.com/gpg<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span>-o<span class="w"> </span>/usr/share/keyrings/hashicorp-archive-keyring.gpg
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com </span><span class="k">$(</span>.<span class="w"> </span>/etc/os-release<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$VERSION_CODENAME</span><span class="s2">"</span><span class="k">)</span><span class="s2"> main"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/hashicorp.list
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>terraform
 </code></pre></div>
-<h2 id="_3">업로드 확인<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span>s3<span class="w"> </span>ls<span class="w"> </span>s3://YOUR_BUCKET_NAME/
+<p>macOS:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>brew<span class="w"> </span>tap<span class="w"> </span>hashicorp/tap
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>brew<span class="w"> </span>install<span class="w"> </span>hashicorp/tap/terraform
 </code></pre></div>
-<h2 id="_4">정적 웹사이트 호스팅 확인<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p>Object Storage에서 정적 웹사이트 호스팅을 켠 뒤, index document를 아래처럼 설정합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Index document: index.html
+<h2 id="2">2. 예제 폴더 이동<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"011-terraform/examples/ncloud-basic"</span>
 </code></pre></div>
-<p>단순히 <code>index.html</code> 객체 URL을 직접 여는 것과 정적 웹사이트 호스팅 endpoint를 여는 것은 다릅니다.</p>
+<h2 id="3">3. 입력값 준비<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>cp<span class="w"> </span>terraform.tfvars.example<span class="w"> </span>terraform.tfvars
+</code></pre></div>
+<p><code>terraform.tfvars</code>를 수정합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="na">access_key</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">"YOUR_ACCESS_KEY"</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="na">secret_key</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">"YOUR_SECRET_KEY"</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="na">my_public_ip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"YOUR_PUBLIC_IP/32"</span>
+</code></pre></div>
+<p><code>terraform.tfvars</code>, <code>terraform.tfstate</code>, <code>.pem</code> 파일은 Git에 올리지 않습니다.</p>
+<h2 id="4">4. 초기화<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>terraform<span class="w"> </span>init
+</code></pre></div>
+<p>Provider 플러그인을 다운로드하고 <code>.terraform</code> 디렉터리를 만듭니다.</p>
+<h2 id="5">5. 포맷과 문법 확인<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>terraform<span class="w"> </span>fmt
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>terraform<span class="w"> </span>validate
+</code></pre></div>
+<h2 id="6">6. 생성 계획 확인<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>terraform<span class="w"> </span>plan
+</code></pre></div>
+<p>주요 표시:</p>
+<table>
+<thead>
+<tr>
+<th>표시</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>+ create</code></td>
+<td>새로 생성</td>
+</tr>
+<tr>
+<td><code>~ update</code></td>
+<td>변경</td>
+</tr>
+<tr>
+<td><code>- destroy</code></td>
+<td>삭제</td>
+</tr>
+<tr>
+<td><code>-/+ replace</code></td>
+<td>삭제 후 재생성</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7">7. 생성<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>terraform<span class="w"> </span>apply
+</code></pre></div>
+<p>확인 메시지가 나오면 <code>yes</code>를 입력합니다.</p>
+<p>자동 승인:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>terraform<span class="w"> </span>apply<span class="w"> </span>-auto-approve
+</code></pre></div>
+<h2 id="8">8. 결과 확인<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>terraform<span class="w"> </span>output
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>terraform<span class="w"> </span>output<span class="w"> </span>server_instance_no
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>terraform<span class="w"> </span>output<span class="w"> </span>public_ip
+</code></pre></div>
+<p>브라우저 접속:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>http://PUBLIC_IP/
+</code></pre></div>
+<h2 id="9-state">9. State 확인<a class="headerlink" href="#9-state" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>terraform<span class="w"> </span>state<span class="w"> </span>list
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>ls<span class="w"> </span>-la
+</code></pre></div>
+<p><code>terraform.tfstate</code>는 Terraform이 관리 중인 리소스 상태를 기록합니다. 실무에서는 Object Storage 같은 원격 backend와 state lock을 사용합니다.</p>
+<h2 id="10">10. 삭제<a class="headerlink" href="#10" title="Permanent link">&para;</a></h2>
+<p>실습이 끝나면 반드시 삭제합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>terraform<span class="w"> </span>destroy
+</code></pre></div>
+<p>자동 승인:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>terraform<span class="w"> </span>destroy<span class="w"> </span>-auto-approve
+</code></pre></div>
+<p>삭제 후 확인:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>terraform<span class="w"> </span>state<span class="w"> </span>list
+</code></pre></div>
+<p>아무것도 출력되지 않으면 Terraform이 관리하던 리소스가 모두 삭제된 상태입니다.</p>
+<h2 id="_4">주의사항<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <ul>
-<li>객체 URL: 특정 객체 하나를 직접 다운로드/조회</li>
-<li>정적 웹사이트 endpoint: <code>/</code> 요청을 <code>index.html</code>로 매핑하고 웹사이트처럼 응답</li>
+<li>인증키를 <code>.tf</code> 파일에 직접 쓰지 않습니다.</li>
+<li><code>terraform.tfvars</code>는 Git에 올리지 않습니다.</li>
+<li>운영 환경에서는 <code>terraform plan</code>을 먼저 확인합니다.</li>
+<li><code>destroy</code>는 실제 리소스를 삭제하므로 실습 리소스인지 반드시 확인합니다.</li>
+<li>콘솔에서 수동 변경하면 Terraform state와 실제 리소스가 어긋날 수 있습니다.</li>
+</ul>
+<h2 id="_5">참고 문서<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Ncloud Terraform Provider: <a href="https://registry.terraform.io/providers/NaverCloudPlatform/ncloud/latest/docs">https://registry.terraform.io/providers/NaverCloudPlatform/ncloud/latest/docs</a></li>
+<li>Ncloud Provider GitHub: <a href="https://github.com/NaverCloudPlatform/terraform-provider-ncloud">https://github.com/NaverCloudPlatform/terraform-provider-ncloud</a></li>
+<li>Terraform Provider 설정: <a href="https://developer.hashicorp.com/terraform/language/providers">https://developer.hashicorp.com/terraform/language/providers</a></li>
 </ul>
 
 
