@@ -46,6 +46,7 @@ Swap:          2.0Gi          0B       2.0Gi
 | --- | --- | --- |
 | `used` | 사용 중인 메모리 | 이 값만 보고 메모리 부족이라고 판단하지 않습니다. |
 | `free` | 완전히 비어 있는 메모리 | Linux는 남는 메모리를 캐시로 쓰기 때문에 낮을 수 있습니다. |
+| `shared` | tmpfs, shared memory 등 여러 프로세스가 공유하는 메모리 | `/dev/shm`, 컨테이너, DB shared buffer 사용과 함께 봅니다. |
 | `buff/cache` | 커널이 캐시로 쓰는 메모리 | 필요하면 애플리케이션에 반환될 수 있습니다. |
 | `available` | 새 프로세스가 사용할 수 있는 예상 메모리 | 실제 판단은 주로 이 값을 봅니다. |
 | `Swap` | 디스크를 메모리처럼 임시 사용하는 영역 | 계속 증가하면 메모리 부족 가능성이 큽니다. |
@@ -54,7 +55,14 @@ Swap:          2.0Gi          0B       2.0Gi
 watch -n 1 free -h
 ```
 
-`available`이 충분하면 `used`가 높아도 정상일 수 있습니다. 반대로 `available`이 낮고 Swap 사용량이 계속 늘면 서버가 느려지거나 애플리케이션 응답이 지연될 수 있습니다.
+`available`이 충분하면 `used`가 높아도 정상일 수 있습니다. `shared`가 높으면 tmpfs나 shared memory를 많이 쓰는 프로세스가 있는지 확인합니다. 반대로 `available`이 낮고 Swap 사용량이 계속 늘면 서버가 느려지거나 애플리케이션 응답이 지연될 수 있습니다.
+
+shared 메모리가 커 보이면 tmpfs 사용량도 같이 확인합니다.
+
+```bash
+df -h /dev/shm
+mount | grep tmpfs
+```
 
 ## 3. 파일과 디렉터리
 
