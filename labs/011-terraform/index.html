@@ -1312,9 +1312,10 @@
 <a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>terraform<span class="w"> </span>output<span class="w"> </span>public_ip
 <a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>terraform<span class="w"> </span>output<span class="w"> </span>http_url
 </code></pre></div>
-<p>관리자 비밀번호는 sensitive output이라 일반 <code>terraform output</code> 화면에서는 숨겨집니다. 직접 확인할 때만 아래 명령을 사용합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>admin_password
+<p>관리자 비밀번호도 실습 편의를 위해 output에 보이도록 설정했습니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>terraform<span class="w"> </span>output<span class="w"> </span>admin_password
 </code></pre></div>
+<p>실무에서는 비밀번호를 output에 그대로 노출하지 않는 것이 맞지만, 강의 실습에서는 접속 흐름을 단순하게 만들기 위해 보이게 했습니다.</p>
 <p>브라우저 접속:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>http://PUBLIC_IP/
 </code></pre></div>
