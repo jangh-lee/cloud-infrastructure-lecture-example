@@ -27,7 +27,7 @@
     
     
       
-        <title>GitHub Pages 배포 - 단국대 클라우드 인프라 실습</title>
+        <title>GitHub Pages 배포 - 클라우드 인프라 실습</title>
       
     
     
@@ -84,7 +84,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="상단/헤더">
-    <a href="../.." title="단국대 클라우드 인프라 실습" class="md-header__button md-logo" aria-label="단국대 클라우드 인프라 실습" data-md-component="logo">
+    <a href="../.." title="클라우드 인프라 실습" class="md-header__button md-logo" aria-label="클라우드 인프라 실습" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -98,7 +98,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            단국대 클라우드 인프라 실습
+            클라우드 인프라 실습
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -199,13 +199,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="네비게이션" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="단국대 클라우드 인프라 실습" class="md-nav__button md-logo" aria-label="단국대 클라우드 인프라 실습" data-md-component="logo">
+    <a href="../.." title="클라우드 인프라 실습" class="md-nav__button md-logo" aria-label="클라우드 인프라 실습" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    단국대 클라우드 인프라 실습
+    클라우드 인프라 실습
   </label>
   
     <div class="md-nav__source">
@@ -940,7 +940,7 @@
 <h1 id="github-pages">GitHub Pages 배포<a class="headerlink" href="#github-pages" title="Permanent link">&para;</a></h1>
 <h2 id="_1">목표<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <p>GitBook 유료 플랜 없이 GitHub Pages에서 강의 교안을 무료로 공개합니다.</p>
-<p>이 저장소는 <code>gitbook/dankook-university</code> 폴더를 문서 원본으로 사용하고, GitHub Actions가 MkDocs Material 정적 사이트로 빌드합니다.</p>
+<p>이 저장소는 <code>gitbook</code> 폴더를 문서 원본으로 사용하고, GitHub Actions가 MkDocs Material 정적 사이트로 빌드합니다.</p>
 <h2 id="_2">배포 흐름<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>main 브랜치 push
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>→ GitHub Actions 실행
@@ -972,12 +972,12 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mkdocs<span class="w"> </span>build<span class="w"> </span>--strict
 </code></pre></div>
 <h2 id="_4">교안 수정 흐름<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p>단국대 교안은 아래 폴더에서 수정합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>gitbook/dankook-university
+<p>교안은 아래 폴더에서 수정합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>gitbook
 </code></pre></div>
 <p>수정 후 push하면 자동 배포됩니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>git<span class="w"> </span>status
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>git<span class="w"> </span>add<span class="w"> </span>gitbook/dankook-university<span class="w"> </span>mkdocs.yml<span class="w"> </span>requirements-docs.txt<span class="w"> </span>.github/workflows/deploy-docs.yml
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>git<span class="w"> </span>add<span class="w"> </span>gitbook<span class="w"> </span>mkdocs.yml<span class="w"> </span>requirements-docs.txt<span class="w"> </span>.github/workflows/deploy-docs.yml
 <a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Update lecture docs"</span>
 <a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>git<span class="w"> </span>push
 </code></pre></div>

@@ -27,7 +27,7 @@
     
     
       
-        <title>010 Linux Commands - 단국대 클라우드 인프라 실습</title>
+        <title>010 Linux Commands - 클라우드 인프라 실습</title>
       
     
     
@@ -84,7 +84,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="상단/헤더">
-    <a href="../.." title="단국대 클라우드 인프라 실습" class="md-header__button md-logo" aria-label="단국대 클라우드 인프라 실습" data-md-component="logo">
+    <a href="../.." title="클라우드 인프라 실습" class="md-header__button md-logo" aria-label="클라우드 인프라 실습" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -98,7 +98,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            단국대 클라우드 인프라 실습
+            클라우드 인프라 실습
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -199,13 +199,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="네비게이션" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="단국대 클라우드 인프라 실습" class="md-nav__button md-logo" aria-label="단국대 클라우드 인프라 실습" data-md-component="logo">
+    <a href="../.." title="클라우드 인프라 실습" class="md-nav__button md-logo" aria-label="클라우드 인프라 실습" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    단국대 클라우드 인프라 실습
+    클라우드 인프라 실습
   </label>
   
     <div class="md-nav__source">
@@ -1261,140 +1261,378 @@
 </tr>
 </tbody>
 </table>
+<p><code>free -h</code> 예시:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>               total        used        free      shared  buff/cache   available
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Mem:           3.8Gi       1.1Gi       450Mi        30Mi       2.2Gi       2.4Gi
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Swap:          2.0Gi          0B       2.0Gi
+</code></pre></div>
+<p>읽는 방법:</p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>의미</th>
+<th>운영에서 보는 법</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>used</code></td>
+<td>사용 중인 메모리</td>
+<td>이 값만 보고 메모리 부족이라고 판단하지 않습니다.</td>
+</tr>
+<tr>
+<td><code>free</code></td>
+<td>완전히 비어 있는 메모리</td>
+<td>Linux는 남는 메모리를 캐시로 쓰기 때문에 낮을 수 있습니다.</td>
+</tr>
+<tr>
+<td><code>buff/cache</code></td>
+<td>커널이 캐시로 쓰는 메모리</td>
+<td>필요하면 애플리케이션에 반환될 수 있습니다.</td>
+</tr>
+<tr>
+<td><code>available</code></td>
+<td>새 프로세스가 사용할 수 있는 예상 메모리</td>
+<td>실제 판단은 주로 이 값을 봅니다.</td>
+</tr>
+<tr>
+<td><code>Swap</code></td>
+<td>디스크를 메모리처럼 임시 사용하는 영역</td>
+<td>계속 증가하면 메모리 부족 가능성이 큽니다.</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>watch<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="w"> </span>free<span class="w"> </span>-h
+</code></pre></div>
+<p><code>available</code>이 충분하면 <code>used</code>가 높아도 정상일 수 있습니다. 반대로 <code>available</code>이 낮고 Swap 사용량이 계속 늘면 서버가 느려지거나 애플리케이션 응답이 지연될 수 있습니다.</p>
 <h2 id="3">3. 파일과 디렉터리<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>ls<span class="w"> </span>-la
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">cd</span><span class="w"> </span>/var/log
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">cd</span><span class="w"> </span>~
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>cat<span class="w"> </span>/etc/os-release
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>less<span class="w"> </span>/var/log/syslog
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span><span class="w"> </span>/var/log/syslog
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>tail<span class="w"> </span>-f<span class="w"> </span>/var/log/syslog
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/lab/logs
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>touch<span class="w"> </span>~/lab/test.txt
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>cp<span class="w"> </span>~/lab/test.txt<span class="w"> </span>~/lab/test-copy.txt
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>mv<span class="w"> </span>~/lab/test-copy.txt<span class="w"> </span>~/lab/logs/
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>rm<span class="w"> </span>~/lab/test.txt
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>ls<span class="w"> </span>-la
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">cd</span><span class="w"> </span>/var/log
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">cd</span><span class="w"> </span>~
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>cat<span class="w"> </span>/etc/os-release
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>less<span class="w"> </span>/var/log/syslog
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span><span class="w"> </span>/var/log/syslog
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>tail<span class="w"> </span>-f<span class="w"> </span>/var/log/syslog
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/lab/logs
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>touch<span class="w"> </span>~/lab/test.txt
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>cp<span class="w"> </span>~/lab/test.txt<span class="w"> </span>~/lab/test-copy.txt
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>mv<span class="w"> </span>~/lab/test-copy.txt<span class="w"> </span>~/lab/logs/
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>rm<span class="w"> </span>~/lab/test.txt
 </code></pre></div>
 <p>운영 서버에서 <code>rm -rf</code>는 삭제 전 경로를 반드시 확인합니다.</p>
 <h2 id="4">4. 검색<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>find<span class="w"> </span>/etc<span class="w"> </span>-name<span class="w"> </span><span class="s2">"*.conf"</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>find<span class="w"> </span>.<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s2">"*.log"</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>grep<span class="w"> </span>-n<span class="w"> </span><span class="s2">"error"</span><span class="w"> </span>/var/log/syslog
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>grep<span class="w"> </span>-Rni<span class="w"> </span><span class="s2">"listen"</span><span class="w"> </span>/etc/nginx<span class="w"> </span><span class="m">2</span>&gt;/dev/null
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>find<span class="w"> </span>/var/log<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-mtime<span class="w"> </span>-1<span class="w"> </span><span class="m">2</span>&gt;/dev/null
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>find<span class="w"> </span>/etc<span class="w"> </span>-name<span class="w"> </span><span class="s2">"*.conf"</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>find<span class="w"> </span>.<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s2">"*.log"</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>grep<span class="w"> </span>-n<span class="w"> </span><span class="s2">"error"</span><span class="w"> </span>/var/log/syslog
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>grep<span class="w"> </span>-Rni<span class="w"> </span><span class="s2">"listen"</span><span class="w"> </span>/etc/nginx<span class="w"> </span><span class="m">2</span>&gt;/dev/null
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>find<span class="w"> </span>/var/log<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-mtime<span class="w"> </span>-1<span class="w"> </span><span class="m">2</span>&gt;/dev/null
 </code></pre></div>
 <h2 id="5">5. 권한<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>ls<span class="w"> </span>-l
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>sudo<span class="w"> </span>chown<span class="w"> </span>ubuntu:ubuntu<span class="w"> </span>file.txt
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>chmod<span class="w"> </span>+x<span class="w"> </span>script.sh
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>chmod<span class="w"> </span><span class="m">400</span><span class="w"> </span>key.pem
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>sudo<span class="w"> </span>-l
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>ls<span class="w"> </span>-l
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>sudo<span class="w"> </span>chown<span class="w"> </span>ubuntu:ubuntu<span class="w"> </span>file.txt
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>chmod<span class="w"> </span>+x<span class="w"> </span>script.sh
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>chmod<span class="w"> </span><span class="m">400</span><span class="w"> </span>key.pem
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>sudo<span class="w"> </span>-l
 </code></pre></div>
 <h2 id="6">6. 패키지<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>git<span class="w"> </span>vim<span class="w"> </span>htop<span class="w"> </span>net-tools
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>dpkg<span class="w"> </span>-l<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>nginx
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>apt-cache<span class="w"> </span>policy<span class="w"> </span>nginx
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>git<span class="w"> </span>vim<span class="w"> </span>htop<span class="w"> </span>net-tools
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>dpkg<span class="w"> </span>-l<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>nginx
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>apt-cache<span class="w"> </span>policy<span class="w"> </span>nginx
 </code></pre></div>
 <h2 id="7">7. 프로세스<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>ps<span class="w"> </span>aux
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>ps<span class="w"> </span>aux<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>nginx
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>top
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>htop
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>sudo<span class="w"> </span><span class="nb">kill</span><span class="w"> </span>PID
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>sudo<span class="w"> </span><span class="nb">kill</span><span class="w"> </span>-9<span class="w"> </span>PID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>ps<span class="w"> </span>aux
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>ps<span class="w"> </span>aux<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>nginx
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>ps<span class="w"> </span>aux<span class="w"> </span>--sort<span class="o">=</span>-%mem<span class="w"> </span><span class="p">|</span><span class="w"> </span>head
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>ps<span class="w"> </span>aux<span class="w"> </span>--sort<span class="o">=</span>-%cpu<span class="w"> </span><span class="p">|</span><span class="w"> </span>head
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>top
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>htop
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>sudo<span class="w"> </span><span class="nb">kill</span><span class="w"> </span>PID
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>sudo<span class="w"> </span><span class="nb">kill</span><span class="w"> </span>-9<span class="w"> </span>PID
 </code></pre></div>
+<p><code>ps aux</code>에서 자주 보는 항목:</p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PID</code></td>
+<td>프로세스 ID</td>
+</tr>
+<tr>
+<td><code>%CPU</code></td>
+<td>CPU 사용률</td>
+</tr>
+<tr>
+<td><code>%MEM</code></td>
+<td>전체 메모리 대비 사용 비율</td>
+</tr>
+<tr>
+<td><code>VSZ</code></td>
+<td>가상 메모리 크기</td>
+</tr>
+<tr>
+<td><code>RSS</code></td>
+<td>실제 RAM 사용량</td>
+</tr>
+<tr>
+<td><code>STAT</code></td>
+<td>프로세스 상태</td>
+</tr>
+<tr>
+<td><code>COMMAND</code></td>
+<td>실행 명령</td>
+</tr>
+</tbody>
+</table>
+<p><code>top</code>에서 자주 보는 항목:</p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>load average</code></td>
+<td>1분, 5분, 15분 평균 부하</td>
+</tr>
+<tr>
+<td><code>%Cpu(s) us</code></td>
+<td>사용자 프로세스 CPU 사용률</td>
+</tr>
+<tr>
+<td><code>%Cpu(s) sy</code></td>
+<td>커널 CPU 사용률</td>
+</tr>
+<tr>
+<td><code>%Cpu(s) id</code></td>
+<td>CPU idle 비율</td>
+</tr>
+<tr>
+<td><code>%Cpu(s) wa</code></td>
+<td>I/O wait</td>
+</tr>
+<tr>
+<td><code>MiB Mem</code></td>
+<td>메모리 상태</td>
+</tr>
+<tr>
+<td><code>MiB Swap</code></td>
+<td>Swap 상태</td>
+</tr>
+</tbody>
+</table>
+<p><code>top</code> 키:</p>
+<table>
+<thead>
+<tr>
+<th>키</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>P</code></td>
+<td>CPU 기준 정렬</td>
+</tr>
+<tr>
+<td><code>M</code></td>
+<td>메모리 기준 정렬</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>CPU 코어별 표시</td>
+</tr>
+<tr>
+<td><code>k</code></td>
+<td>프로세스 종료</td>
+</tr>
+<tr>
+<td><code>q</code></td>
+<td>종료</td>
+</tr>
+</tbody>
+</table>
+<p><code>htop</code>은 <code>top</code>보다 초보자가 보기 쉽습니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>htop
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>htop
+</code></pre></div>
+<p><code>htop</code>에서 보는 것:</p>
+<table>
+<thead>
+<tr>
+<th>화면 요소</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CPU</code> 막대</td>
+<td>코어별 CPU 사용률</td>
+</tr>
+<tr>
+<td><code>Mem</code> 막대</td>
+<td>RAM 사용량</td>
+</tr>
+<tr>
+<td><code>Swp</code> 막대</td>
+<td>Swap 사용량</td>
+</tr>
+<tr>
+<td><code>Load average</code></td>
+<td>1분, 5분, 15분 평균 부하</td>
+</tr>
+<tr>
+<td><code>%CPU</code></td>
+<td>프로세스별 CPU 사용률</td>
+</tr>
+<tr>
+<td><code>%MEM</code></td>
+<td>프로세스별 메모리 사용률</td>
+</tr>
+<tr>
+<td><code>RES</code></td>
+<td>실제 RAM 사용량</td>
+</tr>
+<tr>
+<td><code>Command</code></td>
+<td>실행된 명령</td>
+</tr>
+</tbody>
+</table>
+<p><code>htop</code> 키:</p>
+<table>
+<thead>
+<tr>
+<th>키</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>F3</code></td>
+<td>검색</td>
+</tr>
+<tr>
+<td><code>F4</code></td>
+<td>필터</td>
+</tr>
+<tr>
+<td><code>F5</code></td>
+<td>트리 보기</td>
+</tr>
+<tr>
+<td><code>F6</code></td>
+<td>정렬</td>
+</tr>
+<tr>
+<td><code>F9</code></td>
+<td>종료 신호</td>
+</tr>
+<tr>
+<td><code>F10</code></td>
+<td>htop 종료</td>
+</tr>
+</tbody>
+</table>
 <p><code>kill -9</code>는 강제 종료이므로 마지막 수단으로 사용합니다.</p>
 <h2 id="8-systemd">8. systemd 서비스<a class="headerlink" href="#8-systemd" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>systemctl<span class="w"> </span>status<span class="w"> </span>nginx
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>nginx
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>nginx
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nginx
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>nginx
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>disable<span class="w"> </span>nginx
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>nginx
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>nginx<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span>
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>nginx<span class="w"> </span>-f
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>systemctl<span class="w"> </span>status<span class="w"> </span>nginx
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>nginx
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>nginx
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nginx
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>nginx
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>disable<span class="w"> </span>nginx
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>nginx
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>nginx<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>nginx<span class="w"> </span>-f
 </code></pre></div>
 <h2 id="9">9. 네트워크<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>ip<span class="w"> </span>addr
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>ip<span class="w"> </span>-br<span class="w"> </span>addr
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>ip<span class="w"> </span>route
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>resolvectl<span class="w"> </span>status
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>cat<span class="w"> </span>/etc/resolv.conf
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>ping<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="m">8</span>.8.8.8
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>ping<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="w"> </span>google.com
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>ip<span class="w"> </span>addr
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>ip<span class="w"> </span>-br<span class="w"> </span>addr
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>ip<span class="w"> </span>route
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>resolvectl<span class="w"> </span>status
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>cat<span class="w"> </span>/etc/resolv.conf
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>ping<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="m">8</span>.8.8.8
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>ping<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="w"> </span>google.com
 </code></pre></div>
 <p>IP ping은 되는데 도메인 ping이 안 되면 DNS 문제일 가능성이 큽니다.</p>
 <h2 id="10">10. 포트 확인<a class="headerlink" href="#10" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>ss<span class="w"> </span>-tulpen
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>ss<span class="w"> </span>-tulpen<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':80'</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>ss<span class="w"> </span>-tulpen<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':22'</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://localhost
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://localhost/healthz
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>nc<span class="w"> </span>-vz<span class="w"> </span>SERVER_IP<span class="w"> </span><span class="m">80</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>nc<span class="w"> </span>-vz<span class="w"> </span>SERVER_IP<span class="w"> </span><span class="m">3306</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>ss<span class="w"> </span>-tulpen
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>ss<span class="w"> </span>-tulpen<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':80'</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>ss<span class="w"> </span>-tulpen<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':22'</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://localhost
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://localhost/healthz
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>nc<span class="w"> </span>-vz<span class="w"> </span>SERVER_IP<span class="w"> </span><span class="m">80</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>nc<span class="w"> </span>-vz<span class="w"> </span>SERVER_IP<span class="w"> </span><span class="m">3306</span>
 </code></pre></div>
 <p><code>nc</code>가 없다면 설치합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>netcat-openbsd
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>netcat-openbsd
 </code></pre></div>
 <h2 id="11">11. 방화벽<a class="headerlink" href="#11" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>status<span class="w"> </span>verbose
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">22</span>/tcp
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">80</span>/tcp
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>status<span class="w"> </span>verbose
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">22</span>/tcp
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">80</span>/tcp
 </code></pre></div>
 <p>클라우드에서는 OS 방화벽뿐 아니라 ACG, Security Group, Network ACL도 함께 확인합니다.</p>
 <h2 id="12">12. 디스크<a class="headerlink" href="#12" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>df<span class="w"> </span>-h
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>du<span class="w"> </span>-sh<span class="w"> </span>/var/log
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>du<span class="w"> </span>-h<span class="w"> </span>--max-depth<span class="o">=</span><span class="m">1</span><span class="w"> </span>/var<span class="w"> </span><span class="m">2</span>&gt;/dev/null
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>lsblk
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>mount
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>findmnt
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>df<span class="w"> </span>-h
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>du<span class="w"> </span>-sh<span class="w"> </span>/var/log
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>du<span class="w"> </span>-h<span class="w"> </span>--max-depth<span class="o">=</span><span class="m">1</span><span class="w"> </span>/var<span class="w"> </span><span class="m">2</span>&gt;/dev/null
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>lsblk
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>mount
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>findmnt
 </code></pre></div>
 <p>디스크가 꽉 차면 <code>/var/log</code>, 애플리케이션 업로드 디렉터리, Docker 이미지와 로그부터 확인합니다.</p>
 <h2 id="13">13. 로그<a class="headerlink" href="#13" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>journalctl<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>journalctl<span class="w"> </span>-f
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>journalctl<span class="w"> </span>-b
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>/var/log/auth.log
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>journalctl<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>journalctl<span class="w"> </span>-f
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>journalctl<span class="w"> </span>-b
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>/var/log/auth.log
 </code></pre></div>
 <p>Ubuntu 버전에 따라 <code>/var/log/syslog</code>가 없을 수 있습니다. 이 경우 <code>journalctl</code>을 사용합니다.</p>
 <h2 id="14">14. 압축과 전송<a class="headerlink" href="#14" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>tar<span class="w"> </span>-czf<span class="w"> </span>logs.tar.gz<span class="w"> </span>/var/log
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>tar<span class="w"> </span>-xzf<span class="w"> </span>logs.tar.gz
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>scp<span class="w"> </span>-i<span class="w"> </span>key.pem<span class="w"> </span>local-file.txt<span class="w"> </span>ubuntu@SERVER_IP:/home/ubuntu/
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>scp<span class="w"> </span>-i<span class="w"> </span>key.pem<span class="w"> </span>ubuntu@SERVER_IP:/home/ubuntu/logs.tar.gz<span class="w"> </span>.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>tar<span class="w"> </span>-czf<span class="w"> </span>logs.tar.gz<span class="w"> </span>/var/log
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>tar<span class="w"> </span>-xzf<span class="w"> </span>logs.tar.gz
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>scp<span class="w"> </span>-i<span class="w"> </span>key.pem<span class="w"> </span>local-file.txt<span class="w"> </span>ubuntu@SERVER_IP:/home/ubuntu/
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>scp<span class="w"> </span>-i<span class="w"> </span>key.pem<span class="w"> </span>ubuntu@SERVER_IP:/home/ubuntu/logs.tar.gz<span class="w"> </span>.
 </code></pre></div>
 <h2 id="15">15. 환경변수<a class="headerlink" href="#15" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>env
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>printenv<span class="w"> </span>PATH
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">APP_ENV</span><span class="o">=</span>dev
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$APP_ENV</span><span class="s2">"</span>
-<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="nv">APP_ENV</span><span class="o">=</span>dev<span class="w"> </span>node<span class="w"> </span>server.js
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>env
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>printenv<span class="w"> </span>PATH
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">APP_ENV</span><span class="o">=</span>dev
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$APP_ENV</span><span class="s2">"</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="nv">APP_ENV</span><span class="o">=</span>dev<span class="w"> </span>node<span class="w"> </span>server.js
 </code></pre></div>
 <h2 id="16">16. 장애 확인 조합<a class="headerlink" href="#16" title="Permanent link">&para;</a></h2>
 <p>서비스 장애:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>systemctl<span class="w"> </span>status<span class="w"> </span>nginx
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>nginx<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span>
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>ss<span class="w"> </span>-tulpen<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':80'</span>
-<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://localhost
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>systemctl<span class="w"> </span>status<span class="w"> </span>nginx
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>nginx<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>ss<span class="w"> </span>-tulpen<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':80'</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://localhost
 </code></pre></div>
 <p>디스크 부족:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>df<span class="w"> </span>-h
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>du<span class="w"> </span>-h<span class="w"> </span>--max-depth<span class="o">=</span><span class="m">1</span><span class="w"> </span>/var<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-h
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>df<span class="w"> </span>-h
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>du<span class="w"> </span>-h<span class="w"> </span>--max-depth<span class="o">=</span><span class="m">1</span><span class="w"> </span>/var<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-h
 </code></pre></div>
 <p>네트워크 장애:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>ip<span class="w"> </span>-br<span class="w"> </span>addr
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>ip<span class="w"> </span>route
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>ping<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="m">8</span>.8.8.8
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>ping<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="w"> </span>google.com
-<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>curl<span class="w"> </span>-I<span class="w"> </span>https://www.naver.com
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>ip<span class="w"> </span>-br<span class="w"> </span>addr
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>ip<span class="w"> </span>route
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>ping<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="m">8</span>.8.8.8
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>ping<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="w"> </span>google.com
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>curl<span class="w"> </span>-I<span class="w"> </span>https://www.naver.com
 </code></pre></div>
 <p>SSH 접속 문제:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>chmod<span class="w"> </span><span class="m">400</span><span class="w"> </span>key.pem
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>ssh<span class="w"> </span>-i<span class="w"> </span>key.pem<span class="w"> </span>-v<span class="w"> </span>ubuntu@SERVER_IP
-<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>/var/log/auth.log
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>chmod<span class="w"> </span><span class="m">400</span><span class="w"> </span>key.pem
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>ssh<span class="w"> </span>-i<span class="w"> </span>key.pem<span class="w"> </span>-v<span class="w"> </span>ubuntu@SERVER_IP
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>/var/log/auth.log
 </code></pre></div>
 <h2 id="_2">체크리스트<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <ul>
