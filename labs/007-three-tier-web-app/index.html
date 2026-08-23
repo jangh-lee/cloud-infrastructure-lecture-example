@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/005-static-website/">
+        <link rel="canonical" href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/007-three-tier-web-app/">
       
       
-        <link rel="prev" href="../004-load-balancer/">
+        <link rel="prev" href="../006-database-backup-recovery/">
       
       
-        <link rel="next" href="../006-database-backup-recovery/">
+        <link rel="next" href="../008-game-server/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>005 Object Storage 정적 웹사이트 - 단국대 클라우드 인프라 실습</title>
+        <title>007 Three Tier Web App - 단국대 클라우드 인프라 실습</title>
       
     
     
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#005-object-storage" class="md-skip">
+        <a href="#007-three-tier-web-app" class="md-skip">
           콘텐츠로 이동
         </a>
       
@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              005 Object Storage 정적 웹사이트
+              007 Three Tier Web App
             
           </span>
         </div>
@@ -536,6 +536,62 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../005-static-website/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    005 Object Storage 정적 웹사이트
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../006-database-backup-recovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    006 Database 백업 및 복구
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -555,7 +611,7 @@
   <span class="md-ellipsis">
     
   
-    005 Object Storage 정적 웹사이트
+    007 Three Tier Web App
   
 
     
@@ -573,7 +629,7 @@
   <span class="md-ellipsis">
     
   
-    005 Object Storage 정적 웹사이트
+    007 Three Tier Web App
   
 
     
@@ -613,18 +669,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        업로드 전 확인
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#naver-cloud-object-storage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Naver Cloud Object Storage 업로드
+        실습 폴더
       
     </span>
   </a>
@@ -635,7 +680,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        업로드 확인
+        권장 구조
       
     </span>
   </a>
@@ -646,7 +691,62 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        정적 웹사이트 호스팅 확인
+        설치 순서
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#db" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DB 서버
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        백엔드 서버
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        웹서버
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ACG 권장 규칙
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        확인
       
     </span>
   </a>
@@ -657,62 +757,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../006-database-backup-recovery/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    006 Database 백업 및 복구
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../007-three-tier-web-app/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    007 Three Tier Web App
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -849,18 +893,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        업로드 전 확인
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#naver-cloud-object-storage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Naver Cloud Object Storage 업로드
+        실습 폴더
       
     </span>
   </a>
@@ -871,7 +904,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        업로드 확인
+        권장 구조
       
     </span>
   </a>
@@ -882,7 +915,62 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        정적 웹사이트 호스팅 확인
+        설치 순서
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#db" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DB 서버
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        백엔드 서버
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        웹서버
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ACG 권장 규칙
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        확인
       
     </span>
   </a>
@@ -909,39 +997,86 @@
   
 
 
-<h1 id="005-object-storage">005 Object Storage 정적 웹사이트<a class="headerlink" href="#005-object-storage" title="Permanent link">&para;</a></h1>
+<h1 id="007-three-tier-web-app">007 Three Tier Web App<a class="headerlink" href="#007-three-tier-web-app" title="Permanent link">&para;</a></h1>
 <h2 id="_1">목표<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>Object Storage 계열 서비스에 정적 웹사이트 파일을 업로드하고, 브라우저에서 웹 페이지가 열리는지 확인합니다.</p>
-<p>실습 폴더:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>005-static website
+<p>Web, Backend, DB 서버를 분리해 3계층 게시판을 구성하고 서버 간 통신, ACG, 사설 IP 연결을 실습합니다.</p>
+<h2 id="_2">실습 폴더<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>007-three tier web app
 </code></pre></div>
-<h2 id="_2">업로드 전 확인<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ls<span class="w"> </span><span class="s2">"005-static website"</span>
+<h2 id="_3">권장 구조<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>사용자 브라우저
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>   ↓ 80
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>웹서버 nginx
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>   ↓ 4000
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>백엔드 Node.js
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>   ↓ 3306
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>DB MariaDB
 </code></pre></div>
-<p>정적 웹사이트는 서버 코드 없이 HTML, CSS, JavaScript, 이미지, 영상 파일만으로 동작해야 합니다.</p>
-<h2 id="naver-cloud-object-storage">Naver Cloud Object Storage 업로드<a class="headerlink" href="#naver-cloud-object-storage" title="Permanent link">&para;</a></h2>
-<p>폴더 이름에 공백이 있으므로 경로 전체를 따옴표로 감쌉니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>s3<span class="w"> </span>sync<span class="w"> </span><span class="s2">"005-static website/"</span><span class="w"> </span>s3://YOUR_BUCKET_NAME/
+<h2 id="_4">설치 순서<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<ol>
+<li>DB 서버</li>
+<li>백엔드 서버</li>
+<li>웹서버</li>
+</ol>
+<h2 id="db">DB 서버<a class="headerlink" href="#db" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">cd</span><span class="w"> </span>cloud-infrastructure-lecture-example
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>git<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>main
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"007-three tier web app/db"</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>chmod<span class="w"> </span>+x<span class="w"> </span>install-db.sh
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>sudo<span class="w"> </span>./install-db.sh
 </code></pre></div>
-<p>예시:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>s3<span class="w"> </span>sync<span class="w"> </span><span class="s2">"005-static website/"</span><span class="w"> </span>s3://lab-bucket-james-260816/
+<p>처음 실행하면 <code>.env</code> 템플릿이 생성됩니다. 값을 채운 뒤 다시 실행합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>./install-db.sh
 </code></pre></div>
-<h2 id="_3">업로드 확인<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span>s3<span class="w"> </span>ls<span class="w"> </span>s3://YOUR_BUCKET_NAME/
+<h2 id="_5">백엔드 서버<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">cd</span><span class="w"> </span>cloud-infrastructure-lecture-example
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>git<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>main
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"007-three tier web app/backend"</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>chmod<span class="w"> </span>+x<span class="w"> </span>install-backend.sh
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>sudo<span class="w"> </span>./install-backend.sh
 </code></pre></div>
-<h2 id="_4">정적 웹사이트 호스팅 확인<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p>Object Storage에서 정적 웹사이트 호스팅을 켠 뒤, index document를 아래처럼 설정합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Index document: index.html
+<p><code>.env</code>를 채운 뒤 다시 실행합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>./install-backend.sh
 </code></pre></div>
-<p>단순히 <code>index.html</code> 객체 URL을 직접 여는 것과 정적 웹사이트 호스팅 endpoint를 여는 것은 다릅니다.</p>
+<h2 id="_6">웹서버<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nb">cd</span><span class="w"> </span>cloud-infrastructure-lecture-example
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>git<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>main
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"007-three tier web app/web"</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>chmod<span class="w"> </span>+x<span class="w"> </span>install-web.sh
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>sudo<span class="w"> </span>./install-web.sh
+</code></pre></div>
+<p><code>.env</code>를 채운 뒤 다시 실행합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>./install-web.sh
+</code></pre></div>
+<h2 id="acg">ACG 권장 규칙<a class="headerlink" href="#acg" title="Permanent link">&para;</a></h2>
+<p>웹서버:</p>
 <ul>
-<li>객체 URL: 특정 객체 하나를 직접 다운로드/조회</li>
-<li>정적 웹사이트 endpoint: <code>/</code> 요청을 <code>index.html</code>로 매핑하고 웹사이트처럼 응답</li>
+<li><code>22/tcp</code>: 관리자 IP</li>
+<li><code>80/tcp</code>: <code>0.0.0.0/0</code></li>
 </ul>
+<p>백엔드 서버:</p>
+<ul>
+<li><code>22/tcp</code>: 관리자 IP</li>
+<li><code>4000/tcp</code>: 웹서버 사설 IP 또는 웹서버 ACG</li>
+</ul>
+<p>DB 서버:</p>
+<ul>
+<li><code>22/tcp</code>: 관리자 IP</li>
+<li><code>3306/tcp</code>: 백엔드 서버 사설 IP 또는 백엔드 ACG</li>
+</ul>
+<h2 id="_7">확인<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>curl<span class="w"> </span>http://localhost:4000/api/health
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>curl<span class="w"> </span>http://localhost:4000/api/posts
+</code></pre></div>
+<p>웹서버는 브라우저에서 확인합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>http://WEB_SERVER_PUBLIC_IP/
+</code></pre></div>
 
 
 

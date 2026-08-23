@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/005-static-website/">
+        <link rel="canonical" href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/009-ai-rag-studio/">
       
       
-        <link rel="prev" href="../004-load-balancer/">
+        <link rel="prev" href="../008-game-server/">
       
       
-        <link rel="next" href="../006-database-backup-recovery/">
+        <link rel="next" href="../../SUMMARY/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>005 Object Storage 정적 웹사이트 - 단국대 클라우드 인프라 실습</title>
+        <title>009 AI RAG Studio - 단국대 클라우드 인프라 실습</title>
       
     
     
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#005-object-storage" class="md-skip">
+        <a href="#009-ai-rag-studio" class="md-skip">
           콘텐츠로 이동
         </a>
       
@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              005 Object Storage 정적 웹사이트
+              009 AI RAG Studio
             
           </span>
         </div>
@@ -536,37 +536,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    005 Object Storage 정적 웹사이트
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../005-static-website/" class="md-nav__link">
         
   
   
@@ -582,81 +555,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="목차">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      목차
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        목표
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        업로드 전 확인
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#naver-cloud-object-storage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Naver Cloud Object Storage 업로드
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        업로드 확인
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        정적 웹사이트 호스팅 확인
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -750,10 +648,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../009-ai-rag-studio/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    009 AI RAG Studio
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -769,6 +694,103 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="목차">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      목차
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        목표
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        실습 폴더
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        설치
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#env" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .env 예시
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        접속
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ACG
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        실습 포인트
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -849,18 +871,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        업로드 전 확인
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#naver-cloud-object-storage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Naver Cloud Object Storage 업로드
+        실습 폴더
       
     </span>
   </a>
@@ -871,7 +882,18 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        업로드 확인
+        설치
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#env" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .env 예시
       
     </span>
   </a>
@@ -882,7 +904,29 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        정적 웹사이트 호스팅 확인
+        접속
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ACG
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        실습 포인트
       
     </span>
   </a>
@@ -909,38 +953,45 @@
   
 
 
-<h1 id="005-object-storage">005 Object Storage 정적 웹사이트<a class="headerlink" href="#005-object-storage" title="Permanent link">&para;</a></h1>
+<h1 id="009-ai-rag-studio">009 AI RAG Studio<a class="headerlink" href="#009-ai-rag-studio" title="Permanent link">&para;</a></h1>
 <h2 id="_1">목표<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>Object Storage 계열 서비스에 정적 웹사이트 파일을 업로드하고, 브라우저에서 웹 페이지가 열리는지 확인합니다.</p>
-<p>실습 폴더:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>005-static website
+<p>CLOVA Studio API와 로컬 RAG 문서 관리 화면을 사용해 AI 애플리케이션의 API 호출, 프롬프트, 문서 검색 흐름을 실습합니다.</p>
+<h2 id="_2">실습 폴더<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>009-ai rag studio
 </code></pre></div>
-<h2 id="_2">업로드 전 확인<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ls<span class="w"> </span><span class="s2">"005-static website"</span>
+<h2 id="_3">설치<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"cloud-infrastructure-lecture-example/009-ai rag studio"</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>chmod<span class="w"> </span>+x<span class="w"> </span>install.sh
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>sudo<span class="w"> </span>./install.sh
 </code></pre></div>
-<p>정적 웹사이트는 서버 코드 없이 HTML, CSS, JavaScript, 이미지, 영상 파일만으로 동작해야 합니다.</p>
-<h2 id="naver-cloud-object-storage">Naver Cloud Object Storage 업로드<a class="headerlink" href="#naver-cloud-object-storage" title="Permanent link">&para;</a></h2>
-<p>폴더 이름에 공백이 있으므로 경로 전체를 따옴표로 감쌉니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>s3<span class="w"> </span>sync<span class="w"> </span><span class="s2">"005-static website/"</span><span class="w"> </span>s3://YOUR_BUCKET_NAME/
+<p>처음 실행하면 <code>.env</code> 템플릿이 생성됩니다. 값을 채운 뒤 다시 실행합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>./install.sh
 </code></pre></div>
-<p>예시:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>s3<span class="w"> </span>sync<span class="w"> </span><span class="s2">"005-static website/"</span><span class="w"> </span>s3://lab-bucket-james-260816/
+<h2 id="env"><code>.env</code> 예시<a class="headerlink" href="#env" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>PORT=4100
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>CLOVA_BASE_URL="https://clovastudio.stream.ntruss.com"
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>CLOVA_API_KEY="nv-xxxx"
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>CLOVA_TEXT_MODEL="HCX-DASH-002"
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>ADMIN_PASSWORD="change-me"
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>DEMO_MODE_IF_NO_KEY="true"
 </code></pre></div>
-<h2 id="_3">업로드 확인<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span>s3<span class="w"> </span>ls<span class="w"> </span>s3://YOUR_BUCKET_NAME/
+<p>API 키 없이 화면 흐름만 확인하려면 <code>DEMO_MODE_IF_NO_KEY="true"</code>를 유지합니다.</p>
+<h2 id="_4">접속<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>http://SERVER_PUBLIC_IP:4100
 </code></pre></div>
-<h2 id="_4">정적 웹사이트 호스팅 확인<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p>Object Storage에서 정적 웹사이트 호스팅을 켠 뒤, index document를 아래처럼 설정합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Index document: index.html
-</code></pre></div>
-<p>단순히 <code>index.html</code> 객체 URL을 직접 여는 것과 정적 웹사이트 호스팅 endpoint를 여는 것은 다릅니다.</p>
+<h2 id="acg">ACG<a class="headerlink" href="#acg" title="Permanent link">&para;</a></h2>
 <ul>
-<li>객체 URL: 특정 객체 하나를 직접 다운로드/조회</li>
-<li>정적 웹사이트 endpoint: <code>/</code> 요청을 <code>index.html</code>로 매핑하고 웹사이트처럼 응답</li>
+<li><code>22/tcp</code>: 관리자 IP</li>
+<li><code>4100/tcp</code>: 실습자 또는 강의장 IP</li>
+</ul>
+<h2 id="_5">실습 포인트<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>CLOVA Studio Chat Completions 호출</li>
+<li>RAG 문서 검색과 근거 표시</li>
+<li>관리자 비밀번호 기반 RAG 문서 추가, 수정, 삭제</li>
+<li>시스템 프롬프트 변경</li>
 </ul>
 
 

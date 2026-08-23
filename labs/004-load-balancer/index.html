@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/005-static-website/">
+        <link rel="canonical" href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/004-load-balancer/">
       
       
-        <link rel="prev" href="../004-load-balancer/">
+        <link rel="prev" href="../003-cloud-cli/">
       
       
-        <link rel="next" href="../006-database-backup-recovery/">
+        <link rel="next" href="../005-static-website/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>005 Object Storage 정적 웹사이트 - 단국대 클라우드 인프라 실습</title>
+        <title>004 Load Balancer - 단국대 클라우드 인프라 실습</title>
       
     
     
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#005-object-storage" class="md-skip">
+        <a href="#004-load-balancer" class="md-skip">
           콘텐츠로 이동
         </a>
       
@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              005 Object Storage 정적 웹사이트
+              004 Load Balancer
             
           </span>
         </div>
@@ -508,34 +508,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../004-load-balancer/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    004 Load Balancer
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -555,7 +527,7 @@
   <span class="md-ellipsis">
     
   
-    005 Object Storage 정적 웹사이트
+    004 Load Balancer
   
 
     
@@ -573,7 +545,7 @@
   <span class="md-ellipsis">
     
   
-    005 Object Storage 정적 웹사이트
+    004 Load Balancer
   
 
     
@@ -613,18 +585,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        업로드 전 확인
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#naver-cloud-object-storage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Naver Cloud Object Storage 업로드
+        실습 폴더
       
     </span>
   </a>
@@ -635,7 +596,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        업로드 확인
+        백엔드 노드 설치
       
     </span>
   </a>
@@ -646,7 +607,29 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        정적 웹사이트 호스팅 확인
+        서버 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ACG
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        분산 확인
       
     </span>
   </a>
@@ -657,6 +640,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../005-static-website/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    005 Object Storage 정적 웹사이트
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -849,18 +860,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        업로드 전 확인
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#naver-cloud-object-storage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Naver Cloud Object Storage 업로드
+        실습 폴더
       
     </span>
   </a>
@@ -871,7 +871,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        업로드 확인
+        백엔드 노드 설치
       
     </span>
   </a>
@@ -882,7 +882,29 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        정적 웹사이트 호스팅 확인
+        서버 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ACG
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        분산 확인
       
     </span>
   </a>
@@ -909,39 +931,46 @@
   
 
 
-<h1 id="005-object-storage">005 Object Storage 정적 웹사이트<a class="headerlink" href="#005-object-storage" title="Permanent link">&para;</a></h1>
+<h1 id="004-load-balancer">004 Load Balancer<a class="headerlink" href="#004-load-balancer" title="Permanent link">&para;</a></h1>
 <h2 id="_1">목표<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>Object Storage 계열 서비스에 정적 웹사이트 파일을 업로드하고, 브라우저에서 웹 페이지가 열리는지 확인합니다.</p>
-<p>실습 폴더:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>005-static website
+<p>여러 Ubuntu 웹 노드를 만들고 Load Balancer 뒤에 연결해 헬스체크와 트래픽 분산을 확인합니다.</p>
+<h2 id="_2">실습 폴더<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>004-load balancer
 </code></pre></div>
-<h2 id="_2">업로드 전 확인<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ls<span class="w"> </span><span class="s2">"005-static website"</span>
+<h2 id="_3">백엔드 노드 설치<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>서버마다 <code>userinput</code> 값을 다르게 넣습니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nv">userinput</span><span class="o">=</span><span class="s2">"node-1"</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"cloud-infrastructure-lecture-example/004-load balancer"</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>chmod<span class="w"> </span>+x<span class="w"> </span>install.sh
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>sudo<span class="w"> </span><span class="nv">userinput</span><span class="o">=</span><span class="s2">"</span><span class="nv">$userinput</span><span class="s2">"</span><span class="w"> </span>./install.sh
 </code></pre></div>
-<p>정적 웹사이트는 서버 코드 없이 HTML, CSS, JavaScript, 이미지, 영상 파일만으로 동작해야 합니다.</p>
-<h2 id="naver-cloud-object-storage">Naver Cloud Object Storage 업로드<a class="headerlink" href="#naver-cloud-object-storage" title="Permanent link">&para;</a></h2>
-<p>폴더 이름에 공백이 있으므로 경로 전체를 따옴표로 감쌉니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>s3<span class="w"> </span>sync<span class="w"> </span><span class="s2">"005-static website/"</span><span class="w"> </span>s3://YOUR_BUCKET_NAME/
+<p>두 번째 서버에서는 예를 들어 아래처럼 바꿉니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">userinput</span><span class="o">=</span><span class="s2">"node-2"</span>
 </code></pre></div>
-<p>예시:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>s3<span class="w"> </span>sync<span class="w"> </span><span class="s2">"005-static website/"</span><span class="w"> </span>s3://lab-bucket-james-260816/
+<h2 id="_4">서버 확인<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>http://localhost/healthz
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>curl<span class="w"> </span>http://localhost/status.json
 </code></pre></div>
-<h2 id="_3">업로드 확인<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span>s3<span class="w"> </span>ls<span class="w"> </span>s3://YOUR_BUCKET_NAME/
+<p>브라우저에서는 각 서버 공인 IP 또는 Load Balancer 주소로 접속합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>http://SERVER_PUBLIC_IP/
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>http://LOAD_BALANCER_URL/
 </code></pre></div>
-<h2 id="_4">정적 웹사이트 호스팅 확인<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p>Object Storage에서 정적 웹사이트 호스팅을 켠 뒤, index document를 아래처럼 설정합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Index document: index.html
-</code></pre></div>
-<p>단순히 <code>index.html</code> 객체 URL을 직접 여는 것과 정적 웹사이트 호스팅 endpoint를 여는 것은 다릅니다.</p>
+<h2 id="acg">ACG<a class="headerlink" href="#acg" title="Permanent link">&para;</a></h2>
 <ul>
-<li>객체 URL: 특정 객체 하나를 직접 다운로드/조회</li>
-<li>정적 웹사이트 endpoint: <code>/</code> 요청을 <code>index.html</code>로 매핑하고 웹사이트처럼 응답</li>
+<li>웹 노드 <code>22/tcp</code>: 관리자 IP</li>
+<li>웹 노드 <code>80/tcp</code>: Load Balancer 또는 실습자 IP</li>
+<li>Load Balancer 리스너: <code>80/tcp</code></li>
+<li>Load Balancer 헬스체크 경로: <code>/healthz</code></li>
 </ul>
+<h2 id="_5">분산 확인<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nv">LB_URL</span><span class="o">=</span><span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">100</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span>curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/status.json"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
+</code></pre></div>
 
 
 

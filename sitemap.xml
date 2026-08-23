@@ -9,11 +9,19 @@
          <lastmod>2026-08-23</lastmod>
     </url>
     <url>
+         <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/001-api-server/</loc>
+         <lastmod>2026-08-23</lastmod>
+    </url>
+    <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/002-init-script/</loc>
          <lastmod>2026-08-23</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/003-cloud-cli/</loc>
+         <lastmod>2026-08-23</lastmod>
+    </url>
+    <url>
+         <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/004-load-balancer/</loc>
          <lastmod>2026-08-23</lastmod>
     </url>
     <url>
@@ -25,7 +33,15 @@
          <lastmod>2026-08-23</lastmod>
     </url>
     <url>
+         <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/007-three-tier-web-app/</loc>
+         <lastmod>2026-08-23</lastmod>
+    </url>
+    <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/008-game-server/</loc>
+         <lastmod>2026-08-23</lastmod>
+    </url>
+    <url>
+         <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/009-ai-rag-studio/</loc>
          <lastmod>2026-08-23</lastmod>
     </url>
     <url>
