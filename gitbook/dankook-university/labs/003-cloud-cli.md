@@ -477,16 +477,18 @@ SERVER_INSTANCE_NO="응답의 serverInstanceNo"
 ```bash
 ncloud vserver stopServerInstances \
   --regionCode "$REGION_CODE" \
-  --serverInstanceNoList "['$SERVER_INSTANCE_NO']" \
+  --serverInstanceNoList "$SERVER_INSTANCE_NO" \
   --output json
 ```
+
+`serverInstanceNoList`는 이름은 List이지만 CLI에서는 숫자 값만 넘깁니다. `['144506069']`처럼 대괄호를 넣으면 CLI가 중첩 리스트로 해석해서 오류가 납니다.
 
 서버가 정지될 때까지 상태를 확인합니다.
 
 ```bash
 ncloud vserver getServerInstanceList \
   --regionCode "$REGION_CODE" \
-  --serverInstanceNoList "['$SERVER_INSTANCE_NO']" \
+  --serverInstanceNoList "$SERVER_INSTANCE_NO" \
   --output json
 ```
 
@@ -495,7 +497,7 @@ ncloud vserver getServerInstanceList \
 ```bash
 ncloud vserver terminateServerInstances \
   --regionCode "$REGION_CODE" \
-  --serverInstanceNoList "['$SERVER_INSTANCE_NO']" \
+  --serverInstanceNoList "$SERVER_INSTANCE_NO" \
   --output json
 ```
 
@@ -504,7 +506,7 @@ ncloud vserver terminateServerInstances \
 ```bash
 ncloud vserver getServerInstanceList \
   --regionCode "$REGION_CODE" \
-  --serverInstanceNoList "['$SERVER_INSTANCE_NO']" \
+  --serverInstanceNoList "$SERVER_INSTANCE_NO" \
   --output json
 ```
 
@@ -559,12 +561,12 @@ $SERVER_INSTANCE_NO = "응답의 serverInstanceNo"
 
 ncloud vserver stopServerInstances `
   --regionCode $REGION_CODE `
-  --serverInstanceNoList "['$SERVER_INSTANCE_NO']" `
+  --serverInstanceNoList $SERVER_INSTANCE_NO `
   --output json
 
 ncloud vserver terminateServerInstances `
   --regionCode $REGION_CODE `
-  --serverInstanceNoList "['$SERVER_INSTANCE_NO']" `
+  --serverInstanceNoList $SERVER_INSTANCE_NO `
   --output json
 
 ncloud vserver deleteAccessControlGroup `
