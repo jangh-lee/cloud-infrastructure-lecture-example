@@ -90,6 +90,9 @@ echo "[lab11] init script started at $(date -Is)"
 apt-get update
 apt-get install -y nginx
 
+sed -i '/listen \[::\]:80/d' /etc/nginx/sites-available/default
+sed -i '/listen \[::\]:80/d' /etc/nginx/sites-enabled/default 2>/dev/null || true
+
 cat > /var/www/html/index.txt <<'TEXT'
 Terraform NCP Lab
 This server was created by Terraform.
@@ -102,6 +105,7 @@ This server was created by Terraform.
 HTML
 
 systemctl enable nginx
+nginx -t
 systemctl restart nginx
 systemctl status nginx --no-pager
 

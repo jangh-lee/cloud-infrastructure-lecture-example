@@ -163,6 +163,7 @@ nginx 접속이 안 되면 먼저 SSH로 서버에 접속해 init script 로그�
 ssh -i key-lab11.pem root@PUBLIC_IP
 sudo tail -n 100 /var/log/lab11-init.log
 sudo systemctl status nginx --no-pager
+sudo nginx -t
 sudo ss -tulpen | grep ':80'
 curl -i http://localhost
 ```
@@ -173,6 +174,17 @@ curl -i http://localhost
 2. ACG에 `80/tcp` inbound가 있는지 확인합니다.
 3. 서버 내부에서 `curl -i http://localhost`가 되는지 확인합니다.
 4. `/var/log/lab11-init.log`에서 `apt-get`, `nginx` 설치 실패가 있는지 확인합니다.
+
+NCP Ubuntu 서버에서 IPv6가 비활성화된 경우 nginx 기본 설정의 `listen [::]:80` 때문에 nginx가 실패할 수 있습니다. 이 예제의 init script는 기본 사이트 설정에서 IPv6 listen 줄을 제거합니다.
+
+이미 서버에 접속한 상태에서 수동으로 고치려면:
+
+```bash
+sudo sed -i '/listen \[::\]:80/d' /etc/nginx/sites-available/default
+sudo nginx -t
+sudo systemctl restart nginx
+sudo systemctl status nginx --no-pager
+```
 
 Init Script는 서버 최초 생성 시점에만 실행됩니다. 서버가 이미 만들어진 뒤 init script 내용을 수정했다면 기존 서버에는 자동 재실행되지 않습니다. 실습에서는 아래처럼 서버를 교체하거나 전체 삭제 후 다시 생성합니다.
 
