@@ -208,6 +208,20 @@ http://PUBLIC_IP/
 
 Init Script가 정상 동작했다면 nginx 기본 페이지 또는 실습 페이지가 보입니다.
 
+Ncloud Terraform provider는 `ncloud_init_script.content`에 HTML 태그가 들어가면 콘솔 저장 과정에서 일부 태그를 필터링해 Terraform state 비교가 깨질 수 있습니다. 그래서 이 예제의 init script는 HTML 태그 없이 단순 텍스트 페이지를 생성합니다.
+
+아래와 같은 오류가 나오면 init script 내용에 필터링되는 태그가 들어간 경우입니다.
+
+```text
+Provider produced inconsistent result after apply
+```
+
+이 경우 init script 내용에서 HTML/XML 태그를 제거하고 다시 실행합니다.
+
+```bash
+terraform apply
+```
+
 ## 13. 상태 파일 이해
 
 Terraform은 `terraform.tfstate` 파일에 실제 리소스 상태를 기록합니다.

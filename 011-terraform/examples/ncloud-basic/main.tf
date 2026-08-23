@@ -87,18 +87,15 @@ set -e
 apt-get update
 apt-get install -y nginx
 
+cat > /var/www/html/index.txt <<'TEXT'
+Terraform NCP Lab
+This server was created by Terraform.
+TEXT
+
 cat > /var/www/html/index.html <<'HTML'
-<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8">
-  <title>Terraform NCP Lab</title>
-</head>
-<body>
-  <h1>Terraform NCP Lab</h1>
-  <p>This server was created by Terraform.</p>
-</body>
-</html>
+Terraform NCP Lab
+
+This server was created by Terraform.
 HTML
 
 systemctl enable nginx
