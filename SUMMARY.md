@@ -11,4 +11,5 @@
 * [008 Game Server](<008-game server/README.md>)
 * [009 AI RAG Studio](<009-ai rag studio/README.md>)
 * [010 Linux Commands](<010-linux commands/README.md>)
+* [011 Terraform](011-terraform/README.md)
 * [Web Lecture Notes](gitbook/README.md)

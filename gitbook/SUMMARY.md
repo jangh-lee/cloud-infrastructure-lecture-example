@@ -13,3 +13,4 @@
 * [008 Game Server 생성 실습](labs/008-game-server.md)
 * [009 AI RAG Studio](labs/009-ai-rag-studio.md)
 * [010 Linux Commands](labs/010-linux-commands.md)
+* [011 Terraform](labs/011-terraform.md)

@@ -18,6 +18,7 @@ Naver Cloud 기반 클라우드 인프라 실습 교안입니다.
 | 008 | Game Server 생성 실습 | `008-game server` |
 | 009 | CLOVA Studio AI RAG 앱 | `009-ai rag studio` |
 | 010 | Linux 기본 명령어 | `010-linux commands` |
+| 011 | Terraform 인프라 코드 | `011-terraform` |
 
 ## 웹 교안 열람
 
