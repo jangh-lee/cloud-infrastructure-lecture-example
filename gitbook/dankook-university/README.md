@@ -17,6 +17,7 @@ Naver Cloud 기반 클라우드 인프라 실습 교안입니다.
 | 007 | 3계층 Web, Backend, DB 앱 | `007-three tier web app` |
 | 008 | Game Server 생성 실습 | `008-game server` |
 | 009 | CLOVA Studio AI RAG 앱 | `009-ai rag studio` |
+| 010 | Linux 기본 명령어 | `010-linux commands` |
 
 ## 웹 교안 열람
 
