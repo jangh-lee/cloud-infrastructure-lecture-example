@@ -23,7 +23,18 @@ output "public_ip" {
   value       = ncloud_public_ip.web.public_ip
 }
 
+output "http_url" {
+  description = "HTTP URL"
+  value       = "http://${ncloud_public_ip.web.public_ip}/"
+}
+
 output "login_key_file" {
   description = "Generated login key PEM file path"
   value       = local_file.login_key_pem.filename
+}
+
+output "admin_password" {
+  description = "Decrypted server admin password. Use: terraform output -raw admin_password"
+  value       = data.ncloud_root_password.web.root_password
+  sensitive   = true
 }

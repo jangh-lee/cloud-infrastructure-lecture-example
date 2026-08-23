@@ -83,6 +83,9 @@ resource "ncloud_init_script" "web" {
   content = <<-EOT
 #!/bin/bash
 set -e
+exec > >(tee -a /var/log/lab11-init.log) 2>&1
+
+echo "[lab11] init script started at $(date -Is)"
 
 apt-get update
 apt-get install -y nginx
@@ -100,6 +103,9 @@ HTML
 
 systemctl enable nginx
 systemctl restart nginx
+systemctl status nginx --no-pager
+
+echo "[lab11] init script finished at $(date -Is)"
 EOT
 }
 
@@ -122,4 +128,9 @@ resource "ncloud_server" "web" {
 
 resource "ncloud_public_ip" "web" {
   server_instance_no = ncloud_server.web.id
+}
+
+data "ncloud_root_password" "web" {
+  server_instance_no = ncloud_server.web.id
+  private_key        = ncloud_login_key.web.private_key
 }

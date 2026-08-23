@@ -126,6 +126,13 @@ terraform apply -auto-approve
 terraform output
 terraform output server_instance_no
 terraform output public_ip
+terraform output http_url
+```
+
+관리자 비밀번호는 sensitive output이라 일반 `terraform output` 화면에서는 숨겨집니다. 직접 확인할 때만 아래 명령을 사용합니다.
+
+```bash
+terraform output -raw admin_password
 ```
 
 브라우저 접속:
@@ -145,6 +152,36 @@ Provider produced inconsistent result after apply
 이 경우 init script 내용에서 HTML/XML 태그를 제거하고 다시 실행합니다.
 
 ```bash
+terraform apply
+```
+
+nginx 접속이 안 되면 먼저 SSH로 서버에 접속해 init script 로그와 서비스 상태를 확인합니다.
+
+```bash
+ssh -i key-lab11.pem root@PUBLIC_IP
+sudo tail -n 100 /var/log/lab11-init.log
+sudo systemctl status nginx --no-pager
+sudo ss -tulpen | grep ':80'
+curl -i http://localhost
+```
+
+확인 순서:
+
+1. `terraform output public_ip`의 IP로 접속 중인지 확인합니다.
+2. ACG에 `80/tcp` inbound가 있는지 확인합니다.
+3. 서버 내부에서 `curl -i http://localhost`가 되는지 확인합니다.
+4. `/var/log/lab11-init.log`에서 `apt-get`, `nginx` 설치 실패가 있는지 확인합니다.
+
+Init Script는 서버 최초 생성 시점에만 실행됩니다. 서버가 이미 만들어진 뒤 init script 내용을 수정했다면 기존 서버에는 자동 재실행되지 않습니다. 실습에서는 아래처럼 서버를 교체하거나 전체 삭제 후 다시 생성합니다.
+
+```bash
+terraform apply -replace=ncloud_server.web
+```
+
+또는:
+
+```bash
+terraform destroy
 terraform apply
 ```
 
