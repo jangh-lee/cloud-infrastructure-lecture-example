@@ -685,7 +685,39 @@ $SERVER_INSTANCE_NO = "응답의 serverInstanceNo"
 $SERVER_PUBLIC_IP = "응답의 publicIp"
 ```
 
-## 14. SSH 접속
+## 14. 관리자 비밀번호 확인
+
+서버 생성 시 사용한 Login Key의 개인키 파일로 관리자 비밀번호를 확인할 수 있습니다.
+
+Linux/macOS:
+
+```bash
+ncloud vserver getRootPassword \
+  --regionCode "$REGION_CODE" \
+  --serverInstanceNo "$SERVER_INSTANCE_NO" \
+  --privateKey "file://$PWD/cli-lab-key.pem" \
+  --output json
+```
+
+Windows PowerShell:
+
+```powershell
+ncloud vserver getRootPassword `
+  --regionCode $REGION_CODE `
+  --serverInstanceNo $SERVER_INSTANCE_NO `
+  --privateKey "file://$PWD/cli-lab-key.pem" `
+  --output json
+```
+
+주의할 점:
+
+- 서버 생성 시 사용한 `LOGIN_KEY_NAME`에 해당하는 개인키여야 합니다.
+- `file://` 뒤에는 `.pem` 파일 경로를 넣습니다.
+- 개인키가 현재 디렉터리에 없다면 절대 경로를 사용합니다.
+- 개인키를 잃어버리면 관리자 비밀번호를 복호화할 수 없습니다.
+- 비밀번호 출력값은 화면 공유나 로그에 남기지 않습니다.
+
+## 15. SSH 접속
 
 Linux/macOS:
 
@@ -705,7 +737,7 @@ ssh -i .\cli-lab-key.pem "USERNAME@$SERVER_PUBLIC_IP"
 ssh -i cli-lab-key.pem -p 2200 "USERNAME@$SERVER_PUBLIC_IP"
 ```
 
-## 15. 실습 정리
+## 16. 실습 정리
 
 삭제는 의존성이 있는 리소스의 역순으로 진행합니다.
 
@@ -861,3 +893,4 @@ ncloud vpc deleteVpc `
 - 서버 스펙 조회 CLI: <https://cli.ncloud-docs.com/docs/en/cli-vserver-server-common-getserverspeclist>
 - Login Key 생성 CLI: <https://cli.ncloud-docs.com/docs/en/cli-vserver-server-loginkey-createloginkey>
 - 서버 생성 CLI: <https://cli.ncloud-docs.com/docs/en/cli-vserver-server-createserverinstances>
+- 관리자 비밀번호 확인 CLI: <https://cli.ncloud-docs.com/docs/cli-vserver-server-getrootpassword>
