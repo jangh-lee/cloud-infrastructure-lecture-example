@@ -4,7 +4,7 @@
 
 GitBook 유료 플랜 없이 GitHub Pages에서 강의 교안을 무료로 공개합니다.
 
-이 저장소는 `gitbook/dankook-university` 폴더를 문서 원본으로 사용하고, GitHub Actions가 MkDocs Material 정적 사이트로 빌드합니다.
+이 저장소는 `gitbook` 폴더를 문서 원본으로 사용하고, GitHub Actions가 MkDocs Material 정적 사이트로 빌드합니다.
 
 ## 배포 흐름
 
@@ -58,17 +58,17 @@ mkdocs build --strict
 
 ## 교안 수정 흐름
 
-단국대 교안은 아래 폴더에서 수정합니다.
+교안은 아래 폴더에서 수정합니다.
 
 ```text
-gitbook/dankook-university
+gitbook
 ```
 
 수정 후 push하면 자동 배포됩니다.
 
 ```bash
 git status
-git add gitbook/dankook-university mkdocs.yml requirements-docs.txt .github/workflows/deploy-docs.yml
+git add gitbook mkdocs.yml requirements-docs.txt .github/workflows/deploy-docs.yml
 git commit -m "Update lecture docs"
 git push
 ```

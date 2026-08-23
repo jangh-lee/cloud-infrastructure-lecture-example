@@ -14,18 +14,10 @@ cloud-infrastructure-lecture-example
 ├── 006-database backup recovery
 ├── 008-game server
 └── gitbook
-    └── dankook-university
-        ├── README.md
-        ├── SUMMARY.md
-        ├── setup
-        └── labs
-```
-
-학교별 교안을 추가할 때는 `gitbook` 아래에 학교 폴더를 새로 만듭니다.
-
-```text
-gitbook/dankook-university
-gitbook/another-university
+    ├── README.md
+    ├── SUMMARY.md
+    ├── setup
+    └── labs
 ```
 
 ## GitBook에서 필요한 준비물
@@ -38,15 +30,15 @@ gitbook/another-university
 
 ## GitBook Space 연결 값
 
-단국대 교안은 아래 값으로 연결합니다.
+교안은 아래 값으로 연결합니다.
 
 ```text
 Repository: cloud-infrastructure-lecture-example
 Branch: main
-Root directory: gitbook/dankook-university
+Root directory: gitbook
 ```
 
-GitBook에서 root directory를 지정할 수 없다면, 단국대 교안을 별도 브랜치나 별도 저장소로 분리하는 방식이 더 단순합니다.
+GitBook에서 root directory를 지정할 수 없다면, 교안을 별도 브랜치나 별도 저장소로 분리하는 방식이 더 단순합니다.
 
 ## 수정 흐름
 
@@ -54,7 +46,7 @@ GitBook에서 root directory를 지정할 수 없다면, 단국대 교안을 별
 
 ```bash
 git status
-git add gitbook/dankook-university
+git add gitbook
 git commit -m "Update Dankook lecture notes"
 git push
 ```

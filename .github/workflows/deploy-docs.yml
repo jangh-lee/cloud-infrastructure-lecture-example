@@ -7,7 +7,7 @@ on:
     paths:
       - mkdocs.yml
       - requirements-docs.txt
-      - gitbook/dankook-university/**
+      - gitbook/**
       - .github/workflows/deploy-docs.yml
   workflow_dispatch:
 

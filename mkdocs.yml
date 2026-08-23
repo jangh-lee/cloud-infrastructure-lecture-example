@@ -1,9 +1,9 @@
-site_name: 단국대 클라우드 인프라 실습
+site_name: 클라우드 인프라 실습
 site_description: Naver Cloud 기반 클라우드 인프라 실습 교안
 site_url: https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 repo_url: https://github.com/jangh-lee/cloud-infrastructure-lecture-example
 repo_name: jangh-lee/cloud-infrastructure-lecture-example
-docs_dir: gitbook/dankook-university
+docs_dir: gitbook
 
 theme:
   name: material

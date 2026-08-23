@@ -362,6 +362,16 @@ ncloud vserver createLoginKey `
 
 ## 8. 서버 생성
 
+실습 서버는 비용 실수를 막기 위해 시간 요금제(종량제)를 명시합니다.
+
+```text
+feeSystemTypeCode
+- MTRAT: 시간 요금제
+- FXSUM: 월 요금제
+```
+
+공식 기본값도 `MTRAT`이지만, 강의 실습에서는 명령어에 `--feeSystemTypeCode MTRAT`를 직접 넣어 확인합니다.
+
 아래 오류가 나오면 `SERVER_IMAGE_NO` 또는 `SERVER_SPEC_CODE` 값이 비어 있거나 잘못된 상태입니다. Ubuntu G3 이미지 조회 결과에서 실제 `serverImageNo`를, 스펙 조회 결과에서 실제 `serverSpecCode`를 변수에 넣었는지 확인합니다.
 
 ```text
@@ -388,6 +398,7 @@ ncloud vserver createServerInstances \
   --serverSpecCode "$SERVER_SPEC_CODE" \
   --serverName "$SERVER_NAME" \
   --loginKeyName "$LOGIN_KEY_NAME" \
+  --feeSystemTypeCode MTRAT \
   --associateWithPublicIp true \
   --isProtectServerTermination false \
   --output json
@@ -405,6 +416,7 @@ ncloud vserver createServerInstances `
   --serverSpecCode $SERVER_SPEC_CODE `
   --serverName $SERVER_NAME `
   --loginKeyName $LOGIN_KEY_NAME `
+  --feeSystemTypeCode MTRAT `
   --associateWithPublicIp true `
   --isProtectServerTermination false `
   --output json
