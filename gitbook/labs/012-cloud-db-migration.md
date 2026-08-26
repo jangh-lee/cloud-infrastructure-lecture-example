@@ -4,13 +4,30 @@
 
 007번 게시판 DB를 Ubuntu 서버의 MariaDB/MySQL에서 Naver Cloud `Cloud DB for MySQL`로 마이그레이션합니다.
 
-흐름:
+이 챕터에서는 두 가지 방식을 소개합니다.
+
+| 방식 | 적합한 상황 | 특징 |
+| --- | --- | --- |
+| DMS | 운영 DB를 Cloud DB로 이관 | 콘솔 기반, 연결 테스트 제공, binlog/권한/ACG 준비 필요 |
+| mysqldump | 작은 DB를 단순 백업/복원 | SQL 파일로 이해하기 쉬움, 덤프 이후 변경분은 자동 반영되지 않음 |
+
+DMS 흐름:
 
 ```text
 Source DB 사전 설정
   -> Cloud DB for MySQL 생성
   -> DMS Endpoint 생성
   -> DMS Migration 실행
+  -> 데이터 검증
+  -> Backend DB_HOST 전환
+```
+
+mysqldump 흐름:
+
+```text
+데이터 변경 중지 또는 점검 시간 확보
+  -> mysqldump로 SQL 파일 생성
+  -> Cloud DB for MySQL에 복원
   -> 데이터 검증
   -> Backend DB_HOST 전환
 ```
@@ -82,7 +99,7 @@ Backend에서 Cloud DB로 전환할 때:
 | Backend outbound | `3306` | Cloud DB 접속 |
 | Cloud DB inbound | `3306` | Backend private IP 허용 |
 
-## 4. DMS Endpoint 생성
+## 4. 방법 A: DMS Endpoint 생성
 
 ```text
 Database Migration Service
@@ -102,7 +119,7 @@ Database Migration Service
 
 `Test Connection`을 먼저 통과시킵니다.
 
-## 5. Migration 생성
+## 5. 방법 A: Migration 생성
 
 ```text
 Database Migration Service
@@ -112,7 +129,62 @@ Database Migration Service
 
 Source Endpoint와 Target Cloud DB for MySQL을 선택하고 `chapter3_board`를 이관합니다.
 
-## 6. 데이터 검증
+## 6. 방법 B: mysqldump 이관
+
+정확한 이관을 위해 덤프 중에는 게시판 백엔드와 자동 게시글 생성을 잠시 멈춥니다.
+
+```bash
+sudo systemctl stop chapter3-post-seeder || true
+sudo systemctl stop chapter3-backend
+```
+
+Source DB에서 덤프 파일 생성:
+
+```bash
+cd "012-cloud db migration/scripts"
+
+SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
+SOURCE_DB_USER='chapter3_user' \
+SOURCE_DB_PASSWORD='ChangeThisPassword123!' \
+DB_NAME='chapter3_board' \
+DUMP_FILE='/tmp/chapter3_board.sql' \
+./dump-source-db.sh
+```
+
+Cloud DB for MySQL에 복원:
+
+```bash
+TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
+TARGET_DB_USER='TARGET_USER' \
+TARGET_DB_PASSWORD='TARGET_PASSWORD' \
+DUMP_FILE='/tmp/chapter3_board.sql' \
+./restore-target-db.sh
+```
+
+명령어를 직접 쓰면 아래와 같습니다.
+
+```bash
+MYSQL_PWD='SOURCE_PASSWORD' mysqldump \
+  -h SOURCE_DB_PRIVATE_IP \
+  -u chapter3_user \
+  --single-transaction \
+  --quick \
+  --routines \
+  --triggers \
+  --events \
+  --default-character-set=utf8mb4 \
+  --databases chapter3_board \
+  > /tmp/chapter3_board.sql
+```
+
+```bash
+MYSQL_PWD='TARGET_PASSWORD' mysql \
+  -h db-xxxx.vpc-cdb.ntruss.com \
+  -u TARGET_USER \
+  < /tmp/chapter3_board.sql
+```
+
+## 7. 데이터 검증
 
 ```bash
 SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
@@ -125,7 +197,7 @@ DB_NAME='chapter3_board' \
 ./compare-post-counts.sh
 ```
 
-## 7. 백엔드 전환
+## 8. 백엔드 전환
 
 ```bash
 sudo BACKEND_ENV_FILE='/opt/chapter3-backend/.env' \

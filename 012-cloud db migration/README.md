@@ -2,7 +2,12 @@
 
 007번 게시판 실습에서 Ubuntu 서버에 직접 설치한 MariaDB/MySQL 데이터를 Naver Cloud `Cloud DB for MySQL`로 마이그레이션하는 실습입니다.
 
-이 챕터에서는 Database Migration Service(DMS)를 사용해 Source DB에서 Target DB로 데이터를 옮기고, 백엔드 API 서버의 `.env`를 Cloud DB 주소로 바꿔 애플리케이션이 그대로 동작하는지 확인합니다.
+이 챕터에서는 두 가지 방식으로 Source DB에서 Target DB로 데이터를 옮기는 방법을 소개합니다.
+
+- 방법 A: Naver Cloud Database Migration Service(DMS)
+- 방법 B: `mysqldump` 파일 백업/복원
+
+마이그레이션 후에는 백엔드 API 서버의 `.env`를 Cloud DB 주소로 바꿔 애플리케이션이 그대로 동작하는지 확인합니다.
 
 > 용어 정정: 데이터베이스 구조 설명은 보통 `EDR`이 아니라 `ERD(Entity Relationship Diagram)`라고 부릅니다.
 
@@ -26,7 +31,7 @@
   -> Cloud DB for MySQL
 ```
 
-DMS 작업 흐름:
+방법 A. DMS 작업 흐름:
 
 ```text
 Source DB 사전 설정
@@ -37,6 +42,25 @@ Source DB 사전 설정
   -> 데이터 검증
   -> Backend .env의 DB_HOST 전환
 ```
+
+방법 B. mysqldump 작업 흐름:
+
+```text
+Source DB 데이터 변경 중지 또는 점검 시간 확보
+  -> mysqldump로 SQL 파일 생성
+  -> SQL 파일을 Target Cloud DB에 복원
+  -> 데이터 검증
+  -> Backend .env의 DB_HOST 전환
+```
+
+## 1-1. DMS와 mysqldump 비교
+
+| 방식 | 적합한 상황 | 장점 | 주의점 |
+| --- | --- | --- | --- |
+| DMS | 운영 중인 DB를 Cloud DB로 옮기고 싶을 때 | 콘솔 기반, 연결 테스트 제공, 변경분 이관 시나리오 설명에 적합 | Source DB binlog, 계정 권한, ACG 설정이 필요 |
+| mysqldump | 작은 DB를 단순하게 백업/복원하고 싶을 때 | 원리가 쉽고 파일로 남기기 좋음, 백업/복구 수업에 적합 | 덤프 시점 이후 변경분은 자동 반영되지 않음 |
+
+수업에서는 둘 다 보여주는 것이 좋습니다. DMS는 클라우드 관리형 마이그레이션을 설명하기 좋고, `mysqldump`는 데이터베이스 백업 파일이 실제로 어떻게 만들어지고 복원되는지 이해시키기 좋습니다.
 
 ## 2. 게시판 ERD
 
@@ -181,7 +205,7 @@ Naver Cloud Console
 - DB User/Password는 실습용으로 명확하게 기록
 - Private domain 예: `db-xxxx.vpc-cdb.ntruss.com`
 
-## 7. DMS Endpoint 생성
+## 7. 방법 A: DMS Endpoint 생성
 
 ```text
 Naver Cloud Console
@@ -204,7 +228,7 @@ Naver Cloud Console
 
 `Test Connection`을 눌러 연결이 되는지 먼저 확인합니다.
 
-## 8. DMS Migration 생성
+## 8. 방법 A: DMS Migration 생성
 
 ```text
 Naver Cloud Console
@@ -224,7 +248,78 @@ Naver Cloud Console
 
 마이그레이션 작업이 완료되면 반드시 완료 상태를 확인합니다. 콘솔에서 마이그레이션 작업을 종료/완료 처리해야 계속 실행 중으로 남지 않습니다.
 
-## 9. 마이그레이션 검증
+## 9. 방법 B: mysqldump로 이관
+
+`mysqldump` 방식은 Source DB의 내용을 SQL 파일로 저장한 뒤 Target Cloud DB for MySQL에 복원하는 방식입니다.
+
+이 방식은 DMS보다 단순하지만, 덤프를 뜬 이후 Source DB에 새로 들어온 데이터는 자동으로 Target DB에 반영되지 않습니다. 정확한 실습을 위해서는 아래 중 하나를 선택합니다.
+
+- 게시판 백엔드와 자동 게시글 생성 서비스를 잠시 중지한 뒤 덤프
+- 수업용이라면 덤프 시점 이후 데이터는 누락될 수 있음을 설명하고 진행
+
+백엔드와 자동 게시글 생성을 잠시 멈추는 예시:
+
+```bash
+sudo systemctl stop chapter3-post-seeder || true
+sudo systemctl stop chapter3-backend
+```
+
+Source DB에서 덤프 파일 생성:
+
+```bash
+cd "012-cloud db migration/scripts"
+
+SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
+SOURCE_DB_USER='chapter3_user' \
+SOURCE_DB_PASSWORD='ChangeThisPassword123!' \
+DB_NAME='chapter3_board' \
+DUMP_FILE='/tmp/chapter3_board.sql' \
+./dump-source-db.sh
+```
+
+Cloud DB for MySQL에 복원:
+
+```bash
+TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
+TARGET_DB_USER='TARGET_USER' \
+TARGET_DB_PASSWORD='TARGET_PASSWORD' \
+DUMP_FILE='/tmp/chapter3_board.sql' \
+./restore-target-db.sh
+```
+
+복원 후 백엔드는 다시 켤 수 있습니다. 단, DB 전환 전이라면 기존 Source DB로 다시 쓰게 됩니다.
+
+```bash
+sudo systemctl start chapter3-backend
+sudo systemctl start chapter3-post-seeder || true
+```
+
+`mysqldump` 명령어를 직접 쓰면 아래와 같습니다.
+
+```bash
+MYSQL_PWD='SOURCE_PASSWORD' mysqldump \
+  -h SOURCE_DB_PRIVATE_IP \
+  -u chapter3_user \
+  --single-transaction \
+  --quick \
+  --routines \
+  --triggers \
+  --events \
+  --default-character-set=utf8mb4 \
+  --databases chapter3_board \
+  > /tmp/chapter3_board.sql
+```
+
+복원 명령어:
+
+```bash
+MYSQL_PWD='TARGET_PASSWORD' mysql \
+  -h db-xxxx.vpc-cdb.ntruss.com \
+  -u TARGET_USER \
+  < /tmp/chapter3_board.sql
+```
+
+## 10. 마이그레이션 검증
 
 Source DB와 Target DB의 데이터 수를 비교합니다.
 
@@ -251,7 +346,7 @@ mysql -h db-xxxx.vpc-cdb.ntruss.com -u TARGET_USER -p chapter3_board \
   -e "SELECT COUNT(*) AS target_posts FROM posts;"
 ```
 
-## 10. Backend DB_HOST 전환
+## 11. Backend DB_HOST 전환
 
 백엔드 서버에서 `.env`의 DB 접속 정보를 Cloud DB로 바꿉니다.
 
@@ -277,7 +372,7 @@ curl http://localhost:4000/api/posts
 sudo systemctl status chapter3-backend --no-pager
 ```
 
-## 11. 장애 확인 포인트
+## 12. 장애 확인 포인트
 
 ### DMS Test Connection 실패
 
@@ -299,7 +394,15 @@ sudo systemctl status chapter3-backend --no-pager
 - Backend 서버 ACG outbound에서 Cloud DB `3306/tcp` 접근 가능한지 확인
 - Cloud DB ACG inbound에서 Backend 서버 private IP 허용 여부 확인
 
-## 12. 참고 자료
+### mysqldump 실패
+
+- Source DB 접속 정보 확인
+- Source DB ACG inbound `3306/tcp` 확인
+- `mysqldump` 패키지 설치 여부 확인
+- Target Cloud DB 계정에 DB 생성/테이블 생성 권한이 있는지 확인
+- Source와 Target의 MySQL/MariaDB 버전 차이 확인
+
+## 13. 참고 자료
 
 - Naver Cloud Database Migration Service 개요: <https://guide.ncloud-docs.com/docs/en/dms-overview>
 - Naver Cloud Database Migration Service 사전 조건: <https://guide.ncloud-docs.com/docs/en/dms-spec>
