@@ -123,12 +123,28 @@ sudo ./install-db.sh
 
 ```env
 PORT="4000"
-FRONTEND_ORIGIN="http://10.0.0.10"
+FRONTEND_ORIGIN="http://10.0.0.10,http://board.example.com"
 DB_HOST="10.0.1.30"
 DB_PORT="3306"
 DB_NAME="chapter3_board"
 DB_USER="chapter3_user"
 DB_PASSWORD="ChangeThisPassword123!"
+AUTO_POST_ENABLED="true"
+AUTO_POST_INTERVAL_SECONDS="60"
+AUTO_POST_TOTAL="300"
+AUTO_POST_API_URL="http://127.0.0.1:4000/api/posts"
+```
+
+`FRONTEND_ORIGIN`은 브라우저에서 접속하는 웹 주소를 적습니다. HTTP 수업이면 반드시 `http://`까지 포함합니다. 웹서버 공인 IP와 도메인을 둘 다 쓸 경우 콤마로 나열합니다.
+
+```env
+FRONTEND_ORIGIN="http://WEB_SERVER_PUBLIC_IP,http://YOUR_DOMAIN"
+```
+
+강의 편의상 모든 Origin을 허용하려면 아래처럼 쓸 수 있습니다. 운영 환경에서는 권장하지 않습니다.
+
+```env
+FRONTEND_ORIGIN="*"
 ```
 
 ### 백엔드 서버
@@ -142,7 +158,38 @@ cd "007-three tier web app/backend"
 chmod +x install-backend.sh
 sudo ./install-backend.sh
 # .env가 자동 생성되면 값 수정 후 다시
-sudo ./install-backend.sh
+sudo ./install-backend.sh configure
+```
+
+자동 예시 글을 생성하려면 백엔드 서버 `.env`에 아래 값을 넣고 `install-backend.sh`를 다시 실행합니다.
+
+```env
+AUTO_POST_ENABLED=true
+AUTO_POST_INTERVAL_SECONDS=60
+AUTO_POST_TOTAL=300
+AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
+```
+
+`.env`만 바꾼 경우에는 패키지 설치를 반복할 필요가 없으므로 아래 명령으로 설정만 반영합니다.
+
+```bash
+sudo ./install-backend.sh configure
+```
+
+이 기능은 백엔드 서버 안에서 별도 systemd 서비스가 1분에 한 번씩 자기 API에 `POST /api/posts`를 호출하는 방식입니다. 작성자는 여러 명처럼 보이도록 샘플 이름을 섞고, 제목과 본문은 실습 주제 조합으로 300개까지 생성합니다. 샘플은 매번 랜덤으로 선택하며, 이미 사용한 샘플 번호는 상태 파일에 저장해서 중복 등록하지 않습니다.
+
+상태 확인:
+
+```bash
+sudo ./install-backend.sh status
+sudo systemctl status chapter3-post-seeder --no-pager
+sudo journalctl -u chapter3-post-seeder -f
+```
+
+중지:
+
+```bash
+sudo systemctl disable --now chapter3-post-seeder
 ```
 
 ### 웹서버 `.env` 예시

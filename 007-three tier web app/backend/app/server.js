@@ -8,7 +8,11 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 const port = Number(process.env.PORT || 4000);
-const frontendOrigin = process.env.FRONTEND_ORIGIN || "*";
+const frontendOrigins = String(process.env.FRONTEND_ORIGIN || "*")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowAllOrigins = frontendOrigins.includes("*");
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -21,7 +25,14 @@ const pool = mysql.createPool({
 });
 
 app.use(cors({
-  origin: frontendOrigin,
+  origin(origin, callback) {
+    if (!origin || allowAllOrigins || frontendOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`CORS origin not allowed: ${origin}`));
+  },
   methods: ["GET", "POST", "DELETE", "OPTIONS"]
 }));
 app.use(express.json());

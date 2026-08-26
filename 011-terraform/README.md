@@ -2,15 +2,34 @@
 
 Naver Cloud 리소스를 Terraform으로 생성하고 삭제하는 실습입니다.
 
-10번까지는 서버에 접속해서 리눅스 명령어로 상태를 확인하는 방법을 익혔습니다. 11번에서는 같은 클라우드 리소스를 콘솔이나 CLI로 하나씩 누르는 대신, 코드로 선언하고 `terraform plan`, `terraform apply`, `terraform destroy` 흐름을 익힙니다.
+10번까지는 서버에 접속해서 리눅스 명령어로 상태를 확인하는 방법을 익혔습니다. 11번에서는 콘솔이나 CLI로 하나씩 만들던 인프라를 코드로 선언하고, `terraform plan`, `terraform apply`, `terraform destroy` 흐름을 익힙니다.
+
+이 예제는 007번 게시판 실습을 Terraform으로 자동 생성합니다.
+
+```text
+사용자 브라우저
+  ↓ 80
+웹 서버 Public Subnet
+  ↓ /backend-api 프록시
+백엔드 서버 Private Subnet
+  ↓ 3306
+DB 서버 Private Subnet
+
+관리자
+  ↓ SSH
+베스천 서버 Public Subnet
+  ↓ SSH ProxyJump
+백엔드/DB 서버 Private Subnet
+```
 
 ## 실습 목표
 
 - Terraform 기본 흐름 이해
 - Ncloud Terraform Provider 설정
-- VPC, Subnet, ACG, Login Key, Init Script, Server 생성
+- VPC, Subnet, NAT Gateway, Route, ACG 생성
+- 베스천 서버와 private 서버 접속 구조 이해
+- Init Script로 게시판 웹/백엔드/DB 자동 설치
 - 시간 요금제 서버 생성
-- Public IP 확인
 - Terraform state 개념 이해
 - 실습 리소스 삭제
 
@@ -38,7 +57,34 @@ main.tf 작성
 | Output | 생성 후 확인할 값. 예: 서버 번호, 공인 IP |
 | State | Terraform이 현재 인프라 상태를 기록하는 파일 |
 
-## 2. 설치 확인
+## 2. 생성되는 구성
+
+| 구분 | 이름 |
+| --- | --- |
+| VPC | `vpc-lab11` |
+| Public Subnet | `sub-lab11-pub-kr1` |
+| Private Subnet | `sub-lab11-pri-kr1` |
+| NAT Gateway Subnet | `sub-lab11-nat-kr1` |
+| NAT Gateway | `natgw-lab11-kr1` |
+| Bastion ACG | `lab11-bastion-acg` |
+| Web ACG | `lab11-web-acg` |
+| Backend ACG | `lab11-backend-acg` |
+| DB ACG | `lab11-db-acg` |
+| Login Key | `key-lab11` |
+| Bastion Server | `svr-lab11-bastion-kr1` |
+| Web Server | `svr-lab11-web-kr1` |
+| Backend Server | `svr-lab11-backend-kr1` |
+| DB Server | `svr-lab11-db-kr1` |
+
+서버는 시간 요금제로 생성합니다.
+
+```hcl
+fee_system_type_code = "MTRAT"
+```
+
+Private subnet의 백엔드/DB 서버도 init script에서 패키지를 설치해야 하므로 NAT Gateway를 생성합니다. NAT Gateway가 없으면 private 서버에서 `apt-get`, `git clone`, `npm install`이 실패할 수 있습니다.
+
+## 3. 설치 확인
 
 Terraform 설치 확인:
 
@@ -64,13 +110,13 @@ brew tap hashicorp/tap
 brew install hashicorp/tap/terraform
 ```
 
-## 3. 예제 폴더로 이동
+## 4. 예제 폴더로 이동
 
 ```bash
 cd "011-terraform/examples/ncloud-basic"
 ```
 
-## 4. 인증키 준비
+## 5. 인증키와 입력값 준비
 
 Naver Cloud 콘솔에서 API 인증키를 준비합니다.
 
@@ -81,7 +127,7 @@ Naver Cloud 콘솔에서 API 인증키를 준비합니다.
 신규 API 인증키 생성
 ```
 
-이 실습에서는 인증키를 코드에 직접 쓰지 않습니다. `terraform.tfvars` 파일에 넣고, 이 파일은 `.gitignore`로 Git에 올라가지 않게 관리합니다.
+`terraform.tfvars` 파일을 만듭니다.
 
 ```bash
 cp terraform.tfvars.example terraform.tfvars
@@ -93,11 +139,20 @@ cp terraform.tfvars.example terraform.tfvars
 access_key   = "YOUR_ACCESS_KEY"
 secret_key   = "YOUR_SECRET_KEY"
 my_public_ip = "YOUR_PUBLIC_IP/32"
+
+region = "KR"
+zone   = "KR-1"
+
+server_image_number = "104630229"
+server_spec_code    = "s2-g3a"
+
+db_root_password  = "ChangeRootPassword123!"
+board_db_password = "ChangeThisPassword123!"
 ```
 
-강의장 전체에서 접속해야 하면 `my_public_ip`를 강의장 공인 IP 대역으로 넣습니다. 실습 편의상 `0.0.0.0/0`도 가능하지만 운영 환경에서는 권장하지 않습니다.
+`my_public_ip`는 SSH를 허용할 관리자 공인 IP입니다. 실습 편의상 `0.0.0.0/0`도 가능하지만 운영 환경에서는 권장하지 않습니다.
 
-## 5. 파일 구성
+## 6. 파일 구성
 
 ```text
 examples/ncloud-basic
@@ -118,7 +173,7 @@ examples/ncloud-basic
 | `outputs.tf` | 생성 후 출력할 값 선언 |
 | `terraform.tfvars.example` | 입력값 예시 |
 
-## 6. 초기화
+## 7. 초기화
 
 ```bash
 terraform init
@@ -126,7 +181,7 @@ terraform init
 
 이 명령은 Ncloud provider를 다운로드하고 `.terraform` 디렉터리를 만듭니다.
 
-## 7. 포맷 확인
+## 8. 포맷 확인
 
 ```bash
 terraform fmt
@@ -134,7 +189,7 @@ terraform fmt
 
 Terraform 파일의 들여쓰기와 정렬을 맞춥니다.
 
-## 8. 문법 검증
+## 9. 문법 검증
 
 ```bash
 terraform validate
@@ -142,15 +197,13 @@ terraform validate
 
 문법과 provider 설정이 올바른지 확인합니다.
 
-## 9. 생성 계획 확인
+## 10. 생성 계획 확인
 
 ```bash
 terraform plan
 ```
 
 `plan`은 실제 생성 전에 Terraform이 무엇을 만들지 보여줍니다.
-
-주니어가 꼭 봐야 하는 부분:
 
 | 표시 | 의미 |
 | --- | --- |
@@ -159,7 +212,7 @@ terraform plan
 | `- destroy` | 삭제 |
 | `-/+ replace` | 삭제 후 재생성 |
 
-## 10. 리소스 생성
+## 11. 리소스 생성
 
 ```bash
 terraform apply
@@ -173,94 +226,115 @@ terraform apply
 terraform apply -auto-approve
 ```
 
-## 11. 생성 결과 확인
+## 12. 생성 결과 확인
 
 ```bash
 terraform output
 ```
 
-특정 값만 확인:
+주요 output:
 
 ```bash
-terraform output server_instance_no
-terraform output public_ip
 terraform output http_url
+terraform output bastion_public_ip
+terraform output web_public_ip
+terraform output backend_private_ip
+terraform output db_private_ip
+terraform output ssh_bastion_command
+terraform output ssh_backend_via_bastion_command
+terraform output ssh_db_via_bastion_command
 ```
 
 관리자 비밀번호도 실습 편의를 위해 output에 보이도록 설정했습니다.
 
 ```bash
-terraform output admin_password
+terraform output admin_passwords
 ```
 
 이 값은 서버 생성 시 사용한 Terraform login key로 복호화한 관리자 비밀번호입니다. 실무에서는 비밀번호를 output에 그대로 노출하지 않는 것이 맞지만, 강의 실습에서는 접속 흐름을 단순하게 만들기 위해 보이게 했습니다. 화면 공유나 터미널 로그에 남기지 않도록 주의합니다.
 
-생성되는 주요 리소스:
+## 13. 게시판 접속
 
-| 리소스 | 이름 |
-| --- | --- |
-| VPC | `vpc-lab11` |
-| Public Subnet | `sub-lab11-pub-kr1` |
-| Private Subnet | `sub-lab11-pri-kr1` |
-| ACG | `lab11-acg` |
-| Login Key | `key-lab11` |
-| Init Script | `init-lab11-nginx` |
-| Server | `svr-lab11-web-kr1` |
-
-## 12. 브라우저 접속
-
-출력된 Public IP로 접속합니다.
-
-```text
-http://PUBLIC_IP/
-```
-
-Init Script가 정상 동작했다면 nginx 기본 페이지 또는 실습 페이지가 보입니다.
-
-Ncloud Terraform provider는 `ncloud_init_script.content`에 HTML 태그가 들어가면 콘솔 저장 과정에서 일부 태그를 필터링해 Terraform state 비교가 깨질 수 있습니다. 그래서 이 예제의 init script는 HTML 태그 없이 단순 텍스트 페이지를 생성합니다.
-
-아래와 같은 오류가 나오면 init script 내용에 필터링되는 태그가 들어간 경우입니다.
-
-```text
-Provider produced inconsistent result after apply
-```
-
-이 경우 init script 내용에서 HTML/XML 태그를 제거하고 다시 실행합니다.
+출력된 URL로 접속합니다.
 
 ```bash
-terraform apply
+terraform output http_url
 ```
 
-nginx 접속이 안 되면 먼저 SSH로 서버에 접속해 init script 로그와 서비스 상태를 확인합니다.
+브라우저에서는 아래 형식으로 접속합니다.
+
+```text
+http://WEB_PUBLIC_IP/
+```
+
+웹 서버 nginx는 `/backend-api/` 요청을 private subnet의 백엔드 서버로 프록시합니다. 그래서 사용자 브라우저는 백엔드 private IP를 직접 알 필요가 없습니다.
+
+## 14. SSH 접속
+
+베스천 서버 접속:
 
 ```bash
-ssh -i key-lab11.pem root@PUBLIC_IP
+terraform output ssh_bastion_command
+```
+
+출력된 명령을 실행합니다.
+
+Private backend 서버 접속:
+
+```bash
+terraform output ssh_backend_via_bastion_command
+```
+
+Private DB 서버 접속:
+
+```bash
+terraform output ssh_db_via_bastion_command
+```
+
+`-J` 옵션은 SSH ProxyJump입니다. 내 PC에서 베스천을 거쳐 private 서버로 접속할 때 사용합니다.
+
+## 15. 상태 점검
+
+웹 서버:
+
+```bash
 sudo tail -n 100 /var/log/lab11-init.log
 sudo systemctl status nginx --no-pager
 sudo nginx -t
-sudo ss -tulpen | grep ':80'
 curl -i http://localhost
+curl -i http://localhost/backend-api/api/health
 ```
 
-확인 순서:
-
-1. `terraform output public_ip`의 IP로 접속 중인지 확인합니다.
-2. ACG에 `80/tcp` inbound가 있는지 확인합니다.
-3. 서버 내부에서 `curl -i http://localhost`가 되는지 확인합니다.
-4. `/var/log/lab11-init.log`에서 `apt-get`, `nginx` 설치 실패가 있는지 확인합니다.
-
-NCP Ubuntu 서버에서 IPv6가 비활성화된 경우 nginx 기본 설정의 `listen [::]:80` 때문에 nginx가 실패할 수 있습니다. 이 예제의 init script는 기본 사이트 설정에서 IPv6 listen 줄을 제거합니다.
-
-이미 서버에 접속한 상태에서 수동으로 고치려면:
+백엔드 서버:
 
 ```bash
-sudo sed -i '/listen \[::\]:80/d' /etc/nginx/sites-available/default
-sudo nginx -t
-sudo systemctl restart nginx
-sudo systemctl status nginx --no-pager
+sudo tail -n 100 /var/log/lab11-init.log
+sudo systemctl status chapter3-backend --no-pager
+curl -i http://localhost:4000/api/health
 ```
 
-Init Script는 서버 최초 생성 시점에만 실행됩니다. 서버가 이미 만들어진 뒤 init script 내용을 수정했다면 기존 서버에는 자동 재실행되지 않습니다. 실습에서는 아래처럼 서버를 교체하거나 전체 삭제 후 다시 생성합니다.
+DB 서버:
+
+```bash
+sudo tail -n 100 /var/log/lab11-init.log
+sudo systemctl status mariadb --no-pager
+sudo mariadb -u root -p -e "SHOW DATABASES;"
+```
+
+NCP Ubuntu 서버에서 IPv6가 비활성화된 경우 nginx 기본 설정의 `listen [::]:80` 때문에 nginx가 실패할 수 있습니다. 이 예제의 웹 설치 스크립트는 nginx 설정에서 IPv6 listen 줄을 제거합니다.
+
+## 16. Init Script 재실행 주의
+
+Init Script는 서버 최초 생성 시점에만 실행됩니다. 서버가 이미 만들어진 뒤 init script 내용을 수정했다면 기존 서버에는 자동 재실행되지 않습니다.
+
+실습에서는 전체 삭제 후 다시 생성하는 것이 가장 단순합니다.
+
+```bash
+terraform destroy
+terraform apply
+```
+
+서버만 교체해야 한다면 관련 서버와 Public IP를 같이 교체합니다.
 
 ```bash
 terraform apply \
@@ -268,26 +342,7 @@ terraform apply \
   -replace=ncloud_public_ip.web
 ```
 
-또는:
-
-```bash
-terraform destroy
-terraform apply
-```
-
-서버만 교체하면 기존 Public IP를 새 서버에 재할당하는 과정에서 아래 오류가 날 수 있습니다.
-
-```text
-Unassigned Authorized IP.
-```
-
-이 예제는 서버가 교체될 때 Public IP도 같이 교체되도록 `replace_triggered_by = [ncloud_server.web]`를 설정합니다. 이미 오류가 난 상태라면 아래 명령으로 Public IP 리소스만 다시 생성합니다.
-
-```bash
-terraform apply -replace=ncloud_public_ip.web
-```
-
-## 13. 상태 파일 이해
+## 17. State 확인
 
 Terraform은 `terraform.tfstate` 파일에 실제 리소스 상태를 기록합니다.
 
@@ -302,17 +357,7 @@ terraform state list
 - 실무에서는 로컬 state 대신 Object Storage 같은 원격 backend를 사용합니다.
 - 이 저장소에서는 `*.tfstate`, `*.tfvars`, `*.pem`을 Git에 올리지 않도록 `.gitignore`에 등록합니다.
 
-## 14. 변경 실습
-
-예를 들어 `variables.tf` 또는 `terraform.tfvars`에서 서버 이름을 바꾸고 plan을 확인합니다.
-
-```bash
-terraform plan
-```
-
-Terraform은 변경이 가능한 항목은 update로, 재생성이 필요한 항목은 replace로 표시합니다.
-
-## 15. 삭제
+## 18. 삭제
 
 실습이 끝나면 반드시 삭제합니다.
 
@@ -336,7 +381,7 @@ terraform state list
 
 아무것도 출력되지 않으면 Terraform이 관리하던 리소스가 모두 삭제된 상태입니다.
 
-## 16. 실무 주의사항
+## 19. 실무 주의사항
 
 - 인증키를 `.tf` 파일에 직접 쓰지 않습니다.
 - `terraform.tfvars`는 Git에 올리지 않습니다.
@@ -344,8 +389,9 @@ terraform state list
 - 운영 환경에서는 `destroy` 권한을 제한합니다.
 - 여러 명이 함께 쓰는 프로젝트는 원격 backend와 state lock을 사용합니다.
 - 수동으로 콘솔에서 리소스를 변경하면 Terraform state와 실제 인프라가 어긋날 수 있습니다.
+- NAT Gateway와 Public IP는 비용이 발생할 수 있으므로 실습 후 삭제합니다.
 
-## 17. 참고 문서
+## 20. 참고 문서
 
 - Ncloud Terraform Provider: <https://registry.terraform.io/providers/NaverCloudPlatform/ncloud/latest/docs>
 - Ncloud Provider GitHub: <https://github.com/NaverCloudPlatform/terraform-provider-ncloud>

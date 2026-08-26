@@ -14,3 +14,4 @@
 * [009 AI RAG Studio](labs/009-ai-rag-studio.md)
 * [010 Linux Commands](labs/010-linux-commands.md)
 * [011 Terraform](labs/011-terraform.md)
+* [012 Cloud DB Migration](labs/012-cloud-db-migration.md)

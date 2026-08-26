@@ -7,4 +7,6 @@ site/
 *.tfstate.*
 *.tfvars
 !*.tfvars.example
+tfplan
+*.tfplan
 *.pem

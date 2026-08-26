@@ -23,3 +23,4 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 | [`009-ai rag studio`](./009-ai%20rag%20studio/) | CLOVA Studio API와 로컬 RAG 문서 관리 화면을 사용해 AI 애플리케이션 구성을 실습하는 예제입니다. |
 | [`010-linux commands`](./010-linux%20commands/) | 클라우드 엔지니어가 Ubuntu 서버에서 자주 사용하는 리눅스 기본 명령어를 점검 순서대로 익히는 예제입니다. |
 | [`011-terraform`](./011-terraform/) | Terraform으로 Naver Cloud VPC, Subnet, ACG, Init Script, Server를 코드로 생성하고 삭제하는 예제입니다. |
+| [`012-cloud db migration`](./012-cloud%20db%20migration/) | 007번 게시판 DB를 Cloud DB for MySQL로 마이그레이션하기 위한 ERD, Source DB 사전 설정, 검증, 백엔드 전환 예제입니다. |

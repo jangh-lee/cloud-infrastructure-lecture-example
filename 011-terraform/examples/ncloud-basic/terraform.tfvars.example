@@ -5,6 +5,10 @@ region = "KR"
 zone   = "KR-1"
 
 my_public_ip = "YOUR_PUBLIC_IP/32"
+name_prefix  = "lab11"
 
 server_image_number = "104630229"
 server_spec_code    = "s2-g3a"
+
+db_root_password  = "ChangeRootPassword123!"
+board_db_password = "ChangeThisPassword123!"
