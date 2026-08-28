@@ -15,3 +15,4 @@
 * [010 Linux Commands](labs/010-linux-commands.md)
 * [011 Terraform](labs/011-terraform.md)
 * [012 Cloud DB Migration](labs/012-cloud-db-migration.md)
+* [013 Cost Slack Alert](labs/013-cost-slack-alert.md)

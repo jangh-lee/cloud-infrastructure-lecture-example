@@ -24,3 +24,4 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 | [`010-linux commands`](./010-linux%20commands/) | 클라우드 엔지니어가 Ubuntu 서버에서 자주 사용하는 리눅스 기본 명령어를 점검 순서대로 익히는 예제입니다. |
 | [`011-terraform`](./011-terraform/) | Terraform으로 Naver Cloud VPC, Subnet, ACG, Init Script, Server를 코드로 생성하고 삭제하는 예제입니다. |
 | [`012-cloud db migration`](./012-cloud%20db%20migration/) | 007번 게시판 DB를 Cloud DB for MySQL로 마이그레이션하기 위한 ERD, Source DB 사전 설정, 검증, 백엔드 전환 예제입니다. |
+| [`013-cost slack alert`](./013-cost%20slack%20alert/) | Cloud Functions에서 Naver Cloud 비용을 조회하고 Slack으로 알림을 보내는 예제입니다. |
