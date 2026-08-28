@@ -58,7 +58,7 @@ Webhook URL은 비밀번호처럼 취급합니다. Git에 올리지 않습니다
 Cloud Functions 업로드용 소스:
 
 ```text
-013-cost slack alert/function/__main__.py
+013-cost slack alert/function/main.py
 ```
 
 업로드용 zip 파일:
@@ -67,7 +67,7 @@ Cloud Functions 업로드용 소스:
 013-cost slack alert/dist/ncp-billing.zip
 ```
 
-zip 파일에는 `__main__.py`가 루트에 들어 있어야 합니다.
+zip 파일에는 `main.py`, `__main__.py`, `boto3/botocore` 의존성이 함께 들어갑니다. `main.py`가 실제 함수 본체이고, `__main__.py`는 Cloud Functions 런타임 호환을 위한 wrapper입니다.
 
 ## 5. zip 파일 다시 만들기
 
@@ -128,6 +128,13 @@ Action의 기본 파라미터 또는 환경 변수에 아래 값을 넣습니다
 | `ALERT_ONLY_OVER_BUDGET` | `false` | `true`면 예산 초과 시에만 Slack 전송 |
 | `SLACK_CHANNEL` | Slack Webhook 기본 채널 | Webhook이 허용하는 경우 채널 override |
 | `SLACK_USERNAME` | `NCP Cost Bot` | Slack 표시 이름 |
+| `SAVE_REPORT_TO_OBJECT_STORAGE` | `false` | `true`면 비용 조회 결과를 Object Storage에 JSON으로 저장 |
+| `OBJECT_STORAGE_BUCKET` |  | 비용 리포트를 저장할 Object Storage 버킷 |
+| `OBJECT_STORAGE_KEY_PREFIX` | `billing-reports` | 저장 경로 prefix |
+| `OBJECT_STORAGE_ENDPOINT` | `https://kr.object.ncloudstorage.com` | Object Storage endpoint |
+| `OBJECT_STORAGE_REGION` | `kr-standard` | Object Storage region |
+| `OBJECT_STORAGE_ACCESS_KEY` | `NCP_ACCESS_KEY` | Object Storage용 Access Key를 따로 쓸 때 사용 |
+| `OBJECT_STORAGE_SECRET_KEY` | `NCP_SECRET_KEY` | Object Storage용 Secret Key를 따로 쓸 때 사용 |
 
 ## 8. 테스트 파라미터 예시
 
@@ -139,7 +146,9 @@ Cloud Functions 테스트 실행 시 아래처럼 넣습니다.
   "NCP_SECRET_KEY": "YOUR_NCP_SECRET_KEY",
   "SLACK_WEBHOOK_URL": "https://hooks.slack.com/services/...",
   "BUDGET_KRW": "5000",
-  "ALERT_ONLY_OVER_BUDGET": "false"
+  "ALERT_ONLY_OVER_BUDGET": "false",
+  "SAVE_REPORT_TO_OBJECT_STORAGE": "true",
+  "OBJECT_STORAGE_BUCKET": "ncp-billing-report-james-260828"
 }
 ```
 
@@ -190,13 +199,14 @@ NCP 비용 알림
 2. Billing API `getDemandCostList`를 호출합니다.
 3. 응답에서 `useAmount` 또는 비용 관련 숫자 필드를 찾아 합산합니다.
 4. `BUDGET_KRW`와 비교합니다.
-5. Slack Incoming Webhook으로 메시지를 보냅니다.
+5. `SAVE_REPORT_TO_OBJECT_STORAGE=true`이면 Object Storage에 JSON 리포트를 저장합니다.
+6. Slack Incoming Webhook으로 메시지를 보냅니다.
 
 ## 12. Object Storage 저장 시 boto3 체크섬 설정
 
-현재 `ncp-billing.zip` 예제는 Billing API 조회와 Slack 알림만 수행하므로 `boto3`가 필요 없습니다.
+`ncp-billing.zip` 예제는 `SAVE_REPORT_TO_OBJECT_STORAGE=true`일 때 비용 조회 결과를 Object Storage에 JSON 파일로 저장합니다. 이때 `main.py` 안에서 `boto3`와 아래 `botocore.config.Config`를 사용합니다.
 
-다만 비용 리포트를 Object Storage에 저장하거나, Object Storage에 저장된 리포트를 다시 읽는 구조로 확장할 때는 `boto3`/`botocore` 설정을 조심해야 합니다. 최근 `botocore` 버전에서는 요청/응답 체크섬 처리가 더 적극적으로 동작할 수 있고, S3 호환 스토리지에서 체크섬 관련 헤더 때문에 `AccessDenied`, `InvalidRequest`, 서명 오류처럼 보이는 문제가 발생할 수 있습니다.
+최근 `botocore` 버전에서는 요청/응답 체크섬 처리가 더 적극적으로 동작할 수 있고, S3 호환 스토리지에서 체크섬 관련 헤더 때문에 `AccessDenied`, `InvalidRequest`, 서명 오류처럼 보이는 문제가 발생할 수 있습니다.
 
 Naver Cloud Object Storage를 `boto3`로 사용할 때는 아래 설정을 명시합니다.
 
@@ -213,7 +223,7 @@ config = Config(
 )
 ```
 
-전체 예시:
+`main.py`에 들어간 Object Storage client 생성 방식:
 
 ```python
 import boto3
@@ -243,6 +253,12 @@ s3 = boto3.client(
 
 response = s3.list_objects_v2(Bucket=BUCKET)
 print(response)
+```
+
+비용 리포트 저장 경로 예시:
+
+```text
+billing-reports/202608/ncp-billing-20260828.json
 ```
 
 예제 파일:

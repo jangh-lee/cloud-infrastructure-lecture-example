@@ -56,6 +56,8 @@ Naver Cloud Console
 | Upload File | `ncp-billing.zip` |
 | Main Function | `main` |
 
+zip 파일에는 `main.py`, `__main__.py`, `boto3/botocore` 의존성이 함께 들어갑니다.
+
 ## 기본 파라미터
 
 ```json
@@ -64,7 +66,9 @@ Naver Cloud Console
   "NCP_SECRET_KEY": "YOUR_NCP_SECRET_KEY",
   "SLACK_WEBHOOK_URL": "https://hooks.slack.com/services/...",
   "BUDGET_KRW": "10000",
-  "ALERT_ONLY_OVER_BUDGET": "false"
+  "ALERT_ONLY_OVER_BUDGET": "false",
+  "SAVE_REPORT_TO_OBJECT_STORAGE": "true",
+  "OBJECT_STORAGE_BUCKET": "ncp-billing-report-james-260828"
 }
 ```
 
@@ -84,11 +88,12 @@ Naver Cloud Console
 2. Billing API `getDemandCostList`를 호출합니다.
 3. 응답에서 사용 금액을 추출합니다.
 4. `BUDGET_KRW`와 비교합니다.
-5. Slack으로 비용 알림을 보냅니다.
+5. `SAVE_REPORT_TO_OBJECT_STORAGE=true`이면 Object Storage에 JSON 리포트를 저장합니다.
+6. Slack으로 비용 알림을 보냅니다.
 
 ## Object Storage 체크섬 설정
 
-현재 `ncp-billing.zip` 예제는 `boto3`를 쓰지 않습니다. 하지만 비용 리포트를 Object Storage에 저장하는 구조로 확장하면 `boto3`/`botocore` 체크섬 설정이 필요할 수 있습니다.
+`ncp-billing.zip` 예제의 `main.py`는 Object Storage 저장 옵션을 켜면 `boto3`를 사용합니다. 이때 체크섬 설정을 함수 코드 안에 포함했습니다.
 
 Naver Cloud Object Storage를 S3 호환 API로 사용할 때는 아래 설정을 명시합니다.
 
