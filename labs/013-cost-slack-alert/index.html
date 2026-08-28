@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/008-game-server/">
+        <link rel="canonical" href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/013-cost-slack-alert/">
       
       
-        <link rel="prev" href="../007-three-tier-web-app/">
+        <link rel="prev" href="../012-cloud-db-migration/">
       
       
-        <link rel="next" href="../009-ai-rag-studio/">
+        <link rel="next" href="../../SUMMARY/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>008 Game Server 생성 실습 - 클라우드 인프라 실습</title>
+        <title>013 Cost Slack Alert - 클라우드 인프라 실습</title>
       
     
     
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#008-game-server" class="md-skip">
+        <a href="#013-cost-slack-alert" class="md-skip">
           콘텐츠로 이동
         </a>
       
@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              008 Game Server 생성 실습
+              013 Cost Slack Alert
             
           </span>
         </div>
@@ -620,37 +620,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    008 Game Server 생성 실습
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../008-game-server/" class="md-nav__link">
         
   
   
@@ -666,103 +639,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="목차">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      목차
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        목표
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#acg" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ACG 포트
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        서버 설치
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        서버 실행
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#30" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        30명 접속 운영
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        학생 접속
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        기본 조작키
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -884,10 +760,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../013-cost-slack-alert/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    013 Cost Slack Alert
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -903,6 +806,114 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="목차">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      목차
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        목표
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        준비물
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        zip 파일
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-functions-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Functions Action 생성
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        기본 파라미터
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        스케줄
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        동작 설명
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        참고
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -980,10 +991,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#acg" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ACG 포트
+        준비물
       
     </span>
   </a>
@@ -991,10 +1002,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#zip" class="md-nav__link">
     <span class="md-ellipsis">
       
-        서버 설치
+        zip 파일
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-functions-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Functions Action 생성
       
     </span>
   </a>
@@ -1005,18 +1027,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        서버 실행
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#30" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        30명 접속 운영
+        기본 파라미터
       
     </span>
   </a>
@@ -1027,7 +1038,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        학생 접속
+        스케줄
       
     </span>
   </a>
@@ -1038,7 +1049,18 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        기본 조작키
+        동작 설명
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        참고
       
     </span>
   </a>
@@ -1065,137 +1087,109 @@
   
 
 
-<h1 id="008-game-server">008 Game Server 생성 실습<a class="headerlink" href="#008-game-server" title="Permanent link">&para;</a></h1>
+<h1 id="013-cost-slack-alert">013 Cost Slack Alert<a class="headerlink" href="#013-cost-slack-alert" title="Permanent link">&para;</a></h1>
 <h2 id="_1">목표<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>Ubuntu 서버에서 SuperTuxKart 게임 서버를 실행하고, 학생 PC에서 공인 IP와 UDP 포트로 접속합니다.</p>
-<p>실습 폴더:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>008-game server
+<p>Naver Cloud Cost and Usage API로 이번 달 사용 요금을 조회하고, Cloud Functions에서 Slack으로 비용 알림을 보냅니다.</p>
+<p>구조:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Cloud Functions Trigger
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  -&gt; Python Action
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  -&gt; Billing API getDemandCostList
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  -&gt; Slack Incoming Webhook
 </code></pre></div>
-<h2 id="acg">ACG 포트<a class="headerlink" href="#acg" title="Permanent link">&para;</a></h2>
+<h2 id="_2">준비물<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Protocol</th>
-<th>Port</th>
-<th>Purpose</th>
+<th>항목</th>
+<th>설명</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>TCP</td>
-<td>22</td>
-<td>SSH</td>
+<td><code>NCP_ACCESS_KEY</code></td>
+<td>Naver Cloud API Access Key</td>
 </tr>
 <tr>
-<td>UDP</td>
-<td>2759</td>
-<td>SuperTuxKart 게임 서버</td>
+<td><code>NCP_SECRET_KEY</code></td>
+<td>Naver Cloud API Secret Key</td>
 </tr>
 <tr>
-<td>UDP</td>
-<td>2757</td>
-<td>서버 discovery</td>
+<td><code>SLACK_WEBHOOK_URL</code></td>
+<td>Slack Incoming Webhook URL</td>
+</tr>
+<tr>
+<td><code>BUDGET_KRW</code></td>
+<td>예산 기준 금액</td>
 </tr>
 </tbody>
 </table>
-<p>Ubuntu 방화벽:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">2759</span>/udp
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">2757</span>/udp
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>status
+<p>Webhook URL과 Secret Key는 Git에 올리지 않습니다.</p>
+<h2 id="zip">zip 파일<a class="headerlink" href="#zip" title="Permanent link">&para;</a></h2>
+<p>업로드용 zip 파일:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>013-cost slack alert/dist/ncp-cost-slack-alert.zip
 </code></pre></div>
-<h2 id="_2">서버 설치<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>supertuxkart
+<p>다시 만들기:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"013-cost slack alert"</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>./scripts/build-zip.sh
 </code></pre></div>
-<h2 id="_3">서버 실행<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>supertuxkart<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>--no-graphics<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>--no-sound<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span>--lan-server<span class="o">=</span>NCP-Lab<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span>--port<span class="o">=</span><span class="m">2759</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span>--max-players<span class="o">=</span><span class="m">24</span>
+<h2 id="cloud-functions-action">Cloud Functions Action 생성<a class="headerlink" href="#cloud-functions-action" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Naver Cloud Console
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  -&gt; Cloud Functions
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  -&gt; Action 생성
 </code></pre></div>
-<p>스크립트로 실행:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"008-game server"</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>./scripts/start-supertuxkart.sh
-</code></pre></div>
-<p>서버 포트 확인:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>ss<span class="w"> </span>-lunp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="m">2759</span>
-</code></pre></div>
-<p>정상 로그 예시:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>STKHost: Server port is 2759
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>main: Creating a LAN server 'NCP-Lab'.
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>STKHost: Listening has been started.
-</code></pre></div>
-<h2 id="30">30명 접속 운영<a class="headerlink" href="#30" title="Permanent link">&para;</a></h2>
-<p>SuperTuxKart는 한 서버를 24명 이하로 운영하는 것이 안전합니다. 30명 실습이면 서버를 2개로 나눕니다.</p>
-<p>서버 1:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nv">SERVER_NAME</span><span class="o">=</span>NCP-Lab-1<span class="w"> </span><span class="nv">SERVER_PORT</span><span class="o">=</span><span class="m">2759</span><span class="w"> </span><span class="nv">MAX_PLAYERS</span><span class="o">=</span><span class="m">15</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span>./scripts/start-supertuxkart.sh
-</code></pre></div>
-<p>서버 2:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">SERVER_NAME</span><span class="o">=</span>NCP-Lab-2<span class="w"> </span><span class="nv">SERVER_PORT</span><span class="o">=</span><span class="m">2760</span><span class="w"> </span><span class="nv">MAX_PLAYERS</span><span class="o">=</span><span class="m">15</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span>./scripts/start-supertuxkart.sh
-</code></pre></div>
-<p>추가 포트:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">2760</span>/udp
-</code></pre></div>
-<h2 id="_4">학생 접속<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p>클라이언트 다운로드:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>https://supertuxkart.net/Download
-</code></pre></div>
-<p>접속 경로:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Online
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>Global Networking
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>Enter server address
-</code></pre></div>
-<p>서버 주소:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>SERVER_PUBLIC_IP:2759
-</code></pre></div>
-<h2 id="_5">기본 조작키<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p>권장 설정:</p>
 <table>
 <thead>
 <tr>
-<th>Key</th>
-<th>Action</th>
+<th>항목</th>
+<th>값</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>↑</code></td>
-<td>가속</td>
+<td>Runtime</td>
+<td>Python 3.x</td>
 </tr>
 <tr>
-<td><code>↓</code></td>
-<td>브레이크 / 후진</td>
+<td>Code Type</td>
+<td>파일 업로드</td>
 </tr>
 <tr>
-<td><code>←</code></td>
-<td>왼쪽 조향</td>
+<td>Upload File</td>
+<td><code>ncp-cost-slack-alert.zip</code></td>
 </tr>
 <tr>
-<td><code>→</code></td>
-<td>오른쪽 조향</td>
-</tr>
-<tr>
-<td><code>Space</code></td>
-<td>아이템 사용</td>
-</tr>
-<tr>
-<td><code>N</code></td>
-<td>니트로</td>
-</tr>
-<tr>
-<td><code>V</code></td>
-<td>뒤 보기</td>
-</tr>
-<tr>
-<td><code>Esc</code></td>
-<td>메뉴</td>
+<td>Main Function</td>
+<td><code>main</code></td>
 </tr>
 </tbody>
 </table>
+<h2 id="_3">기본 파라미터<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">"NCP_ACCESS_KEY"</span><span class="p">:</span><span class="w"> </span><span class="s2">"YOUR_NCP_ACCESS_KEY"</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">"NCP_SECRET_KEY"</span><span class="p">:</span><span class="w"> </span><span class="s2">"YOUR_NCP_SECRET_KEY"</span><span class="p">,</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nt">"SLACK_WEBHOOK_URL"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://hooks.slack.com/services/..."</span><span class="p">,</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="nt">"BUDGET_KRW"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10000"</span><span class="p">,</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">"ALERT_ONLY_OVER_BUDGET"</span><span class="p">:</span><span class="w"> </span><span class="s2">"false"</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="_4">스케줄<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p>매일 오전 9시에 실행하는 예시:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>0 0 9 * * *
+</code></pre></div>
+<p>콘솔에서 Cron 기준 시간이 UTC인지 KST인지 확인합니다.</p>
+<h2 id="_5">동작 설명<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<ol>
+<li>현재 월을 <code>yyyyMM</code> 형식으로 계산합니다.</li>
+<li>Billing API <code>getDemandCostList</code>를 호출합니다.</li>
+<li>응답에서 사용 금액을 추출합니다.</li>
+<li><code>BUDGET_KRW</code>와 비교합니다.</li>
+<li>Slack으로 비용 알림을 보냅니다.</li>
+</ol>
+<h2 id="_6">참고<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li>상세 자료는 저장소의 <code>013-cost slack alert/README.md</code>를 확인합니다.</li>
+</ul>
 
 
 
