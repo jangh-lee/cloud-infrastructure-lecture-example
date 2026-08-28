@@ -192,7 +192,89 @@ NCP 비용 알림
 4. `BUDGET_KRW`와 비교합니다.
 5. Slack Incoming Webhook으로 메시지를 보냅니다.
 
-## 12. 장애 확인
+## 12. Object Storage 저장 시 boto3 체크섬 설정
+
+현재 `ncp-billing.zip` 예제는 Billing API 조회와 Slack 알림만 수행하므로 `boto3`가 필요 없습니다.
+
+다만 비용 리포트를 Object Storage에 저장하거나, Object Storage에 저장된 리포트를 다시 읽는 구조로 확장할 때는 `boto3`/`botocore` 설정을 조심해야 합니다. 최근 `botocore` 버전에서는 요청/응답 체크섬 처리가 더 적극적으로 동작할 수 있고, S3 호환 스토리지에서 체크섬 관련 헤더 때문에 `AccessDenied`, `InvalidRequest`, 서명 오류처럼 보이는 문제가 발생할 수 있습니다.
+
+Naver Cloud Object Storage를 `boto3`로 사용할 때는 아래 설정을 명시합니다.
+
+```python
+from botocore.config import Config
+
+config = Config(
+    signature_version="s3v4",
+    s3={
+        "addressing_style": "path"
+    },
+    request_checksum_calculation="when_required",
+    response_checksum_validation="when_required",
+)
+```
+
+전체 예시:
+
+```python
+import boto3
+from botocore.config import Config
+
+ACCESS_KEY = "YOUR_ACCESS_KEY"
+SECRET_KEY = "YOUR_SECRET_KEY"
+BUCKET = "YOUR_BUCKET_NAME"
+
+config = Config(
+    signature_version="s3v4",
+    s3={
+        "addressing_style": "path"
+    },
+    request_checksum_calculation="when_required",
+    response_checksum_validation="when_required",
+)
+
+s3 = boto3.client(
+    "s3",
+    endpoint_url="https://kr.object.ncloudstorage.com",
+    region_name="kr-standard",
+    aws_access_key_id=ACCESS_KEY,
+    aws_secret_access_key=SECRET_KEY,
+    config=config,
+)
+
+response = s3.list_objects_v2(Bucket=BUCKET)
+print(response)
+```
+
+예제 파일:
+
+```text
+013-cost slack alert/examples/object-storage-checksum.py
+```
+
+실행 예시:
+
+```bash
+cd "013-cost slack alert"
+
+python3 -m venv .venv
+source .venv/bin/activate
+pip install boto3
+
+NCP_ACCESS_KEY='YOUR_ACCESS_KEY' \
+NCP_SECRET_KEY='YOUR_SECRET_KEY' \
+NCP_OBJECT_STORAGE_BUCKET='YOUR_BUCKET_NAME' \
+python examples/object-storage-checksum.py
+```
+
+권한 확인 포인트:
+
+- Access Key/Secret Key가 Object Storage 권한을 가진 계정인지 확인합니다.
+- 버킷 정책 또는 IAM 정책에서 `ListBucket`, `GetObject`, `PutObject` 권한을 확인합니다.
+- Naver Cloud Object Storage는 path-style 접근을 쓰는 것이 안전합니다.
+- `endpoint_url`은 한국 리전 기준 `https://kr.object.ncloudstorage.com`을 사용합니다.
+- 최신 `boto3`/`botocore`에서 원인 불명의 `AccessDenied`가 나면 체크섬 설정을 먼저 확인합니다.
+
+## 13. 장애 확인
 
 ### Billing API 인증 실패
 
@@ -212,7 +294,13 @@ NCP 비용 알림
 - 아직 청구 데이터가 집계되지 않은 시점인지 확인
 - 계정에 실제 사용량이 있는지 확인
 
-## 13. 참고 자료
+### Object Storage AccessDenied
+
+- Object Storage Manager 권한만으로 충분하지 않을 수 있으므로 버킷 단위 정책과 IAM 정책을 함께 확인합니다.
+- `PutObject`만 실패하면 업로드 권한, `ListObjectsV2`만 실패하면 버킷 목록 조회 권한을 확인합니다.
+- S3 호환 API에서는 `region_name`, `endpoint_url`, `addressing_style`, 체크섬 설정이 실제 권한 문제처럼 보이는 오류를 만들 수 있습니다.
+
+## 14. 참고 자료
 
 - Naver Cloud Cost and Usage API: <https://api.ncloud-docs.com/docs/en/platform-costandusage>
 - Naver Cloud API Workflow 비용 조회 예시: <https://guide.ncloud-docs.com/docs/en/apiworkflow-procedure>

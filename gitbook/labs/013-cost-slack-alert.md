@@ -86,6 +86,48 @@ Naver Cloud Console
 4. `BUDGET_KRW`와 비교합니다.
 5. Slack으로 비용 알림을 보냅니다.
 
+## Object Storage 체크섬 설정
+
+현재 `ncp-billing.zip` 예제는 `boto3`를 쓰지 않습니다. 하지만 비용 리포트를 Object Storage에 저장하는 구조로 확장하면 `boto3`/`botocore` 체크섬 설정이 필요할 수 있습니다.
+
+Naver Cloud Object Storage를 S3 호환 API로 사용할 때는 아래 설정을 명시합니다.
+
+```python
+from botocore.config import Config
+
+config = Config(
+    signature_version="s3v4",
+    s3={
+        "addressing_style": "path"
+    },
+    request_checksum_calculation="when_required",
+    response_checksum_validation="when_required",
+)
+```
+
+전체 예제:
+
+```text
+013-cost slack alert/examples/object-storage-checksum.py
+```
+
+실행:
+
+```bash
+cd "013-cost slack alert"
+
+python3 -m venv .venv
+source .venv/bin/activate
+pip install boto3
+
+NCP_ACCESS_KEY='YOUR_ACCESS_KEY' \
+NCP_SECRET_KEY='YOUR_SECRET_KEY' \
+NCP_OBJECT_STORAGE_BUCKET='YOUR_BUCKET_NAME' \
+python examples/object-storage-checksum.py
+```
+
+`AccessDenied`가 발생하면 권한뿐 아니라 `endpoint_url`, `region_name`, `addressing_style`, 체크섬 설정을 같이 확인합니다.
+
 ## 참고
 
 - 상세 자료는 저장소의 `013-cost slack alert/README.md`를 확인합니다.
