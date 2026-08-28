@@ -1186,14 +1186,17 @@
 </tr>
 </tbody>
 </table>
+<p>zip 파일에는 <code>main.py</code>, <code>__main__.py</code>, <code>boto3/botocore</code> 의존성이 함께 들어갑니다.</p>
 <h2 id="_3">기본 파라미터<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">"NCP_ACCESS_KEY"</span><span class="p">:</span><span class="w"> </span><span class="s2">"YOUR_NCP_ACCESS_KEY"</span><span class="p">,</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">"NCP_SECRET_KEY"</span><span class="p">:</span><span class="w"> </span><span class="s2">"YOUR_NCP_SECRET_KEY"</span><span class="p">,</span>
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nt">"SLACK_WEBHOOK_URL"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://hooks.slack.com/services/..."</span><span class="p">,</span>
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="nt">"BUDGET_KRW"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10000"</span><span class="p">,</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">"ALERT_ONLY_OVER_BUDGET"</span><span class="p">:</span><span class="w"> </span><span class="s2">"false"</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">}</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">"ALERT_ONLY_OVER_BUDGET"</span><span class="p">:</span><span class="w"> </span><span class="s2">"false"</span><span class="p">,</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="nt">"SAVE_REPORT_TO_OBJECT_STORAGE"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="nt">"OBJECT_STORAGE_BUCKET"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ncp-billing-report-james-260828"</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="p">}</span>
 </code></pre></div>
 <h2 id="_4">스케줄<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <p>매일 오전 9시에 실행하는 예시:</p>
@@ -1206,10 +1209,11 @@
 <li>Billing API <code>getDemandCostList</code>를 호출합니다.</li>
 <li>응답에서 사용 금액을 추출합니다.</li>
 <li><code>BUDGET_KRW</code>와 비교합니다.</li>
+<li><code>SAVE_REPORT_TO_OBJECT_STORAGE=true</code>이면 Object Storage에 JSON 리포트를 저장합니다.</li>
 <li>Slack으로 비용 알림을 보냅니다.</li>
 </ol>
 <h2 id="object-storage">Object Storage 체크섬 설정<a class="headerlink" href="#object-storage" title="Permanent link">&para;</a></h2>
-<p>현재 <code>ncp-billing.zip</code> 예제는 <code>boto3</code>를 쓰지 않습니다. 하지만 비용 리포트를 Object Storage에 저장하는 구조로 확장하면 <code>boto3</code>/<code>botocore</code> 체크섬 설정이 필요할 수 있습니다.</p>
+<p><code>ncp-billing.zip</code> 예제의 <code>main.py</code>는 Object Storage 저장 옵션을 켜면 <code>boto3</code>를 사용합니다. 이때 체크섬 설정을 함수 코드 안에 포함했습니다.</p>
 <p>Naver Cloud Object Storage를 S3 호환 API로 사용할 때는 아래 설정을 명시합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">botocore.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
