@@ -1,5 +1,6 @@
 import base64
 import datetime as dt
+import email.utils
 import hashlib
 import hmac
 import json
@@ -85,7 +86,7 @@ def _get_demand_cost_list(access_key, secret_key, start_month, end_month):
     query = urllib.parse.urlencode(params)
     path_with_query = f"{BILLING_PATH}?{query}"
     url = f"https://{BILLING_HOST}{path_with_query}"
-    timestamp = str(int(time.time() * 1000))
+    timestamp = str(_gateway_epoch_millis())
 
     headers = {
         "x-ncp-apigw-timestamp": timestamp,
@@ -107,6 +108,21 @@ def _make_signature(method, path_with_query, timestamp, access_key, secret_key):
     message = f"{method} {path_with_query}\n{timestamp}\n{access_key}"
     digest = hmac.new(secret_key.encode("utf-8"), message.encode("utf-8"), hashlib.sha256).digest()
     return base64.b64encode(digest).decode("utf-8")
+
+
+def _gateway_epoch_millis():
+    request = urllib.request.Request(f"https://{BILLING_HOST}", method="HEAD")
+    try:
+        with urllib.request.urlopen(request, timeout=5) as response:
+            date_header = response.headers.get("Date")
+    except Exception:
+        date_header = None
+
+    if date_header:
+        server_time = email.utils.parsedate_to_datetime(date_header)
+        return int(server_time.timestamp() * 1000)
+
+    return int(time.time() * 1000)
 
 
 def _extract_use_amount(payload):

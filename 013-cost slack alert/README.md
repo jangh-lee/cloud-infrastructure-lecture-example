@@ -297,7 +297,7 @@ python examples/object-storage-checksum.py
 - `NCP_ACCESS_KEY`, `NCP_SECRET_KEY` 값 확인
 - Billing API 조회 권한 확인
 - 함수 실행 시간이 현재 시간과 크게 차이 나지 않는지 확인
-- `Expired timestamp`가 나오면 함수 코드가 현재 epoch millisecond를 보내는지 확인합니다. Python에서 `datetime.utcnow().timestamp()`처럼 timezone 정보가 없는 값을 쓰면 런타임 타임존에 따라 시간이 어긋날 수 있으므로 `time.time()`을 사용합니다.
+- `Expired timestamp`가 나오면 함수 코드가 현재 epoch millisecond를 보내는지 확인합니다. 이 예제는 Cloud Functions 런타임 시각 차이에 대비하기 위해 Billing API Gateway의 `Date` 헤더를 먼저 읽고, 그 시간을 기준으로 서명합니다. Date 헤더를 가져오지 못할 때만 `time.time()`을 사용합니다.
 
 ### Slack 전송 실패
 
