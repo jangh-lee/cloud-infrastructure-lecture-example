@@ -122,8 +122,8 @@ Action의 기본 파라미터 또는 환경 변수에 아래 값을 넣습니다
 
 | 이름 | 기본값 | 설명 |
 | --- | --- | --- |
-| `START_DATE` | 이번 달 1일 | Slack 메시지에 표시할 조회 시작일, `yyyy-mm-dd` |
-| `END_DATE` | 오늘 | Slack 메시지에 표시할 조회 종료일, `yyyy-mm-dd` |
+| `START_DATE` | KST 기준 이번 달 1일 | Slack 메시지에 표시할 조회 시작일, `yyyy-mm-dd` |
+| `END_DATE` | KST 기준 오늘 | Slack 메시지에 표시할 조회 종료일, `yyyy-mm-dd` |
 | `START_MONTH` | 이번 달 | 조회 시작 월, `yyyyMM` |
 | `END_MONTH` | 이번 달 | 조회 종료 월, `yyyyMM` |
 | `BUDGET_KRW` | `0` | 예산 기준 금액 |
@@ -148,8 +148,6 @@ Cloud Functions 테스트 실행 시 아래처럼 넣습니다.
   "NCP_ACCESS_KEY": "YOUR_NCP_ACCESS_KEY",
   "NCP_SECRET_KEY": "YOUR_NCP_SECRET_KEY",
   "SLACK_WEBHOOK_URL": "https://hooks.slack.com/services/...",
-  "START_DATE": "2026-08-01",
-  "END_DATE": "2026-08-15",
   "BUDGET_KRW": "5000",
   "ALERT_ONLY_OVER_BUDGET": "false",
   "SAVE_REPORT_TO_OBJECT_STORAGE": "true",
@@ -191,23 +189,35 @@ Cron 예시:
 ## 10. Slack 메시지 예시
 
 ```text
-NCP 비용 알림
-조회 월: 202608
-조회 기간: 8월 1일 ~ 8월 15일
-현재 사용 금액: 12,340 KRW
-전일 대비: 증가 1,230 KRW (11.1%)
-예산: 10,000 KRW
-상태: 예산 초과
+NCP 비용 리포트
+8월 1일 ~ 8월 28일 기준 사용 금액 요약입니다.
+
+요약
+항목           내용
+------------ ----------------------------
+조회 월         202608
+조회 기간        8월 1일 ~ 8월 28일
+사용 금액        26,810 KRW
+전일 대비        증가 1,230 KRW (4.8%)
+예산           10,000 KRW
+상태           예산 초과
 
 서비스별 비용
-- Server(VPC): 7,000 KRW
-- Cloud DB for MySQL (VPC): 3,000 KRW
-- Public IP: 1,000 KRW
+No  Service                                        Cost
+--  ------------------------------------ --------------
+ 1  Server(VPC)                              17,540 KRW
+ 2  Cloud DB for MySQL (VPC)                  5,440 KRW
+ 3  NAT Gateway                               2,070 KRW
+ 4  Public IP                                 1,460 KRW
+
+리포트 정보
+requestId: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+저장 경로: billing-reports/202608/ncp-billing-20260828.json
 ```
 
 ## 11. 코드 동작 설명
 
-1. `START_DATE`, `END_DATE`로 `8월 1일 ~ 8월 15일` 같은 표시용 조회 기간을 만듭니다.
+1. KST 기준 오늘 날짜를 계산합니다. `START_DATE`, `END_DATE`를 생략하면 자동으로 `이번 달 1일 ~ 오늘` 기간을 만듭니다.
 2. Billing API `getDemandCostList`를 호출합니다.
 3. Billing API `getProductDemandCostList`를 호출해 서비스별 비용을 가져옵니다.
 4. 응답에서 `useAmount` 또는 비용 관련 숫자 필드를 찾아 합산합니다.
@@ -216,7 +226,7 @@ NCP 비용 알림
 7. `SAVE_REPORT_TO_OBJECT_STORAGE=true`이면 Object Storage에 JSON 리포트를 저장합니다.
 8. Slack Incoming Webhook으로 메시지를 보냅니다.
 
-주의할 점은 Billing API의 기본 조회 단위가 `yyyyMM` 월 단위라는 것입니다. `START_DATE`, `END_DATE`는 Slack 메시지와 리포트에 표시할 기간이며, API 호출에는 해당 날짜가 속한 `START_MONTH`, `END_MONTH`가 사용됩니다.
+주의할 점은 Billing API의 기본 조회 단위가 `yyyyMM` 월 단위라는 것입니다. `START_DATE`, `END_DATE`는 Slack 메시지와 리포트에 표시할 기간이며, API 호출에는 해당 날짜가 속한 `START_MONTH`, `END_MONTH`가 사용됩니다. 날짜 파라미터를 생략하면 매일 실행 시 자동으로 오늘 날짜가 반영됩니다.
 
 ## 12. Object Storage 저장 시 boto3 체크섬 설정
 

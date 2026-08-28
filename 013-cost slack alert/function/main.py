@@ -345,24 +345,67 @@ def _build_slack_message(
     status = "예산 초과" if over_budget else "정상"
     budget_text = f"{budget:,.0f} KRW" if budget > 0 else "미설정"
     lines = [
-        "*NCP 비용 알림*",
-        f"- 조회 월: `{month}`",
-        f"- 조회 기간: `{period_label}`",
-        f"- 현재 사용 금액: *{amount:,.0f} KRW*",
-        f"- 전일 대비: `{delta['label']}`",
-        f"- 예산: `{budget_text}`",
-        f"- 상태: *{status}*",
+        "*NCP 비용 리포트*",
+        f"`{period_label}` 기준 사용 금액 요약입니다.",
+        "",
+        "*요약*",
+        "```",
+        f"{'항목':<12} {'내용'}",
+        f"{'-' * 12} {'-' * 28}",
+        f"{'조회 월':<12} {month}",
+        f"{'조회 기간':<12} {period_label}",
+        f"{'사용 금액':<12} {amount:,.0f} KRW",
+        f"{'전일 대비':<12} {delta['label']}",
+        f"{'예산':<12} {budget_text}",
+        f"{'상태':<12} {status}",
+        "```",
     ]
     if product_costs:
         lines.append("")
         lines.append("*서비스별 비용*")
-        for item in product_costs[:8]:
-            lines.append(f"- {item['service']}: `{item['useAmount']:,.0f} KRW`")
+        lines.append(_build_product_cost_table(product_costs))
+
+    report_lines = []
     if request_id:
-        lines.append(f"- requestId: `{request_id}`")
+        report_lines.append(f"requestId: {request_id}")
     if object_storage_key:
-        lines.append(f"- 저장 경로: `{object_storage_key}`")
+        report_lines.append(f"저장 경로: {object_storage_key}")
+    if report_lines:
+        lines.append("")
+        lines.append("*리포트 정보*")
+        lines.append("```")
+        lines.extend(report_lines)
+        lines.append("```")
+
     return "\n".join(lines)
+
+
+def _build_product_cost_table(product_costs, limit=10):
+    rows = product_costs[:limit]
+    service_width = 36
+    lines = [
+        "```",
+        f"{'No':>2}  {'Service':<{service_width}} {'Cost':>14}",
+        f"{'-' * 2}  {'-' * service_width} {'-' * 14}",
+    ]
+
+    for index, item in enumerate(rows, start=1):
+        service = _truncate(str(item["service"]), service_width)
+        cost = f"{item['useAmount']:,.0f} KRW"
+        lines.append(f"{index:>2}  {service:<{service_width}} {cost:>14}")
+
+    if len(product_costs) > limit:
+        remaining = len(product_costs) - limit
+        lines.append(f"..  and {remaining} more service(s)")
+
+    lines.append("```")
+    return "\n".join(lines)
+
+
+def _truncate(value, width):
+    if len(value) <= width:
+        return value
+    return value[: max(0, width - 3)] + "..."
 
 
 def _send_slack(webhook_url, text, channel="", username="NCP Cost Bot"):

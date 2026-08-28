@@ -65,8 +65,6 @@ zip 파일에는 `main.py`, `__main__.py`, `boto3/botocore` 의존성이 함께 
   "NCP_ACCESS_KEY": "YOUR_NCP_ACCESS_KEY",
   "NCP_SECRET_KEY": "YOUR_NCP_SECRET_KEY",
   "SLACK_WEBHOOK_URL": "https://hooks.slack.com/services/...",
-  "START_DATE": "2026-08-01",
-  "END_DATE": "2026-08-15",
   "BUDGET_KRW": "10000",
   "ALERT_ONLY_OVER_BUDGET": "false",
   "SAVE_REPORT_TO_OBJECT_STORAGE": "true",
@@ -86,7 +84,7 @@ zip 파일에는 `main.py`, `__main__.py`, `boto3/botocore` 의존성이 함께 
 
 ## 동작 설명
 
-1. `START_DATE`, `END_DATE`로 `8월 1일 ~ 8월 15일` 같은 조회 기간을 표시합니다.
+1. KST 기준 오늘 날짜를 계산합니다. `START_DATE`, `END_DATE`를 생략하면 자동으로 `이번 달 1일 ~ 오늘` 기간을 표시합니다.
 2. Billing API `getDemandCostList`를 호출합니다.
 3. Billing API `getProductDemandCostList`를 호출해 서비스별 비용을 가져옵니다.
 4. 응답에서 사용 금액을 추출합니다.
@@ -95,23 +93,34 @@ zip 파일에는 `main.py`, `__main__.py`, `boto3/botocore` 의존성이 함께 
 7. `SAVE_REPORT_TO_OBJECT_STORAGE=true`이면 Object Storage에 JSON 리포트를 저장합니다.
 8. Slack으로 비용 알림을 보냅니다.
 
-Billing API의 기본 조회 단위는 `yyyyMM` 월 단위입니다. `START_DATE`, `END_DATE`는 메시지와 리포트에 보여줄 기간이고, 실제 API 호출에는 해당 월이 사용됩니다.
+Billing API의 기본 조회 단위는 `yyyyMM` 월 단위입니다. `START_DATE`, `END_DATE`는 메시지와 리포트에 보여줄 기간이고, 실제 API 호출에는 해당 월이 사용됩니다. 날짜 파라미터를 생략하면 매일 실행 시 자동으로 오늘 날짜가 반영됩니다.
 
 Slack 메시지 예시:
 
 ```text
-NCP 비용 알림
-조회 월: 202608
-조회 기간: 8월 1일 ~ 8월 15일
-현재 사용 금액: 26,810 KRW
-전일 대비: 증가 1,230 KRW (4.8%)
-예산: 10,000 KRW
-상태: 예산 초과
+NCP 비용 리포트
+8월 1일 ~ 8월 28일 기준 사용 금액 요약입니다.
+
+요약
+항목           내용
+------------ ----------------------------
+조회 월         202608
+조회 기간        8월 1일 ~ 8월 28일
+사용 금액        26,810 KRW
+전일 대비        증가 1,230 KRW (4.8%)
+예산           10,000 KRW
+상태           예산 초과
 
 서비스별 비용
-- Server(VPC): 17,540 KRW
-- Cloud DB for MySQL (VPC): 5,440 KRW
-- NAT Gateway: 2,070 KRW
+No  Service                                        Cost
+--  ------------------------------------ --------------
+ 1  Server(VPC)                              17,540 KRW
+ 2  Cloud DB for MySQL (VPC)                  5,440 KRW
+ 3  NAT Gateway                               2,070 KRW
+
+리포트 정보
+requestId: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+저장 경로: billing-reports/202608/ncp-billing-20260828.json
 ```
 
 ## Object Storage 체크섬 설정
