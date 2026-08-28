@@ -297,6 +297,7 @@ python examples/object-storage-checksum.py
 - `NCP_ACCESS_KEY`, `NCP_SECRET_KEY` 값 확인
 - Billing API 조회 권한 확인
 - 함수 실행 시간이 현재 시간과 크게 차이 나지 않는지 확인
+- `Expired timestamp`가 나오면 함수 코드가 현재 epoch millisecond를 보내는지 확인합니다. Python에서 `datetime.utcnow().timestamp()`처럼 timezone 정보가 없는 값을 쓰면 런타임 타임존에 따라 시간이 어긋날 수 있으므로 `time.time()`을 사용합니다.
 
 ### Slack 전송 실패
 

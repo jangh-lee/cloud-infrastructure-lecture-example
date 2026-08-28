@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import json
 import os
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -23,7 +24,7 @@ def main(args):
     secret_key = _get_value(args, "NCP_SECRET_KEY", required=True)
     slack_webhook_url = _get_value(args, "SLACK_WEBHOOK_URL", required=True)
 
-    current_month = dt.datetime.utcnow().strftime("%Y%m")
+    current_month = _utc_now().strftime("%Y%m")
     start_month = _get_value(args, "START_MONTH", default=current_month)
     end_month = _get_value(args, "END_MONTH", default=start_month)
     budget = _to_float(_get_value(args, "BUDGET_KRW", default="0"))
@@ -84,7 +85,7 @@ def _get_demand_cost_list(access_key, secret_key, start_month, end_month):
     query = urllib.parse.urlencode(params)
     path_with_query = f"{BILLING_PATH}?{query}"
     url = f"https://{BILLING_HOST}{path_with_query}"
-    timestamp = str(int(dt.datetime.utcnow().timestamp() * 1000))
+    timestamp = str(int(time.time() * 1000))
 
     headers = {
         "x-ncp-apigw-timestamp": timestamp,
@@ -147,7 +148,7 @@ def _save_report_to_object_storage(args, access_key, secret_key, month, amount, 
     endpoint_url = _get_value(args, "OBJECT_STORAGE_ENDPOINT", default="https://kr.object.ncloudstorage.com")
     region_name = _get_value(args, "OBJECT_STORAGE_REGION", default="kr-standard")
     key_prefix = _get_value(args, "OBJECT_STORAGE_KEY_PREFIX", default="billing-reports").strip("/")
-    today = dt.datetime.utcnow().strftime("%Y%m%d")
+    today = _utc_now().strftime("%Y%m%d")
     key = f"{key_prefix}/{month}/ncp-billing-{today}.json"
 
     config = Config(
@@ -173,7 +174,7 @@ def _save_report_to_object_storage(args, access_key, secret_key, month, amount, 
         "useAmount": amount,
         "budget": budget,
         "overBudget": over_budget,
-        "createdAt": dt.datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "createdAt": _utc_now().isoformat(timespec="seconds").replace("+00:00", "Z"),
         "billingResponse": billing_response,
     }
 
@@ -249,3 +250,7 @@ def _to_float(value):
 
 def _to_bool(value):
     return str(value).strip().lower() in ("1", "true", "yes", "y", "on")
+
+
+def _utc_now():
+    return dt.datetime.now(dt.timezone.utc)
