@@ -29,7 +29,7 @@ Webhook URL과 Secret Key는 Git에 올리지 않습니다.
 업로드용 zip 파일:
 
 ```text
-013-cost slack alert/dist/ncp-cost-slack-alert.zip
+013-cost slack alert/dist/ncp-billing.zip
 ```
 
 다시 만들기:
@@ -53,7 +53,7 @@ Naver Cloud Console
 | --- | --- |
 | Runtime | Python 3.x |
 | Code Type | 파일 업로드 |
-| Upload File | `ncp-cost-slack-alert.zip` |
+| Upload File | `ncp-billing.zip` |
 | Main Function | `main` |
 
 ## 기본 파라미터

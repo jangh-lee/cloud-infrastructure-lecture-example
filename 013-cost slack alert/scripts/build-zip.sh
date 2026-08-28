@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FUNCTION_DIR="$ROOT_DIR/function"
 DIST_DIR="$ROOT_DIR/dist"
-ZIP_FILE="$DIST_DIR/ncp-cost-slack-alert.zip"
+ZIP_FILE="$DIST_DIR/ncp-billing.zip"
 
 mkdir -p "$DIST_DIR"
 

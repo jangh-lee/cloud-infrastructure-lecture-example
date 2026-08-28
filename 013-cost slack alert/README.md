@@ -64,7 +64,7 @@ Cloud Functions 업로드용 소스:
 업로드용 zip 파일:
 
 ```text
-013-cost slack alert/dist/ncp-cost-slack-alert.zip
+013-cost slack alert/dist/ncp-billing.zip
 ```
 
 zip 파일에는 `__main__.py`가 루트에 들어 있어야 합니다.
@@ -81,7 +81,7 @@ cd "013-cost slack alert"
 생성 결과:
 
 ```text
-dist/ncp-cost-slack-alert.zip
+dist/ncp-billing.zip
 ```
 
 ## 6. Cloud Functions Action 생성
@@ -100,7 +100,7 @@ Naver Cloud Console
 | --- | --- |
 | Runtime | Python 3.x |
 | Code Type | 파일 업로드 |
-| Upload File | `dist/ncp-cost-slack-alert.zip` |
+| Upload File | `dist/ncp-billing.zip` |
 | Main Function | `main` |
 | Timeout | 30초 이상 |
 
