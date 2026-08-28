@@ -1192,13 +1192,11 @@
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">"NCP_ACCESS_KEY"</span><span class="p">:</span><span class="w"> </span><span class="s2">"YOUR_NCP_ACCESS_KEY"</span><span class="p">,</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">"NCP_SECRET_KEY"</span><span class="p">:</span><span class="w"> </span><span class="s2">"YOUR_NCP_SECRET_KEY"</span><span class="p">,</span>
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nt">"SLACK_WEBHOOK_URL"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://hooks.slack.com/services/..."</span><span class="p">,</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="nt">"START_DATE"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-08-01"</span><span class="p">,</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">"END_DATE"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-08-15"</span><span class="p">,</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="nt">"BUDGET_KRW"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10000"</span><span class="p">,</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="nt">"ALERT_ONLY_OVER_BUDGET"</span><span class="p">:</span><span class="w"> </span><span class="s2">"false"</span><span class="p">,</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">  </span><span class="nt">"SAVE_REPORT_TO_OBJECT_STORAGE"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">  </span><span class="nt">"OBJECT_STORAGE_BUCKET"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ncp-billing-report-james-260828"</span>
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="p">}</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="nt">"BUDGET_KRW"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10000"</span><span class="p">,</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">"ALERT_ONLY_OVER_BUDGET"</span><span class="p">:</span><span class="w"> </span><span class="s2">"false"</span><span class="p">,</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="nt">"SAVE_REPORT_TO_OBJECT_STORAGE"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="nt">"OBJECT_STORAGE_BUCKET"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ncp-billing-report-james-260828"</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="p">}</span>
 </code></pre></div>
 <h2 id="_4">스케줄<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <p>매일 오전 9시에 실행하는 예시:</p>
@@ -1207,7 +1205,7 @@
 <p>콘솔에서 Cron 기준 시간이 UTC인지 KST인지 확인합니다.</p>
 <h2 id="_5">동작 설명<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <ol>
-<li><code>START_DATE</code>, <code>END_DATE</code>로 <code>8월 1일 ~ 8월 15일</code> 같은 조회 기간을 표시합니다.</li>
+<li>KST 기준 오늘 날짜를 계산합니다. <code>START_DATE</code>, <code>END_DATE</code>를 생략하면 자동으로 <code>이번 달 1일 ~ 오늘</code> 기간을 표시합니다.</li>
 <li>Billing API <code>getDemandCostList</code>를 호출합니다.</li>
 <li>Billing API <code>getProductDemandCostList</code>를 호출해 서비스별 비용을 가져옵니다.</li>
 <li>응답에서 사용 금액을 추출합니다.</li>
@@ -1216,20 +1214,31 @@
 <li><code>SAVE_REPORT_TO_OBJECT_STORAGE=true</code>이면 Object Storage에 JSON 리포트를 저장합니다.</li>
 <li>Slack으로 비용 알림을 보냅니다.</li>
 </ol>
-<p>Billing API의 기본 조회 단위는 <code>yyyyMM</code> 월 단위입니다. <code>START_DATE</code>, <code>END_DATE</code>는 메시지와 리포트에 보여줄 기간이고, 실제 API 호출에는 해당 월이 사용됩니다.</p>
+<p>Billing API의 기본 조회 단위는 <code>yyyyMM</code> 월 단위입니다. <code>START_DATE</code>, <code>END_DATE</code>는 메시지와 리포트에 보여줄 기간이고, 실제 API 호출에는 해당 월이 사용됩니다. 날짜 파라미터를 생략하면 매일 실행 시 자동으로 오늘 날짜가 반영됩니다.</p>
 <p>Slack 메시지 예시:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>NCP 비용 알림
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>조회 월: 202608
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>조회 기간: 8월 1일 ~ 8월 15일
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>현재 사용 금액: 26,810 KRW
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>전일 대비: 증가 1,230 KRW (4.8%)
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>예산: 10,000 KRW
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>상태: 예산 초과
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>서비스별 비용
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>- Server(VPC): 17,540 KRW
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>- Cloud DB for MySQL (VPC): 5,440 KRW
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>- NAT Gateway: 2,070 KRW
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>NCP 비용 리포트
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>8월 1일 ~ 8월 28일 기준 사용 금액 요약입니다.
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>요약
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>항목           내용
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>------------ ----------------------------
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>조회 월         202608
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>조회 기간        8월 1일 ~ 8월 28일
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>사용 금액        26,810 KRW
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>전일 대비        증가 1,230 KRW (4.8%)
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>예산           10,000 KRW
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>상태           예산 초과
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>서비스별 비용
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>No  Service                                        Cost
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>--  ------------------------------------ --------------
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a> 1  Server(VPC)                              17,540 KRW
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a> 2  Cloud DB for MySQL (VPC)                  5,440 KRW
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a> 3  NAT Gateway                               2,070 KRW
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>리포트 정보
+<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a>requestId: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>저장 경로: billing-reports/202608/ncp-billing-20260828.json
 </code></pre></div>
 <h2 id="object-storage">Object Storage 체크섬 설정<a class="headerlink" href="#object-storage" title="Permanent link">&para;</a></h2>
 <p><code>ncp-billing.zip</code> 예제의 <code>main.py</code>는 Object Storage 저장 옵션을 켜면 <code>boto3</code>를 사용합니다. 이때 체크섬 설정을 함수 코드 안에 포함했습니다.</p>
