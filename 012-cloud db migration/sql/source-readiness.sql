@@ -19,6 +19,13 @@ WHERE Variable_name IN (
 SHOW MASTER STATUS;
 
 SELECT
+  User AS user_name,
+  Host AS allowed_host,
+  plugin AS authentication_plugin
+FROM mysql.user
+WHERE User = 'dms_migration';
+
+SELECT
   TABLE_NAME,
   ENGINE,
   TABLE_ROWS AS estimated_rows,
@@ -26,6 +33,30 @@ SELECT
 FROM information_schema.TABLES
 WHERE TABLE_SCHEMA = 'chapter3_board'
 ORDER BY TABLE_NAME;
+
+SELECT
+  TABLE_NAME,
+  ENGINE AS unsupported_engine
+FROM information_schema.TABLES
+WHERE TABLE_SCHEMA = 'chapter3_board'
+  AND ENGINE IN ('MyISAM', 'BLACKHOLE', 'FEDERATED', 'ARCHIVE', 'MEMORY');
+
+SELECT
+  TABLE_NAME,
+  TABLE_COLLATION
+FROM information_schema.TABLES
+WHERE TABLE_SCHEMA = 'chapter3_board'
+  AND TABLE_COLLATION IS NOT NULL
+  AND TABLE_COLLATION NOT LIKE 'utf8%'
+  AND TABLE_COLLATION NOT LIKE 'euckr%';
+
+SELECT DEFINER, ROUTINE_TYPE, ROUTINE_NAME
+FROM information_schema.ROUTINES
+WHERE ROUTINE_SCHEMA = 'chapter3_board';
+
+SELECT DEFINER, TABLE_NAME
+FROM information_schema.VIEWS
+WHERE TABLE_SCHEMA = 'chapter3_board';
 
 SELECT
   GRANTEE,

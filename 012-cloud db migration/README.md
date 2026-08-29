@@ -62,6 +62,21 @@ Source DB 데이터 변경 중지 또는 점검 시간 확보
 
 수업에서는 둘 다 보여주는 것이 좋습니다. DMS는 클라우드 관리형 마이그레이션을 설명하기 좋고, `mysqldump`는 데이터베이스 백업 파일이 실제로 어떻게 만들어지고 복원되는지 이해시키기 좋습니다.
 
+## 1-2. 시작 전에 기록할 값
+
+아래 값이 하나라도 빠지면 DMS 연결 테스트를 끝까지 진행할 수 없습니다.
+
+| 값 | 예시 | 사용하는 곳 |
+| --- | --- | --- |
+| Source DB 사설 IP | `10.0.1.30` | DMS Endpoint, Target ACG outbound |
+| Source DB 공인 IP | `49.50.x.x` | 서로 다른 VPC에서 NAT로 연결할 때만 사용 |
+| Source DB 관리자 비밀번호 | `RootPass123!` | Source 설정 및 계정 생성 |
+| Target DB private domain | `db-xxxx.vpc-cdb.ntruss.com` | 백엔드 전환, Target 접속 |
+| Target DB 사설 IP 또는 서브넷 | `10.0.2.0/24` | Source ACG inbound와 Source DB 계정 Host |
+| Target DB 사용자/비밀번호 | 콘솔에서 생성 | 복원, 검증, 백엔드 전환 |
+
+먼저 Source와 Target이 같은 VPC인지 확인합니다. 같은 VPC면 사설 IP/서브넷으로 연결하고, 서로 다른 VPC면 VPC Peering과 양쪽 Route Table을 구성합니다. 공인 IP로 연결할 때는 Target DB 서브넷의 Route Table에 NAT Gateway가 필요합니다.
+
 ## 2. 게시판 ERD
 
 현재 게시판 예제는 로그인/회원 기능 없이 게시글만 저장합니다. 따라서 핵심 테이블은 `posts` 하나입니다.
@@ -143,26 +158,26 @@ DMS가 Source DB를 읽으려면 보통 아래 준비가 필요합니다.
 
 Naver Cloud DB for MySQL의 DB 사용자 비밀번호 입력 제한을 피하려고 예시 비밀번호는 2자 이상, 21자 이하인 `MigratePass123!`를 사용합니다.
 
+007 설치 스크립트는 `root@localhost`에 `DB_ROOT_PASSWORD`를 설정합니다. 따라서 007을 그대로 설치한 Source DB에서는 DB 서버의 `007-three tier web app/db/.env`에 기록한 비밀번호를 사용합니다.
+
 Source DB 서버에서:
 
 ```bash
 cd "012-cloud db migration/scripts"
-sudo MIGRATION_USER='dms_migration' \
-  MIGRATION_PASSWORD='MigratePass123!' \
-  SOURCE_DATABASE='chapter3_board' \
-  ./prepare-source-db.sh
-```
-
-007번 Ubuntu DB 서버처럼 `root`가 `unix_socket` 인증을 쓰는 경우에는 `SOURCE_DB_ROOT_PASSWORD`를 넣지 않는 것이 맞습니다. `sudo mysql` 또는 `sudo mariadb`로 접속되는 구조이기 때문입니다.
-
-만약 로컬 DB의 `root`가 비밀번호 인증으로 설정되어 있다면 아래처럼 넣습니다.
-
-```bash
-sudo SOURCE_DB_ADMIN_PASSWORD='DB_ROOT_PASSWORD' \
+sudo SOURCE_DB_ADMIN_PASSWORD='RootPass123!' \
   MIGRATION_USER='dms_migration' \
   MIGRATION_PASSWORD='MigratePass123!' \
   SOURCE_DATABASE='chapter3_board' \
+  ALLOWED_HOST='10.0.2.%' \
   ./prepare-source-db.sh
+```
+
+`ALLOWED_HOST`에는 실제 Target DB 사설 IP 또는 서브넷에 맞는 MySQL Host 패턴을 넣습니다. 수업 중 임시로 `%`를 쓸 수는 있지만 인터넷 전체에 `3306`을 열어 둔 상태와 조합하면 위험합니다.
+
+별도로 만든 MariaDB에서 `sudo mariadb -u root`가 비밀번호 없이 성공하는 경우에만 `SOURCE_DB_ADMIN_PASSWORD`를 생략합니다.
+
+```bash
+sudo mariadb -u root -e "SELECT CURRENT_USER(), VERSION();"
 ```
 
 스크립트가 하는 일:
@@ -171,23 +186,23 @@ sudo SOURCE_DB_ADMIN_PASSWORD='DB_ROOT_PASSWORD' \
 - `server-id=1`
 - `log_bin`
 - `binlog_format=ROW`
+- `binlog_row_image=FULL`
 - `expire_logs_days=5`
-- 마이그레이션 계정 생성 및 권한 부여
+- DMS가 요구하는 `mysql_native_password` 방식으로 마이그레이션 계정 생성
+- 마이그레이션 계정에 백업/복제 권한 부여
 - DB 서비스 재시작
+- 재시작 실패 시 기존 DMS 설정 파일 자동 복원
 
 확인:
 
 ```bash
-sudo ./check-source-db.sh
+sudo SOURCE_DB_ADMIN_PASSWORD='RootPass123!' \
+  MIGRATION_USER='dms_migration' \
+  SOURCE_DATABASE='chapter3_board' \
+  ./check-source-db.sh
 ```
 
-비밀번호 기반 root 접속을 쓰는 경우:
-
-```bash
-sudo SOURCE_DB_ADMIN_PASSWORD='DB_ROOT_PASSWORD' ./check-source-db.sh
-```
-
-`ERROR 1227 ... CREATE USER privilege`가 나오면 관리자 계정이 아니라 일반 애플리케이션 계정으로 접속한 것입니다. `chapter3_user` 같은 게시판 앱 계정은 `chapter3_board` 안에서만 권한이 있고, `CREATE USER`나 전역 replication 권한을 줄 수 없습니다.
+모든 항목이 `OK`이고 마지막에 `Preflight passed`가 출력되어야 다음 단계로 넘어갑니다. `ERROR 1227 ... CREATE USER privilege`가 나오면 관리자 계정이 아니라 일반 애플리케이션 계정으로 접속한 것입니다. `chapter3_user`는 앱 계정이므로 DMS 계정을 생성하거나 전역 replication 권한을 부여할 수 없습니다.
 
 Source DB의 binlog 설정, 마이그레이션 관련 전역 권한, `chapter3_board` 스키마 권한과 현재 게시글 범위를 한 번에 확인하려면 다음 SQL을 실행합니다.
 
@@ -277,19 +292,26 @@ LIMIT 5;
 
 DMS 연결 테스트가 실패하면 대부분 네트워크 또는 권한 문제입니다.
 
-Source DB 서버 ACG inbound:
+같은 VPC에 있는 Source DB 서버 ACG inbound:
 
 | 프로토콜 | 포트 | 접근 소스 |
 | --- | --- | --- |
-| TCP | `3306` | DMS/Cloud DB가 Source DB로 접근할 때 사용하는 대역 또는 NAT Gateway IP |
+| TCP | `3306` | Target DB가 속한 서브넷 CIDR |
 
 Target Cloud DB ACG outbound:
 
 | 프로토콜 | 포트 | 목적지 |
 | --- | --- | --- |
-| TCP | `3306` | Source DB private IP 또는 Source DB 대역 |
+| TCP | `3306` | Source DB 사설 IP 또는 Source DB 서브넷 |
 
-수업에서는 Source DB와 Cloud DB가 같은 VPC에 있으면 private IP 기준으로 접근시키는 편이 이해하기 쉽습니다.
+Source DB의 OS 방화벽과 실제 리슨 주소도 확인합니다.
+
+```bash
+sudo ss -lntp | grep ':3306'
+sudo ufw status
+```
+
+서로 다른 VPC라면 ACG만으로는 연결되지 않습니다. 양방향 VPC Peering과 Route Table이 필요합니다. 공인 IP 경로를 사용할 때는 Target DB 쪽 NAT Gateway IP를 Source ACG와 DB 계정 Host에 허용합니다.
 
 ## 6. Cloud DB for MySQL 생성
 
@@ -311,6 +333,8 @@ Naver Cloud Console
 - Private domain 예: `db-xxxx.vpc-cdb.ntruss.com`
 
 Cloud DB for MySQL은 사용자가 DB 서버 OS에 접속해서 `root@localhost`로 계정을 만드는 방식이 아닙니다. Naver Cloud 콘솔의 `Cloud DB for MySQL > DB Server > Manage DB > Manage DB user`에서 DB User를 만들고 접근 대역을 허용합니다.
+
+DMS를 시작하기 전 Target에 `chapter3_board`를 미리 만들지 마십시오. Target에 Source와 같은 이름의 데이터베이스가 이미 있으면 Migration 작업이 실행되지 않습니다. DB 사용자만 콘솔에서 만들고, 데이터베이스와 테이블은 DMS가 이관하도록 둡니다.
 
 공식 문서의 접속 예시도 `root`가 아니라 콘솔에서 확인한 `user_id`로 접속합니다.
 
@@ -340,13 +364,15 @@ Naver Cloud Console
 | --- | --- |
 | Endpoint 이름 | `src-board-db` |
 | DB 종류 | MySQL 또는 MariaDB |
-| Source DB Host | Source DB private IP |
+| Source DB Host | 같은 VPC면 Source DB 사설 IP, 공인 경로면 Source DB 공인 IP |
 | Port | `3306` |
 | User | `dms_migration` |
 | Password | `MigratePass123!` |
 | Database | `chapter3_board` |
 
 `Test Connection`을 눌러 연결이 되는지 먼저 확인합니다.
+
+Endpoint 비밀번호는 반드시 `mysql_native_password` 계정의 비밀번호여야 합니다. `check-source-db.sh`의 `auth plugin` 결과가 다른 값이면 Endpoint 연결 테스트 전에 계정을 다시 준비합니다.
 
 ## 8. 방법 A: DMS Migration 생성
 
@@ -364,9 +390,9 @@ Naver Cloud Console
 | Source Endpoint | `src-board-db` |
 | Target DB | 생성한 Cloud DB for MySQL |
 | Migration 대상 DB | `chapter3_board` |
-| Migration 방식 | 콘솔 옵션에 따라 전체 이관 또는 변경분 포함 이관 |
+| Backup type | 작은 실습 DB는 `mysqldump` |
 
-마이그레이션 작업이 완료되면 반드시 완료 상태를 확인합니다. 콘솔에서 마이그레이션 작업을 종료/완료 처리해야 계속 실행 중으로 남지 않습니다.
+작업 생성 화면의 `Test Connection`이 성공하면 Source/Target DB 버전과 GTID 상태가 자동으로 표시됩니다. 마이그레이션은 Exporting, Importing, Replication 순서로 진행됩니다. Replication 완료 상태에서도 Source 변경분은 계속 동기화되며, 최종 검증과 쓰기 중지 후 콘솔의 [Complete]를 눌러야 Target이 정상 운영 상태로 전환됩니다.
 
 ## 9. 방법 B: mysqldump로 이관
 
@@ -640,10 +666,13 @@ sudo systemctl status chapter3-backend --no-pager
 
 ### DMS Test Connection 실패
 
-- Source DB ACG inbound `3306/tcp` 확인
+- Source와 Target이 같은 VPC인지, 다른 VPC면 Peering/Route Table이 양방향인지 확인
+- Source DB ACG inbound가 Target DB 서브넷 또는 NAT Gateway IP의 `3306/tcp`를 허용하는지 확인
+- Target DB ACG outbound가 Source DB IP/서브넷의 `3306/tcp`를 허용하는지 확인
 - Source DB `bind-address=0.0.0.0` 또는 private IP 확인
-- migration user 비밀번호 확인
-- `mysql -h SOURCE_DB_PRIVATE_IP -u dms_migration -p` 직접 접속 확인
+- DMS 계정 Host가 Target DB 서브넷/IP와 일치하는지 확인
+- DMS 계정의 인증 플러그인이 `mysql_native_password`인지 확인
+- `sudo SOURCE_DB_ADMIN_PASSWORD='...' ./check-source-db.sh`가 통과하는지 확인
 
 ### Migration 실패
 
@@ -651,6 +680,9 @@ sudo systemctl status chapter3-backend --no-pager
 - `server-id` 설정 확인
 - Source DB와 Target DB major version 차이 확인
 - 마이그레이션 계정 권한 확인
+- Target에 `chapter3_board`가 이미 존재하지 않는지 확인
+- Source DB의 테이블 엔진과 문자셋이 DMS 지원 범위인지 확인
+- MariaDB가 EOL 버전이면 Source 업그레이드 또는 호환되는 Target 버전 검토
 
 ### 앱 전환 후 API 실패
 
@@ -668,6 +700,8 @@ sudo systemctl status chapter3-backend --no-pager
 
 ## 13. 참고 자료
 
-- Naver Cloud Database Migration Service 개요: <https://guide.ncloud-docs.com/docs/en/dms-overview>
-- Naver Cloud Database Migration Service 사전 조건: <https://guide.ncloud-docs.com/docs/en/dms-spec>
-- 참고 블로그: <https://kclouder.tistory.com/8>
+- Naver Cloud DMS Source/Target 접속 설정: <https://guide.ncloud-docs.com/docs/dms-connect>
+- Naver Cloud DMS Endpoint 관리: <https://guide.ncloud-docs.com/docs/dms-endpointmanagement>
+- Naver Cloud DMS Migration 관리: <https://guide.ncloud-docs.com/docs/dms-migrationmanagement>
+- Naver Cloud DMS 지원 사양: <https://guide.ncloud-docs.com/docs/dms-spec>
+- Naver Cloud DMS 접속 문제 해결: <https://guide.ncloud-docs.com/docs/dms-troubleshot-access>
