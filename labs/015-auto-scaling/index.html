@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/013-cost-slack-alert/">
+        <link rel="canonical" href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/015-auto-scaling/">
       
       
-        <link rel="prev" href="../012-cloud-db-migration/">
+        <link rel="prev" href="../014-acg-slack-alert/">
       
       
-        <link rel="next" href="../014-acg-slack-alert/">
+        <link rel="next" href="../../SUMMARY/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>013 Cost Slack Alert - 클라우드 인프라 실습</title>
+        <title>015 Auto Scaling Hands-on - 클라우드 인프라 실습</title>
       
     
     
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#013-cost-slack-alert" class="md-skip">
+        <a href="#015-auto-scaling-hands-on" class="md-skip">
           콘텐츠로 이동
         </a>
       
@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              013 Cost Slack Alert
+              015 Auto Scaling Hands-on
             
           </span>
         </div>
@@ -760,6 +760,62 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../013-cost-slack-alert/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    013 Cost Slack Alert
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../014-acg-slack-alert/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    014 ACG Slack Alert
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -779,7 +835,7 @@
   <span class="md-ellipsis">
     
   
-    013 Cost Slack Alert
+    015 Auto Scaling Hands-on
   
 
     
@@ -797,7 +853,7 @@
   <span class="md-ellipsis">
     
   
-    013 Cost Slack Alert
+    015 Auto Scaling Hands-on
   
 
     
@@ -837,7 +893,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        준비물
+        완료 기준
       
     </span>
   </a>
@@ -845,10 +901,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#zip" class="md-nav__link">
+  <a href="#1-backend" class="md-nav__link">
     <span class="md-ellipsis">
       
-        zip 파일
+        1. 골든 Backend 준비
       
     </span>
   </a>
@@ -856,10 +912,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#cloud-functions-action" class="md-nav__link">
+  <a href="#2-target-group-load-balancer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Cloud Functions Action 생성
+        2. Target Group과 Load Balancer
       
     </span>
   </a>
@@ -867,10 +923,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#3-web" class="md-nav__link">
     <span class="md-ellipsis">
       
-        기본 파라미터
+        3. Web 서버 전환
       
     </span>
   </a>
@@ -878,10 +934,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#4-launch-configuration-asg" class="md-nav__link">
     <span class="md-ellipsis">
       
-        스케줄
+        4. Launch Configuration과 ASG
       
     </span>
   </a>
@@ -889,10 +945,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#5-cloud-insight-scale-out-rule" class="md-nav__link">
     <span class="md-ellipsis">
       
-        동작 설명
+        5. Cloud Insight Scale-out Rule
       
     </span>
   </a>
@@ -900,10 +956,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#object-storage" class="md-nav__link">
+  <a href="#6-scale-out" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Object Storage 체크섬 설정
+        6. 부하 및 Scale-out
       
     </span>
   </a>
@@ -911,10 +967,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#7-scale-in" class="md-nav__link">
     <span class="md-ellipsis">
       
-        참고
+        7. Scale-in
       
     </span>
   </a>
@@ -925,62 +981,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../014-acg-slack-alert/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    014 ACG Slack Alert
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../015-auto-scaling/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    015 Auto Scaling Hands-on
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -1061,7 +1061,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        준비물
+        완료 기준
       
     </span>
   </a>
@@ -1069,10 +1069,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#zip" class="md-nav__link">
+  <a href="#1-backend" class="md-nav__link">
     <span class="md-ellipsis">
       
-        zip 파일
+        1. 골든 Backend 준비
       
     </span>
   </a>
@@ -1080,10 +1080,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#cloud-functions-action" class="md-nav__link">
+  <a href="#2-target-group-load-balancer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Cloud Functions Action 생성
+        2. Target Group과 Load Balancer
       
     </span>
   </a>
@@ -1091,10 +1091,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#3-web" class="md-nav__link">
     <span class="md-ellipsis">
       
-        기본 파라미터
+        3. Web 서버 전환
       
     </span>
   </a>
@@ -1102,10 +1102,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#4-launch-configuration-asg" class="md-nav__link">
     <span class="md-ellipsis">
       
-        스케줄
+        4. Launch Configuration과 ASG
       
     </span>
   </a>
@@ -1113,10 +1113,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#5-cloud-insight-scale-out-rule" class="md-nav__link">
     <span class="md-ellipsis">
       
-        동작 설명
+        5. Cloud Insight Scale-out Rule
       
     </span>
   </a>
@@ -1124,10 +1124,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#object-storage" class="md-nav__link">
+  <a href="#6-scale-out" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Object Storage 체크섬 설정
+        6. 부하 및 Scale-out
       
     </span>
   </a>
@@ -1135,10 +1135,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#7-scale-in" class="md-nav__link">
     <span class="md-ellipsis">
       
-        참고
+        7. Scale-in
       
     </span>
   </a>
@@ -1165,57 +1165,46 @@
   
 
 
-<h1 id="013-cost-slack-alert">013 Cost Slack Alert<a class="headerlink" href="#013-cost-slack-alert" title="Permanent link">&para;</a></h1>
+<h1 id="015-auto-scaling-hands-on">015 Auto Scaling Hands-on<a class="headerlink" href="#015-auto-scaling-hands-on" title="Permanent link">&para;</a></h1>
 <h2 id="_1">목표<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>Naver Cloud Cost and Usage API로 이번 달 사용 요금을 조회하고, Cloud Functions에서 Slack으로 비용 알림을 보냅니다.</p>
-<p>구조:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Cloud Functions Trigger
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  -&gt; Python Action
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  -&gt; Billing API getDemandCostList
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  -&gt; Slack Incoming Webhook
+<p>007번 게시판의 Backend를 Naver Cloud Auto Scaling Group으로 전환하고, CPU 부하에 따라 서버가 자동 확장·축소되는 전체 흐름을 확인합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>고정 Web 서버
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  -&gt; Public Application Load Balancer :80
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  -&gt; Target Group :4000
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  -&gt; Auto Scaling Backend 1~3대
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  -&gt; Cloud DB for MySQL :3306
 </code></pre></div>
-<h2 id="_2">준비물<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>항목</th>
-<th>설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>NCP_ACCESS_KEY</code></td>
-<td>Naver Cloud API Access Key</td>
-</tr>
-<tr>
-<td><code>NCP_SECRET_KEY</code></td>
-<td>Naver Cloud API Secret Key</td>
-</tr>
-<tr>
-<td><code>SLACK_WEBHOOK_URL</code></td>
-<td>Slack Incoming Webhook URL</td>
-</tr>
-<tr>
-<td><code>BUDGET_KRW</code></td>
-<td>예산 기준 금액</td>
-</tr>
-</tbody>
-</table>
-<p>Webhook URL과 Secret Key는 Git에 올리지 않습니다.</p>
-<h2 id="zip">zip 파일<a class="headerlink" href="#zip" title="Permanent link">&para;</a></h2>
-<p>업로드용 zip 파일:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>013-cost slack alert/dist/ncp-billing.zip
+<h2 id="_2">완료 기준<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Load Balancer의 Health API가 HTTP <code>200</code>을 반환합니다.</li>
+<li>Web 게시판에서 글을 등록하고 조회할 수 있습니다.</li>
+<li>부하 전에는 Backend hostname 1개가 보입니다.</li>
+<li>CPU 50% 이상 이벤트로 Backend가 2대 이상이 됩니다.</li>
+<li>새 Backend가 Target Group에서 정상 상태가 됩니다.</li>
+<li>요청이 여러 Backend로 분산됩니다.</li>
+<li>부하 종료 후 Backend가 최소 용량 1대로 감소합니다.</li>
+<li>Scale-in 뒤에도 Cloud DB의 게시글이 유지됩니다.</li>
+</ul>
+<h2 id="1-backend">1. 골든 Backend 준비<a class="headerlink" href="#1-backend" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"cloud-infrastructure-lecture-example/015-auto scaling/scripts"</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>sudo<span class="w"> </span>-E<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nv">DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nv">DB_NAME</span><span class="o">=</span><span class="s1">'chapter3_board'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="nv">DB_USER</span><span class="o">=</span><span class="s1">'chapter3_user'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="nv">DB_PASSWORD</span><span class="o">=</span><span class="s1">'CHANGE_ME'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="nv">FRONTEND_ORIGIN</span><span class="o">=</span><span class="s1">'http://WEB_SERVER_PUBLIC_IP'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span>./prepare-backend-image.sh
 </code></pre></div>
-<p>다시 만들기:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"013-cost slack alert"</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>./scripts/build-zip.sh
+<p>로컬 확인:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/instance
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>curl<span class="w"> </span>-i<span class="w"> </span><span class="s1">'http://127.0.0.1:4000/api/stress?iterations=10000'</span>
 </code></pre></div>
-<h2 id="cloud-functions-action">Cloud Functions Action 생성<a class="headerlink" href="#cloud-functions-action" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Naver Cloud Console
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  -&gt; Cloud Functions
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  -&gt; Action 생성
-</code></pre></div>
-<p>권장 설정:</p>
+<p>골든 서버에서 <code>chapter3-backend</code>가 <code>active</code>, <code>enabled</code>인지 확인한 뒤 <code>lab-board-backend-image-v1</code> Server Image를 생성합니다.</p>
+<h2 id="2-target-group-load-balancer">2. Target Group과 Load Balancer<a class="headerlink" href="#2-target-group-load-balancer" title="Permanent link">&para;</a></h2>
+<p>Target Group:</p>
 <table>
 <thead>
 <tr>
@@ -1225,115 +1214,194 @@
 </thead>
 <tbody>
 <tr>
-<td>Runtime</td>
-<td>Python 3.x</td>
+<td>프로토콜 / 포트</td>
+<td><code>HTTP / 4000</code></td>
 </tr>
 <tr>
-<td>Code Type</td>
-<td>파일 업로드</td>
+<td>Health Check</td>
+<td><code>GET /api/health</code></td>
 </tr>
 <tr>
-<td>Upload File</td>
-<td><code>ncp-billing.zip</code></td>
+<td>주기 / 임계값</td>
+<td><code>10초 / 정상 2 / 실패 3</code></td>
 </tr>
 <tr>
-<td>Main Function</td>
-<td><code>main</code></td>
+<td>알고리즘</td>
+<td>Round Robin</td>
+</tr>
+<tr>
+<td>Sticky Session</td>
+<td>사용 안 함</td>
 </tr>
 </tbody>
 </table>
-<p>zip 파일에는 <code>main.py</code>, <code>__main__.py</code>, <code>boto3/botocore</code> 의존성이 함께 들어갑니다.</p>
-<h2 id="_3">기본 파라미터<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">"NCP_ACCESS_KEY"</span><span class="p">:</span><span class="w"> </span><span class="s2">"YOUR_NCP_ACCESS_KEY"</span><span class="p">,</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">"NCP_SECRET_KEY"</span><span class="p">:</span><span class="w"> </span><span class="s2">"YOUR_NCP_SECRET_KEY"</span><span class="p">,</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nt">"SLACK_WEBHOOK_URL"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://hooks.slack.com/services/..."</span><span class="p">,</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="nt">"BUDGET_KRW"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10000"</span><span class="p">,</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">"ALERT_ONLY_OVER_BUDGET"</span><span class="p">:</span><span class="w"> </span><span class="s2">"false"</span><span class="p">,</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="nt">"SAVE_REPORT_TO_OBJECT_STORAGE"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="nt">"OBJECT_STORAGE_BUCKET"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ncp-billing-report-james-260828"</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="p">}</span>
+<p>Public Application Load Balancer:</p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Listener</td>
+<td><code>HTTP :80</code></td>
+</tr>
+<tr>
+<td>Target Group</td>
+<td><code>lab-board-tg</code></td>
+</tr>
+<tr>
+<td>Subnet</td>
+<td>Public <code>LOADB</code> Subnet</td>
+</tr>
+</tbody>
+</table>
+<p>확인:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LB_URL</span><span class="o">=</span><span class="s1">'http://LOAD_BALANCER_DOMAIN'</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>./verify-backend.sh<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">LB_URL</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>./smoke-test-board.sh<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">LB_URL</span><span class="si">}</span><span class="s2">"</span>
 </code></pre></div>
-<h2 id="_4">스케줄<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p>매일 오전 9시에 실행하는 예시:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>0 0 9 * * *
+<h2 id="3-web">3. Web 서버 전환<a class="headerlink" href="#3-web" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"007-three tier web app/web"</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>sudo<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="s2">"s|^BACKEND_BASE_URL=.*|BACKEND_BASE_URL=\"</span><span class="si">${</span><span class="nv">LB_URL</span><span class="si">}</span><span class="s2">\"|"</span><span class="w"> </span>.env
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>sudo<span class="w"> </span>./install-web.sh
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>curl<span class="w"> </span>http://127.0.0.1/config.js
 </code></pre></div>
-<p>콘솔에서 Cron 기준 시간이 UTC인지 KST인지 확인합니다.</p>
-<h2 id="_5">동작 설명<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p>브라우저에서 글쓰기와 조회를 확인합니다.</p>
+<h2 id="4-launch-configuration-asg">4. Launch Configuration과 ASG<a class="headerlink" href="#4-launch-configuration-asg" title="Permanent link">&para;</a></h2>
+<p>Launch Configuration은 생성한 Server Image와 수업용 2 vCPU 이상 스펙을 사용합니다. 앱과 설정이 Image에 포함되어 있으므로 Init Script는 생략합니다.</p>
+<p>Auto Scaling Group 권장값:</p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>최소 / 최대 / 기대</td>
+<td><code>1 / 3 / 1</code></td>
+</tr>
+<tr>
+<td>상세 모니터링</td>
+<td>사용</td>
+</tr>
+<tr>
+<td>기본 Cooldown</td>
+<td><code>300초</code></td>
+</tr>
+<tr>
+<td>Health Check</td>
+<td>Load Balancer</td>
+</tr>
+<tr>
+<td>Health Check Grace Period</td>
+<td><code>300초</code></td>
+</tr>
+<tr>
+<td>Target Group</td>
+<td><code>lab-board-tg</code></td>
+</tr>
+<tr>
+<td>Scale-out Policy</td>
+<td><code>+1</code>, Cooldown <code>300초</code></td>
+</tr>
+<tr>
+<td>Scale-in Policy</td>
+<td><code>-1</code>, Cooldown <code>300초</code></td>
+</tr>
+</tbody>
+</table>
+<p>첫 ASG Backend가 정상 등록되면 골든 서버를 Target Group에서 제거합니다.</p>
+<h2 id="5-cloud-insight-scale-out-rule">5. Cloud Insight Scale-out Rule<a class="headerlink" href="#5-cloud-insight-scale-out-rule" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>감시 대상</td>
+<td><code>Server (VPC)</code>의 <code>lab-board-asg</code></td>
+</tr>
+<tr>
+<td>Metric</td>
+<td><code>SERVER/avg_cpu_used_rto</code></td>
+</tr>
+<tr>
+<td>조건</td>
+<td><code>&gt;= 50</code></td>
+</tr>
+<tr>
+<td>집약 / 지속</td>
+<td><code>AVG / 1 minute</code></td>
+</tr>
+<tr>
+<td>액션</td>
+<td><code>scale-out-add-1</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>CPU/used_rto</code>가 아니라 서버 평균 CPU Metric을 선택합니다.</p>
+<h2 id="6-scale-out">6. 부하 및 Scale-out<a class="headerlink" href="#6-scale-out" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nv">REQUEST_COUNT</span><span class="o">=</span><span class="m">40</span><span class="w"> </span>./check-distribution.sh<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">LB_URL</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nv">DURATION_SECONDS</span><span class="o">=</span><span class="m">600</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="nv">CONCURRENCY</span><span class="o">=</span><span class="m">20</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="nv">ITERATIONS</span><span class="o">=</span><span class="m">250000</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>./run-load-test.sh<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">LB_URL</span><span class="si">}</span><span class="s2">"</span>
+</code></pre></div>
+<p>관찰 순서:</p>
 <ol>
-<li>KST 기준 오늘 날짜를 계산합니다. <code>START_DATE</code>, <code>END_DATE</code>를 생략하면 자동으로 <code>이번 달 1일 ~ 오늘</code> 기간을 표시합니다.</li>
-<li>Billing API <code>getDemandCostList</code>를 호출합니다.</li>
-<li>Billing API <code>getProductDemandCostList</code>를 호출해 서비스별 비용을 가져옵니다.</li>
-<li>응답에서 사용 금액을 추출합니다.</li>
-<li>전일 Object Storage 리포트 또는 <code>PREVIOUS_USE_AMOUNT_KRW</code>와 비교해 증감액을 계산합니다.</li>
-<li><code>BUDGET_KRW</code>와 비교합니다.</li>
-<li><code>SAVE_REPORT_TO_OBJECT_STORAGE=true</code>이면 Object Storage에 JSON 리포트를 저장합니다.</li>
-<li>Slack으로 비용 알림을 보냅니다.</li>
+<li>평균 CPU 50% 이상</li>
+<li>Event 발생</li>
+<li>ASG 실행 이력에 Scale-out Policy 표시</li>
+<li>서버 수 증가</li>
+<li>새 Target 정상 전환</li>
 </ol>
-<p>Billing API의 기본 조회 단위는 <code>yyyyMM</code> 월 단위입니다. <code>START_DATE</code>, <code>END_DATE</code>는 메시지와 리포트에 보여줄 기간이고, 실제 API 호출에는 해당 월이 사용됩니다. 날짜 파라미터를 생략하면 매일 실행 시 자동으로 오늘 날짜가 반영됩니다.</p>
-<p><code>OBJECT_STORAGE_BUCKET</code>이 있으면 아래 경로에서 전일 리포트를 자동으로 찾고, 오늘 리포트도 저장합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>오늘 리포트: billing-reports/202608/ncp-billing-20260829.json
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>전일 리포트: billing-reports/202608/ncp-billing-20260828.json
+<p>분산과 DB 쓰기를 확인합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">REQUEST_COUNT</span><span class="o">=</span><span class="m">100</span><span class="w"> </span>./check-distribution.sh<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">LB_URL</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>./smoke-test-board.sh<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">LB_URL</span><span class="si">}</span><span class="s2">"</span>
 </code></pre></div>
-<p>Slack 메시지 예시:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>NCP 비용 리포트
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>8월 1일 ~ 8월 28일 기준 사용 금액 요약입니다.
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>요약
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>항목           내용
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>------------ ----------------------------
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>조회 월         202608
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>조회 기간        8월 1일 ~ 8월 28일
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>사용 금액        26,810 KRW
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>전일 대비        증가 1,230 KRW (4.8%)
-<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>예산           10,000 KRW
-<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>상태           예산 초과
-<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>
-<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>서비스별 비용
-<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>No  Service                                        Cost
-<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>--  ------------------------------------ --------------
-<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a> 1  Server(VPC)                              17,540 KRW
-<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a> 2  Cloud DB for MySQL (VPC)                  5,440 KRW
-<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a> 3  NAT Gateway                               2,070 KRW
-<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>
-<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>리포트 정보
-<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>requestId: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>저장 경로: billing-reports/202608/ncp-billing-20260828.json
+<h2 id="7-scale-in">7. Scale-in<a class="headerlink" href="#7-scale-in" title="Permanent link">&para;</a></h2>
+<p>Scale-out 확인 후 부하를 중지하고 Scale-in Event Rule을 생성합니다.</p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Metric</td>
+<td><code>SERVER/avg_cpu_used_rto</code></td>
+</tr>
+<tr>
+<td>조건</td>
+<td><code>&lt; 20</code></td>
+</tr>
+<tr>
+<td>집약 / 지속</td>
+<td><code>AVG / 5 minutes</code></td>
+</tr>
+<tr>
+<td>액션</td>
+<td><code>scale-in-remove-1</code></td>
+</tr>
+</tbody>
+</table>
+<p>최종 확인:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nv">REQUEST_COUNT</span><span class="o">=</span><span class="m">40</span><span class="w"> </span>./check-distribution.sh<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">LB_URL</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>./verify-backend.sh<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">LB_URL</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>./smoke-test-board.sh<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">LB_URL</span><span class="si">}</span><span class="s2">"</span>
 </code></pre></div>
-<h2 id="object-storage">Object Storage 체크섬 설정<a class="headerlink" href="#object-storage" title="Permanent link">&para;</a></h2>
-<p><code>ncp-billing.zip</code> 예제의 <code>main.py</code>는 Object Storage 저장 옵션을 켜면 <code>boto3</code>를 사용합니다. 이때 체크섬 설정을 함수 코드 안에 포함했습니다.</p>
-<p>Naver Cloud Object Storage를 S3 호환 API로 사용할 때는 아래 설정을 명시합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">botocore.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="n">signature_version</span><span class="o">=</span><span class="s2">"s3v4"</span><span class="p">,</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="n">s3</span><span class="o">=</span><span class="p">{</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>        <span class="s2">"addressing_style"</span><span class="p">:</span> <span class="s2">"path"</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="p">},</span>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="n">request_checksum_calculation</span><span class="o">=</span><span class="s2">"when_required"</span><span class="p">,</span>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="n">response_checksum_validation</span><span class="o">=</span><span class="s2">"when_required"</span><span class="p">,</span>
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="p">)</span>
-</code></pre></div>
-<p>전체 예제:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>013-cost slack alert/examples/object-storage-checksum.py
-</code></pre></div>
-<p>실행:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"013-cost slack alert"</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>pip<span class="w"> </span>install<span class="w"> </span>boto3
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="nv">NCP_ACCESS_KEY</span><span class="o">=</span><span class="s1">'YOUR_ACCESS_KEY'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="nv">NCP_SECRET_KEY</span><span class="o">=</span><span class="s1">'YOUR_SECRET_KEY'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="nv">NCP_OBJECT_STORAGE_BUCKET</span><span class="o">=</span><span class="s1">'YOUR_BUCKET_NAME'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>python<span class="w"> </span>examples/object-storage-checksum.py
-</code></pre></div>
-<p><code>AccessDenied</code>가 발생하면 권한뿐 아니라 <code>endpoint_url</code>, <code>region_name</code>, <code>addressing_style</code>, 체크섬 설정을 같이 확인합니다.</p>
-<h2 id="_6">참고<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<ul>
-<li>상세 자료는 저장소의 <code>013-cost slack alert/README.md</code>를 확인합니다.</li>
-</ul>
+<p>상세 콘솔 입력값, 트러블슈팅, 비용 정리 순서는 저장소의 <a href="https://github.com/jangh-lee/cloud-infrastructure-lecture-example/tree/main/015-auto%20scaling"><code>015-auto scaling/README.md</code></a>를 확인합니다.</p>
 
 
 
