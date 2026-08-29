@@ -185,6 +185,73 @@ sudo mariadb -u root \
 - 마이그레이션 계정에 복제 관련 권한과 `chapter3_board` 조회 권한이 있는지
 - `posts` 테이블과 이관할 게시글이 실제로 존재하는지
 
+### Source 준비 상태를 SQL로 직접 확인
+
+스크립트 결과만 보지 않고 Source DB 서버에서 관리자 계정으로 접속해 항목별 쿼리를 직접 실행합니다.
+
+```bash
+sudo mariadb -u root -p chapter3_board
+```
+
+먼저 DMS가 변경 데이터를 읽는 데 필요한 binlog 설정을 확인합니다.
+
+```sql
+SHOW VARIABLES
+WHERE Variable_name IN (
+  'server_id',
+  'log_bin',
+  'binlog_format',
+  'binlog_row_image',
+  'expire_logs_days',
+  'bind_address'
+);
+
+SHOW MASTER STATUS;
+```
+
+`server_id`는 `0`이 아니어야 하고, `log_bin=ON`, `binlog_format=ROW`여야 합니다. `SHOW MASTER STATUS`에서 binlog 파일명과 위치가 출력되어야 DMS가 읽을 변경 로그가 존재하는 상태입니다.
+
+마이그레이션 계정에 복제 관련 전역 권한과 게시판 DB 조회 권한이 부여됐는지 확인합니다.
+
+```sql
+SELECT GRANTEE, PRIVILEGE_TYPE
+FROM information_schema.USER_PRIVILEGES
+WHERE PRIVILEGE_TYPE IN (
+  'RELOAD',
+  'PROCESS',
+  'SHOW DATABASES',
+  'REPLICATION SLAVE',
+  'REPLICATION CLIENT'
+)
+ORDER BY GRANTEE, PRIVILEGE_TYPE;
+
+SELECT GRANTEE, TABLE_SCHEMA, PRIVILEGE_TYPE
+FROM information_schema.SCHEMA_PRIVILEGES
+WHERE TABLE_SCHEMA = 'chapter3_board'
+ORDER BY GRANTEE, PRIVILEGE_TYPE;
+```
+
+결과의 `GRANTEE`에서 DMS Endpoint에 입력할 계정을 찾습니다. 계정이 없거나 `chapter3_board`의 `SELECT` 권한이 없다면 Endpoint 연결은 되더라도 테이블 이관이 실패할 수 있습니다.
+
+마이그레이션 시작 전 기준값도 직접 기록합니다.
+
+```sql
+SELECT
+  COUNT(*) AS total_posts,
+  MIN(id) AS first_post_id,
+  MAX(id) AS last_post_id,
+  MIN(created_at) AS first_created_at,
+  MAX(created_at) AS last_created_at
+FROM posts;
+
+SELECT id, title, content, author_name, created_at
+FROM posts
+ORDER BY id DESC
+LIMIT 5;
+```
+
+`total_posts`, `last_post_id`, 최신 게시글 제목과 본문을 기록해 두면 마이그레이션 후 Target이 어느 시점까지 따라왔는지 판단할 수 있습니다.
+
 ## 5. ACG 확인
 
 DMS 연결 테스트가 실패하면 대부분 네트워크 또는 권한 문제입니다.
@@ -372,6 +439,122 @@ mysql -h SOURCE_DB_PRIVATE_IP -u chapter3_user -p chapter3_board \
 mysql -h db-xxxx.vpc-cdb.ntruss.com -u TARGET_USER -p chapter3_board \
   -e "SELECT COUNT(*) AS target_posts FROM posts;"
 ```
+
+### Source와 Target을 직접 비교하는 SQL 실습
+
+터미널 두 개를 열어 한쪽은 Source, 다른 한쪽은 Target에 접속합니다. 이후 아래 쿼리를 양쪽에서 똑같이 실행해 결과를 비교합니다.
+
+```bash
+# 터미널 1: Source
+mysql -h SOURCE_DB_PRIVATE_IP -u chapter3_user -p chapter3_board
+
+# 터미널 2: Target Cloud DB
+mysql -h db-xxxx.vpc-cdb.ntruss.com -u TARGET_USER -p chapter3_board
+```
+
+먼저 테이블 컬럼 순서와 타입을 비교합니다.
+
+```sql
+SELECT
+  ORDINAL_POSITION,
+  COLUMN_NAME,
+  COLUMN_TYPE,
+  IS_NULLABLE,
+  COLUMN_KEY,
+  COLUMN_DEFAULT,
+  EXTRA,
+  COLLATION_NAME
+FROM information_schema.COLUMNS
+WHERE TABLE_SCHEMA = DATABASE()
+  AND TABLE_NAME = 'posts'
+ORDER BY ORDINAL_POSITION;
+```
+
+Source와 Target의 컬럼 개수, 타입, `NULL` 허용 여부, 기본 키, 기본값이 같아야 합니다. 다음으로 행 수와 데이터 범위를 비교합니다.
+
+```sql
+SELECT
+  COUNT(*) AS total_posts,
+  MIN(id) AS first_post_id,
+  MAX(id) AS last_post_id,
+  MIN(created_at) AS first_created_at,
+  MAX(created_at) AS last_created_at
+FROM posts;
+```
+
+최종 전환 시점에는 Source와 Target의 다섯 값이 모두 같아야 합니다. DMS 실행 중이라면 Target의 `last_post_id`가 잠시 작을 수 있지만 DMS 지연이 `0`이 된 뒤에는 같아야 합니다.
+
+행 수만 같고 실제 내용이 다른 경우를 찾기 위해 전체 데이터 지문을 비교합니다.
+
+```sql
+SELECT
+  COUNT(*) AS total_posts,
+  COALESCE(SUM(CAST(row_crc AS UNSIGNED)), 0) AS checksum_sum,
+  COALESCE(BIT_XOR(row_crc), 0) AS checksum_xor
+FROM (
+  SELECT CRC32(CONCAT_WS(
+    CHAR(31),
+    CAST(id AS CHAR),
+    title,
+    content,
+    author_name,
+    CAST(UNIX_TIMESTAMP(created_at) AS CHAR)
+  )) AS row_crc
+  FROM posts
+) AS post_fingerprints;
+```
+
+세 값이 Source와 Target에서 모두 같아야 합니다. 체크섬이 다르면 특정 게시글을 골라 실제 값을 확인합니다. 아래 `@post_id`에는 비교 스크립트가 알려준 불일치 ID나 최신 ID를 넣습니다.
+
+```sql
+SET @post_id = 1;
+
+SELECT
+  id,
+  title,
+  content,
+  CHAR_LENGTH(title) AS title_length,
+  CHAR_LENGTH(content) AS content_length,
+  author_name,
+  created_at,
+  CRC32(CONCAT_WS(
+    CHAR(31),
+    CAST(id AS CHAR),
+    title,
+    content,
+    author_name,
+    CAST(UNIX_TIMESTAMP(created_at) AS CHAR)
+  )) AS row_checksum
+FROM posts
+WHERE id = @post_id;
+```
+
+제목과 본문을 눈으로 확인하고 길이, 작성자, 작성 시각, `row_checksum`을 비교합니다. 실제 데이터 자체의 이상 여부도 양쪽에서 확인합니다.
+
+```sql
+SELECT
+  COALESCE(SUM(CASE WHEN TRIM(title) = '' THEN 1 ELSE 0 END), 0) AS empty_title_count,
+  COALESCE(SUM(CASE WHEN TRIM(content) = '' THEN 1 ELSE 0 END), 0) AS empty_content_count,
+  COALESCE(SUM(CASE WHEN TRIM(author_name) = '' THEN 1 ELSE 0 END), 0) AS empty_author_count,
+  COALESCE(SUM(CASE WHEN created_at > CURRENT_TIMESTAMP THEN 1 ELSE 0 END), 0) AS future_created_at_count
+FROM posts;
+
+SELECT title, author_name, COUNT(*) AS duplicate_candidate_count
+FROM posts
+GROUP BY title, author_name
+HAVING COUNT(*) > 1
+ORDER BY duplicate_candidate_count DESC, title;
+```
+
+빈 값과 미래 시각은 정상 데이터라면 모두 `0`이어야 합니다. 중복 후보는 반드시 오류라는 뜻은 아니므로 Source에도 같은 행이 있었는지 실제 본문과 작성 시각을 추가 조회해 판단합니다.
+
+| 비교 결과 | 해석과 확인 사항 |
+| --- | --- |
+| 행 수가 다름 | DMS 지연, 덤프 이후 Source 쓰기, 일부 행 누락 여부 확인 |
+| 행 수는 같고 체크섬이 다름 | 같은 ID의 제목·본문·작성자·작성 시각을 직접 비교 |
+| 스키마가 다름 | Target의 컬럼 타입, 기본값, 문자셋과 복원 로그 확인 |
+| 최신 ID만 Target에 없음 | 쓰기를 중지했는지, DMS 지연이 `0`인지 확인 |
+| Source와 Target 결과가 모두 같음 | 백엔드 전환 전 데이터 검증 통과 |
 
 각 DB의 스키마, ID·시간 범위, 체크섬, 빈 값·미래 시각 같은 이상 데이터, 중복 후보, 최신 10건의 실제 제목·본문과 작성자별 건수를 직접 확인하려면 동일한 SQL을 Source와 Target에 각각 실행합니다.
 

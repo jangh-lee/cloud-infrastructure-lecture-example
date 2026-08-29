@@ -249,22 +249,119 @@ cd "007-three tier web app"
 sudo mariadb -u root -p < db/queries/database-accounts.sql
 ```
 
-개별 쿼리를 직접 연습하려면 다음처럼 실행할 수 있습니다.
+#### SQL 직접 조회 실습
+
+SQL 파일만 실행하고 넘어가지 말고, 아래처럼 DB에 접속해서 쿼리를 하나씩 입력해 봅니다.
+
+```bash
+mysql -h DB_SERVER_PRIVATE_IP -u chapter3_user -p chapter3_board
+```
+
+접속 후 현재 선택된 DB와 실제 인증 계정을 확인합니다.
 
 ```sql
-USE chapter3_board;
+SELECT
+  DATABASE() AS database_name,
+  CURRENT_USER() AS authenticated_account,
+  USER() AS connection_account,
+  VERSION() AS database_version;
 
--- 최근 게시글 10개의 실제 내용
+SHOW GRANTS FOR CURRENT_USER;
+```
+
+`database_name`은 `chapter3_board`여야 합니다. `CURRENT_USER()`는 DB가 권한을 판정할 때 사용한 계정이고, `USER()`는 클라이언트가 접속할 때 사용한 계정과 접속 출발지를 보여줍니다.
+
+테이블과 컬럼 구조를 직접 확인합니다.
+
+```sql
+SHOW TABLES;
+DESCRIBE posts;
+SHOW CREATE TABLE posts\G
+```
+
+`posts.id`는 기본 키이자 `AUTO_INCREMENT`, 제목·본문·작성자·작성 시각은 `NOT NULL`인지 확인합니다.
+
+게시글이 실제로 쌓이고 있는지 범위와 최근 내용을 조회합니다.
+
+```sql
+SELECT
+  COUNT(*) AS total_posts,
+  MIN(id) AS first_post_id,
+  MAX(id) AS last_post_id,
+  MIN(created_at) AS first_created_at,
+  MAX(created_at) AS last_created_at
+FROM posts;
+
 SELECT id, title, content, author_name, created_at
 FROM posts
 ORDER BY id DESC
 LIMIT 10;
+```
 
--- 작성자별 게시글 수
+웹에서 새 글을 작성한 뒤 두 쿼리를 다시 실행해 `total_posts`, `last_post_id`가 증가하고 최신 행의 제목·본문이 입력한 내용과 같은지 확인합니다. 특정 글 하나를 자세히 보려면 실제 ID를 지정합니다.
+
+```sql
+SET @post_id = 1;
+
+SELECT
+  id,
+  title,
+  content,
+  CHAR_LENGTH(title) AS title_length,
+  CHAR_LENGTH(content) AS content_length,
+  author_name,
+  created_at
+FROM posts
+WHERE id = @post_id;
+```
+
+작성자와 날짜별로 데이터가 어떤 분포로 쌓였는지 집계합니다. 이 게시판에는 회원 테이블이 없으므로 `author_name`은 로그인 사용자가 아니라 게시글에 저장된 표시 이름입니다.
+
+```sql
 SELECT author_name, COUNT(*) AS post_count
 FROM posts
 GROUP BY author_name
-ORDER BY post_count DESC;
+ORDER BY post_count DESC, author_name;
+
+SELECT DATE(created_at) AS created_date, COUNT(*) AS post_count
+FROM posts
+GROUP BY DATE(created_at)
+ORDER BY created_date DESC
+LIMIT 14;
+```
+
+마지막으로 빈 값, 미래 시각, 중복 후보 같은 이상 데이터를 조회합니다. 정상이라면 첫 쿼리의 네 값은 모두 `0`이고, 중복 후보 쿼리는 결과가 없거나 의도적으로 같은 제목을 작성한 행만 나와야 합니다.
+
+```sql
+SELECT
+  COALESCE(SUM(CASE WHEN TRIM(title) = '' THEN 1 ELSE 0 END), 0) AS empty_title_count,
+  COALESCE(SUM(CASE WHEN TRIM(content) = '' THEN 1 ELSE 0 END), 0) AS empty_content_count,
+  COALESCE(SUM(CASE WHEN TRIM(author_name) = '' THEN 1 ELSE 0 END), 0) AS empty_author_count,
+  COALESCE(SUM(CASE WHEN created_at > CURRENT_TIMESTAMP THEN 1 ELSE 0 END), 0) AS future_created_at_count
+FROM posts;
+
+SELECT title, author_name, COUNT(*) AS duplicate_candidate_count
+FROM posts
+GROUP BY title, author_name
+HAVING COUNT(*) > 1
+ORDER BY duplicate_candidate_count DESC, title;
+```
+
+실제 MariaDB 접속 계정은 DB 서버에서 관리자 권한으로 별도 확인합니다.
+
+```bash
+sudo mariadb -u root -p
+```
+
+```sql
+SELECT User, Host, plugin
+FROM mysql.user
+ORDER BY User, Host;
+
+SELECT GRANTEE, TABLE_SCHEMA, PRIVILEGE_TYPE
+FROM information_schema.SCHEMA_PRIVILEGES
+WHERE TABLE_SCHEMA = 'chapter3_board'
+ORDER BY GRANTEE, PRIVILEGE_TYPE;
 ```
 
 ### 백엔드 서버
