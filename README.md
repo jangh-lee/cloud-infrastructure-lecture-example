@@ -25,3 +25,4 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 | [`011-terraform`](./011-terraform/) | Terraform으로 Naver Cloud VPC, Subnet, ACG, Init Script, Server를 코드로 생성하고 삭제하는 예제입니다. |
 | [`012-cloud db migration`](./012-cloud%20db%20migration/) | 007번 게시판 DB를 Cloud DB for MySQL로 마이그레이션하기 위한 ERD, Source DB 사전 설정, 검증, 백엔드 전환 예제입니다. |
 | [`013-cost slack alert`](./013-cost%20slack%20alert/) | Cloud Functions에서 Naver Cloud 비용을 조회하고 Slack으로 알림을 보내는 예제입니다. |
+| [`014-acg slack alert`](./014-acg%20slack%20alert/) | Cloud Activity Tracer로 ACG 규칙 변경을 감지하고 Slack으로 보안 알림을 보내는 예제입니다. |

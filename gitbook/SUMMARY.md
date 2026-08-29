@@ -16,3 +16,4 @@
 * [011 Terraform](labs/011-terraform.md)
 * [012 Cloud DB Migration](labs/012-cloud-db-migration.md)
 * [013 Cost Slack Alert](labs/013-cost-slack-alert.md)
+* [014 ACG Slack Alert](labs/014-acg-slack-alert.md)
