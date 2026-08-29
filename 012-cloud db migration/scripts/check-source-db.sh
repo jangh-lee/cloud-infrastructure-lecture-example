@@ -80,7 +80,12 @@ mysql_select="$(query "SELECT COUNT(*) FROM information_schema.SCHEMA_PRIVILEGES
 echo "Source DB preflight"
 echo "-------------------"
 printf 'INFO %-24s %s\n' "DB version" "${db_version}"
-printf 'INFO %-24s %s\n' "bind_address" "${bind_address}"
+if [[ "${bind_address}" == "127.0.0.1" || "${bind_address}" == "::1" || "${bind_address}" == "localhost" ]]; then
+  printf 'FAIL %-24s loopback-only value %s\n' "bind_address" "${bind_address}"
+  failures=$((failures + 1))
+else
+  printf 'OK   %-24s %s\n' "bind_address" "${bind_address}"
+fi
 check_equal "log_bin" "${log_bin}" "1"
 if [[ "${server_id}" != "0" ]]; then
   printf 'OK   %-24s %s\n' "server_id" "${server_id}"

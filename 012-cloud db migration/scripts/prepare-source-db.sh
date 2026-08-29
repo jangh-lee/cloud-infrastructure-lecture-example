@@ -86,11 +86,14 @@ fi
 DB_VERSION="$(run_admin_sql "SELECT VERSION();" --skip-column-names)"
 if [[ "${DB_VERSION}" == *MariaDB* ]]; then
   CONF_DIR="/etc/mysql/mariadb.conf.d"
+  CONF_BASENAME="60-dms-source.cnf"
   SERVICE_NAME="mariadb"
   AUTH_SQL="IDENTIFIED VIA mysql_native_password USING PASSWORD('$(escape_sql_string "${MIGRATION_PASSWORD}")')"
   EXPIRY_SETTING="expire_logs_days=5"
 elif systemctl list-unit-files mysql.service >/dev/null 2>&1; then
   CONF_DIR="/etc/mysql/mysql.conf.d"
+  # Ubuntu's mysqld.cnf sorts after numeric names and would override bind-address.
+  CONF_BASENAME="zz-dms-source.cnf"
   SERVICE_NAME="mysql"
   AUTH_SQL="IDENTIFIED WITH mysql_native_password BY '$(escape_sql_string "${MIGRATION_PASSWORD}")'"
   EXPIRY_SETTING="binlog_expire_logs_seconds=432000"
@@ -105,7 +108,7 @@ if [[ -n "${SOURCE_DB_ADMIN_HOST}" ]]; then
   exit 1
 fi
 
-CONF_FILE="${CONF_DIR}/60-dms-source.cnf"
+CONF_FILE="${CONF_DIR}/${CONF_BASENAME}"
 CONF_BACKUP="${CONF_FILE}.pre-dms"
 HAD_EXISTING_CONFIG=false
 
