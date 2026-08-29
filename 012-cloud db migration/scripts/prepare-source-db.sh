@@ -12,7 +12,7 @@ SOURCE_DB_ADMIN_PASSWORD="${SOURCE_DB_ADMIN_PASSWORD:-${SOURCE_DB_ROOT_PASSWORD:
 SOURCE_DB_ADMIN_HOST="${SOURCE_DB_ADMIN_HOST:-}"
 SOURCE_DB_ADMIN_PORT="${SOURCE_DB_ADMIN_PORT:-3306}"
 MIGRATION_USER="${MIGRATION_USER:-dms_migration}"
-MIGRATION_PASSWORD="${MIGRATION_PASSWORD:-ChangeMigrationPassword123!}"
+MIGRATION_PASSWORD="${MIGRATION_PASSWORD:-MigratePass123!}"
 SOURCE_DATABASE="${SOURCE_DATABASE:-chapter3_board}"
 ALLOWED_HOST="${ALLOWED_HOST:-%}"
 
@@ -20,6 +20,11 @@ MYSQL_BIN="$(command -v mariadb || command -v mysql || true)"
 
 if [[ -z "${MYSQL_BIN}" ]]; then
   echo "mariadb or mysql client is required." >&2
+  exit 1
+fi
+
+if (( ${#MIGRATION_PASSWORD} < 2 || ${#MIGRATION_PASSWORD} > 21 )); then
+  echo "MIGRATION_PASSWORD must be 2-21 characters for NCP Cloud DB compatibility." >&2
   exit 1
 fi
 

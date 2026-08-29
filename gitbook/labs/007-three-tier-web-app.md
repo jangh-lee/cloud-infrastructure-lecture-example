@@ -42,6 +42,18 @@ sudo ./install-db.sh
 
 처음 실행하면 `.env` 템플릿이 생성됩니다. 값을 채운 뒤 다시 실행합니다.
 
+예시 비밀번호는 Naver Cloud DB for MySQL 콘솔에서도 그대로 쓸 수 있도록 2자 이상, 21자 이하로 맞췄습니다.
+
+```env
+DB_ROOT_PASSWORD=RootPass123!
+DB_PREVIOUS_ROOT_PASSWORD=
+DB_NAME=chapter3_board
+DB_USER=chapter3_user
+DB_PASSWORD=AppDbPass123!
+DB_ALLOWED_HOST=10.0.1.25
+DB_BIND_ADDRESS=0.0.0.0
+```
+
 ```bash
 sudo ./install-db.sh
 ```
@@ -59,6 +71,20 @@ sudo ./install-backend.sh
 ```
 
 `.env`를 채운 뒤 다시 실행합니다.
+
+```env
+PORT=4000
+FRONTEND_ORIGIN=http://WEB_SERVER_PUBLIC_IP
+DB_HOST=DB_SERVER_PRIVATE_IP
+DB_PORT=3306
+DB_NAME=chapter3_board
+DB_USER=chapter3_user
+DB_PASSWORD=AppDbPass123!
+AUTO_POST_ENABLED=true
+AUTO_POST_INTERVAL_SECONDS=60
+AUTO_POST_TOTAL=300
+AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
+```
 
 ```bash
 sudo ./install-backend.sh

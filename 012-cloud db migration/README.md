@@ -141,12 +141,14 @@ DMS가 Source DB를 읽으려면 보통 아래 준비가 필요합니다.
 - 마이그레이션 전용 계정 생성
 - DMS 또는 Cloud DB 쪽에서 Source DB `3306/tcp`로 접근 가능하도록 ACG 허용
 
+Naver Cloud DB for MySQL의 DB 사용자 비밀번호 입력 제한을 피하려고 예시 비밀번호는 2자 이상, 21자 이하인 `MigratePass123!`를 사용합니다.
+
 Source DB 서버에서:
 
 ```bash
 cd "012-cloud db migration/scripts"
 sudo MIGRATION_USER='dms_migration' \
-  MIGRATION_PASSWORD='ChangeMigrationPassword123!' \
+  MIGRATION_PASSWORD='MigratePass123!' \
   SOURCE_DATABASE='chapter3_board' \
   ./prepare-source-db.sh
 ```
@@ -158,7 +160,7 @@ sudo MIGRATION_USER='dms_migration' \
 ```bash
 sudo SOURCE_DB_ADMIN_PASSWORD='DB_ROOT_PASSWORD' \
   MIGRATION_USER='dms_migration' \
-  MIGRATION_PASSWORD='ChangeMigrationPassword123!' \
+  MIGRATION_PASSWORD='MigratePass123!' \
   SOURCE_DATABASE='chapter3_board' \
   ./prepare-source-db.sh
 ```
@@ -341,7 +343,7 @@ Naver Cloud Console
 | Source DB Host | Source DB private IP |
 | Port | `3306` |
 | User | `dms_migration` |
-| Password | `ChangeMigrationPassword123!` |
+| Password | `MigratePass123!` |
 | Database | `chapter3_board` |
 
 `Test Connection`을 눌러 연결이 되는지 먼저 확인합니다.
@@ -389,7 +391,7 @@ cd "012-cloud db migration/scripts"
 
 SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
 SOURCE_DB_USER='chapter3_user' \
-SOURCE_DB_PASSWORD='ChangeThisPassword123!' \
+SOURCE_DB_PASSWORD='AppDbPass123!' \
 DB_NAME='chapter3_board' \
 DUMP_FILE='/tmp/chapter3_board.sql' \
 ./dump-source-db.sh
@@ -446,7 +448,7 @@ cd "012-cloud db migration/scripts"
 
 SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
 SOURCE_DB_USER='chapter3_user' \
-SOURCE_DB_PASSWORD='ChangeThisPassword123!' \
+SOURCE_DB_PASSWORD='AppDbPass123!' \
 TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
 TARGET_DB_USER='TARGET_USER' \
 TARGET_DB_PASSWORD='TARGET_PASSWORD' \

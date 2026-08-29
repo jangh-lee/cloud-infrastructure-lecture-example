@@ -57,10 +57,12 @@ erDiagram
 
 ## 1. Source DB 준비
 
+Naver Cloud DB for MySQL의 DB 사용자 비밀번호 입력 제한을 피하려고 예시 비밀번호는 2자 이상, 21자 이하인 `MigratePass123!`를 사용합니다.
+
 ```bash
 cd "012-cloud db migration/scripts"
 sudo MIGRATION_USER='dms_migration' \
-  MIGRATION_PASSWORD='ChangeMigrationPassword123!' \
+  MIGRATION_PASSWORD='MigratePass123!' \
   SOURCE_DATABASE='chapter3_board' \
   ./prepare-source-db.sh
 ```
@@ -72,7 +74,7 @@ sudo MIGRATION_USER='dms_migration' \
 ```bash
 sudo SOURCE_DB_ADMIN_PASSWORD='DB_ROOT_PASSWORD' \
   MIGRATION_USER='dms_migration' \
-  MIGRATION_PASSWORD='ChangeMigrationPassword123!' \
+  MIGRATION_PASSWORD='MigratePass123!' \
   SOURCE_DATABASE='chapter3_board' \
   ./prepare-source-db.sh
 ```
@@ -167,7 +169,7 @@ cd "012-cloud db migration/scripts"
 
 SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
 SOURCE_DB_USER='chapter3_user' \
-SOURCE_DB_PASSWORD='ChangeThisPassword123!' \
+SOURCE_DB_PASSWORD='AppDbPass123!' \
 DB_NAME='chapter3_board' \
 DUMP_FILE='/tmp/chapter3_board.sql' \
 ./dump-source-db.sh
@@ -211,7 +213,7 @@ MYSQL_PWD='TARGET_PASSWORD' mysql \
 ```bash
 SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
 SOURCE_DB_USER='chapter3_user' \
-SOURCE_DB_PASSWORD='ChangeThisPassword123!' \
+SOURCE_DB_PASSWORD='AppDbPass123!' \
 TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
 TARGET_DB_USER='TARGET_USER' \
 TARGET_DB_PASSWORD='TARGET_PASSWORD' \

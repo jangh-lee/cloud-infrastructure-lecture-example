@@ -94,14 +94,16 @@ git pull origin main
 스크립트는 `.env`가 없으면 같은 폴더에 템플릿 `.env`를 자동으로 만들어주고 종료합니다.
 즉, 스크립트만 서버에 복사해 넣어도 1회 실행 후 `.env`를 채우고 다시 실행하는 방식으로 사용할 수 있습니다.
 
+Naver Cloud DB for MySQL 콘솔에서 같은 값을 재사용할 수 있도록 예시 비밀번호는 2자 이상, 21자 이하로 구성했습니다.
+
 ### DB 서버 `.env` 예시
 
 ```env
-DB_ROOT_PASSWORD=ChangeRootPassword123!
+DB_ROOT_PASSWORD=RootPass123!
 DB_PREVIOUS_ROOT_PASSWORD=
 DB_NAME=chapter3_board
 DB_USER=chapter3_user
-DB_PASSWORD=ChangeThisPassword123!
+DB_PASSWORD=AppDbPass123!
 DB_ALLOWED_HOST=10.0.1.25
 DB_BIND_ADDRESS=0.0.0.0
 ```
@@ -138,7 +140,7 @@ DB_HOST="10.0.1.30"
 DB_PORT="3306"
 DB_NAME="chapter3_board"
 DB_USER="chapter3_user"
-DB_PASSWORD="ChangeThisPassword123!"
+DB_PASSWORD="AppDbPass123!"
 AUTO_POST_ENABLED="true"
 AUTO_POST_INTERVAL_SECONDS="60"
 AUTO_POST_TOTAL="300"

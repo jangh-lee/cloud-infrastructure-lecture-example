@@ -81,11 +81,11 @@ EOF
   fi
 
   cat > "${SCRIPT_DIR}/.env" <<'EOF'
-DB_ROOT_PASSWORD=ChangeRootPassword123!
+DB_ROOT_PASSWORD=RootPass123!
 DB_PREVIOUS_ROOT_PASSWORD=
 DB_NAME=chapter3_board
 DB_USER=chapter3_user
-DB_PASSWORD=ChangeThisPassword123!
+DB_PASSWORD=AppDbPass123!
 DB_ALLOWED_HOST=%
 DB_BIND_ADDRESS=0.0.0.0
 EOF
@@ -101,6 +101,14 @@ set +a
 
 for required_variable in DB_ROOT_PASSWORD DB_NAME DB_USER DB_PASSWORD DB_ALLOWED_HOST DB_BIND_ADDRESS; do
   require_env_value "${required_variable}"
+done
+
+for password_variable in DB_ROOT_PASSWORD DB_PASSWORD; do
+  password_value="${!password_variable}"
+  if (( ${#password_value} < 2 || ${#password_value} > 21 )); then
+    echo "${password_variable} must be 2-21 characters for NCP Cloud DB compatibility." >&2
+    exit 1
+  fi
 done
 
 db_root_password_sql="$(escape_sql_string "${DB_ROOT_PASSWORD}")"
