@@ -63,6 +63,7 @@ if [[ -d /etc/mysql ]]; then
   mv /etc/mysql "${backup_dir}/mariadb-config"
 fi
 
+mkdir -p /etc/mysql/conf.d /etc/mysql/mysql.conf.d
 DEBIAN_FRONTEND=noninteractive apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server
 systemctl enable --now mysql
