@@ -1215,59 +1215,63 @@
 <li>Slack으로 비용 알림을 보냅니다.</li>
 </ol>
 <p>Billing API의 기본 조회 단위는 <code>yyyyMM</code> 월 단위입니다. <code>START_DATE</code>, <code>END_DATE</code>는 메시지와 리포트에 보여줄 기간이고, 실제 API 호출에는 해당 월이 사용됩니다. 날짜 파라미터를 생략하면 매일 실행 시 자동으로 오늘 날짜가 반영됩니다.</p>
+<p><code>OBJECT_STORAGE_BUCKET</code>이 있으면 아래 경로에서 전일 리포트를 자동으로 찾고, 오늘 리포트도 저장합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>오늘 리포트: billing-reports/202608/ncp-billing-20260829.json
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>전일 리포트: billing-reports/202608/ncp-billing-20260828.json
+</code></pre></div>
 <p>Slack 메시지 예시:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>NCP 비용 리포트
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>8월 1일 ~ 8월 28일 기준 사용 금액 요약입니다.
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>요약
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>항목           내용
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>------------ ----------------------------
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>조회 월         202608
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>조회 기간        8월 1일 ~ 8월 28일
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>사용 금액        26,810 KRW
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>전일 대비        증가 1,230 KRW (4.8%)
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>예산           10,000 KRW
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>상태           예산 초과
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>서비스별 비용
-<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>No  Service                                        Cost
-<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>--  ------------------------------------ --------------
-<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a> 1  Server(VPC)                              17,540 KRW
-<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a> 2  Cloud DB for MySQL (VPC)                  5,440 KRW
-<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a> 3  NAT Gateway                               2,070 KRW
-<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>
-<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>리포트 정보
-<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a>requestId: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>저장 경로: billing-reports/202608/ncp-billing-20260828.json
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>NCP 비용 리포트
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>8월 1일 ~ 8월 28일 기준 사용 금액 요약입니다.
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>요약
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>항목           내용
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>------------ ----------------------------
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>조회 월         202608
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>조회 기간        8월 1일 ~ 8월 28일
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>사용 금액        26,810 KRW
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>전일 대비        증가 1,230 KRW (4.8%)
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>예산           10,000 KRW
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>상태           예산 초과
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>서비스별 비용
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>No  Service                                        Cost
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>--  ------------------------------------ --------------
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a> 1  Server(VPC)                              17,540 KRW
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a> 2  Cloud DB for MySQL (VPC)                  5,440 KRW
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a> 3  NAT Gateway                               2,070 KRW
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>리포트 정보
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>requestId: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>저장 경로: billing-reports/202608/ncp-billing-20260828.json
 </code></pre></div>
 <h2 id="object-storage">Object Storage 체크섬 설정<a class="headerlink" href="#object-storage" title="Permanent link">&para;</a></h2>
 <p><code>ncp-billing.zip</code> 예제의 <code>main.py</code>는 Object Storage 저장 옵션을 켜면 <code>boto3</code>를 사용합니다. 이때 체크섬 설정을 함수 코드 안에 포함했습니다.</p>
 <p>Naver Cloud Object Storage를 S3 호환 API로 사용할 때는 아래 설정을 명시합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">botocore.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">signature_version</span><span class="o">=</span><span class="s2">"s3v4"</span><span class="p">,</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">s3</span><span class="o">=</span><span class="p">{</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>        <span class="s2">"addressing_style"</span><span class="p">:</span> <span class="s2">"path"</span>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="p">},</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="n">request_checksum_calculation</span><span class="o">=</span><span class="s2">"when_required"</span><span class="p">,</span>
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="n">response_checksum_validation</span><span class="o">=</span><span class="s2">"when_required"</span><span class="p">,</span>
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">botocore.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="n">signature_version</span><span class="o">=</span><span class="s2">"s3v4"</span><span class="p">,</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="n">s3</span><span class="o">=</span><span class="p">{</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>        <span class="s2">"addressing_style"</span><span class="p">:</span> <span class="s2">"path"</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="p">},</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="n">request_checksum_calculation</span><span class="o">=</span><span class="s2">"when_required"</span><span class="p">,</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="n">response_checksum_validation</span><span class="o">=</span><span class="s2">"when_required"</span><span class="p">,</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="p">)</span>
 </code></pre></div>
 <p>전체 예제:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>013-cost slack alert/examples/object-storage-checksum.py
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>013-cost slack alert/examples/object-storage-checksum.py
 </code></pre></div>
 <p>실행:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"013-cost slack alert"</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>pip<span class="w"> </span>install<span class="w"> </span>boto3
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="nv">NCP_ACCESS_KEY</span><span class="o">=</span><span class="s1">'YOUR_ACCESS_KEY'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="nv">NCP_SECRET_KEY</span><span class="o">=</span><span class="s1">'YOUR_SECRET_KEY'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="nv">NCP_OBJECT_STORAGE_BUCKET</span><span class="o">=</span><span class="s1">'YOUR_BUCKET_NAME'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>python<span class="w"> </span>examples/object-storage-checksum.py
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"013-cost slack alert"</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>pip<span class="w"> </span>install<span class="w"> </span>boto3
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="nv">NCP_ACCESS_KEY</span><span class="o">=</span><span class="s1">'YOUR_ACCESS_KEY'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="nv">NCP_SECRET_KEY</span><span class="o">=</span><span class="s1">'YOUR_SECRET_KEY'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="nv">NCP_OBJECT_STORAGE_BUCKET</span><span class="o">=</span><span class="s1">'YOUR_BUCKET_NAME'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>python<span class="w"> </span>examples/object-storage-checksum.py
 </code></pre></div>
 <p><code>AccessDenied</code>가 발생하면 권한뿐 아니라 <code>endpoint_url</code>, <code>region_name</code>, <code>addressing_style</code>, 체크섬 설정을 같이 확인합니다.</p>
 <h2 id="_6">참고<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
