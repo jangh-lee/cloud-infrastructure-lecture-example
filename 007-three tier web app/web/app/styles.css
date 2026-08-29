@@ -201,11 +201,6 @@ textarea:focus-visible {
   background: var(--danger-hover);
 }
 
-.header-write-button {
-  min-height: 36px;
-  padding: 7px 14px;
-}
-
 .board-tools {
   margin-bottom: 12px;
   display: flex;
@@ -276,7 +271,7 @@ textarea:focus-visible {
   min-height: 54px;
   padding: 0 18px;
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr) 132px 128px;
+  grid-template-columns: 72px minmax(0, 1fr) 132px 160px;
   align-items: center;
   gap: 16px;
 }
@@ -699,8 +694,7 @@ textarea:focus-visible {
     height: 58px;
   }
 
-  .brand span,
-  .header-write-button {
+  .brand span {
     display: none;
   }
 

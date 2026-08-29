@@ -63,7 +63,7 @@ function formatDate(value, includeTime = false) {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-    ...(includeTime ? { hour: "2-digit", minute: "2-digit" } : {})
+    ...(includeTime ? { hour: "2-digit", minute: "2-digit", hourCycle: "h23" } : {})
   }).format(date);
 }
 
@@ -159,7 +159,7 @@ function renderPostList() {
     : pagePosts.map((post, index) => {
       const rowNumber = posts.length - startIndex - index;
       const author = escapeHtml(post.authorName || "비가입 유저");
-      const date = formatDate(post.createdAt);
+      const date = formatDate(post.createdAt, true);
       return `
         <button class="board-row post-row" type="button" data-post-id="${post.id}">
           <span class="post-number">${rowNumber}</span>
