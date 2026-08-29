@@ -63,14 +63,17 @@ if [[ "${posts_exists}" == "1" ]]; then
   posts_count="$(query "SELECT COUNT(*) FROM \`${SOURCE_DATABASE}\`.posts;")"
 fi
 
-account_row="$(query "SELECT CONCAT(User, '@', Host, CHAR(9), plugin) FROM mysql.user WHERE User='${MIGRATION_USER}' ORDER BY Host LIMIT 1;" 2>/dev/null || true)"
-account_name="${account_row%%$'\t'*}"
+account_row="$(query "SELECT User, Host, plugin FROM mysql.user WHERE User='${MIGRATION_USER}' ORDER BY Host LIMIT 1;" 2>/dev/null || true)"
+account_user=""
+account_host=""
 auth_plugin=""
-if [[ "${account_row}" == *$'\t'* ]]; then
-  auth_plugin="${account_row#*$'\t'}"
+read -r account_user account_host auth_plugin <<< "${account_row}"
+account_name=""
+if [[ -n "${account_user}" && -n "${account_host}" ]]; then
+  account_name="${account_user}@${account_host}"
 fi
 
-global_privileges="$(query "SELECT COUNT(DISTINCT PRIVILEGE_TYPE) FROM information_schema.USER_PRIVILEGES WHERE GRANTEE LIKE '\\'${MIGRATION_USER}\\'@%' AND PRIVILEGE_TYPE IN ('RELOAD','PROCESS','SHOW DATABASES','REPLICATION SLAVE','REPLICATION CLIENT');")"
+global_privileges="$(query "SELECT COUNT(DISTINCT CASE WHEN PRIVILEGE_TYPE='BINLOG MONITOR' THEN 'REPLICATION CLIENT' ELSE PRIVILEGE_TYPE END) FROM information_schema.USER_PRIVILEGES WHERE GRANTEE LIKE '\\'${MIGRATION_USER}\\'@%' AND PRIVILEGE_TYPE IN ('RELOAD','PROCESS','SHOW DATABASES','REPLICATION SLAVE','REPLICATION CLIENT','BINLOG MONITOR');")"
 schema_privileges="$(query "SELECT COUNT(DISTINCT PRIVILEGE_TYPE) FROM information_schema.SCHEMA_PRIVILEGES WHERE GRANTEE LIKE '\\'${MIGRATION_USER}\\'@%' AND TABLE_SCHEMA='${SOURCE_DATABASE}' AND PRIVILEGE_TYPE IN ('SELECT','SHOW VIEW','LOCK TABLES','TRIGGER');")"
 mysql_select="$(query "SELECT COUNT(*) FROM information_schema.SCHEMA_PRIVILEGES WHERE GRANTEE LIKE '\\'${MIGRATION_USER}\\'@%' AND TABLE_SCHEMA='mysql' AND PRIVILEGE_TYPE='SELECT';")"
 
