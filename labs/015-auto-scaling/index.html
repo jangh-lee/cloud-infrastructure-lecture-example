@@ -2355,7 +2355,7 @@
 </ul>
 </div>
 <p>007번 3계층 게시판의 Backend를 Naver Cloud Auto Scaling Group으로 전환하는 실습입니다.</p>
-<p>이 교재는 전용 자동화 스크립트로 결과를 감추지 않습니다. 학습자가 <code>curl</code>, <code>systemctl</code>, <code>awk</code>, <code>ab</code> 명령을 한 줄씩 직접 실행하고 응답 헤더, JSON, CPU 그래프, 서버 수, Target 상태를 눈으로 확인하도록 구성했습니다.</p>
+<p>이 교재는 전용 자동화 스크립트로 결과를 감추지 않습니다. 같은 목적의 연속 명령은 한 코드 박스로 묶어 한 번에 복사하고, 결과 해석이나 실행 시점이 다른 명령만 분리했습니다. 학습자는 <code>curl</code>, <code>systemctl</code>, <code>awk</code>, <code>ab</code>의 출력과 CPU 그래프, 서버 수, Target 상태를 직접 확인합니다.</p>
 <p>007번의 <code>install-backend.sh</code>만 앱 설치에 재사용합니다. 이 스크립트는 Node.js 패키지와 systemd 서비스를 설치하기 위한 기존 게시판 구성 요소이며, Auto Scaling 리소스 생성과 검증은 모두 직접 수행합니다.</p>
 <blockquote>
 <p><code>GET /api/stress</code>는 수업용 CPU 부하 API입니다. <code>LAB_STRESS_ENABLED=true</code>인 실습 이미지에서만 열고 운영 환경에서는 사용하지 마십시오.</p>
@@ -2492,15 +2492,11 @@
 <p>골든 Backend 서버에서 Cloud DB에 직접 접속합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mysql<span class="w"> </span>-h<span class="w"> </span>DB_PRIVATE_DOMAIN<span class="w"> </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span>-u<span class="w"> </span>chapter3_user<span class="w"> </span>-p<span class="w"> </span>chapter3_board
 </code></pre></div>
-<p>MySQL 프롬프트에서 한 줄씩 실행합니다.</p>
+<p>MySQL 프롬프트에 아래 블록을 한 번에 붙여 넣습니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">DATABASE</span><span class="p">(),</span><span class="w"> </span><span class="k">CURRENT_USER</span><span class="p">(),</span><span class="w"> </span><span class="k">VERSION</span><span class="p">();</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">post_count</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">posts</span><span class="p">;</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">posts</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">DESC</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
-</code></pre></div>
-<p>종료:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">exit</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">post_count</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">posts</span><span class="p">;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">posts</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">DESC</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">exit</span>
 </code></pre></div>
 <p>눈으로 확인할 것:</p>
 <ul>
@@ -2562,42 +2558,38 @@
 </ul>
 <h2 id="8-step-3-backend">8. Step 3 - 골든 Backend 준비<a class="headerlink" href="#8-step-3-backend" title="Permanent link">&para;</a></h2>
 <h3 id="81">8.1 저장소 받기<a class="headerlink" href="#81" title="Permanent link">&para;</a></h3>
-<p>골든 Backend Ubuntu 서버에서 한 줄씩 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+<p>처음 준비하는 골든 Backend Ubuntu 서버에서는 아래 블록을 한 번에 실행합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git<span class="w"> </span>curl
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/007-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/backend
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git<span class="w"> </span>curl
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git
-</code></pre></div>
-<p>이미 저장소가 있다면 다음 명령만 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>pull<span class="w"> </span>--ff-only<span class="w"> </span>origin<span class="w"> </span>main
-</code></pre></div>
-<p>Backend 폴더로 이동합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/007-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/backend
+<p>이미 저장소가 있다면 새로 clone하지 않고 아래 블록을 실행합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>git<span class="w"> </span>pull<span class="w"> </span>--ff-only<span class="w"> </span>origin<span class="w"> </span>main
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/007-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/backend
 </code></pre></div>
 <h3 id="82">8.2 환경 파일 직접 작성<a class="headerlink" href="#82" title="Permanent link">&para;</a></h3>
-<p>예제 파일을 복사합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>cp<span class="w"> </span>.env.example<span class="w"> </span>.env
-</code></pre></div>
-<p>직접 엽니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>nano<span class="w"> </span>.env
+<p>예제 파일을 복사한 뒤 바로 편집기로 엽니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>cp<span class="w"> </span>.env.example<span class="w"> </span>.env
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>nano<span class="w"> </span>.env
 </code></pre></div>
 <p>아래 형태로 실제 값을 입력합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>PORT=4000
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>FRONTEND_ORIGIN=http://WEB_SERVER_PUBLIC_IP
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>DB_HOST=db-xxxx.vpc-cdb.ntruss.com
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>DB_PORT=3306
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>DB_NAME=chapter3_board
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>DB_USER=chapter3_user
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>DB_PASSWORD=CHANGE_ME
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>AUTO_POST_ENABLED=false
-<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>AUTO_POST_INTERVAL_SECONDS=60
-<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>AUTO_POST_TOTAL=300
-<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
-<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>LAB_STRESS_ENABLED=true
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>PORT=4000
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>FRONTEND_ORIGIN=http://WEB_SERVER_PUBLIC_IP
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>DB_HOST=db-xxxx.vpc-cdb.ntruss.com
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>DB_PORT=3306
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>DB_NAME=chapter3_board
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>DB_USER=chapter3_user
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>DB_PASSWORD=CHANGE_ME
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>AUTO_POST_ENABLED=false
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>AUTO_POST_INTERVAL_SECONDS=60
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>AUTO_POST_TOTAL=300
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>LAB_STRESS_ENABLED=true
 </code></pre></div>
 <p>저장 후 비밀번호를 제외한 설정을 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>grep<span class="w"> </span>-v<span class="w"> </span><span class="s1">'^DB_PASSWORD='</span><span class="w"> </span>.env
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>grep<span class="w"> </span>-v<span class="w"> </span><span class="s1">'^DB_PASSWORD='</span><span class="w"> </span>.env
 </code></pre></div>
 <p>눈으로 확인할 것:</p>
 <ul>
@@ -2608,65 +2600,56 @@
 </ul>
 <h3 id="83-backend">8.3 게시판 Backend 설치<a class="headerlink" href="#83-backend" title="Permanent link">&para;</a></h3>
 <p>기존 007번 설치기를 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>install-backend.sh
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>sudo<span class="w"> </span>./install-backend.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>install-backend.sh
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>sudo<span class="w"> </span>./install-backend.sh
 </code></pre></div>
 <p>이 단계만 기존 스크립트를 사용하는 이유는 Node.js 패키지 설치와 systemd 서비스 파일 생성을 반복해서 손으로 입력하는 것이 Auto Scaling 학습 목표가 아니기 때문입니다.</p>
-<p>설치 결과를 숨기지 않고 직접 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>systemctl<span class="w"> </span>is-enabled<span class="w"> </span>chapter3-backend
+<p>서비스 자동 시작, 현재 상태, 포트 Listen 여부를 한 번에 확인합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>systemctl<span class="w"> </span>is-enabled<span class="w"> </span>chapter3-backend
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>systemctl<span class="w"> </span>is-active<span class="w"> </span>chapter3-backend
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>sudo<span class="w"> </span>ss<span class="w"> </span>-lntp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':4000'</span>
 </code></pre></div>
-<p>예상 출력:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>enabled
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>systemctl<span class="w"> </span>is-active<span class="w"> </span>chapter3-backend
-</code></pre></div>
-<p>예상 출력:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>active
-</code></pre></div>
+<p>앞의 두 줄은 각각 <code>enabled</code>, <code>active</code>가 출력되고 마지막 줄에는 <code>:4000</code> LISTEN 정보가 보여야 합니다.</p>
 <p>실제로 어떤 명령으로 기동되는지 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>cat<span class="w"> </span>chapter3-backend
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>cat<span class="w"> </span>chapter3-backend
 </code></pre></div>
 <p>최근 로그를 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>chapter3-backend<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span><span class="w"> </span>--no-pager
-</code></pre></div>
-<p>포트 확인:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>sudo<span class="w"> </span>ss<span class="w"> </span>-lntp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':4000'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>chapter3-backend<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span><span class="w"> </span>--no-pager
 </code></pre></div>
 <h2 id="9-step-4-api">9. Step 4 - 로컬 API를 한 개씩 확인<a class="headerlink" href="#9-step-4-api" title="Permanent link">&para;</a></h2>
 <h3 id="health-check">Health Check<a class="headerlink" href="#health-check" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
 </code></pre></div>
 <p>확인할 부분:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>HTTP/1.1 200 OK
-<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>X-Backend-Instance: 골든서버-hostname
-<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>
-<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>{"status":"ok","service":"chapter3-backend","instance":"골든서버-hostname"}
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>HTTP/1.1 200 OK
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>X-Backend-Instance: 골든서버-hostname
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>{"status":"ok","service":"chapter3-backend","instance":"골든서버-hostname"}
 </code></pre></div>
 <h3 id="backend">현재 Backend 식별<a class="headerlink" href="#backend" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:4000/api/instance<span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:4000/api/instance<span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool
 </code></pre></div>
 <h3 id="_1">게시글 조회<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:4000/api/posts<span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-40
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:4000/api/posts<span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-40
 </code></pre></div>
 <h3 id="cpu-api">CPU 부하 API 한 번 호출<a class="headerlink" href="#cpu-api" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>curl<span class="w"> </span>-i<span class="w"> </span><span class="s1">'http://127.0.0.1:4000/api/stress?iterations=10000'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>curl<span class="w"> </span>-i<span class="w"> </span><span class="s1">'http://127.0.0.1:4000/api/stress?iterations=10000'</span>
 </code></pre></div>
 <p>확인할 부분:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>HTTP/1.1 200 OK
-<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>X-Backend-Instance: 골든서버-hostname
-<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>X-Lab-Stress-Iterations: 10000
-<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>X-Lab-Stress-Duration-Ms: ...
-<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>
-<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a>ok
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>HTTP/1.1 200 OK
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>X-Backend-Instance: 골든서버-hostname
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>X-Lab-Stress-Iterations: 10000
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>X-Lab-Stress-Duration-Ms: ...
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>ok
 </code></pre></div>
 <p>이 네 명령이 모두 성공한 뒤에만 Server Image를 생성합니다.</p>
 <h2 id="10-step-5-server-image">10. Step 5 - Server Image 생성<a class="headerlink" href="#10-step-5-server-image" title="Permanent link">&para;</a></h2>
 <p>콘솔 경로:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>Compute &gt; Server &gt; Server
-<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>  &gt; 골든 Backend 선택
-<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>  &gt; 서버 관리 및 설정 변경
-<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>  &gt; 내 서버 이미지 생성
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>Compute &gt; Server &gt; Server
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>  &gt; 골든 Backend 선택
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>  &gt; 서버 관리 및 설정 변경
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>  &gt; 내 서버 이미지 생성
 </code></pre></div>
 <table>
 <thead>
@@ -2687,7 +2670,7 @@
 </tbody>
 </table>
 <p>눈으로 확인할 곳:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>Compute &gt; Server &gt; Server Image
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>Compute &gt; Server &gt; Server Image
 </code></pre></div>
 <p>통과 기준:</p>
 <ul>
@@ -2697,7 +2680,7 @@
 </ul>
 <h2 id="11-step-6-target-group">11. Step 6 - Target Group 생성<a class="headerlink" href="#11-step-6-target-group" title="Permanent link">&para;</a></h2>
 <p>콘솔 경로:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>Networking &gt; Load Balancer &gt; Target Group &gt; Target Group 생성
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>Networking &gt; Load Balancer &gt; Target Group &gt; Target Group 생성
 </code></pre></div>
 <h3 id="target-group">Target Group 값<a class="headerlink" href="#target-group" title="Permanent link">&para;</a></h3>
 <table>
@@ -2786,15 +2769,15 @@
 </tbody>
 </table>
 <p>눈으로 확인할 곳:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>Target Group &gt; lab-board-tg &gt; Target 상태 확인
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>Target Group &gt; lab-board-tg &gt; Target 상태 확인
 </code></pre></div>
 <p>통과 기준은 골든 Backend가 <code>정상</code>으로 표시되는 것입니다. <code>비정상</code>이면 다음 명령을 골든 서버에서 다시 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
 </code></pre></div>
 <p>로컬은 정상인데 Target Group만 비정상이면 Backend ACG의 Load Balancer Subnet CIDR과 <code>4000/tcp</code>를 확인합니다.</p>
 <h2 id="12-step-7-application-load-balancer">12. Step 7 - Application Load Balancer 생성<a class="headerlink" href="#12-step-7-application-load-balancer" title="Permanent link">&para;</a></h2>
 <p>콘솔 경로:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>Networking &gt; Load Balancer &gt; Load Balancer &gt; 로드 밸런서 생성
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>Networking &gt; Load Balancer &gt; Load Balancer &gt; 로드 밸런서 생성
 </code></pre></div>
 <table>
 <thead>
@@ -2834,14 +2817,12 @@
 </tr>
 </tbody>
 </table>
-<p>생성 후 제공된 도메인을 터미널 B에 변수로 넣습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LB_URL</span><span class="o">=</span><span class="s1">'http://LOAD_BALANCER_DOMAIN'</span>
-</code></pre></div>
-<p>변수 확인:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">"</span>
+<p>생성 후 제공된 도메인을 터미널 B에 변수로 넣고 바로 확인합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LB_URL</span><span class="o">=</span><span class="s1">'http://LOAD_BALANCER_DOMAIN'</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">"</span>
 </code></pre></div>
 <h3 id="alb-health">ALB를 통한 Health 확인<a class="headerlink" href="#alb-health" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>curl<span class="w"> </span>-i<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/health"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>curl<span class="w"> </span>-i<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/health"</span>
 </code></pre></div>
 <p>확인할 것:</p>
 <ul>
@@ -2850,7 +2831,7 @@
 <li>JSON의 <code>status</code>가 <code>ok</code>입니다.</li>
 </ul>
 <h3 id="alb">ALB를 통한 게시글 작성<a class="headerlink" href="#alb" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/posts"</span><span class="w"> </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span>-d<span class="w"> </span><span class="s1">'{"title":"autoscaling-before","content":"ALB 경유 게시글 쓰기 확인","authorName":"autoscaling-lab"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/posts"</span><span class="w"> </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span>-d<span class="w"> </span><span class="s1">'{"title":"autoscaling-before","content":"ALB 경유 게시글 쓰기 확인","authorName":"autoscaling-lab"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool
 </code></pre></div>
 <p>확인할 것:</p>
 <ul>
@@ -2859,33 +2840,29 @@
 <li><code>createdAt</code>이 현재 시각입니다.</li>
 </ul>
 <h3 id="alb_1">ALB를 통한 게시글 재조회<a class="headerlink" href="#alb_1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/posts"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-40
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/posts"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-40
 </code></pre></div>
 <p><code>autoscaling-before</code> 글이 보이면 ALB, Backend, Cloud DB 전체 경로가 연결된 것입니다.</p>
 <h2 id="13-step-8-web-alb">13. Step 8 - Web 서버를 ALB로 전환<a class="headerlink" href="#13-step-8-web-alb" title="Permanent link">&para;</a></h2>
-<p>고정 Web 서버에서 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>pull<span class="w"> </span>--ff-only<span class="w"> </span>origin<span class="w"> </span>main
+<p>고정 Web 서버에서 최신 소스를 받고 Web 폴더로 이동합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>git<span class="w"> </span>pull<span class="w"> </span>--ff-only<span class="w"> </span>origin<span class="w"> </span>main
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/007-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/web
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/007-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/web
+<p>현재 설정을 확인한 뒤 편집기로 엽니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>grep<span class="w"> </span><span class="s1">'^BACKEND_BASE_URL='</span><span class="w"> </span>.env
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>nano<span class="w"> </span>.env
 </code></pre></div>
-<p>현재 설정을 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>grep<span class="w"> </span><span class="s1">'^BACKEND_BASE_URL='</span><span class="w"> </span>.env
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>BACKEND_BASE_URL="http://LOAD_BALANCER_DOMAIN"
 </code></pre></div>
-<p>직접 수정합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>nano<span class="w"> </span>.env
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>BACKEND_BASE_URL="http://LOAD_BALANCER_DOMAIN"
-</code></pre></div>
-<p>Web 파일을 다시 배치합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>sudo<span class="w"> </span>./install-web.sh
-</code></pre></div>
-<p>실제 배포 설정 확인:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>cat<span class="w"> </span>/var/www/chapter3-web/config.js
+<p>Web 파일을 다시 배치하고 실제 배포 설정을 확인합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>sudo<span class="w"> </span>./install-web.sh
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>cat<span class="w"> </span>/var/www/chapter3-web/config.js
 </code></pre></div>
 <p>브라우저에서 Web 서버를 열어 <code>autoscaling-before</code> 글을 확인하고 새 글을 하나 더 작성합니다. 개발자 도구 Network 탭에서 API 요청 주소가 개별 Backend IP가 아니라 ALB 도메인인지 확인합니다.</p>
 <h2 id="14-step-9-launch-configuration">14. Step 9 - Launch Configuration 생성<a class="headerlink" href="#14-step-9-launch-configuration" title="Permanent link">&para;</a></h2>
 <p>콘솔 경로:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>Compute &gt; Auto Scaling &gt; Launch Configuration &gt; Launch Configuration 생성
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>Compute &gt; Auto Scaling &gt; Launch Configuration &gt; Launch Configuration 생성
 </code></pre></div>
 <table>
 <thead>
@@ -2931,7 +2908,7 @@
 </ul>
 <h2 id="15-step-10-auto-scaling-group">15. Step 10 - Auto Scaling Group 생성<a class="headerlink" href="#15-step-10-auto-scaling-group" title="Permanent link">&para;</a></h2>
 <p>콘솔 경로:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>Compute &gt; Auto Scaling &gt; Auto Scaling Group &gt; Auto Scaling Group 생성
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>Compute &gt; Auto Scaling &gt; Auto Scaling Group &gt; Auto Scaling Group 생성
 </code></pre></div>
 <h3 id="_2">그룹 설정<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
 <table>
@@ -3056,14 +3033,14 @@
 </tbody>
 </table>
 <p>골든 Backend를 제거한 뒤 ALB 응답 hostname이 ASG 서버인지 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-D<span class="w"> </span>-<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/instance"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s1">'^X-Backend-Instance:'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-D<span class="w"> </span>-<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/instance"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s1">'^X-Backend-Instance:'</span>
 </code></pre></div>
 <h2 id="16-step-11-">16. Step 11 - 부하 전 분산 상태 직접 집계<a class="headerlink" href="#16-step-11-" title="Permanent link">&para;</a></h2>
 <p>아래 명령은 ALB를 20번 호출하고 응답 헤더의 Backend hostname을 집계합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">20</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>curl<span class="w"> </span>-fsS<span class="w"> </span>-D<span class="w"> </span>-<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/instance"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="s1">': '</span><span class="w"> </span><span class="s1">'tolower($1)=="x-backend-instance" {gsub("\r","",$2); print $2}'</span><span class="p">;</span><span class="w"> </span><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">20</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>curl<span class="w"> </span>-fsS<span class="w"> </span>-D<span class="w"> </span>-<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/instance"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="s1">': '</span><span class="w"> </span><span class="s1">'tolower($1)=="x-backend-instance" {gsub("\r","",$2); print $2}'</span><span class="p">;</span><span class="w"> </span><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
 </code></pre></div>
 <p>예상 출력:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>20 lab-board-api-xxxxx
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>20 lab-board-api-xxxxx
 </code></pre></div>
 <p>명령을 나누어 이해합니다.</p>
 <table>
@@ -3095,8 +3072,8 @@
 <p>이 시점에는 기대 용량이 1이므로 hostname 하나만 보여야 합니다.</p>
 <h2 id="17-step-12-cloud-insight-scale-out-rule">17. Step 12 - Cloud Insight Scale-out Rule 생성<a class="headerlink" href="#17-step-12-cloud-insight-scale-out-rule" title="Permanent link">&para;</a></h2>
 <p>콘솔 경로:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>Management &amp; Governance &gt; Cloud Insight
-<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>  &gt; Configuration &gt; Event Rule &gt; Event Rule 생성
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>Management &amp; Governance &gt; Cloud Insight
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>  &gt; Configuration &gt; Event Rule &gt; Event Rule 생성
 </code></pre></div>
 <h3 id="_4">감시 대상<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <table>
@@ -3175,21 +3152,19 @@
 <p>Event 종료 시 재실행 옵션은 끕니다. Event가 계속되면 Cooldown마다 Policy가 다시 실행될 수 있지만 최대 용량 3대에서 멈춥니다.</p>
 <h2 id="18-step-13-apachebench">18. Step 13 - ApacheBench 설치<a class="headerlink" href="#18-step-13-apachebench" title="Permanent link">&para;</a></h2>
 <p>부하 발생용 Ubuntu에서:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>apache2-utils
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>apache2-utils
 </code></pre></div>
 <p>macOS에서:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>brew<span class="w"> </span>install<span class="w"> </span>httpd
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>brew<span class="w"> </span>install<span class="w"> </span>httpd
 </code></pre></div>
-<p>설치 확인:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>ab<span class="w"> </span>-V
-</code></pre></div>
-<p>부하를 시작하기 전에 Stress API가 열려 있는지 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>curl<span class="w"> </span>-i<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/stress?iterations=10000"</span>
+<p>설치와 Stress API 준비 상태를 함께 확인합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>ab<span class="w"> </span>-V
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>curl<span class="w"> </span>-i<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/stress?iterations=10000"</span>
 </code></pre></div>
 <p>HTTP <code>200</code>과 <code>ok</code>가 보여야 합니다. <code>404</code>이면 Server Image 안의 <code>/opt/chapter3-backend/.env</code>에서 <code>LAB_STRESS_ENABLED=true</code>인지 확인합니다.</p>
 <h2 id="19-step-14-cpu">19. Step 14 - CPU 부하 발생<a class="headerlink" href="#19-step-14-cpu" title="Permanent link">&para;</a></h2>
 <p>터미널 B에서 10분 동안 동시 요청 20개를 발생시킵니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>ab<span class="w"> </span>-t<span class="w"> </span><span class="m">600</span><span class="w"> </span>-c<span class="w"> </span><span class="m">20</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/stress?iterations=250000"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>ab<span class="w"> </span>-t<span class="w"> </span><span class="m">600</span><span class="w"> </span>-c<span class="w"> </span><span class="m">20</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/stress?iterations=250000"</span>
 </code></pre></div>
 <p>옵션 의미:</p>
 <table>
@@ -3215,10 +3190,10 @@
 </tbody>
 </table>
 <p>CPU가 50%를 넘지 않으면 <code>Ctrl+C</code>로 종료하고 동시성만 한 단계 높입니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>ab<span class="w"> </span>-t<span class="w"> </span><span class="m">600</span><span class="w"> </span>-c<span class="w"> </span><span class="m">40</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/stress?iterations=250000"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>ab<span class="w"> </span>-t<span class="w"> </span><span class="m">600</span><span class="w"> </span>-c<span class="w"> </span><span class="m">40</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/stress?iterations=250000"</span>
 </code></pre></div>
 <p>그래도 낮을 때만 연산량을 높입니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>ab<span class="w"> </span>-t<span class="w"> </span><span class="m">600</span><span class="w"> </span>-c<span class="w"> </span><span class="m">40</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/stress?iterations=500000"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>ab<span class="w"> </span>-t<span class="w"> </span><span class="m">600</span><span class="w"> </span>-c<span class="w"> </span><span class="m">40</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/stress?iterations=500000"</span>
 </code></pre></div>
 <p>처음부터 가장 높은 값을 사용하지 않습니다. 서버 스펙마다 필요한 부하가 다릅니다.</p>
 <h2 id="20-step-15-scale-out">20. Step 15 - Scale-out을 눈으로 추적<a class="headerlink" href="#20-step-15-scale-out" title="Permanent link">&para;</a></h2>
@@ -3298,22 +3273,22 @@
 <p>Metric 수집, Event 지속 시간, 서버 생성, Health Check 때문에 즉시 늘어나지 않습니다. 각 단계가 어느 화면에서 지연되는지 확인하는 것이 실습의 핵심입니다.</p>
 <h2 id="21-step-16-hostname">21. Step 16 - 확장 중 hostname 변화 실시간 확인<a class="headerlink" href="#21-step-16-hostname" title="Permanent link">&para;</a></h2>
 <p>별도 터미널에서 10초마다 요청 처리 hostname을 집계합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a><span class="k">while</span><span class="w"> </span>true<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>date<span class="p">;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">30</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>curl<span class="w"> </span>-fsS<span class="w"> </span>-D<span class="w"> </span>-<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/instance"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="s1">': '</span><span class="w"> </span><span class="s1">'tolower($1)=="x-backend-instance" {gsub("\r","",$2); print $2}'</span><span class="p">;</span><span class="w"> </span><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c<span class="p">;</span><span class="w"> </span>echo<span class="p">;</span><span class="w"> </span>sleep<span class="w"> </span><span class="m">10</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="k">while</span><span class="w"> </span>true<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>date<span class="p">;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">30</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>curl<span class="w"> </span>-fsS<span class="w"> </span>-D<span class="w"> </span>-<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/instance"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="s1">': '</span><span class="w"> </span><span class="s1">'tolower($1)=="x-backend-instance" {gsub("\r","",$2); print $2}'</span><span class="p">;</span><span class="w"> </span><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c<span class="p">;</span><span class="w"> </span>echo<span class="p">;</span><span class="w"> </span>sleep<span class="w"> </span><span class="m">10</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
 </code></pre></div>
 <p>처음에는 하나만 보입니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>30 lab-board-api-aaaaa
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>30 lab-board-api-aaaaa
 </code></pre></div>
 <p>새 Target이 정상 상태가 되면 hostname이 두 개 이상 보입니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>16 lab-board-api-aaaaa
-<a id="__codelineno-63-2" name="__codelineno-63-2" href="#__codelineno-63-2"></a>14 lab-board-api-bbbbb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>16 lab-board-api-aaaaa
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>14 lab-board-api-bbbbb
 </code></pre></div>
 <p>정확히 15:15일 필요는 없습니다. 서로 다른 hostname이 보이고 실패가 없다면 트래픽 분산이 확인된 것입니다. 확인 후 <code>Ctrl+C</code>로 종료합니다.</p>
 <h2 id="22-step-17-">22. Step 17 - 확장 후 게시판 데이터 확인<a class="headerlink" href="#22-step-17-" title="Permanent link">&para;</a></h2>
 <p>확장된 상태에서 새 글을 작성합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/posts"</span><span class="w"> </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span>-d<span class="w"> </span><span class="s1">'{"title":"autoscaling-after","content":"Scale-out 후 Cloud DB 쓰기 확인","authorName":"autoscaling-lab"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/posts"</span><span class="w"> </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span>-d<span class="w"> </span><span class="s1">'{"title":"autoscaling-after","content":"Scale-out 후 Cloud DB 쓰기 확인","authorName":"autoscaling-lab"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool
 </code></pre></div>
 <p>목록을 다시 읽습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/posts"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-60
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/posts"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-60
 </code></pre></div>
 <p>확인할 것:</p>
 <ul>
@@ -3402,40 +3377,34 @@
 </tbody>
 </table>
 <h2 id="24-step-19-">24. Step 19 - 최종 확인<a class="headerlink" href="#24-step-19-" title="Permanent link">&para;</a></h2>
-<p>최종 Backend hostname 집계:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">20</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>curl<span class="w"> </span>-fsS<span class="w"> </span>-D<span class="w"> </span>-<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/instance"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="s1">': '</span><span class="w"> </span><span class="s1">'tolower($1)=="x-backend-instance" {gsub("\r","",$2); print $2}'</span><span class="p">;</span><span class="w"> </span><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
+<p>최종 Backend hostname, Health, 게시글을 한 번에 확인합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">20</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>curl<span class="w"> </span>-fsS<span class="w"> </span>-D<span class="w"> </span>-<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/instance"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="s1">': '</span><span class="w"> </span><span class="s1">'tolower($1)=="x-backend-instance" {gsub("\r","",$2); print $2}'</span><span class="p">;</span><span class="w"> </span><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
+<a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a>curl<span class="w"> </span>-i<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/health"</span>
+<a id="__codelineno-49-3" name="__codelineno-49-3" href="#__codelineno-49-3"></a>curl<span class="w"> </span>-sS<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/posts"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'autoscaling-before|autoscaling-after'</span>
 </code></pre></div>
-<p>예상 결과는 hostname 하나입니다.</p>
-<p>Health 확인:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>curl<span class="w"> </span>-i<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/health"</span>
-</code></pre></div>
-<p>게시글 확인:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/posts"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'autoscaling-before|autoscaling-after'</span>
-</code></pre></div>
+<p>첫 명령의 hostname은 하나여야 하고, Health는 HTTP <code>200</code>, 마지막 명령은 두 게시글 제목을 출력해야 합니다.</p>
 <p>예상 출력:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>"title": "autoscaling-after",
-<a id="__codelineno-69-2" name="__codelineno-69-2" href="#__codelineno-69-2"></a>"title": "autoscaling-before",
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>"title": "autoscaling-after",
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>"title": "autoscaling-before",
 </code></pre></div>
 <p>Scale-in으로 서버가 종료되어도 두 글이 남아 있으면 전체 실습이 완료된 것입니다.</p>
 <h2 id="25">25. 트러블슈팅 명령<a class="headerlink" href="#25" title="Permanent link">&para;</a></h2>
 <h3 id="backend_1">Backend 프로세스<a class="headerlink" href="#backend_1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>systemctl<span class="w"> </span>is-active<span class="w"> </span>chapter3-backend
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>chapter3-backend<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>--no-pager
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>sudo<span class="w"> </span>ss<span class="w"> </span>-lntp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':4000'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>systemctl<span class="w"> </span>is-active<span class="w"> </span>chapter3-backend
+<a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>chapter3-backend<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>--no-pager
+<a id="__codelineno-51-3" name="__codelineno-51-3" href="#__codelineno-51-3"></a>sudo<span class="w"> </span>ss<span class="w"> </span>-lntp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':4000'</span>
 </code></pre></div>
 <h3 id="backend-health">Backend 로컬 Health<a class="headerlink" href="#backend-health" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
 </code></pre></div>
 <h3 id="_7">이미지에 저장된 환경 설정<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a>sudo<span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span><span class="s1">'^DB_PASSWORD='</span><span class="w"> </span>/opt/chapter3-backend/.env
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>sudo<span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span><span class="s1">'^DB_PASSWORD='</span><span class="w"> </span>/opt/chapter3-backend/.env
 </code></pre></div>
 <h3 id="cloud-db">Cloud DB 연결<a class="headerlink" href="#cloud-db" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>mysql<span class="w"> </span>-h<span class="w"> </span>DB_PRIVATE_DOMAIN<span class="w"> </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span>-u<span class="w"> </span>chapter3_user<span class="w"> </span>-p<span class="w"> </span>chapter3_board<span class="w"> </span>-e<span class="w"> </span><span class="s1">'SELECT 1;'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>mysql<span class="w"> </span>-h<span class="w"> </span>DB_PRIVATE_DOMAIN<span class="w"> </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span>-u<span class="w"> </span>chapter3_user<span class="w"> </span>-p<span class="w"> </span>chapter3_board<span class="w"> </span>-e<span class="w"> </span><span class="s1">'SELECT 1;'</span>
 </code></pre></div>
 <h3 id="alb_2">ALB 응답 서버<a class="headerlink" href="#alb_2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-D<span class="w"> </span>-<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/instance"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s1">'^X-Backend-Instance:'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-D<span class="w"> </span>-<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/api/instance"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s1">'^X-Backend-Instance:'</span>
 </code></pre></div>
 <h3 id="target">Target이 계속 비정상일 때<a class="headerlink" href="#target" title="Permanent link">&para;</a></h3>
 <ol>
