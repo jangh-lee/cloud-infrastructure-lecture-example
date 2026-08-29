@@ -36,7 +36,8 @@ def main(args):
     period_label = _format_period_label(start_date, end_date)
     budget = _to_float(_get_value(args, "BUDGET_KRW", default="0"))
     alert_only_over_budget = _to_bool(_get_value(args, "ALERT_ONLY_OVER_BUDGET", default="false"))
-    save_report = _to_bool(_get_value(args, "SAVE_REPORT_TO_OBJECT_STORAGE", default="false"))
+    object_storage_bucket = _get_object_storage_bucket(args)
+    save_report = _to_bool(_get_value(args, "SAVE_REPORT_TO_OBJECT_STORAGE", default="false")) or bool(object_storage_bucket)
 
     response = _get_demand_cost_list(access_key, secret_key, start_month, end_month)
     product_response = _get_product_demand_cost_list(access_key, secret_key, start_month, end_month)
@@ -44,7 +45,8 @@ def main(args):
     product_costs = _extract_product_costs(product_response)
     over_budget = budget > 0 and amount >= budget
     month_label = start_month if start_month == end_month else f"{start_month}-{end_month}"
-    previous_amount = _resolve_previous_amount(args, access_key, secret_key, month_label, today, save_report)
+    previous_report = _resolve_previous_report(args, access_key, secret_key, month_label, today, save_report)
+    previous_amount = previous_report.get("useAmount")
     delta = _build_delta(amount, previous_amount)
 
     object_storage_result = None
@@ -93,6 +95,7 @@ def main(args):
         "period": period_label,
         "useAmount": amount,
         "previousUseAmount": previous_amount,
+        "previousReport": previous_report,
         "delta": delta,
         "productCosts": product_costs,
         "budget": budget,
@@ -203,23 +206,48 @@ def _find_value(value, target_key):
     return None
 
 
-def _resolve_previous_amount(args, access_key, secret_key, month, today, save_report):
+def _resolve_previous_report(args, access_key, secret_key, month, today, save_report):
     manual_previous = _get_value(args, "PREVIOUS_USE_AMOUNT_KRW", default="")
     if manual_previous != "":
-        return _to_float(manual_previous)
+        return {
+            "found": True,
+            "source": "parameter",
+            "key": None,
+            "useAmount": _to_float(manual_previous),
+            "error": None,
+        }
 
     if not save_report:
-        return None
+        return {
+            "found": False,
+            "source": "disabled",
+            "key": None,
+            "useAmount": None,
+            "error": "Object Storage report lookup is disabled.",
+        }
 
+    previous_key = None
     try:
         s3, bucket, key_prefix = _create_object_storage_client(args, access_key, secret_key)
         previous_day = today - dt.timedelta(days=1)
         previous_key = _report_key(key_prefix, month, previous_day)
         response = s3.get_object(Bucket=bucket, Key=previous_key)
         payload = json.loads(response["Body"].read().decode("utf-8"))
-        return _to_float(payload.get("useAmount"))
-    except Exception:
-        return None
+        return {
+            "found": True,
+            "source": "object_storage",
+            "key": previous_key,
+            "useAmount": _to_float(payload.get("useAmount")),
+            "error": None,
+        }
+    except Exception as exc:
+        return {
+            "found": False,
+            "source": "object_storage",
+            "key": previous_key,
+            "useAmount": None,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
 
 
 def _build_delta(amount, previous_amount):
@@ -296,7 +324,7 @@ def _save_report_to_object_storage(
 
 
 def _create_object_storage_client(args, access_key, secret_key):
-    bucket = _get_value(args, "OBJECT_STORAGE_BUCKET", default=_get_value(args, "NCP_OBJECT_STORAGE_BUCKET", default=""))
+    bucket = _get_object_storage_bucket(args)
     if not bucket:
         raise ValueError("Missing required value: OBJECT_STORAGE_BUCKET")
 
@@ -325,6 +353,10 @@ def _create_object_storage_client(args, access_key, secret_key):
     )
 
     return s3, bucket, key_prefix
+
+
+def _get_object_storage_bucket(args):
+    return _get_value(args, "OBJECT_STORAGE_BUCKET", default=_get_value(args, "NCP_OBJECT_STORAGE_BUCKET", default=""))
 
 
 def _report_key(key_prefix, month, day):

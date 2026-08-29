@@ -95,6 +95,13 @@ zip 파일에는 `main.py`, `__main__.py`, `boto3/botocore` 의존성이 함께 
 
 Billing API의 기본 조회 단위는 `yyyyMM` 월 단위입니다. `START_DATE`, `END_DATE`는 메시지와 리포트에 보여줄 기간이고, 실제 API 호출에는 해당 월이 사용됩니다. 날짜 파라미터를 생략하면 매일 실행 시 자동으로 오늘 날짜가 반영됩니다.
 
+`OBJECT_STORAGE_BUCKET`이 있으면 아래 경로에서 전일 리포트를 자동으로 찾고, 오늘 리포트도 저장합니다.
+
+```text
+오늘 리포트: billing-reports/202608/ncp-billing-20260829.json
+전일 리포트: billing-reports/202608/ncp-billing-20260828.json
+```
+
 Slack 메시지 예시:
 
 ```text

@@ -131,8 +131,8 @@ Action의 기본 파라미터 또는 환경 변수에 아래 값을 넣습니다
 | `PREVIOUS_USE_AMOUNT_KRW` |  | 전일 대비 비교용 이전 금액을 수동으로 넣을 때 사용 |
 | `SLACK_CHANNEL` | Slack Webhook 기본 채널 | Webhook이 허용하는 경우 채널 override |
 | `SLACK_USERNAME` | `NCP Cost Bot` | Slack 표시 이름 |
-| `SAVE_REPORT_TO_OBJECT_STORAGE` | `false` | `true`면 비용 조회 결과를 Object Storage에 JSON으로 저장 |
-| `OBJECT_STORAGE_BUCKET` |  | 비용 리포트를 저장할 Object Storage 버킷 |
+| `SAVE_REPORT_TO_OBJECT_STORAGE` | `false` | `true`면 비용 조회 결과를 Object Storage에 JSON으로 저장. `OBJECT_STORAGE_BUCKET`이 있으면 자동으로 활성화 |
+| `OBJECT_STORAGE_BUCKET` |  | 비용 리포트를 저장할 Object Storage 버킷. 이 값이 있으면 전일 리포트 조회와 오늘 리포트 저장을 수행 |
 | `OBJECT_STORAGE_KEY_PREFIX` | `billing-reports` | 저장 경로 prefix |
 | `OBJECT_STORAGE_ENDPOINT` | `https://kr.object.ncloudstorage.com` | Object Storage endpoint |
 | `OBJECT_STORAGE_REGION` | `kr-standard` | Object Storage region |
@@ -221,12 +221,21 @@ requestId: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 2. Billing API `getDemandCostList`를 호출합니다.
 3. Billing API `getProductDemandCostList`를 호출해 서비스별 비용을 가져옵니다.
 4. 응답에서 `useAmount` 또는 비용 관련 숫자 필드를 찾아 합산합니다.
-5. 전일 저장 리포트 또는 `PREVIOUS_USE_AMOUNT_KRW`와 비교해 증감액을 계산합니다.
+5. 전일 저장 리포트 또는 `PREVIOUS_USE_AMOUNT_KRW`와 비교해 증감액을 계산합니다. `OBJECT_STORAGE_BUCKET`이 있으면 `billing-reports/YYYYMM/ncp-billing-YYYYMMDD.json` 경로에서 전일 리포트를 자동으로 찾습니다.
 6. `BUDGET_KRW`와 비교합니다.
 7. `SAVE_REPORT_TO_OBJECT_STORAGE=true`이면 Object Storage에 JSON 리포트를 저장합니다.
 8. Slack Incoming Webhook으로 메시지를 보냅니다.
 
 주의할 점은 Billing API의 기본 조회 단위가 `yyyyMM` 월 단위라는 것입니다. `START_DATE`, `END_DATE`는 Slack 메시지와 리포트에 표시할 기간이며, API 호출에는 해당 날짜가 속한 `START_MONTH`, `END_MONTH`가 사용됩니다. 날짜 파라미터를 생략하면 매일 실행 시 자동으로 오늘 날짜가 반영됩니다.
+
+전일 대비 계산 방식:
+
+```text
+오늘 리포트 경로: billing-reports/202608/ncp-billing-20260829.json
+전일 리포트 경로: billing-reports/202608/ncp-billing-20260828.json
+```
+
+전일 리포트를 찾으면 `오늘 사용 금액 - 전일 사용 금액`으로 증감액과 증감률을 계산합니다. 전일 리포트가 없거나 읽기 실패하면 함수 응답의 `previousReport.error`에 원인이 표시됩니다.
 
 ## 12. Object Storage 저장 시 boto3 체크섬 설정
 
