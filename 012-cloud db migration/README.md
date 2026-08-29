@@ -684,6 +684,28 @@ sudo systemctl status chapter3-backend --no-pager
 - Source DB의 테이블 엔진과 문자셋이 DMS 지원 범위인지 확인
 - MariaDB가 EOL 버전이면 Source 업그레이드 또는 호환되는 Target 버전 검토
 
+### Replication에서 `Last_Errno 13121` 발생
+
+초기 Export/Import와 테이블 점검은 성공했지만 새 Source 행이 Target에 반영되지 않고, 작업 상세에 아래 오류가 표시될 수 있습니다.
+
+```text
+Relay log read failure: Could not parse relay log event entry
+Last_SQL_Errno: 13121
+Slave_IO_Running: Yes
+Slave_SQL_Running: No
+```
+
+이 상태는 네트워크 문제가 아닙니다. IO 스레드는 Source binlog를 읽었지만 Target MySQL SQL 스레드가 MariaDB 전용 GTID/row 이벤트를 해석하지 못한 엔진 호환성 문제입니다. Naver Cloud는 MariaDB Source를 지원하지만 같은 major version 간 마이그레이션을 권장하며, 버전 조합에 따라 호환성 오류가 발생할 수 있다고 안내합니다.
+
+수업 서버를 재설치해도 되는 경우에는 Source 데이터를 백업한 뒤 Ubuntu 공식 MySQL 8.0으로 변환하고 DMS 작업을 새로 생성할 수 있습니다. 다음 스크립트는 `chapter3_board`를 덤프하고 MariaDB 데이터·설정을 별도 백업 디렉터리로 이동한 후 MySQL을 설치하므로 운영 서버에서는 스냅샷을 먼저 생성해야 합니다.
+
+```bash
+cd "/root/cloud-infrastructure-lecture-example/012-cloud db migration/scripts"
+sudo CONFIRM_CONVERSION=YES ./convert-mariadb-source-to-mysql.sh
+```
+
+변환 후에는 실패한 DMS 작업을 삭제하고, Target의 중복 `chapter3_board`를 삭제한 다음 Test Connection부터 새로 실행합니다. `복제 오류 스킵`은 해당 트랜잭션을 누락시킬 수 있으므로 데이터 정합성 검증 없이 해결책으로 사용하지 않습니다.
+
 ### 앱 전환 후 API 실패
 
 - 백엔드 `.env`의 `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` 확인
