@@ -1292,22 +1292,53 @@
 </table>
 <h2 id="1-source-db">1. Source DB 준비<a class="headerlink" href="#1-source-db" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"012-cloud db migration/scripts"</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>sudo<span class="w"> </span><span class="nv">SOURCE_DB_ROOT_PASSWORD</span><span class="o">=</span><span class="s1">'DB_ROOT_PASSWORD'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nv">MIGRATION_USER</span><span class="o">=</span><span class="s1">'dms_migration'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nv">MIGRATION_PASSWORD</span><span class="o">=</span><span class="s1">'ChangeMigrationPassword123!'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nv">SOURCE_DATABASE</span><span class="o">=</span><span class="s1">'chapter3_board'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span>./prepare-source-db.sh
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>sudo<span class="w"> </span><span class="nv">MIGRATION_USER</span><span class="o">=</span><span class="s1">'dms_migration'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nv">MIGRATION_PASSWORD</span><span class="o">=</span><span class="s1">'ChangeMigrationPassword123!'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nv">SOURCE_DATABASE</span><span class="o">=</span><span class="s1">'chapter3_board'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span>./prepare-source-db.sh
+</code></pre></div>
+<p>007번 Ubuntu DB 서버처럼 <code>root</code>가 <code>unix_socket</code> 인증을 쓰는 경우에는 <code>SOURCE_DB_ROOT_PASSWORD</code>를 넣지 않습니다. <code>sudo mysql</code> 또는 <code>sudo mariadb</code>로 접속되는 구조입니다.</p>
+<p>비밀번호 기반 root 접속을 쓰는 경우:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span><span class="nv">SOURCE_DB_ADMIN_PASSWORD</span><span class="o">=</span><span class="s1">'DB_ROOT_PASSWORD'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nv">MIGRATION_USER</span><span class="o">=</span><span class="s1">'dms_migration'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nv">MIGRATION_PASSWORD</span><span class="o">=</span><span class="s1">'ChangeMigrationPassword123!'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nv">SOURCE_DATABASE</span><span class="o">=</span><span class="s1">'chapter3_board'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span>./prepare-source-db.sh
 </code></pre></div>
 <p>확인:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span><span class="nv">SOURCE_DB_ROOT_PASSWORD</span><span class="o">=</span><span class="s1">'DB_ROOT_PASSWORD'</span><span class="w"> </span>./check-source-db.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>./check-source-db.sh
 </code></pre></div>
+<p><code>ERROR 1227 ... CREATE USER privilege</code>가 나오면 관리자 계정이 아니라 일반 앱 계정으로 접속한 것입니다.</p>
 <h2 id="2-cloud-db-for-mysql">2. Cloud DB for MySQL 생성<a class="headerlink" href="#2-cloud-db-for-mysql" title="Permanent link">&para;</a></h2>
 <p>콘솔에서 Target DB를 생성합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>VPC
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  -&gt; Cloud DB for MySQL
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  -&gt; DB Server 생성
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>VPC
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  -&gt; Cloud DB for MySQL
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  -&gt; DB Server 생성
 </code></pre></div>
 <p>Source DB와 같은 major version을 권장합니다.</p>
+<p>Cloud DB for MySQL은 DB 서버 OS에 접속해서 <code>root@localhost</code>로 계정을 만드는 방식이 아닙니다. 콘솔의 <code>Cloud DB for MySQL &gt; DB Server &gt; Manage DB &gt; Manage DB user</code>에서 DB User를 생성합니다.</p>
+<p>계정 구분:</p>
+<table>
+<thead>
+<tr>
+<th>위치</th>
+<th>계정</th>
+<th>만드는 방법</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Ubuntu DB</td>
+<td><code>dms_migration</code></td>
+<td><code>prepare-source-db.sh</code></td>
+</tr>
+<tr>
+<td>Target Cloud DB for MySQL</td>
+<td><code>TARGET_USER</code></td>
+<td>Console Manage DB user</td>
+</tr>
+</tbody>
+</table>
 <h2 id="3-acg">3. ACG 확인<a class="headerlink" href="#3-acg" title="Permanent link">&para;</a></h2>
 <p>Source DB inbound:</p>
 <table>
@@ -1349,9 +1380,9 @@
 </tbody>
 </table>
 <h2 id="4-a-dms-endpoint">4. 방법 A: DMS Endpoint 생성<a class="headerlink" href="#4-a-dms-endpoint" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Database Migration Service
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  -&gt; Endpoint Management
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  -&gt; Source Endpoint 생성
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Database Migration Service
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  -&gt; Endpoint Management
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  -&gt; Source Endpoint 생성
 </code></pre></div>
 <p>입력값:</p>
 <table>
@@ -1386,73 +1417,73 @@
 </table>
 <p><code>Test Connection</code>을 먼저 통과시킵니다.</p>
 <h2 id="5-a-migration">5. 방법 A: Migration 생성<a class="headerlink" href="#5-a-migration" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Database Migration Service
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  -&gt; Migration Management
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  -&gt; Migration 생성
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Database Migration Service
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  -&gt; Migration Management
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>  -&gt; Migration 생성
 </code></pre></div>
 <p>Source Endpoint와 Target Cloud DB for MySQL을 선택하고 <code>chapter3_board</code>를 이관합니다.</p>
 <h2 id="6-b-mysqldump">6. 방법 B: mysqldump 이관<a class="headerlink" href="#6-b-mysqldump" title="Permanent link">&para;</a></h2>
 <p>정확한 이관을 위해 덤프 중에는 게시판 백엔드와 자동 게시글 생성을 잠시 멈춥니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>chapter3-post-seeder<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>chapter3-backend
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>chapter3-post-seeder<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>chapter3-backend
 </code></pre></div>
 <p>Source DB에서 덤프 파일 생성:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"012-cloud db migration/scripts"</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="nv">SOURCE_DB_HOST</span><span class="o">=</span><span class="s1">'SOURCE_DB_PRIVATE_IP'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="nv">SOURCE_DB_USER</span><span class="o">=</span><span class="s1">'chapter3_user'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nv">SOURCE_DB_PASSWORD</span><span class="o">=</span><span class="s1">'ChangeThisPassword123!'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="nv">DB_NAME</span><span class="o">=</span><span class="s1">'chapter3_board'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="nv">DUMP_FILE</span><span class="o">=</span><span class="s1">'/tmp/chapter3_board.sql'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>./dump-source-db.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"012-cloud db migration/scripts"</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="nv">SOURCE_DB_HOST</span><span class="o">=</span><span class="s1">'SOURCE_DB_PRIVATE_IP'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="nv">SOURCE_DB_USER</span><span class="o">=</span><span class="s1">'chapter3_user'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="nv">SOURCE_DB_PASSWORD</span><span class="o">=</span><span class="s1">'ChangeThisPassword123!'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="nv">DB_NAME</span><span class="o">=</span><span class="s1">'chapter3_board'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="nv">DUMP_FILE</span><span class="o">=</span><span class="s1">'/tmp/chapter3_board.sql'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>./dump-source-db.sh
 </code></pre></div>
 <p>Cloud DB for MySQL에 복원:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nv">TARGET_DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nv">TARGET_DB_USER</span><span class="o">=</span><span class="s1">'TARGET_USER'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="nv">TARGET_DB_PASSWORD</span><span class="o">=</span><span class="s1">'TARGET_PASSWORD'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="nv">DUMP_FILE</span><span class="o">=</span><span class="s1">'/tmp/chapter3_board.sql'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>./restore-target-db.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nv">TARGET_DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nv">TARGET_DB_USER</span><span class="o">=</span><span class="s1">'TARGET_USER'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="nv">TARGET_DB_PASSWORD</span><span class="o">=</span><span class="s1">'TARGET_PASSWORD'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="nv">DUMP_FILE</span><span class="o">=</span><span class="s1">'/tmp/chapter3_board.sql'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>./restore-target-db.sh
 </code></pre></div>
 <p>명령어를 직접 쓰면 아래와 같습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s1">'SOURCE_PASSWORD'</span><span class="w"> </span>mysqldump<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span>-h<span class="w"> </span>SOURCE_DB_PRIVATE_IP<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span>-u<span class="w"> </span>chapter3_user<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span>--single-transaction<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span>--quick<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">  </span>--routines<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">  </span>--triggers<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">  </span>--events<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">  </span>--default-character-set<span class="o">=</span>utf8mb4<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">  </span>--databases<span class="w"> </span>chapter3_board<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">  </span>&gt;<span class="w"> </span>/tmp/chapter3_board.sql
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s1">'SOURCE_PASSWORD'</span><span class="w"> </span>mysqldump<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span>-h<span class="w"> </span>SOURCE_DB_PRIVATE_IP<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span>-u<span class="w"> </span>chapter3_user<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span>--single-transaction<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">  </span>--quick<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">  </span>--routines<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">  </span>--triggers<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">  </span>--events<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">  </span>--default-character-set<span class="o">=</span>utf8mb4<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">  </span>--databases<span class="w"> </span>chapter3_board<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">  </span>&gt;<span class="w"> </span>/tmp/chapter3_board.sql
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s1">'TARGET_PASSWORD'</span><span class="w"> </span>mysql<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span>-h<span class="w"> </span>db-xxxx.vpc-cdb.ntruss.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span>-u<span class="w"> </span>TARGET_USER<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span>&lt;<span class="w"> </span>/tmp/chapter3_board.sql
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s1">'TARGET_PASSWORD'</span><span class="w"> </span>mysql<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span>-h<span class="w"> </span>db-xxxx.vpc-cdb.ntruss.com<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span>-u<span class="w"> </span>TARGET_USER<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">  </span>&lt;<span class="w"> </span>/tmp/chapter3_board.sql
 </code></pre></div>
 <h2 id="7">7. 데이터 검증<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nv">SOURCE_DB_HOST</span><span class="o">=</span><span class="s1">'SOURCE_DB_PRIVATE_IP'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="nv">SOURCE_DB_USER</span><span class="o">=</span><span class="s1">'chapter3_user'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="nv">SOURCE_DB_PASSWORD</span><span class="o">=</span><span class="s1">'ChangeThisPassword123!'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="nv">TARGET_DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="nv">TARGET_DB_USER</span><span class="o">=</span><span class="s1">'TARGET_USER'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="nv">TARGET_DB_PASSWORD</span><span class="o">=</span><span class="s1">'TARGET_PASSWORD'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="nv">DB_NAME</span><span class="o">=</span><span class="s1">'chapter3_board'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>./compare-post-counts.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nv">SOURCE_DB_HOST</span><span class="o">=</span><span class="s1">'SOURCE_DB_PRIVATE_IP'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nv">SOURCE_DB_USER</span><span class="o">=</span><span class="s1">'chapter3_user'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="nv">SOURCE_DB_PASSWORD</span><span class="o">=</span><span class="s1">'ChangeThisPassword123!'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="nv">TARGET_DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="nv">TARGET_DB_USER</span><span class="o">=</span><span class="s1">'TARGET_USER'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="nv">TARGET_DB_PASSWORD</span><span class="o">=</span><span class="s1">'TARGET_PASSWORD'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="nv">DB_NAME</span><span class="o">=</span><span class="s1">'chapter3_board'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>./compare-post-counts.sh
 </code></pre></div>
 <h2 id="8">8. 백엔드 전환<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>sudo<span class="w"> </span><span class="nv">BACKEND_ENV_FILE</span><span class="o">=</span><span class="s1">'/opt/chapter3-backend/.env'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">  </span><span class="nv">DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">  </span><span class="nv">DB_PORT</span><span class="o">=</span><span class="s1">'3306'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">  </span><span class="nv">DB_USER</span><span class="o">=</span><span class="s1">'TARGET_USER'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">  </span><span class="nv">DB_PASSWORD</span><span class="o">=</span><span class="s1">'TARGET_PASSWORD'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">  </span><span class="nv">DB_NAME</span><span class="o">=</span><span class="s1">'chapter3_board'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">  </span>./switch-backend-db.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>sudo<span class="w"> </span><span class="nv">BACKEND_ENV_FILE</span><span class="o">=</span><span class="s1">'/opt/chapter3-backend/.env'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="nv">DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span><span class="nv">DB_PORT</span><span class="o">=</span><span class="s1">'3306'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">  </span><span class="nv">DB_USER</span><span class="o">=</span><span class="s1">'TARGET_USER'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">  </span><span class="nv">DB_PASSWORD</span><span class="o">=</span><span class="s1">'TARGET_PASSWORD'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">  </span><span class="nv">DB_NAME</span><span class="o">=</span><span class="s1">'chapter3_board'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">  </span>./switch-backend-db.sh
 </code></pre></div>
 <p>확인:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>curl<span class="w"> </span>http://localhost:4000/api/health
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>curl<span class="w"> </span>http://localhost:4000/api/posts
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>curl<span class="w"> </span>http://localhost:4000/api/health
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>curl<span class="w"> </span>http://localhost:4000/api/posts
 </code></pre></div>
 <h2 id="_3">참고<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <ul>
