@@ -90,6 +90,7 @@ if [[ "${DB_VERSION}" == *MariaDB* ]]; then
   SERVICE_NAME="mariadb"
   AUTH_SQL="IDENTIFIED VIA mysql_native_password USING PASSWORD('$(escape_sql_string "${MIGRATION_PASSWORD}")')"
   EXPIRY_SETTING="expire_logs_days=5"
+  NATIVE_PASSWORD_SETTING=""
 elif systemctl list-unit-files mysql.service >/dev/null 2>&1; then
   CONF_DIR="/etc/mysql/mysql.conf.d"
   # Ubuntu's mysqld.cnf sorts after numeric names and would override bind-address.
@@ -97,6 +98,10 @@ elif systemctl list-unit-files mysql.service >/dev/null 2>&1; then
   SERVICE_NAME="mysql"
   AUTH_SQL="IDENTIFIED WITH mysql_native_password BY '$(escape_sql_string "${MIGRATION_PASSWORD}")'"
   EXPIRY_SETTING="binlog_expire_logs_seconds=432000"
+  NATIVE_PASSWORD_SETTING=""
+  if [[ "${DB_VERSION}" == 8.4.* ]]; then
+    NATIVE_PASSWORD_SETTING="mysql_native_password=ON"
+  fi
 else
   echo "Unsupported local database service. Expected MariaDB or MySQL managed by systemd." >&2
   exit 1
@@ -133,6 +138,7 @@ log_bin=mysql-bin
 binlog_format=ROW
 binlog_row_image=FULL
 ${EXPIRY_SETTING}
+${NATIVE_PASSWORD_SETTING}
 bind-address=0.0.0.0
 EOF
 

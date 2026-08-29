@@ -55,7 +55,7 @@ log_bin="$(query "SELECT @@log_bin;")"
 binlog_format="$(query "SELECT @@binlog_format;")"
 binlog_row_image="$(query "SELECT @@binlog_row_image;" 2>/dev/null || echo UNKNOWN)"
 bind_address="$(query "SELECT @@bind_address;" 2>/dev/null || echo UNKNOWN)"
-master_status="$(query "SHOW MASTER STATUS;" 2>/dev/null || true)"
+binary_log_status="$(query "SHOW BINARY LOG STATUS;" 2>/dev/null || query "SHOW MASTER STATUS;" 2>/dev/null || true)"
 database_exists="$(query "SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='${SOURCE_DATABASE}';")"
 posts_exists="$(query "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA='${SOURCE_DATABASE}' AND TABLE_NAME='posts';")"
 posts_count="0"
@@ -100,10 +100,10 @@ else
   printf 'FAIL %-24s expected=FULL actual=%s\n' "binlog_row_image" "${binlog_row_image}"
   failures=$((failures + 1))
 fi
-if [[ -n "${master_status}" ]]; then
-  printf 'OK   %-24s %s\n' "binary log position" "$(awk '{print $1 ":" $2}' <<< "${master_status}")"
+if [[ -n "${binary_log_status}" ]]; then
+  printf 'OK   %-24s %s\n' "binary log position" "$(awk '{print $1 ":" $2}' <<< "${binary_log_status}")"
 else
-  printf 'FAIL %-24s SHOW MASTER STATUS returned no row\n' "binary log position"
+  printf 'FAIL %-24s binary log status returned no row\n' "binary log position"
   failures=$((failures + 1))
 fi
 check_equal "source database" "${database_exists}" "1"

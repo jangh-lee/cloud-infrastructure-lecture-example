@@ -2,6 +2,8 @@
 
 007번 게시판 실습에서 Ubuntu 서버에 직접 설치한 MariaDB/MySQL 데이터를 Naver Cloud `Cloud DB for MySQL`로 마이그레이션하는 실습입니다.
 
+실제 실습에서 재현한 MariaDB relay log 오류와 MySQL 8.0/8.4 `mysqldump` 오류의 원인, 복구, 최종 CDC 검증 결과는 [TROUBLESHOOTING-REPORT.md](./TROUBLESHOOTING-REPORT.md)에 정리했습니다.
+
 이 챕터에서는 두 가지 방식으로 Source DB에서 Target DB로 데이터를 옮기는 방법을 소개합니다.
 
 - 방법 A: Naver Cloud Database Migration Service(DMS)
@@ -704,7 +706,32 @@ cd "/root/cloud-infrastructure-lecture-example/012-cloud db migration/scripts"
 sudo CONFIRM_CONVERSION=YES ./convert-mariadb-source-to-mysql.sh
 ```
 
+Target이 MySQL 8.4이면 아래 절의 DMS `mysqldump` 호환성 문제를 피하기 위해 Source도 MySQL 8.4 LTS로 맞춥니다.
+
+```bash
+sudo CONFIRM_UPGRADE=YES ./upgrade-mysql-source-to-84.sh
+```
+
 변환 후에는 실패한 DMS 작업을 삭제하고, Target의 중복 `chapter3_board`를 삭제한 다음 Test Connection부터 새로 실행합니다. `복제 오류 스킵`은 해당 트랜잭션을 누락시킬 수 있으므로 데이터 정합성 검증 없이 해결책으로 사용하지 않습니다.
+
+### Exporting에서 `SHOW BINARY LOG STATUS` 문법 오류 발생
+
+Source MySQL 8.0, Target MySQL 8.4 조합에서 NCP DMS가 MySQL 8.4용 `mysqldump`를 사용하면 Exporting 단계가 아래 오류로 종료될 수 있습니다.
+
+```text
+mysqldump: Couldn't execute 'SHOW BINARY LOG STATUS':
+You have an error in your SQL syntax ... near 'LOG STATUS' at line 1 (1064)
+```
+
+`SHOW BINARY LOG STATUS`는 MySQL 8.4 명령이며 MySQL 8.0은 `SHOW MASTER STATUS`를 사용합니다. 네트워크나 DMS 계정 권한 문제가 아니므로 재시작만 반복해도 해결되지 않습니다. 이 실습처럼 Target 버전을 바꿀 수 없다면 Source를 같은 MySQL 8.4 LTS로 업그레이드한 뒤 실패 작업을 삭제하고 새 작업을 생성합니다.
+
+```bash
+cd "/root/cloud-infrastructure-lecture-example/012-cloud db migration/scripts"
+sudo CONFIRM_UPGRADE=YES ./upgrade-mysql-source-to-84.sh
+sudo SOURCE_DB_ADMIN_PASSWORD='...' ./check-source-db.sh
+```
+
+MySQL 8.4는 `mysql_native_password` 인증 플러그인을 기본 비활성화합니다. 제공 스크립트는 NCP DMS 계정을 계속 사용할 수 있도록 플러그인을 명시적으로 활성화합니다. 운영 환경에서는 DMS 지원 인증 방식과 계정 정책을 먼저 확인하고 마이그레이션 전용 계정에만 적용합니다.
 
 ### 앱 전환 후 API 실패
 
