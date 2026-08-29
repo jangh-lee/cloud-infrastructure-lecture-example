@@ -98,6 +98,7 @@ git pull origin main
 
 ```env
 DB_ROOT_PASSWORD=ChangeRootPassword123!
+DB_PREVIOUS_ROOT_PASSWORD=
 DB_NAME=chapter3_board
 DB_USER=chapter3_user
 DB_PASSWORD=ChangeThisPassword123!
@@ -117,6 +118,15 @@ chmod +x install-db.sh
 sudo ./install-db.sh
 # .env가 자동 생성되면 값 수정 후 다시
 sudo ./install-db.sh
+```
+
+DB 서버의 `DB_PASSWORD`를 변경한 경우 `.env`를 저장하고 `sudo ./install-db.sh`를 다시 실행하면 기존 DB 사용자의 비밀번호도 새 값으로 갱신됩니다. 이후 백엔드 서버의 `DB_PASSWORD`도 같은 값으로 변경하고 `sudo ./install-backend.sh configure`를 실행해야 합니다.
+
+`DB_ROOT_PASSWORD` 자체를 변경하면서 기존 루트 비밀번호 인증이 필요한 환경이라면 DB 서버 `.env`에 이전 값을 임시로 지정합니다. 변경 완료 후에는 `DB_PREVIOUS_ROOT_PASSWORD`를 다시 비워두세요.
+
+```env
+DB_ROOT_PASSWORD=NewRootPassword
+DB_PREVIOUS_ROOT_PASSWORD=CurrentRootPassword
 ```
 
 ### 백엔드 서버 `.env` 예시

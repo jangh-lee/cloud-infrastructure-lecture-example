@@ -3,82 +3,113 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chapter 3 Board</title>
+  <meta name="description" content="게시글을 작성하고 의견을 나누는 커뮤니티 게시판">
+  <title>게시판</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand-area">
-      <div class="brand-badge">C3</div>
-      <div>
-        <h1 id="siteTitle">DevForum Practice Board</h1>
-        <p>Chapter 3. Web Server / Backend / DB Server</p>
-      </div>
-    </div>
-    <div class="topbar-actions">
-      <span class="status-chip">No Login Mode</span>
-      <span id="healthStatus" class="status-chip status-pending">Backend Checking</span>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="/" data-route="/">
+        <strong id="siteTitle">DevForum</strong>
+        <span>게시판</span>
+      </a>
+      <button class="button button-primary header-write-button" type="button" data-route="/write">글쓰기</button>
     </div>
   </header>
 
-  <div class="page">
-    <aside class="sidebar">
-      <div class="side-card">
-        <h2>실습 구성</h2>
-        <ul>
-          <li>웹서버: nginx</li>
-          <li>백엔드: node + express</li>
-          <li>DB: mariadb</li>
-        </ul>
-      </div>
-      <div class="side-card">
-        <h2>접속 주소</h2>
-        <p id="apiBaseUrl" class="mono"></p>
-      </div>
-      <div class="side-card">
-        <h2>실습 포인트</h2>
-        <ul>
-          <li>비로그인 작성</li>
-          <li>백엔드 API 호출</li>
-          <li>DB 저장 확인</li>
-          <li>게시글 삭제</li>
-        </ul>
-      </div>
-    </aside>
-
-    <main class="content">
-      <section class="editor-card">
-        <div class="card-header">
-          <div>
-            <span class="eyebrow">CREATE POST</span>
-            <h2>새 게시글 작성</h2>
-          </div>
-          <span class="floating-tag">비가입 유저</span>
+  <main class="shell main-content">
+    <section id="listView" class="view" aria-labelledby="listHeading">
+      <div class="page-heading">
+        <div>
+          <h1 id="listHeading">게시글</h1>
+          <p>전체 <strong id="postCount">0</strong>개</p>
         </div>
+        <button class="button button-primary" type="button" data-route="/write">글쓰기</button>
+      </div>
 
-        <form id="postForm" class="post-form">
-          <input id="titleInput" type="text" maxlength="120" placeholder="제목을 입력하세요" required>
-          <textarea id="contentInput" maxlength="2000" placeholder="내용을 입력하세요" required></textarea>
-          <div class="form-footer">
-            <p>작성자는 자동으로 <strong>비가입 유저</strong>로 저장됩니다.</p>
-            <button type="submit">게시글 올리기</button>
-          </div>
+      <div class="board-tools">
+        <form id="searchForm" class="search-form" role="search">
+          <label class="sr-only" for="searchInput">게시글 검색</label>
+          <input id="searchInput" type="search" placeholder="제목 또는 작성자 검색" autocomplete="off">
+          <button class="button button-secondary" type="submit">검색</button>
         </form>
-      </section>
+        <button id="refreshButton" class="text-button" type="button">새로고침</button>
+      </div>
 
-      <section class="feed-card">
-        <div class="feed-header">
-          <div>
-            <span class="eyebrow">POST LIST</span>
-            <h2>실습 게시글</h2>
-          </div>
-          <button id="refreshButton" class="secondary-button" type="button">새로 불러오기</button>
+      <p id="listStatus" class="inline-status" role="status" aria-live="polite"></p>
+
+      <div class="board-table">
+        <div class="board-row board-header" aria-hidden="true">
+          <span>번호</span>
+          <span>제목</span>
+          <span>작성자</span>
+          <span>작성일</span>
         </div>
-        <div id="emptyState" class="empty-state" hidden>아직 게시글이 없습니다.</div>
         <div id="postList" class="post-list"></div>
-      </section>
-    </main>
-  </div>
+        <div id="emptyState" class="empty-state" hidden>
+          <strong>게시글이 없습니다.</strong>
+          <span>첫 번째 글을 작성해 보세요.</span>
+        </div>
+      </div>
+
+      <nav id="pagination" class="pagination" aria-label="게시글 페이지"></nav>
+    </section>
+
+    <section id="detailView" class="view detail-view" aria-labelledby="detailTitle" hidden>
+      <button class="back-button" type="button" data-route="/">목록으로</button>
+      <article class="post-detail">
+        <header class="detail-header">
+          <h1 id="detailTitle"></h1>
+          <div class="detail-meta">
+            <span id="detailAuthor"></span>
+            <time id="detailDate"></time>
+          </div>
+        </header>
+        <div id="detailContent" class="detail-content"></div>
+        <footer class="detail-actions">
+          <button class="button button-secondary" type="button" data-route="/">목록</button>
+          <button id="deleteButton" class="button button-danger" type="button">삭제</button>
+        </footer>
+      </article>
+    </section>
+
+    <section id="writeView" class="view write-view" aria-labelledby="writeHeading" hidden>
+      <button class="back-button" type="button" data-route="/">목록으로</button>
+      <div class="write-heading">
+        <h1 id="writeHeading">글쓰기</h1>
+        <span>작성자: 비가입 유저</span>
+      </div>
+      <form id="postForm" class="post-form">
+        <label for="titleInput">제목</label>
+        <div class="field-wrap">
+          <input id="titleInput" type="text" maxlength="120" placeholder="제목을 입력하세요" required>
+          <span id="titleCount" class="character-count">0 / 120</span>
+        </div>
+
+        <label for="contentInput">내용</label>
+        <div class="field-wrap">
+          <textarea id="contentInput" maxlength="2000" placeholder="내용을 입력하세요" required></textarea>
+          <span id="contentCount" class="character-count">0 / 2000</span>
+        </div>
+
+        <p id="formStatus" class="inline-status" role="alert" aria-live="assertive"></p>
+        <div class="form-actions">
+          <button class="button button-secondary" type="button" data-route="/">취소</button>
+          <button id="submitButton" class="button button-primary" type="submit">등록</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <span>비가입 사용자 게시판</span>
+      <span id="healthStatus" class="connection-status status-pending">서버 확인 중</span>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <script src="/config.js"></script>
   <script src="/app.js"></script>
