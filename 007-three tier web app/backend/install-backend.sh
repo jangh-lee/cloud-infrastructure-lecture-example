@@ -30,8 +30,9 @@ DB_USER=${DB_USER}
 DB_PASSWORD=${DB_PASSWORD}
 AUTO_POST_ENABLED=${AUTO_POST_ENABLED:-false}
 AUTO_POST_INTERVAL_SECONDS=${AUTO_POST_INTERVAL_SECONDS:-60}
-AUTO_POST_TOTAL=${AUTO_POST_TOTAL:-300}
-AUTO_POST_API_URL=${AUTO_POST_API_URL:-http://127.0.0.1:${PORT:-4000}/api/posts}
+    AUTO_POST_TOTAL=${AUTO_POST_TOTAL:-300}
+    AUTO_POST_API_URL=${AUTO_POST_API_URL:-http://127.0.0.1:${PORT:-4000}/api/posts}
+    LAB_STRESS_ENABLED=${LAB_STRESS_ENABLED:-false}
 EOF
     return
   fi
@@ -48,6 +49,7 @@ AUTO_POST_ENABLED=false
 AUTO_POST_INTERVAL_SECONDS=60
 AUTO_POST_TOTAL=300
 AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
+LAB_STRESS_ENABLED=false
 EOF
   echo "Created ${SCRIPT_DIR}/.env template. Fill it out and run again."
   exit 1
@@ -185,3 +187,4 @@ echo "Backend installation complete."
 echo "API health : http://SERVER_PRIVATE_OR_PUBLIC_IP:4000/api/health"
 echo "Posts API  : http://SERVER_PRIVATE_OR_PUBLIC_IP:4000/api/posts"
 echo "Auto posts : set AUTO_POST_ENABLED=true in ${SCRIPT_DIR}/.env and rerun this script"
+echo "Lab stress : set LAB_STRESS_ENABLED=true only for the Auto Scaling hands-on lab"

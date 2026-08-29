@@ -145,6 +145,7 @@ AUTO_POST_ENABLED="true"
 AUTO_POST_INTERVAL_SECONDS="60"
 AUTO_POST_TOTAL="300"
 AUTO_POST_API_URL="http://127.0.0.1:4000/api/posts"
+LAB_STRESS_ENABLED="false"
 ```
 
 `FRONTEND_ORIGIN`은 브라우저에서 접속하는 웹 주소를 적습니다. HTTP 수업이면 반드시 `http://`까지 포함합니다. 웹서버 공인 IP와 도메인을 둘 다 쓸 경우 콤마로 나열합니다.
@@ -189,6 +190,8 @@ sudo ./install-backend.sh configure
 ```
 
 이 기능은 백엔드 서버 안에서 별도 systemd 서비스가 1분에 한 번씩 자기 API에 `POST /api/posts`를 호출하는 방식입니다. 작성자는 여러 명처럼 보이도록 샘플 이름을 섞고, 제목과 본문은 실습 주제 조합으로 300개까지 생성합니다. 샘플은 매번 랜덤으로 선택하며, 이미 사용한 샘플 번호는 상태 파일에 저장해서 중복 등록하지 않습니다.
+
+`LAB_STRESS_ENABLED`는 015번 Auto Scaling 실습에서만 `true`로 설정합니다. 활성화하면 CPU 기반 확장 검증용 `GET /api/stress`가 열리므로 인터넷에 공개된 운영 환경에서는 사용하지 않습니다. `GET /api/instance`와 응답 헤더 `X-Backend-Instance`로 요청을 처리한 백엔드 호스트를 확인할 수 있습니다.
 
 상태 확인:
 

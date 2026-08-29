@@ -1,3 +1,5 @@
+const crypto = require("crypto");
+const os = require("os");
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
@@ -8,6 +10,8 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 const port = Number(process.env.PORT || 4000);
+const instanceName = os.hostname();
+const labStressEnabled = String(process.env.LAB_STRESS_ENABLED || "false").toLowerCase() === "true";
 const frontendOrigins = String(process.env.FRONTEND_ORIGIN || "*")
   .split(",")
   .map((origin) => origin.trim())
@@ -33,17 +37,51 @@ app.use(cors({
 
     callback(new Error(`CORS origin not allowed: ${origin}`));
   },
-  methods: ["GET", "POST", "DELETE", "OPTIONS"]
+  methods: ["GET", "POST", "DELETE", "OPTIONS"],
+  exposedHeaders: ["X-Backend-Instance"]
 }));
 app.use(express.json());
+app.use((req, res, next) => {
+  res.set("X-Backend-Instance", instanceName);
+  next();
+});
+
+app.get("/api/instance", (req, res) => {
+  res.json({ instance: instanceName, service: "chapter3-backend" });
+});
 
 app.get("/api/health", async (req, res) => {
   try {
     await pool.query("SELECT 1");
-    res.json({ status: "ok", service: "chapter3-backend" });
+    res.json({ status: "ok", service: "chapter3-backend", instance: instanceName });
   } catch (error) {
     res.status(500).json({ status: "error", message: error.message });
   }
+});
+
+app.get("/api/stress", (req, res, next) => {
+  if (!labStressEnabled) {
+    res.status(404).json({ message: "Lab stress endpoint is disabled" });
+    return;
+  }
+
+  const requestedIterations = Number.parseInt(req.query.iterations, 10);
+  const iterations = Number.isFinite(requestedIterations)
+    ? Math.min(Math.max(requestedIterations, 10000), 1000000)
+    : 250000;
+  const startedAt = process.hrtime.bigint();
+
+  crypto.pbkdf2("ncp-auto-scaling-lab", instanceName, iterations, 32, "sha256", (error) => {
+    if (error) {
+      next(error);
+      return;
+    }
+
+    const elapsedMs = Number(process.hrtime.bigint() - startedAt) / 1000000;
+    res.set("X-Lab-Stress-Iterations", String(iterations));
+    res.set("X-Lab-Stress-Duration-Ms", elapsedMs.toFixed(1));
+    res.type("text/plain").send("ok\n");
+  });
 });
 
 app.get("/api/posts", async (req, res, next) => {

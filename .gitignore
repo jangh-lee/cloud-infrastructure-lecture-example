@@ -11,3 +11,5 @@ tfplan
 *.tfplan
 *.pem
 build/
+node_modules/
+015-auto scaling/lab-values.env

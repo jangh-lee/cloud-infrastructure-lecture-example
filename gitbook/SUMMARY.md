@@ -17,3 +17,4 @@
 * [012 Cloud DB Migration](labs/012-cloud-db-migration.md)
 * [013 Cost Slack Alert](labs/013-cost-slack-alert.md)
 * [014 ACG Slack Alert](labs/014-acg-slack-alert.md)
+* [015 Auto Scaling Hands-on](labs/015-auto-scaling.md)
