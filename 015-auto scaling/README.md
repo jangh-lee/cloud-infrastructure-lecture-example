@@ -45,7 +45,7 @@ GitBook에는 다음 내용이 모두 포함되어 있습니다.
 
 ## 코드 사용 원칙
 
-Auto Scaling 리소스 생성과 검증은 GitBook의 CLI 명령을 한 줄씩 직접 실행합니다. 별도의 015 전용 자동화 스크립트는 사용하지 않습니다.
+Auto Scaling 리소스 생성과 검증은 GitBook의 CLI 코드 박스를 목적별로 복사해 직접 실행합니다. 같은 작업의 연속 명령은 한 박스로 제공하며 별도의 015 전용 자동화 스크립트는 사용하지 않습니다.
 
 Node.js 패키지와 systemd 서비스 설치에만 기존 007번의 `install-backend.sh`를 재사용합니다. Health 확인, 게시글 CRUD, Backend hostname 집계, CPU 부하는 각각 `curl`, `awk`, `ApacheBench`로 직접 확인합니다.
 

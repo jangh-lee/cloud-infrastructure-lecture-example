@@ -9,7 +9,7 @@
 
 007번 3계층 게시판의 Backend를 Naver Cloud Auto Scaling Group으로 전환하는 실습입니다.
 
-이 교재는 전용 자동화 스크립트로 결과를 감추지 않습니다. 학습자가 `curl`, `systemctl`, `awk`, `ab` 명령을 한 줄씩 직접 실행하고 응답 헤더, JSON, CPU 그래프, 서버 수, Target 상태를 눈으로 확인하도록 구성했습니다.
+이 교재는 전용 자동화 스크립트로 결과를 감추지 않습니다. 같은 목적의 연속 명령은 한 코드 박스로 묶어 한 번에 복사하고, 결과 해석이나 실행 시점이 다른 명령만 분리했습니다. 학습자는 `curl`, `systemctl`, `awk`, `ab`의 출력과 CPU 그래프, 서버 수, Target 상태를 직접 확인합니다.
 
 007번의 `install-backend.sh`만 앱 설치에 재사용합니다. 이 스크립트는 Node.js 패키지와 systemd 서비스를 설치하기 위한 기존 게시판 구성 요소이며, Auto Scaling 리소스 생성과 검증은 모두 직접 수행합니다.
 
@@ -100,23 +100,12 @@ Web 서버는 정적 파일만 전달하므로 고정합니다. API 요청과 CP
 mysql -h DB_PRIVATE_DOMAIN -P 3306 -u chapter3_user -p chapter3_board
 ```
 
-MySQL 프롬프트에서 한 줄씩 실행합니다.
+MySQL 프롬프트에 아래 블록을 한 번에 붙여 넣습니다.
 
 ```sql
 SELECT DATABASE(), CURRENT_USER(), VERSION();
-```
-
-```sql
 SELECT COUNT(*) AS post_count FROM posts;
-```
-
-```sql
 SELECT id, title, created_at FROM posts ORDER BY id DESC LIMIT 3;
-```
-
-종료:
-
-```sql
 exit
 ```
 
@@ -153,43 +142,29 @@ exit
 
 ### 8.1 저장소 받기
 
-골든 Backend Ubuntu 서버에서 한 줄씩 실행합니다.
+처음 준비하는 골든 Backend Ubuntu 서버에서는 아래 블록을 한 번에 실행합니다.
 
 ```bash
 sudo apt-get update
-```
-
-```bash
 sudo apt-get install -y git curl
-```
-
-```bash
 git clone https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git
+cd ~/cloud-infrastructure-lecture-example/007-three\ tier\ web\ app/backend
 ```
 
-이미 저장소가 있다면 다음 명령만 실행합니다.
+이미 저장소가 있다면 새로 clone하지 않고 아래 블록을 실행합니다.
 
 ```bash
-cd ~/cloud-infrastructure-lecture-example && git pull --ff-only origin main
-```
-
-Backend 폴더로 이동합니다.
-
-```bash
+cd ~/cloud-infrastructure-lecture-example
+git pull --ff-only origin main
 cd ~/cloud-infrastructure-lecture-example/007-three\ tier\ web\ app/backend
 ```
 
 ### 8.2 환경 파일 직접 작성
 
-예제 파일을 복사합니다.
+예제 파일을 복사한 뒤 바로 편집기로 엽니다.
 
 ```bash
 cp .env.example .env
-```
-
-직접 엽니다.
-
-```bash
 nano .env
 ```
 
@@ -229,35 +204,20 @@ grep -v '^DB_PASSWORD=' .env
 
 ```bash
 chmod +x install-backend.sh
-```
-
-```bash
 sudo ./install-backend.sh
 ```
 
 이 단계만 기존 스크립트를 사용하는 이유는 Node.js 패키지 설치와 systemd 서비스 파일 생성을 반복해서 손으로 입력하는 것이 Auto Scaling 학습 목표가 아니기 때문입니다.
 
-설치 결과를 숨기지 않고 직접 확인합니다.
+서비스 자동 시작, 현재 상태, 포트 Listen 여부를 한 번에 확인합니다.
 
 ```bash
 systemctl is-enabled chapter3-backend
-```
-
-예상 출력:
-
-```text
-enabled
-```
-
-```bash
 systemctl is-active chapter3-backend
+sudo ss -lntp | grep ':4000'
 ```
 
-예상 출력:
-
-```text
-active
-```
+앞의 두 줄은 각각 `enabled`, `active`가 출력되고 마지막 줄에는 `:4000` LISTEN 정보가 보여야 합니다.
 
 실제로 어떤 명령으로 기동되는지 확인합니다.
 
@@ -269,12 +229,6 @@ sudo systemctl cat chapter3-backend
 
 ```bash
 sudo journalctl -u chapter3-backend -n 20 --no-pager
-```
-
-포트 확인:
-
-```bash
-sudo ss -lntp | grep ':4000'
 ```
 
 ## 9. Step 4 - 로컬 API를 한 개씩 확인
@@ -423,15 +377,10 @@ Networking > Load Balancer > Load Balancer > 로드 밸런서 생성
 | Listener | HTTP `80` |
 | Target Group | `lab-board-tg` |
 
-생성 후 제공된 도메인을 터미널 B에 변수로 넣습니다.
+생성 후 제공된 도메인을 터미널 B에 변수로 넣고 바로 확인합니다.
 
 ```bash
 export LB_URL='http://LOAD_BALANCER_DOMAIN'
-```
-
-변수 확인:
-
-```bash
 echo "$LB_URL"
 ```
 
@@ -469,25 +418,18 @@ curl -sS "$LB_URL/api/posts" | python3 -m json.tool | head -40
 
 ## 13. Step 8 - Web 서버를 ALB로 전환
 
-고정 Web 서버에서 실행합니다.
+고정 Web 서버에서 최신 소스를 받고 Web 폴더로 이동합니다.
 
 ```bash
-cd ~/cloud-infrastructure-lecture-example && git pull --ff-only origin main
-```
-
-```bash
+cd ~/cloud-infrastructure-lecture-example
+git pull --ff-only origin main
 cd ~/cloud-infrastructure-lecture-example/007-three\ tier\ web\ app/web
 ```
 
-현재 설정을 확인합니다.
+현재 설정을 확인한 뒤 편집기로 엽니다.
 
 ```bash
 grep '^BACKEND_BASE_URL=' .env
-```
-
-직접 수정합니다.
-
-```bash
 nano .env
 ```
 
@@ -495,15 +437,10 @@ nano .env
 BACKEND_BASE_URL="http://LOAD_BALANCER_DOMAIN"
 ```
 
-Web 파일을 다시 배치합니다.
+Web 파일을 다시 배치하고 실제 배포 설정을 확인합니다.
 
 ```bash
 sudo ./install-web.sh
-```
-
-실제 배포 설정 확인:
-
-```bash
 cat /var/www/chapter3-web/config.js
 ```
 
@@ -660,15 +597,10 @@ macOS에서:
 brew install httpd
 ```
 
-설치 확인:
+설치와 Stress API 준비 상태를 함께 확인합니다.
 
 ```bash
 ab -V
-```
-
-부하를 시작하기 전에 Stress API가 열려 있는지 확인합니다.
-
-```bash
 curl -i "$LB_URL/api/stress?iterations=10000"
 ```
 
@@ -802,25 +734,15 @@ Cloud Insight에서 평균 CPU가 20% 아래로 내려가는 것을 먼저 확�
 
 ## 24. Step 19 - 최종 확인
 
-최종 Backend hostname 집계:
+최종 Backend hostname, Health, 게시글을 한 번에 확인합니다.
 
 ```bash
 for i in $(seq 1 20); do curl -fsS -D - -o /dev/null "$LB_URL/api/instance" | awk -F': ' 'tolower($1)=="x-backend-instance" {gsub("\r","",$2); print $2}'; done | sort | uniq -c
-```
-
-예상 결과는 hostname 하나입니다.
-
-Health 확인:
-
-```bash
 curl -i "$LB_URL/api/health"
-```
-
-게시글 확인:
-
-```bash
 curl -sS "$LB_URL/api/posts" | python3 -m json.tool | grep -E 'autoscaling-before|autoscaling-after'
 ```
+
+첫 명령의 hostname은 하나여야 하고, Health는 HTTP `200`, 마지막 명령은 두 게시글 제목을 출력해야 합니다.
 
 예상 출력:
 
@@ -837,13 +759,7 @@ Scale-in으로 서버가 종료되어도 두 글이 남아 있으면 전체 실�
 
 ```bash
 systemctl is-active chapter3-backend
-```
-
-```bash
 sudo journalctl -u chapter3-backend -n 100 --no-pager
-```
-
-```bash
 sudo ss -lntp | grep ':4000'
 ```
 
