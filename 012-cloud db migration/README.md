@@ -145,7 +145,18 @@ Source DB 서버에서:
 
 ```bash
 cd "012-cloud db migration/scripts"
-sudo SOURCE_DB_ROOT_PASSWORD='DB_ROOT_PASSWORD' \
+sudo MIGRATION_USER='dms_migration' \
+  MIGRATION_PASSWORD='ChangeMigrationPassword123!' \
+  SOURCE_DATABASE='chapter3_board' \
+  ./prepare-source-db.sh
+```
+
+007번 Ubuntu DB 서버처럼 `root`가 `unix_socket` 인증을 쓰는 경우에는 `SOURCE_DB_ROOT_PASSWORD`를 넣지 않는 것이 맞습니다. `sudo mysql` 또는 `sudo mariadb`로 접속되는 구조이기 때문입니다.
+
+만약 로컬 DB의 `root`가 비밀번호 인증으로 설정되어 있다면 아래처럼 넣습니다.
+
+```bash
+sudo SOURCE_DB_ADMIN_PASSWORD='DB_ROOT_PASSWORD' \
   MIGRATION_USER='dms_migration' \
   MIGRATION_PASSWORD='ChangeMigrationPassword123!' \
   SOURCE_DATABASE='chapter3_board' \
@@ -165,8 +176,16 @@ sudo SOURCE_DB_ROOT_PASSWORD='DB_ROOT_PASSWORD' \
 확인:
 
 ```bash
-sudo SOURCE_DB_ROOT_PASSWORD='DB_ROOT_PASSWORD' ./check-source-db.sh
+sudo ./check-source-db.sh
 ```
+
+비밀번호 기반 root 접속을 쓰는 경우:
+
+```bash
+sudo SOURCE_DB_ADMIN_PASSWORD='DB_ROOT_PASSWORD' ./check-source-db.sh
+```
+
+`ERROR 1227 ... CREATE USER privilege`가 나오면 관리자 계정이 아니라 일반 애플리케이션 계정으로 접속한 것입니다. `chapter3_user` 같은 게시판 앱 계정은 `chapter3_board` 안에서만 권한이 있고, `CREATE USER`나 전역 replication 권한을 줄 수 없습니다.
 
 Source DB의 binlog 설정, 마이그레이션 관련 전역 권한, `chapter3_board` 스키마 권한과 현재 게시글 범위를 한 번에 확인하려면 다음 SQL을 실행합니다.
 
@@ -288,6 +307,21 @@ Naver Cloud Console
 - DB 포트: `3306`
 - DB User/Password는 실습용으로 명확하게 기록
 - Private domain 예: `db-xxxx.vpc-cdb.ntruss.com`
+
+Cloud DB for MySQL은 사용자가 DB 서버 OS에 접속해서 `root@localhost`로 계정을 만드는 방식이 아닙니다. Naver Cloud 콘솔의 `Cloud DB for MySQL > DB Server > Manage DB > Manage DB user`에서 DB User를 만들고 접근 대역을 허용합니다.
+
+공식 문서의 접속 예시도 `root`가 아니라 콘솔에서 확인한 `user_id`로 접속합니다.
+
+```bash
+mysql -h db-xxxx.vpc-cdb.ntruss.com -u TARGET_USER -p --port 3306
+```
+
+따라서 이 챕터에서 계정은 이렇게 나눠서 이해합니다.
+
+| 위치 | 계정 | 만드는 방법 |
+| --- | --- | --- |
+| Source Ubuntu DB | `dms_migration` | `prepare-source-db.sh`가 `sudo mysql` 관리자 권한으로 생성 |
+| Target Cloud DB for MySQL | `TARGET_USER` | Naver Cloud Console의 Manage DB user에서 생성 |
 
 ## 7. 방법 A: DMS Endpoint 생성
 

@@ -59,7 +59,18 @@ erDiagram
 
 ```bash
 cd "012-cloud db migration/scripts"
-sudo SOURCE_DB_ROOT_PASSWORD='DB_ROOT_PASSWORD' \
+sudo MIGRATION_USER='dms_migration' \
+  MIGRATION_PASSWORD='ChangeMigrationPassword123!' \
+  SOURCE_DATABASE='chapter3_board' \
+  ./prepare-source-db.sh
+```
+
+007번 Ubuntu DB 서버처럼 `root`가 `unix_socket` 인증을 쓰는 경우에는 `SOURCE_DB_ROOT_PASSWORD`를 넣지 않습니다. `sudo mysql` 또는 `sudo mariadb`로 접속되는 구조입니다.
+
+비밀번호 기반 root 접속을 쓰는 경우:
+
+```bash
+sudo SOURCE_DB_ADMIN_PASSWORD='DB_ROOT_PASSWORD' \
   MIGRATION_USER='dms_migration' \
   MIGRATION_PASSWORD='ChangeMigrationPassword123!' \
   SOURCE_DATABASE='chapter3_board' \
@@ -69,8 +80,10 @@ sudo SOURCE_DB_ROOT_PASSWORD='DB_ROOT_PASSWORD' \
 확인:
 
 ```bash
-sudo SOURCE_DB_ROOT_PASSWORD='DB_ROOT_PASSWORD' ./check-source-db.sh
+sudo ./check-source-db.sh
 ```
+
+`ERROR 1227 ... CREATE USER privilege`가 나오면 관리자 계정이 아니라 일반 앱 계정으로 접속한 것입니다.
 
 ## 2. Cloud DB for MySQL 생성
 
@@ -83,6 +96,15 @@ VPC
 ```
 
 Source DB와 같은 major version을 권장합니다.
+
+Cloud DB for MySQL은 DB 서버 OS에 접속해서 `root@localhost`로 계정을 만드는 방식이 아닙니다. 콘솔의 `Cloud DB for MySQL > DB Server > Manage DB > Manage DB user`에서 DB User를 생성합니다.
+
+계정 구분:
+
+| 위치 | 계정 | 만드는 방법 |
+| --- | --- | --- |
+| Source Ubuntu DB | `dms_migration` | `prepare-source-db.sh` |
+| Target Cloud DB for MySQL | `TARGET_USER` | Console Manage DB user |
 
 ## 3. ACG 확인
 
