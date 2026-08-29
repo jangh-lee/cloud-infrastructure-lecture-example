@@ -232,6 +232,41 @@ sudo ./install-web.sh
 sudo mariadb -u root -p -e "SHOW DATABASES;"
 ```
 
+게시판 DB의 테이블 구조, 전체 게시글 수, 최신 10건의 실제 제목·본문, 빈 값·미래 시각 같은 이상 데이터, 중복 후보, 작성자별·날짜별 적재 현황은 학습용 조회 SQL로 확인할 수 있습니다.
+
+```bash
+cd "007-three tier web app"
+mysql -h DB_SERVER_PRIVATE_IP \
+  -u chapter3_user \
+  -p chapter3_board \
+  < db/queries/board-data.sql
+```
+
+이 예제에는 회원가입 기능과 `users` 테이블이 없습니다. `posts.author_name`은 게시글에 저장되는 작성자 표시 이름입니다. 실제 MariaDB 접속 계정과 허용 호스트, 인증 방식, `chapter3_board` 권한은 DB 서버에서 관리자용 SQL로 확인합니다.
+
+```bash
+cd "007-three tier web app"
+sudo mariadb -u root -p < db/queries/database-accounts.sql
+```
+
+개별 쿼리를 직접 연습하려면 다음처럼 실행할 수 있습니다.
+
+```sql
+USE chapter3_board;
+
+-- 최근 게시글 10개의 실제 내용
+SELECT id, title, content, author_name, created_at
+FROM posts
+ORDER BY id DESC
+LIMIT 10;
+
+-- 작성자별 게시글 수
+SELECT author_name, COUNT(*) AS post_count
+FROM posts
+GROUP BY author_name
+ORDER BY post_count DESC;
+```
+
 ### 백엔드 서버
 
 ```bash

@@ -168,6 +168,23 @@ sudo SOURCE_DB_ROOT_PASSWORD='DB_ROOT_PASSWORD' \
 sudo SOURCE_DB_ROOT_PASSWORD='DB_ROOT_PASSWORD' ./check-source-db.sh
 ```
 
+Source DB의 binlog 설정, 마이그레이션 관련 전역 권한, `chapter3_board` 스키마 권한과 현재 게시글 범위를 한 번에 확인하려면 다음 SQL을 실행합니다.
+
+```bash
+cd "012-cloud db migration"
+sudo mariadb -u root \
+  -p chapter3_board \
+  < sql/source-readiness.sql
+```
+
+결과에서 최소한 다음 항목을 확인합니다.
+
+- `server_id`가 `0`이 아닌지
+- `log_bin=ON`, `binlog_format=ROW`인지
+- `SHOW MASTER STATUS` 결과가 비어 있지 않은지
+- 마이그레이션 계정에 복제 관련 권한과 `chapter3_board` 조회 권한이 있는지
+- `posts` 테이블과 이관할 게시글이 실제로 존재하는지
+
 ## 5. ACG 확인
 
 DMS 연결 테스트가 실패하면 대부분 네트워크 또는 권한 문제입니다.
@@ -321,7 +338,7 @@ MYSQL_PWD='TARGET_PASSWORD' mysql \
 
 ## 10. 마이그레이션 검증
 
-Source DB와 Target DB의 데이터 수를 비교합니다.
+Source DB와 Target DB의 데이터 수와 내용 지문을 비교합니다.
 
 ```bash
 cd "012-cloud db migration/scripts"
@@ -336,6 +353,16 @@ DB_NAME='chapter3_board' \
 ./compare-post-counts.sh
 ```
 
+스크립트는 다음 항목을 함께 비교하며 하나라도 다르면 종료 코드 `2`를 반환합니다.
+
+- `posts` 컬럼 구조
+- 전체 행 수
+- 첫 번째·마지막 게시글 ID
+- 모든 게시글의 제목, 본문, 작성자, 작성 시각을 반영한 체크섬
+- 불일치가 발생한 게시글 ID와 행별 제목 길이·본문 길이·체크섬
+
+체크섬은 빠른 실습 검증을 위한 값입니다. 백업 보존이나 법적 무결성 증명에 사용하는 암호학적 해시는 아닙니다.
+
 직접 확인:
 
 ```bash
@@ -345,6 +372,24 @@ mysql -h SOURCE_DB_PRIVATE_IP -u chapter3_user -p chapter3_board \
 mysql -h db-xxxx.vpc-cdb.ntruss.com -u TARGET_USER -p chapter3_board \
   -e "SELECT COUNT(*) AS target_posts FROM posts;"
 ```
+
+각 DB의 스키마, ID·시간 범위, 체크섬, 빈 값·미래 시각 같은 이상 데이터, 중복 후보, 최신 10건의 실제 제목·본문과 작성자별 건수를 직접 확인하려면 동일한 SQL을 Source와 Target에 각각 실행합니다.
+
+```bash
+cd "012-cloud db migration"
+
+mysql -h SOURCE_DB_PRIVATE_IP \
+  -u chapter3_user \
+  -p chapter3_board \
+  < sql/migration-validation.sql
+
+mysql -h db-xxxx.vpc-cdb.ntruss.com \
+  -u TARGET_USER \
+  -p chapter3_board \
+  < sql/migration-validation.sql
+```
+
+DMS로 변경분까지 이관하는 동안에는 Source에 쓰기가 계속 발생할 수 있으므로 일시적으로 값이 다를 수 있습니다. 최종 전환 직전에는 게시판 백엔드와 자동 게시글 생성기를 중지하고, DMS 지연이 `0`이 된 뒤 다시 검증해야 합니다. `mysqldump` 방식은 덤프를 만든 시점부터 Source 쓰기를 중지한 상태에서 비교해야 합니다.
 
 ## 11. Backend DB_HOST 전환
 
