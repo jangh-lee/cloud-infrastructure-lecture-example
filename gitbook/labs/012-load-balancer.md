@@ -25,45 +25,31 @@
 !!! note "User Input은 하나만 사용"
     서버를 여러 대 생성하더라도 `node-1`, `node-2`처럼 값을 따로 만들 필요가 없습니다. `강의장 LB 실습`처럼 원하는 글자 하나를 입력하고 Hostname과 IP가 바뀌는지 관찰합니다.
 
-## Init Script 등록
+## 통합 Init Script
 
-Naver Cloud에서 Init Script를 생성하고 아래 내용을 등록합니다. 서버 생성 화면에서 `userinput`에는 원하는 표시 문구 하나를 입력합니다.
+신규 서버의 Naver Cloud Init Script와 이미 생성된 서버의 터미널에서 **같은 코드 박스 하나만 사용**합니다. 기존 서버용 Git clone 절차나 별도의 수동 설치 절차는 없습니다.
+
+`userinput` 기본값을 원하는 글자로 바꾸고 전체를 실행합니다. Naver Cloud가 `userinput`을 전달하면 해당 값이 우선 사용됩니다.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-DISPLAY_NAME="${userinput:-Load Balancer Lab}"
-REPO_DIR="/opt/cloud-infrastructure-lecture-example"
+userinput="${userinput:-내가 넣고 싶은 글자}"
+INIT_FILE="/tmp/lb-demo-init.sh"
+INIT_URL="https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/012-load%20balancer/init.sh"
 
-apt-get update
-apt-get install -y git
-
-if [[ -d "${REPO_DIR}/.git" ]]; then
-  git -C "${REPO_DIR}" pull --ff-only
+if command -v curl >/dev/null 2>&1; then
+  curl -fsSL --retry 5 "${INIT_URL}" -o "${INIT_FILE}"
 else
-  git clone --depth 1 \
-    https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git \
-    "${REPO_DIR}"
+  wget -q "${INIT_URL}" -O "${INIT_FILE}"
 fi
 
-cd "${REPO_DIR}/012-load balancer"
-chmod +x install.sh update_status.sh
-userinput="${DISPLAY_NAME}" ./install.sh
+chmod +x "${INIT_FILE}"
+userinput="${userinput}" "${INIT_FILE}"
 ```
 
-Init Script는 서버 생성 시 root 권한으로 실행됩니다. 같은 Init Script로 여러 서버를 생성하면 User Input은 같아도 Hostname과 IP는 각각 다르게 표시됩니다.
-
-## 기존 서버에서 수동 설치
-
-```bash
-userinput="내가 넣고 싶은 글자"
-sudo apt-get update && sudo apt-get install -y git
-git clone https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git
-cd "cloud-infrastructure-lecture-example/012-load balancer"
-chmod +x install.sh
-sudo userinput="$userinput" ./install.sh
-```
+통합 스크립트는 최신 설치 파일을 `/opt/lb-demo-installer`에 내려받고 신규 서버 설치와 기존 설치 갱신을 같은 방식으로 수행합니다. 일반 사용자로 실행하면 내부에서 `sudo`로 전환합니다.
 
 ## 서버 확인
 
@@ -73,6 +59,34 @@ curl http://localhost/status.json
 ```
 
 `status.json`에서 `serverName`, `hostname`, `primaryIp`, `allIps`를 확인합니다. 공인 IP는 Naver Cloud에서 NAT 방식으로 연결될 수 있으므로 `primaryIp`에는 일반적으로 서버 NIC의 사설 IP가 표시됩니다.
+
+## 503 복구 확인
+
+통합 Init Script를 Target 서버마다 한 번 실행한 뒤 다음 명령을 실행합니다.
+
+```bash
+sudo systemctl is-active nginx
+curl -i http://127.0.0.1/healthz
+curl -s http://127.0.0.1/status.json
+sudo ss -lntp | grep ':80'
+```
+
+다음 결과를 모두 확인하고 넘어갑니다.
+
+- `nginx` 상태가 `active`
+- `/healthz` 응답이 HTTP `200`이고 본문이 `ok`
+- `/status.json`에 `hostname`, `primaryIp`가 출력됨
+- `0.0.0.0:80` 또는 `*:80`이 LISTEN 상태
+
+로컬 확인은 모두 정상인데 Load Balancer URL만 503이면 애플리케이션 문제가 아니라 Target Group 또는 ACG 문제입니다.
+
+| 확인 항목 | 설정값 |
+| --- | --- |
+| Target Group 프로토콜, 포트 | `HTTP`, `80` |
+| Health Check 프로토콜, 포트 | `HTTP`, `80` |
+| Health Check URL Path | `/healthz` |
+| 웹 서버 ACG 인바운드 | Load Balancer Subnet CIDR에서 웹 서버 `80/tcp` 허용 |
+| Target 상태 | `Healthy` |
 
 브라우저에서는 각 서버 공인 IP 또는 Load Balancer 주소로 접속합니다.
 
@@ -84,7 +98,7 @@ http://LOAD_BALANCER_URL/
 ## ACG
 
 - 웹 노드 `22/tcp`: 관리자 IP
-- 웹 노드 `80/tcp`: Load Balancer 또는 실습자 IP
+- 웹 노드 `80/tcp`: Load Balancer Subnet CIDR 또는 실습자 IP
 - Load Balancer 리스너: `80/tcp`
 - Load Balancer 헬스체크 경로: `/healthz`
 

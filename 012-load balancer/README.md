@@ -22,53 +22,36 @@ Ubuntu 서버에서 `nginx` 기반으로 아주 단순한 백엔드 노드를 �
 
 ## 구성 파일
 
+- `init.sh`: 신규 서버와 기존 서버가 공통으로 실행하는 통합 Init Script
 - `install.sh`: Ubuntu 서버 설치 스크립트
 - `update_status.sh`: 상태 JSON 갱신 스크립트
 - `templates/index.html.template`: 정적 HTML 템플릿
 
-## Naver Cloud Init Script
+## 통합 Init Script
 
-서버 생성 시 입력할 수 있는 `userinput`은 하나뿐입니다. 여기에 노드 번호를 억지로 넣지 않고 `강의장 LB 실습`, `내 웹 서버`처럼 원하는 표시 문구 하나를 입력합니다. 여러 서버를 동시에 생성하면 같은 문구가 표시되지만 Hostname과 IP는 서버마다 자동으로 달라집니다.
+신규 서버의 Naver Cloud Init Script와 이미 생성한 서버의 터미널에서 **같은 코드 박스 하나만 사용**합니다. `userinput`에는 `강의장 LB 실습`, `내 웹 서버`처럼 원하는 표시 문구 하나를 입력합니다.
 
-Init Script에는 아래 내용을 그대로 등록합니다.
+아래 코드에서 기본 문구만 원하는 글자로 바꾼 뒤 전체를 실행합니다. Naver Cloud가 `userinput`을 전달하면 해당 값이 우선 사용됩니다.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-DISPLAY_NAME="${userinput:-Load Balancer Lab}"
-REPO_DIR="/opt/cloud-infrastructure-lecture-example"
+userinput="${userinput:-내가 넣고 싶은 글자}"
+INIT_FILE="/tmp/lb-demo-init.sh"
+INIT_URL="https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/012-load%20balancer/init.sh"
 
-apt-get update
-apt-get install -y git
-
-if [[ -d "${REPO_DIR}/.git" ]]; then
-  git -C "${REPO_DIR}" pull --ff-only
+if command -v curl >/dev/null 2>&1; then
+  curl -fsSL --retry 5 "${INIT_URL}" -o "${INIT_FILE}"
 else
-  git clone --depth 1 \
-    https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git \
-    "${REPO_DIR}"
+  wget -q "${INIT_URL}" -O "${INIT_FILE}"
 fi
 
-cd "${REPO_DIR}/012-load balancer"
-chmod +x install.sh update_status.sh
-userinput="${DISPLAY_NAME}" ./install.sh
+chmod +x "${INIT_FILE}"
+userinput="${userinput}" "${INIT_FILE}"
 ```
 
-Init Script는 서버 생성 시 root 권한으로 한 번 실행되므로 내부 명령에는 `sudo`가 필요하지 않습니다.
-
-## 기존 서버에서 수동 설치
-
-```bash
-userinput="내가 넣고 싶은 글자"
-sudo apt-get update && sudo apt-get install -y git
-git clone https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git
-cd "cloud-infrastructure-lecture-example/012-load balancer"
-chmod +x install.sh
-sudo userinput="$userinput" ./install.sh
-```
-
-설치 과정에서 추가 입력은 받지 않으며 `userinput` 값은 화면의 User Input에 그대로 표시됩니다.
+통합 스크립트는 저장소를 clone하지 않습니다. 매번 최신 설치 파일을 `/opt/lb-demo-installer`에 내려받아 신규 서버를 설치하거나 기존 설치를 동일한 상태로 갱신합니다. 일반 사용자로 실행하면 내부에서 한 번만 `sudo`로 전환합니다.
 
 ## 설치 후 확인
 
@@ -87,6 +70,25 @@ curl http://localhost/status.json
   "allIps": "10.x.x.x"
 }
 ```
+
+## 503 확인
+
+먼저 Load Balancer가 아니라 각 Target 서버에서 확인합니다.
+
+```bash
+sudo systemctl is-active nginx
+curl -i http://127.0.0.1/healthz
+curl -s http://127.0.0.1/status.json
+sudo ss -lntp | grep ':80'
+```
+
+`nginx`가 `active`, `/healthz`가 HTTP `200`, 응답 본문이 `ok`이면 서버 설치는 정상입니다. 이 상태에서 Load Balancer만 503이면 다음 값을 수정합니다.
+
+- Target Group 프로토콜과 포트: `HTTP`, `80`
+- Health Check 프로토콜과 포트: `HTTP`, `80`
+- Health Check URL Path: `/healthz`
+- 웹 서버 ACG 인바운드: Load Balancer Subnet CIDR에서 웹 서버 `80/tcp` 허용
+- Target 상태: `Healthy`가 된 뒤 Load Balancer URL 재접속
 
 브라우저에서는 아래 주소로 접속합니다.
 

@@ -49,7 +49,7 @@ EOF
   chmod 755 "${TEMP_POLICY_RC_D}"
 fi
 
-apt-get install -y nginx python3-minimal
+apt-get install -y ca-certificates curl nginx python3-minimal
 
 mkdir -p "${APP_DIR}" "${WEB_ROOT}"
 
@@ -71,7 +71,7 @@ server {
 
     location = /healthz {
         default_type text/plain;
-        try_files /healthz =404;
+        return 200 "ok\n";
     }
 
     location = /status.json {
@@ -123,6 +123,9 @@ else
   "${APP_DIR}/update_status.sh"
   service nginx restart
 fi
+
+curl -fsS --retry 5 --retry-delay 1 http://127.0.0.1/healthz >/dev/null
+curl -fsS --retry 5 --retry-delay 1 http://127.0.0.1/status.json >/dev/null
 
 echo
 echo "Installation complete."
