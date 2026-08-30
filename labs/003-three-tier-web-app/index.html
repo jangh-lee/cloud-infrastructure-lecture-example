@@ -1693,7 +1693,6 @@
 <ul>
 <li><code>SITE_BASE_URL</code>: 사용자가 브라우저로 접속하는 Web 주소</li>
 <li><code>BACKEND_UPSTREAM</code>: Web Nginx가 연결할 Backend 내부 주소</li>
-<li><code>FRONTEND_ORIGIN</code>: Backend가 허용할 브라우저 Web Origin</li>
 <li><code>DB_HOST</code>: Backend가 연결할 DB 내부 주소</li>
 </ul>
 </div>
@@ -1813,17 +1812,16 @@
 </code></pre></div>
 <p>생성된 <code>.env</code>를 편집합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>PORT=4000
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>FRONTEND_ORIGIN=http://WEB_SERVER_PUBLIC_IP
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>DB_HOST=DB_SERVER_PRIVATE_IP
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>DB_PORT=3306
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>DB_NAME=chapter3_board
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>DB_USER=chapter3_user
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>DB_PASSWORD=AppDbPass123!
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>AUTO_POST_ENABLED=false
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>AUTO_POST_INTERVAL_SECONDS=60
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>AUTO_POST_TOTAL=300
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
-<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>LAB_STRESS_ENABLED=false
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>DB_HOST=DB_SERVER_PRIVATE_IP
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>DB_PORT=3306
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>DB_NAME=chapter3_board
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>DB_USER=chapter3_user
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>DB_PASSWORD=AppDbPass123!
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>AUTO_POST_ENABLED=false
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>AUTO_POST_INTERVAL_SECONDS=60
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>AUTO_POST_TOTAL=300
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>LAB_STRESS_ENABLED=false
 </code></pre></div>
 <table>
 <thead>
@@ -1838,11 +1836,6 @@
 <td><code>PORT</code></td>
 <td>Backend 애플리케이션 수신 포트</td>
 <td>기본값은 <code>4000</code>이며 ACG와 Web의 <code>BACKEND_UPSTREAM</code> 포트도 같아야 합니다.</td>
-</tr>
-<tr>
-<td><code>FRONTEND_ORIGIN</code></td>
-<td>CORS로 허용할 브라우저 접속 주소</td>
-<td><code>http://</code> 또는 <code>https://</code>를 포함합니다. 003에서는 Web Public IP, 013에서는 Public ALB 주소를 사용합니다. 여러 주소는 쉼표로 구분합니다.</td>
 </tr>
 <tr>
 <td><code>DB_HOST</code></td>
@@ -1896,42 +1889,39 @@
 </tr>
 </tbody>
 </table>
-<p><code>FRONTEND_ORIGIN</code>에는 Backend IP가 아니라 브라우저에서 접속할 Web Public IP 또는 도메인을 입력합니다. 주소를 여러 개 허용하려면 쉼표로 구분합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>FRONTEND_ORIGIN=http://WEB_SERVER_PUBLIC_IP,http://board.example.com
-</code></pre></div>
 <p>설치와 점검을 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>install
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>systemctl<span class="w"> </span>is-enabled<span class="w"> </span>chapter3-backend
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>systemctl<span class="w"> </span>is-active<span class="w"> </span>chapter3-backend
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/instance
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>install
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>systemctl<span class="w"> </span>is-enabled<span class="w"> </span>chapter3-backend
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>systemctl<span class="w"> </span>is-active<span class="w"> </span>chapter3-backend
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/instance
 </code></pre></div>
 <p><code>enabled</code>, <code>active</code>, HTTP <code>200</code>을 확인합니다. <code>/api/instance</code>에는 현재 Backend hostname이 표시됩니다.</p>
 <div class="admonition warning">
 <p class="admonition-title">참고: 이전 Nginx 실습 환경 삭제</p>
 <p>이전 실습에서 설치한 Nginx와 설정이 남아 충돌할 때만 아래 명령을 실행합니다. 신규 Web 서버이거나 기존 Nginx 설정을 유지해야 한다면 건너뜁니다. <code>/etc/nginx</code>와 기존 로그까지 모두 삭제됩니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>nginx
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>remove<span class="w"> </span>--purge<span class="w"> </span>nginx<span class="w"> </span>nginx-full<span class="w"> </span>nginx-common
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>autoremove
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>clean
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/etc/nginx
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/log/nginx
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>nginx
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>remove<span class="w"> </span>--purge<span class="w"> </span>nginx<span class="w"> </span>nginx-full<span class="w"> </span>nginx-common
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>autoremove
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>clean
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/etc/nginx
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/log/nginx
 </code></pre></div>
 </div>
 <h2 id="6-step-3-web">6. Step 3 - Web 서버 설치<a class="headerlink" href="#6-step-3-web" title="Permanent link">&para;</a></h2>
 <p>Web 서버에서 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>git<span class="w"> </span>pull<span class="w"> </span>--ff-only<span class="w"> </span>origin<span class="w"> </span>main
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"003-three tier web app/web"</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>chmod<span class="w"> </span>+x<span class="w"> </span>install-web.sh
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>install
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>git<span class="w"> </span>pull<span class="w"> </span>--ff-only<span class="w"> </span>origin<span class="w"> </span>main
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"003-three tier web app/web"</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>chmod<span class="w"> </span>+x<span class="w"> </span>install-web.sh
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>install
 </code></pre></div>
 <p>생성된 <code>.env</code>를 편집합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>SITE_BASE_URL=http://WEB_SERVER_PUBLIC_IP
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>SITE_TITLE=DevForum Practice Board
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>SITE_BASE_URL=http://WEB_SERVER_PUBLIC_IP
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>SITE_TITLE=DevForum Practice Board
 </code></pre></div>
 <table>
 <thead>
@@ -1961,13 +1951,13 @@
 </table>
 <p><code>BACKEND_UPSTREAM</code>은 브라우저에 전달되지 않습니다. Web Nginx 설정 안에서만 사용하는 Backend 목적지입니다.</p>
 <p>설치와 점검을 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>install
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>status
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/healthz
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/web-instance
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/health
-<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/instance
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>install
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>status
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/healthz
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/web-instance
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/health
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/instance
 </code></pre></div>
 <p>확인할 결과:</p>
 <ul>
@@ -2047,7 +2037,7 @@
 <p>Backend의 <code>4000/tcp</code>를 인터넷에 공개하지 않습니다. 외부 사용자는 Web 서버에만 접속하고 API 요청은 Nginx가 내부로 전달합니다.</p>
 <h2 id="8">8. 브라우저 확인<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
 <p>브라우저에서 Web Public IP로 접속해 게시글을 조회하고 새 글을 작성합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>http://WEB_SERVER_PUBLIC_IP/
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>http://WEB_SERVER_PUBLIC_IP/
 </code></pre></div>
 <p>개발자 도구의 Network 탭에서 다음을 확인합니다.</p>
 <ul>
@@ -2057,23 +2047,23 @@
 </ul>
 <h2 id="9">9. 설정만 다시 반영<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
 <p>Web의 upstream이나 제목만 변경할 때는 패키지를 다시 설치하지 않습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/003-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/web
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>nano<span class="w"> </span>.env
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>configure
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/health
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/003-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/web
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>nano<span class="w"> </span>.env
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>configure
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/health
 </code></pre></div>
 <p>Backend <code>.env</code>만 변경할 때도 같은 방식으로 설정만 반영합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/003-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/backend
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>nano<span class="w"> </span>.env
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>configure
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/003-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/backend
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>nano<span class="w"> </span>.env
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>configure
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
 </code></pre></div>
 <h2 id="10-013-auto-scaling">10. 013 Auto Scaling과 연결<a class="headerlink" href="#10-013-auto-scaling" title="Permanent link">&para;</a></h2>
 <p>003 완료 시 브라우저는 Web Public IP에 접속하고 Web Nginx는 고정 Backend를 바라봅니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
 </code></pre></div>
 <p>013에서는 이 Web 서버로 이미지를 만들고 Public ALB 뒤에 Web Auto Scaling Group을 구성합니다. 모든 Web 복제 서버는 같은 <code>BACKEND_UPSTREAM</code>을 사용합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>브라우저 → Public ALB → Web ASG → 고정 Backend → DB
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>브라우저 → Public ALB → Web ASG → 고정 Backend → DB
 </code></pre></div>
 <p>브라우저 진입 주소는 Web 서버 Public IP에서 Public ALB 주소로 바뀝니다. Backend와 DB의 IP는 바뀌지 않습니다.</p>
 

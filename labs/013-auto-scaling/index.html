@@ -1234,10 +1234,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#9-step-5-alb-web-origin" class="md-nav__link">
+  <a href="#9-step-5-web-public-alb" class="md-nav__link">
     <span class="md-ellipsis">
       
-        9. Step 5 - ALB 주소를 Web Origin에 추가
+        9. Step 5 - Web 대표 주소를 Public ALB로 변경
       
     </span>
   </a>
@@ -1735,10 +1735,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#9-step-5-alb-web-origin" class="md-nav__link">
+  <a href="#9-step-5-web-public-alb" class="md-nav__link">
     <span class="md-ellipsis">
       
-        9. Step 5 - ALB 주소를 Web Origin에 추가
+        9. Step 5 - Web 대표 주소를 Public ALB로 변경
       
     </span>
   </a>
@@ -2330,36 +2330,24 @@
 <a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>curl<span class="w"> </span>-i<span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/api/health"</span>
 </code></pre></div>
 <p>세 요청이 모두 HTTP <code>200</code>이면 <code>Public ALB → 기존 Web → 고정 Backend</code> 경로가 정상입니다.</p>
-<h2 id="9-step-5-alb-web-origin">9. Step 5 - ALB 주소를 Web Origin에 추가<a class="headerlink" href="#9-step-5-alb-web-origin" title="Permanent link">&para;</a></h2>
-<p>브라우저가 Public ALB 주소로 접속하면 요청의 Origin도 ALB 주소가 됩니다. Backend의 <code>FRONTEND_ORIGIN</code>에 실제 ALB 주소를 추가하지 않으면 글쓰기와 삭제가 CORS로 실패할 수 있습니다.</p>
-<p>기존 Backend 서버에서 <code>.env</code>를 수정합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/003-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/backend
+<h2 id="9-step-5-web-public-alb">9. Step 5 - Web 대표 주소를 Public ALB로 변경<a class="headerlink" href="#9-step-5-web-public-alb" title="Permanent link">&para;</a></h2>
+<p>Web 서버의 <code>SITE_BASE_URL</code>을 대표 접속 주소인 Public ALB로 변경합니다. Backend upstream은 그대로 둡니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/003-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/web
 <a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>nano<span class="w"> </span>.env
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>configure
 </code></pre></div>
-<p>기존 Web 주소와 Public ALB 주소를 쉼표로 나열합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>FRONTEND_ORIGIN=http://WEB_SERVER_PUBLIC_IP,http://PUBLIC_ALB_DOMAIN
-</code></pre></div>
-<p>Backend 설정을 반영합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>configure
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
-</code></pre></div>
-<p>Web 서버의 <code>SITE_BASE_URL</code>도 대표 접속 주소인 Public ALB로 변경하되, Backend upstream은 그대로 둡니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/003-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/web
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>nano<span class="w"> </span>.env
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>configure
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>SITE_BASE_URL=http://PUBLIC_ALB_DOMAIN
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>SITE_TITLE=DevForum Practice Board
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>SITE_BASE_URL=http://PUBLIC_ALB_DOMAIN
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>SITE_TITLE=DevForum Practice Board
 </code></pre></div>
 <p>브라우저에서 Public ALB 주소로 게시판을 열고 글 조회, 작성, 삭제를 확인합니다.</p>
 <h2 id="10-step-6-web">10. Step 6 - Web 이미지 준비와 생성<a class="headerlink" href="#10-step-6-web" title="Permanent link">&para;</a></h2>
 <p>Auto Scaling 동작을 확실하게 검증할 수 있도록 기존 Web 서버에 <code>stress-ng</code>를 설치합니다. 이 패키지는 Bastion에서 원격 명령으로 Web CPU를 높일 때만 사용합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>stress-ng
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>stress-ng<span class="w"> </span>--version
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>systemctl<span class="w"> </span>is-enabled<span class="w"> </span>nginx
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>systemctl<span class="w"> </span>is-active<span class="w"> </span>nginx
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/healthz
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>stress-ng
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>stress-ng<span class="w"> </span>--version
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>systemctl<span class="w"> </span>is-enabled<span class="w"> </span>nginx
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>systemctl<span class="w"> </span>is-active<span class="w"> </span>nginx
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/healthz
 </code></pre></div>
 <p><code>stress-ng</code> 버전, <code>enabled</code>, <code>active</code>, HTTP <code>200</code>을 확인한 뒤 이미지를 만듭니다.</p>
 <ol>
@@ -2559,15 +2547,15 @@
 <p>최대 용량 <code>3</code>보다 늘어나거나 최소 용량 <code>1</code>보다 줄어들지 않습니다.</p>
 <h2 id="14-step-10-web">14. Step 10 - 부하 전 Web 분산 확인<a class="headerlink" href="#14-step-10-web" title="Permanent link">&para;</a></h2>
 <p>Bastion에서 Public ALB를 20번 호출합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nv">ALB_URL</span><span class="o">=</span><span class="s2">"http://PUBLIC_ALB_DOMAIN"</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">20</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">  </span>curl<span class="w"> </span>-fsS<span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/web-instance"</span>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">  </span><span class="nb">echo</span>
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"instance":"\([^"]*\)".*/\1/p'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nv">ALB_URL</span><span class="o">=</span><span class="s2">"http://PUBLIC_ALB_DOMAIN"</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">20</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span>curl<span class="w"> </span>-fsS<span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/web-instance"</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">  </span><span class="nb">echo</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"instance":"\([^"]*\)".*/\1/p'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
 </code></pre></div>
 <p>현재 기대 용량이 <code>1</code>이므로 hostname 하나에 20회가 집계되어야 합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>20 lab-web-as-xxxxx
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>20 lab-web-as-xxxxx
 </code></pre></div>
 <h2 id="15-step-11-cloud-insight-event-rule">15. Step 11 - Cloud Insight Event Rule 연결<a class="headerlink" href="#15-step-11-cloud-insight-event-rule" title="Permanent link">&para;</a></h2>
 <p>Scaling Policy만 만들면 CPU에 따라 자동 실행되지 않습니다. <strong>Services &gt; Management &amp; Governance &gt; Cloud Insight &gt; Configuration &gt; Event Rule</strong>에서 두 규칙을 만듭니다.</p>
@@ -2652,15 +2640,15 @@
 <p>Scale-in Rule은 Scale-out 검증이 끝난 뒤 활성화해도 됩니다. 두 규칙이 동시에 움직여 관찰이 어려워지는 것을 방지할 수 있습니다.</p>
 <h2 id="16-step-12-bastion-web-cpu">16. Step 12 - Bastion에서 Web CPU 부하 실행<a class="headerlink" href="#16-step-12-bastion-web-cpu" title="Permanent link">&para;</a></h2>
 <p>콘솔의 ASG <strong>서버 목록</strong>에서 현재 Web 인스턴스 Private IP를 확인합니다. Bastion에서 먼저 SSH와 <code>stress-ng</code> 설치 상태를 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nv">WEB_PRIVATE_IP</span><span class="o">=</span><span class="s2">"WEB_ASG_INSTANCE_PRIVATE_IP"</span>
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="s1">'hostname; stress-ng --version'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nv">WEB_PRIVATE_IP</span><span class="o">=</span><span class="s2">"WEB_ASG_INSTANCE_PRIVATE_IP"</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="s1">'hostname; stress-ng --version'</span>
 </code></pre></div>
 <p>10분 동안 Web CPU를 약 90%로 높입니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">  </span><span class="s1">'nohup stress-ng --cpu 0 --cpu-load 90 --timeout 600s &gt;/tmp/web-stress.log 2&gt;&amp;1 &amp;'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="s1">'nohup stress-ng --cpu 0 --cpu-load 90 --timeout 600s &gt;/tmp/web-stress.log 2&gt;&amp;1 &amp;'</span>
 </code></pre></div>
 <p>실행 상태를 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="s1">'pgrep -af stress-ng; uptime'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="s1">'pgrep -af stress-ng; uptime'</span>
 </code></pre></div>
 <p>명령을 입력하는 위치는 Bastion이지만 실제 CPU 부하는 Web 인스턴스에서 발생합니다. Backend의 <code>/api/stress</code>는 사용하지 않습니다.</p>
 <h2 id="17-step-13-scale-out">17. Step 13 - Scale-out 관찰과 재확인<a class="headerlink" href="#17-step-13-scale-out" title="Permanent link">&para;</a></h2>
@@ -2707,25 +2695,25 @@
 </tbody>
 </table>
 <p>새 Web이 정상 상태가 된 뒤 Bastion에서 다시 집계합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">40</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span>curl<span class="w"> </span>-fsS<span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/web-instance"</span>
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span><span class="nb">echo</span>
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"instance":"\([^"]*\)".*/\1/p'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">40</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span>curl<span class="w"> </span>-fsS<span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/web-instance"</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span><span class="nb">echo</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"instance":"\([^"]*\)".*/\1/p'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
 </code></pre></div>
 <p>서로 다른 Web hostname이 보이고 합계가 40이면 분산 성공입니다. 정확히 절반씩 나올 필요는 없습니다.</p>
 <p>게시판 API도 계속 정상인지 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>curl<span class="w"> </span>-i<span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/api/health"</span>
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>curl<span class="w"> </span>-sS<span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/api/posts"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>curl<span class="w"> </span>-i<span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/api/health"</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>curl<span class="w"> </span>-sS<span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/api/posts"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head
 </code></pre></div>
 <h2 id="18-bastion-http">18. 선택 실습 - Bastion에서 HTTP 트래픽 발생<a class="headerlink" href="#18-bastion-http" title="Permanent link">&para;</a></h2>
 <p>실제 사용자 요청 형태도 확인하려면 Bastion에 ApacheBench를 설치해 Public ALB를 호출합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>apache2-utils
-<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>ab<span class="w"> </span>-t<span class="w"> </span><span class="m">300</span><span class="w"> </span>-c<span class="w"> </span><span class="m">200</span><span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>apache2-utils
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>ab<span class="w"> </span>-t<span class="w"> </span><span class="m">300</span><span class="w"> </span>-c<span class="w"> </span><span class="m">200</span><span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/"</span>
 </code></pre></div>
 <p>이 요청은 <code>Public ALB → Web ASG</code> 경로를 사용합니다. 다만 Nginx 정적 페이지는 CPU 사용량이 낮을 수 있으므로 이 명령만으로 Scale-out되지 않아도 오류가 아닙니다.</p>
 <h2 id="19-step-14-scale-in">19. Step 14 - 부하 종료와 Scale-in 확인<a class="headerlink" href="#19-step-14-scale-in" title="Permanent link">&para;</a></h2>
 <p>10분 전에 부하를 중지하려면 Bastion에서 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="s1">'pkill -f stress-ng || true'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="s1">'pkill -f stress-ng || true'</span>
 </code></pre></div>
 <p>CPU가 내려간 뒤 Scale-in Event와 <code>web-remove-1</code> 실행을 확인합니다. ASG 서버 수가 <code>2 → 1</code>이 되고 Target Group에서 종료 서버가 제거되어야 합니다.</p>
 <p>마지막으로 Public ALB에서 게시판을 조회하고 새 글을 작성합니다. Web 서버가 교체되어도 데이터는 고정 Backend와 DB에 있으므로 유지되어야 합니다.</p>
