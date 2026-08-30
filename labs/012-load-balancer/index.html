@@ -1207,6 +1207,18 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#sticky-session-off" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sticky Session OFF
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sticky Session OFF">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#linux-macos" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1225,6 +1237,50 @@
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sticky-session-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sticky Session ON
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sticky Session ON">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#linux-macos_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux 또는 macOS 터미널
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows-terminal-powershell_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows Terminal PowerShell
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1543,6 +1599,18 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#sticky-session-off" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sticky Session OFF
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sticky Session OFF">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#linux-macos" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1561,6 +1629,50 @@
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sticky-session-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sticky Session ON
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sticky Session ON">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#linux-macos_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux 또는 macOS 터미널
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows-terminal-powershell_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows Terminal PowerShell
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1732,15 +1844,16 @@
 <li>Load Balancer 헬스체크 경로: <code>/healthz</code></li>
 </ul>
 <h2 id="_5">분산 확인<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<p>User Input이 모든 서버에서 같더라도 <code>hostname</code>을 기준으로 응답 횟수를 집계합니다. 사용하는 터미널에 맞는 명령 하나를 실행합니다.</p>
-<h3 id="linux-macos">Linux 또는 macOS 터미널<a class="headerlink" href="#linux-macos" title="Permanent link">&para;</a></h3>
+<p>User Input이 모든 서버에서 같더라도 <code>hostname</code>을 기준으로 응답 횟수를 집계합니다. 먼저 Target Group의 Sticky Session을 끈 상태에서 사용하는 터미널에 맞는 명령 하나를 실행합니다.</p>
+<h3 id="sticky-session-off">Sticky Session OFF<a class="headerlink" href="#sticky-session-off" title="Permanent link">&para;</a></h3>
+<h4 id="linux-macos">Linux 또는 macOS 터미널<a class="headerlink" href="#linux-macos" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nv">LB_URL</span><span class="o">=</span><span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">100</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span>curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/status.json"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'</span>
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
 </code></pre></div>
-<h3 id="windows-terminal-powershell">Windows Terminal PowerShell<a class="headerlink" href="#windows-terminal-powershell" title="Permanent link">&para;</a></h3>
+<h4 id="windows-terminal-powershell">Windows Terminal PowerShell<a class="headerlink" href="#windows-terminal-powershell" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">$LB_URL</span> <span class="p">=</span> <span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nv">$results</span> <span class="p">=</span> <span class="n">1</span><span class="p">..</span><span class="n">100</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
@@ -1758,7 +1871,40 @@
 <a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>   52 lb-node-001
 <a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>   48 lb-node-002
 </code></pre></div>
-<p>호출 횟수의 합이 <code>100</code>인지 확인합니다. Hostname이 하나만 나오면 Target Group에 Healthy 서버가 한 대만 연결되어 있는지 확인합니다.</p>
+<p>호출 횟수의 합이 <code>100</code>인지 확인합니다. Sticky Session이 꺼져 있는데 Hostname이 하나만 나오면 Target Group에 Healthy 서버가 한 대만 연결되어 있는지 확인합니다.</p>
+<h3 id="sticky-session-on">Sticky Session ON<a class="headerlink" href="#sticky-session-on" title="Permanent link">&para;</a></h3>
+<p><a href="https://guide.ncloud-docs.com/docs/loadbalancer-targetgroup-vpc">Naver Cloud Target Group 공식 가이드</a>는 Sticky Session을 서버 고유 ID를 헤더에 추가해 다음 요청도 같은 서버로 전달하는 기능으로 설명합니다. 따라서 100회 요청에서도 <strong>같은 세션 정보를 계속 재사용</strong>해야 합니다.</p>
+<p>기존 명령처럼 매번 새 <code>curl</code> 또는 새 PowerShell 요청을 만들면 세션이 유지되지 않아 Sticky Session을 켜도 여러 서버로 분산될 수 있습니다.</p>
+<h4 id="linux-macos_1">Linux 또는 macOS 터미널<a class="headerlink" href="#linux-macos_1" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">LB_URL</span><span class="o">=</span><span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nv">COOKIE_JAR</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>mktemp<span class="k">)</span><span class="s2">"</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">100</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span>curl<span class="w"> </span>-s<span class="w"> </span>-c<span class="w"> </span><span class="s2">"</span><span class="nv">$COOKIE_JAR</span><span class="s2">"</span><span class="w"> </span>-b<span class="w"> </span><span class="s2">"</span><span class="nv">$COOKIE_JAR</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/status.json"</span><span class="w"> </span><span class="p">|</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>rm<span class="w"> </span>-f<span class="w"> </span><span class="s2">"</span><span class="nv">$COOKIE_JAR</span><span class="s2">"</span>
+</code></pre></div>
+<h4 id="windows-terminal-powershell_1">Windows Terminal PowerShell<a class="headerlink" href="#windows-terminal-powershell_1" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nv">$LB_URL</span> <span class="p">=</span> <span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nv">$session</span> <span class="p">=</span> <span class="nb">New-Object</span> <span class="n">Microsoft</span><span class="p">.</span><span class="n">PowerShell</span><span class="p">.</span><span class="n">Commands</span><span class="p">.</span><span class="n">WebRequestSession</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="nv">$results</span> <span class="p">=</span> <span class="n">1</span><span class="p">..</span><span class="n">100</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>  <span class="p">(</span><span class="nb">Invoke-RestMethod</span> <span class="n">-Uri</span> <span class="s2">"$LB_URL/status.json"</span> <span class="n">-WebSession</span> <span class="nv">$session</span><span class="p">).</span><span class="n">hostname</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="p">}</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="nv">$results</span> <span class="p">|</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>  <span class="nb">Group-Object</span> <span class="p">|</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>  <span class="nb">Sort-Object</span> <span class="n">Count</span> <span class="n">-Descending</span> <span class="p">|</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>  <span class="nb">Select-Object</span> <span class="n">Count</span><span class="p">,</span> <span class="n">Name</span>
+</code></pre></div>
+<p>Sticky Session이 정상이라면 다음처럼 Hostname 하나에 100회가 집계됩니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Count Name
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>----- ----
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>  100 lb-node-001
+</code></pre></div>
+<p>새 쿠키 파일, 새 PowerShell 세션, 시크릿 브라우저는 새로운 세션이므로 처음 선택되는 서버가 달라질 수 있습니다. 고정된 Target이 Unhealthy 상태가 되어 제외되어도 다른 서버로 전환될 수 있습니다.</p>
 
 
 
