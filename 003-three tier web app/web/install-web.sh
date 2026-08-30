@@ -22,16 +22,18 @@ NGINX_CONF="/etc/nginx/sites-available/chapter3-web"
 NGINX_LINK="/etc/nginx/sites-enabled/chapter3-web"
 RAW_BASE="https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/web/app"
 TEMP_POLICY_RC_D=""
+COMMAND="${1:-install}"
 
 ensure_env_file() {
   if [[ -f "${SCRIPT_DIR}/.env" ]]; then
     return
   fi
 
-  if [[ -n "${SITE_BASE_URL:-}" && -n "${BACKEND_BASE_URL:-}" ]]; then
+  if [[ -n "${SITE_BASE_URL:-}" && ( -n "${BACKEND_UPSTREAM:-}" || -n "${BACKEND_BASE_URL:-}" ) ]]; then
+    local backend_upstream="${BACKEND_UPSTREAM:-${BACKEND_BASE_URL}}"
     cat > "${SCRIPT_DIR}/.env" <<EOF
 SITE_BASE_URL="${SITE_BASE_URL}"
-BACKEND_BASE_URL="${BACKEND_BASE_URL}"
+BACKEND_UPSTREAM="${backend_upstream}"
 SITE_TITLE="${SITE_TITLE:-DevForum Practice Board}"
 EOF
     return
@@ -39,7 +41,7 @@ EOF
 
   cat > "${SCRIPT_DIR}/.env" <<'EOF'
 SITE_BASE_URL="http://WEB_SERVER_PUBLIC_IP"
-BACKEND_BASE_URL="http://BACKEND_SERVER_PRIVATE_OR_PUBLIC_IP:4000"
+BACKEND_UPSTREAM="http://BACKEND_SERVER_PRIVATE_IP:4000"
 SITE_TITLE="DevForum Practice Board"
 EOF
   echo "Created ${SCRIPT_DIR}/.env template. Fill it out and run again."
@@ -48,8 +50,26 @@ EOF
 
 load_env() {
   set -a
+  # shellcheck source=/dev/null
   source "${SCRIPT_DIR}/.env"
   set +a
+
+  # Existing labs can be reconfigured before renaming the old variable.
+  if [[ -z "${BACKEND_UPSTREAM:-}" && -n "${BACKEND_BASE_URL:-}" ]]; then
+    BACKEND_UPSTREAM="${BACKEND_BASE_URL}"
+    echo "BACKEND_BASE_URL is deprecated. Rename it to BACKEND_UPSTREAM in ${SCRIPT_DIR}/.env."
+  fi
+
+  if [[ -z "${SITE_BASE_URL:-}" || -z "${BACKEND_UPSTREAM:-}" ]]; then
+    echo "SITE_BASE_URL and BACKEND_UPSTREAM must be set in ${SCRIPT_DIR}/.env"
+    exit 1
+  fi
+
+  BACKEND_UPSTREAM="${BACKEND_UPSTREAM%/}"
+  if [[ "${BACKEND_UPSTREAM}" != http://* && "${BACKEND_UPSTREAM}" != https://* ]]; then
+    echo "BACKEND_UPSTREAM must start with http:// or https://"
+    exit 1
+  fi
 }
 
 copy_or_fetch_file() {
@@ -64,23 +84,48 @@ copy_or_fetch_file() {
   fi
 }
 
-ensure_env_file
-load_env
+install_packages() {
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update
 
-export DEBIAN_FRONTEND=noninteractive
-apt-get update
-
-# Prevent package post-install hooks from auto-starting the default nginx config.
-if [[ ! -e /usr/sbin/policy-rc.d ]]; then
-  TEMP_POLICY_RC_D="/usr/sbin/policy-rc.d"
-  cat > "${TEMP_POLICY_RC_D}" <<'EOF'
+  # Prevent package post-install hooks from auto-starting the default nginx config.
+  if [[ ! -e /usr/sbin/policy-rc.d ]]; then
+    TEMP_POLICY_RC_D="/usr/sbin/policy-rc.d"
+    cat > "${TEMP_POLICY_RC_D}" <<'EOF'
 #!/bin/sh
 exit 101
 EOF
-  chmod 755 "${TEMP_POLICY_RC_D}"
-fi
+    chmod 755 "${TEMP_POLICY_RC_D}"
+  fi
 
-apt-get install -y nginx curl
+  apt-get install -y nginx curl
+}
+
+case "${COMMAND}" in
+  install)
+    ensure_env_file
+    load_env
+    install_packages
+    ;;
+  configure)
+    ensure_env_file
+    load_env
+    if ! command -v nginx >/dev/null 2>&1; then
+      echo "nginx is not installed. Run: sudo ./install-web.sh install"
+      exit 1
+    fi
+    ;;
+  status)
+    systemctl status nginx --no-pager || true
+    nginx -t || true
+    exit 0
+    ;;
+  *)
+    echo "Usage: sudo ./install-web.sh [install|configure|status]"
+    exit 1
+    ;;
+esac
+
 
 mkdir -p "${APP_DIR}" "${WEB_ROOT}"
 
@@ -95,7 +140,6 @@ cp "${APP_DIR}/app.js" "${WEB_ROOT}/app.js"
 cat > "${WEB_ROOT}/config.js" <<EOF
 window.CHAPTER3_CONFIG = {
   SITE_BASE_URL: "${SITE_BASE_URL}",
-  BACKEND_BASE_URL: "${BACKEND_BASE_URL}",
   SITE_TITLE: "${SITE_TITLE:-DevForum Practice Board}"
 };
 EOF
@@ -107,6 +151,15 @@ server {
 
     root ${WEB_ROOT};
     index index.html;
+
+    location /api/ {
+        proxy_pass ${BACKEND_UPSTREAM};
+        proxy_http_version 1.1;
+        proxy_set_header Host \$proxy_host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
 
     location / {
         try_files \$uri \$uri/ /index.html;
@@ -127,7 +180,8 @@ else
 fi
 
 echo
-echo "Web server installation complete."
+echo "Web server configuration complete."
 echo "Site URL     : ${SITE_BASE_URL}"
-echo "Backend URL  : ${BACKEND_BASE_URL}"
+echo "API path     : ${SITE_BASE_URL%/}/api"
+echo "API upstream : ${BACKEND_UPSTREAM}"
 echo "Open browser : http://SERVER_PUBLIC_IP/"

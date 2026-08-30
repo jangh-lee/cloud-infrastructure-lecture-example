@@ -21,15 +21,14 @@
 실습 전에 팀장이 먼저 아래 값을 공유하면 진행이 빨라집니다.
 
 - `SITE_BASE_URL`
-- `BACKEND_BASE_URL`
+- `BACKEND_UPSTREAM`
 - `FRONTEND_ORIGIN`
 - `DB_HOST`
 - `DB_NAME`
 - `DB_USER`
 - `DB_PASSWORD`
 
-주소 값은 프라이빗 IP, 퍼블릭 IP, DNS 중 실제로 상대 서버에서 도달 가능한 값이면 어느 쪽이든 사용할 수 있습니다.
-같은 VPC 내부 통신이면 보통 프라이빗 IP를 권장합니다.
+`BACKEND_UPSTREAM`은 브라우저에 공개하는 값이 아니라 Web Nginx가 API를 전달할 내부 주소입니다. 003에서는 Backend Private IP를 사용하고, 013에서는 Private ALB 주소로 교체합니다.
 
 ## 2. 네트워크 구성
 
@@ -37,9 +36,9 @@
 
 ```text
 사용자 브라우저
-   ↓ 80
-웹서버 (nginx)
-   ↓ 4000
+   ↓ http://WEB_PUBLIC_IP/api/...
+웹서버 (nginx reverse proxy)
+   ↓ BACKEND_UPSTREAM :4000
 백엔드 서버 (node/express)
    ↓ 3306
 DB 서버 (mariadb)
@@ -104,9 +103,11 @@ DB_PREVIOUS_ROOT_PASSWORD=
 DB_NAME=chapter3_board
 DB_USER=chapter3_user
 DB_PASSWORD=AppDbPass123!
-DB_ALLOWED_HOST=10.0.1.25
+DB_ALLOWED_HOST=10.0.1.%
 DB_BIND_ADDRESS=0.0.0.0
 ```
+
+`DB_ALLOWED_HOST`에는 Backend 서버가 속한 Subnet 범위를 MySQL Host 패턴으로 입력합니다. 예시 `10.0.1.%`는 `10.0.1.0/24`용입니다. 이렇게 해야 013에서 IP가 다른 Auto Scaling Backend도 같은 DB 계정으로 접속할 수 있습니다. 실제 접근 범위는 DB ACG에서 Backend ACG로 한 번 더 제한합니다.
 
 ### DB 서버
 
@@ -211,9 +212,11 @@ sudo systemctl disable --now chapter3-post-seeder
 
 ```env
 SITE_BASE_URL="http://10.0.0.10"
-BACKEND_BASE_URL="http://10.0.1.25:4000"
+BACKEND_UPSTREAM="http://10.0.1.25:4000"
 SITE_TITLE="DevForum Practice Board"
 ```
+
+`BACKEND_UPSTREAM`은 Web 서버만 사용하는 Nginx 프록시 목적지입니다. 프런트 JavaScript에는 이 주소가 노출되지 않으며 모든 API 요청은 `/api` 상대경로를 사용합니다.
 
 ### 웹서버
 
@@ -224,9 +227,15 @@ cd cloud-infrastructure-lecture-example
 git pull origin main
 cd "003-three tier web app/web"
 chmod +x install-web.sh
-sudo ./install-web.sh
+sudo ./install-web.sh install
 # .env가 자동 생성되면 값 수정 후 다시
-sudo ./install-web.sh
+sudo ./install-web.sh install
+```
+
+이후 `.env`의 upstream 주소만 바꿀 때는 패키지를 다시 설치하지 않습니다.
+
+```bash
+sudo ./install-web.sh configure
 ```
 
 ## 7. 동작 확인
@@ -379,11 +388,17 @@ curl http://localhost:4000/api/posts
 ### 웹서버
 
 ```bash
-curl http://localhost
+curl -i http://127.0.0.1/
+curl -i http://127.0.0.1/api/health
+curl -i http://127.0.0.1/api/instance
 ```
+
+첫 번째 요청은 정적 페이지, 두 번째와 세 번째 요청은 Nginx를 거쳐 Backend로 전달됩니다. `/api/instance`의 `X-Backend-Instance` 헤더와 JSON `instance` 값으로 실제 요청을 처리한 Backend hostname을 확인합니다.
 
 브라우저에서는 웹서버 공인 IP로 접속합니다.
 
 ```text
 http://WEB_SERVER_PUBLIC_IP/
 ```
+
+브라우저 개발자 도구의 Network 탭에서 API 요청 주소가 Backend IP가 아니라 `http://WEB_SERVER_PUBLIC_IP/api/...`로 표시되는지 확인합니다. 013에서는 Web 주소는 그대로 두고 `BACKEND_UPSTREAM`만 Private ALB 주소로 변경합니다.

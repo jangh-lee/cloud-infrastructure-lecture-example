@@ -1,5 +1,4 @@
 const config = window.CHAPTER3_CONFIG || {};
-const backendBaseUrl = (config.BACKEND_BASE_URL || "").replace(/\/$/, "");
 const siteTitle = config.SITE_TITLE || "DevForum";
 const pageSize = 15;
 
@@ -220,13 +219,8 @@ function renderRoute() {
 }
 
 async function checkHealth() {
-  if (!backendBaseUrl) {
-    setHealthStatus("status-fail", "서버 주소 미설정");
-    return;
-  }
-
   try {
-    const response = await fetch(`${backendBaseUrl}/api/health`);
+    const response = await fetch("/api/health");
     if (!response.ok) {
       throw new Error("Health check failed");
     }
@@ -237,18 +231,12 @@ async function checkHealth() {
 }
 
 async function loadPosts({ announce = false } = {}) {
-  if (!backendBaseUrl) {
-    elements.listStatus.textContent = "백엔드 서버 주소가 설정되지 않았습니다.";
-    renderRoute();
-    return;
-  }
-
   state.isLoading = true;
   elements.listStatus.textContent = "";
   renderRoute();
 
   try {
-    const response = await fetch(`${backendBaseUrl}/api/posts`);
+    const response = await fetch("/api/posts");
     if (!response.ok) {
       throw new Error("Failed to load posts");
     }
@@ -273,17 +261,12 @@ async function createPost(event) {
     elements.formStatus.textContent = "제목과 내용을 모두 입력해 주세요.";
     return;
   }
-  if (!backendBaseUrl) {
-    elements.formStatus.textContent = "백엔드 서버 주소가 설정되지 않았습니다.";
-    return;
-  }
-
   elements.formStatus.textContent = "";
   elements.submitButton.disabled = true;
   elements.submitButton.textContent = "등록 중";
 
   try {
-    const response = await fetch(`${backendBaseUrl}/api/posts`, {
+    const response = await fetch("/api/posts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, content, authorName: "비가입 유저" })
@@ -313,7 +296,7 @@ async function deleteSelectedPost() {
 
   elements.deleteButton.disabled = true;
   try {
-    const response = await fetch(`${backendBaseUrl}/api/posts/${state.selectedPostId}`, {
+    const response = await fetch(`/api/posts/${state.selectedPostId}`, {
       method: "DELETE"
     });
     if (!response.ok) {

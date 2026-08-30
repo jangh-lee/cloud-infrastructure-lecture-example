@@ -46,7 +46,7 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 | Folder | Topic |
 | --- | --- |
 | [`012-load balancer`](./012-load%20balancer/) | 여러 Ubuntu 웹 노드를 Load Balancer 뒤에 연결해 헬스체크와 트래픽 분산을 확인하는 예제입니다. |
-| [`013-auto scaling`](./013-auto%20scaling/) | 003번 Backend 서버로 이미지를 만들고 Launch Configuration, Auto Scaling Group, 증감 정책을 구성합니다. 전체 절차는 [GitBook 013 교재](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/013-auto-scaling/)에서 진행합니다. |
+| [`013-auto scaling`](./013-auto%20scaling/) | 003번 Backend 이미지와 Launch Configuration을 사용해 Private ALB 뒤에 Auto Scaling Group과 증감 정책을 구성합니다. 전체 절차는 [GitBook 013 교재](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/013-auto-scaling/)에서 진행합니다. |
 
 ### 6. 데이터베이스 실습
 
