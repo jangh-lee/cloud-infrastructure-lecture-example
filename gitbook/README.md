@@ -6,19 +6,23 @@ Naver Cloud 기반 클라우드 인프라 실습 교안입니다.
 
 ## 실습 목록
 
-| Chapter | Topic | Lab Folder |
-| --- | --- |
-| 001 | API Server와 Postman CRUD | `001-api server` |
-| 002 | Init Script로 SSH 포트 재설정 | `002-init script` |
-| 003 | Ncloud CLI로 서버 생성 | `003-cloud cli` |
-| 004 | Load Balancer 분산 실습 | `004-load balancer` |
-| 005 | Object Storage 정적 웹사이트 | `005-static website` |
-| 006 | Database 백업 및 특정시점 복구 | `006-database backup recovery` |
-| 007 | 3계층 Web, Backend, DB 앱 | `007-three tier web app` |
-| 008 | Game Server 생성 실습 | `008-game server` |
-| 009 | CLOVA Studio AI RAG 앱 | `009-ai rag studio` |
-| 010 | Linux 기본 명령어 | `010-linux commands` |
-| 011 | Terraform 인프라 코드 | `011-terraform` |
+| 구분 | 번호 | 주제 | 실습 폴더 |
+| --- | --- | --- | --- |
+| 서버 | 001 | API Server와 Postman CRUD | `001-api server` |
+| 서버 | 002 | Init Script로 SSH 포트 재설정 | `002-init script` |
+| 서버 | 003 | 3계층 Web, Backend, DB 앱 | `003-three tier web app` |
+| 서버 | 004 | Game Server 생성 실습 | `004-game server` |
+| 서버 | 005 | CLOVA Studio AI RAG 앱 | `005-ai rag studio` |
+| 서버 | 006 | Linux 기본 명령어 | `006-linux commands` |
+| 네트워크 | 007 | ACG 변경 Slack 알림 | `007-acg slack alert` |
+| CLI 및 IaC | 008 | Ncloud CLI로 서버 생성 | `008-cloud cli` |
+| CLI 및 IaC | 009 | Terraform 인프라 코드 | `009-terraform` |
+| CLI 및 IaC | 010 | 비용 조회 Slack 자동화 | `010-cost slack alert` |
+| 스토리지 | 011 | Object Storage 정적 웹사이트 | `011-static website` |
+| Load Balancer 및 Auto Scaling | 012 | Load Balancer 분산 실습 | `012-load balancer` |
+| Load Balancer 및 Auto Scaling | 013 | 게시판 Auto Scaling | `013-auto scaling` |
+| 데이터베이스 | 014 | Database 백업 및 특정시점 복구 | `014-database backup recovery` |
+| 데이터베이스 | 015 | Cloud DB for MySQL 마이그레이션 | `015-cloud db migration` |
 
 ## 웹 교안 열람
 

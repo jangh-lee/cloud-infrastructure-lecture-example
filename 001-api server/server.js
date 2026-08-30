@@ -270,7 +270,7 @@ app.use((error, req, res, next) => {
 ensureDataFile()
   .then(() => {
     app.listen(port, () => {
-      console.log(`Chapter 1 server running on http://localhost:${port}`);
+      console.log(`Todo API server running on http://localhost:${port}`);
     });
   })
   .catch((error) => {

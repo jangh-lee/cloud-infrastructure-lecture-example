@@ -20,7 +20,7 @@ npm install
 
 cat > "${SERVICE_FILE}" <<EOF
 [Unit]
-Description=Chapter 1 Todo API Server
+Description=Todo API Server
 After=network.target
 
 [Service]

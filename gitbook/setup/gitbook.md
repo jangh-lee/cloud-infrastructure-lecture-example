@@ -10,9 +10,9 @@
 
 ```text
 cloud-infrastructure-lecture-example
-├── 005-static website
-├── 006-database backup recovery
-├── 008-game server
+├── 001-api server
+├── ...
+├── 015-cloud db migration
 └── gitbook
     ├── README.md
     ├── SUMMARY.md

@@ -1,4 +1,4 @@
-# Chapter 1. Postman & API Server
+# 001 Postman & API Server
 
 투두리스트 UI와 함께 CRUD API를 실습하기 위한 예제입니다.
 
