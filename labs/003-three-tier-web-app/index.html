@@ -1748,6 +1748,52 @@
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>DB_ALLOWED_HOST=10.0.1.25
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>DB_BIND_ADDRESS=0.0.0.0
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>변수</th>
+<th>의미</th>
+<th>입력 기준</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DB_ROOT_PASSWORD</code></td>
+<td>MariaDB <code>root</code> 관리자 비밀번호</td>
+<td>최초 설치에 사용할 새 비밀번호를 입력합니다.</td>
+</tr>
+<tr>
+<td><code>DB_PREVIOUS_ROOT_PASSWORD</code></td>
+<td>변경 전 <code>root</code> 비밀번호</td>
+<td>최초 설치는 비워 둡니다. 기존 비밀번호를 변경할 때만 임시로 입력하고 변경 후 다시 비웁니다.</td>
+</tr>
+<tr>
+<td><code>DB_NAME</code></td>
+<td>게시판이 사용할 데이터베이스 이름</td>
+<td>Backend의 <code>DB_NAME</code>과 동일해야 합니다.</td>
+</tr>
+<tr>
+<td><code>DB_USER</code></td>
+<td>게시판 전용 DB 계정</td>
+<td>Backend의 <code>DB_USER</code>와 동일해야 합니다.</td>
+</tr>
+<tr>
+<td><code>DB_PASSWORD</code></td>
+<td>게시판 전용 DB 계정 비밀번호</td>
+<td>Backend의 <code>DB_PASSWORD</code>와 동일해야 합니다.</td>
+</tr>
+<tr>
+<td><code>DB_ALLOWED_HOST</code></td>
+<td>게시판 DB 계정의 접속 허용 호스트</td>
+<td>고정 Backend 서버의 Private IP를 입력합니다.</td>
+</tr>
+<tr>
+<td><code>DB_BIND_ADDRESS</code></td>
+<td>MariaDB가 연결을 수신할 주소</td>
+<td>Private Network의 Backend 연결을 받도록 <code>0.0.0.0</code>을 사용하고, 실제 접근 범위는 ACG로 제한합니다.</td>
+</tr>
+</tbody>
+</table>
 <p><code>DB_ALLOWED_HOST</code>에는 고정 Backend Private IP를 입력합니다. 013의 Auto Scaling 대상은 Web 서버이므로 Backend와 DB 연결은 그대로 유지됩니다. DB ACG에서는 <code>3306/tcp</code> 접근 소스를 Backend ACG로 제한합니다.</p>
 <p>설치를 다시 실행합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>./install-db.sh
@@ -1779,6 +1825,77 @@
 <a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
 <a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>LAB_STRESS_ENABLED=false
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>변수</th>
+<th>의미</th>
+<th>입력 기준</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PORT</code></td>
+<td>Backend 애플리케이션 수신 포트</td>
+<td>기본값은 <code>4000</code>이며 ACG와 Web의 <code>BACKEND_UPSTREAM</code> 포트도 같아야 합니다.</td>
+</tr>
+<tr>
+<td><code>FRONTEND_ORIGIN</code></td>
+<td>CORS로 허용할 브라우저 접속 주소</td>
+<td><code>http://</code> 또는 <code>https://</code>를 포함합니다. 003에서는 Web Public IP, 013에서는 Public ALB 주소를 사용합니다. 여러 주소는 쉼표로 구분합니다.</td>
+</tr>
+<tr>
+<td><code>DB_HOST</code></td>
+<td>Backend가 접속할 DB 주소</td>
+<td>DB 서버 Private IP 또는 내부 도메인을 입력하며 <code>http://</code>는 붙이지 않습니다.</td>
+</tr>
+<tr>
+<td><code>DB_PORT</code></td>
+<td>DB 접속 포트</td>
+<td>MariaDB/MySQL 기본 포트인 <code>3306</code>을 사용합니다.</td>
+</tr>
+<tr>
+<td><code>DB_NAME</code></td>
+<td>접속할 데이터베이스 이름</td>
+<td>DB 서버의 <code>DB_NAME</code>과 동일해야 합니다.</td>
+</tr>
+<tr>
+<td><code>DB_USER</code></td>
+<td>DB 접속 계정</td>
+<td>DB 서버의 <code>DB_USER</code>와 동일해야 합니다.</td>
+</tr>
+<tr>
+<td><code>DB_PASSWORD</code></td>
+<td>DB 접속 계정 비밀번호</td>
+<td>DB 서버의 <code>DB_PASSWORD</code>와 동일해야 합니다.</td>
+</tr>
+<tr>
+<td><code>AUTO_POST_ENABLED</code></td>
+<td>실습용 게시글 자동 등록 기능 사용 여부</td>
+<td>일반 실습은 <code>false</code>, 자동 데이터가 필요할 때만 <code>true</code>로 설정합니다.</td>
+</tr>
+<tr>
+<td><code>AUTO_POST_INTERVAL_SECONDS</code></td>
+<td>자동 게시글 등록 간격</td>
+<td><code>AUTO_POST_ENABLED=true</code>일 때 적용되는 초 단위 값입니다.</td>
+</tr>
+<tr>
+<td><code>AUTO_POST_TOTAL</code></td>
+<td>자동 등록할 게시글의 최대 개수</td>
+<td>필요한 실습 데이터 수를 정수로 입력합니다.</td>
+</tr>
+<tr>
+<td><code>AUTO_POST_API_URL</code></td>
+<td>자동 등록 기능이 호출할 게시글 API</td>
+<td>같은 Backend를 호출하므로 기본값 <code>http://127.0.0.1:4000/api/posts</code>를 사용합니다.</td>
+</tr>
+<tr>
+<td><code>LAB_STRESS_ENABLED</code></td>
+<td>Backend 부하 발생용 실습 API 사용 여부</td>
+<td>003과 Web Auto Scaling을 다루는 013에서는 <code>false</code>를 유지합니다.</td>
+</tr>
+</tbody>
+</table>
 <p><code>FRONTEND_ORIGIN</code>에는 Backend IP가 아니라 브라우저에서 접속할 Web Public IP 또는 도메인을 입력합니다. 주소를 여러 개 허용하려면 쉼표로 구분합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>FRONTEND_ORIGIN=http://WEB_SERVER_PUBLIC_IP,http://board.example.com
 </code></pre></div>
@@ -1816,6 +1933,32 @@
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>SITE_TITLE=DevForum Practice Board
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>변수</th>
+<th>의미</th>
+<th>입력 기준</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SITE_BASE_URL</code></td>
+<td>사용자가 브라우저로 접속할 대표 Web 주소</td>
+<td>003에서는 Web Public IP, 013에서는 Public ALB 주소를 <code>http://</code> 또는 <code>https://</code>와 함께 입력합니다.</td>
+</tr>
+<tr>
+<td><code>BACKEND_UPSTREAM</code></td>
+<td>Nginx가 <code>/api</code> 요청을 전달할 Backend 주소</td>
+<td>고정 Backend의 Private IP와 포트까지 입력합니다. 예: <code>http://10.0.1.25:4000</code></td>
+</tr>
+<tr>
+<td><code>SITE_TITLE</code></td>
+<td>게시판 화면에 표시할 서비스 제목</td>
+<td>실습에서 구분하기 쉬운 원하는 제목을 입력합니다.</td>
+</tr>
+</tbody>
+</table>
 <p><code>BACKEND_UPSTREAM</code>은 브라우저에 전달되지 않습니다. Web Nginx 설정 안에서만 사용하는 Backend 목적지입니다.</p>
 <p>설치와 점검을 실행합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>install
