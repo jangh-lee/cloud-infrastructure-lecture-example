@@ -1,54 +1,45 @@
-# 013 Naver Cloud Auto Scaling Hands-on
+# 013 Backend Auto Scaling Hands-on
 
-013 실습은 **GitBook 페이지를 정본 교재**로 사용합니다. 명령어를 중복해서 두 문서에 관리하지 않으므로 GitHub README와 GitBook 내용이 서로 달라지는 문제를 방지합니다.
+013 실습은 003번에서 완성한 Backend 서버를 원본으로 사용해 Naver Cloud Auto Scaling Group을 구성합니다. 전체 절차와 입력값은 아래 GitBook 정본 교재에서 확인합니다.
 
 ## 실습 시작
 
-아래 GitBook 페이지를 열고 `Step 0`부터 순서대로 진행합니다.
+### [013 Backend Auto Scaling 전체 교재 열기](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/013-auto-scaling/)
 
-### [013 Auto Scaling 전체 실습 교재 열기](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/013-auto-scaling/)
+다루는 내용:
 
-GitBook에는 다음 내용이 모두 포함되어 있습니다.
+- 기존 003 Backend 서비스 점검
+- Backend 내 서버 이미지 생성
+- Launch Configuration 생성
+- 최소 1대, 최대 3대의 Auto Scaling Group 생성
+- 1대 증가, 1대 감소 Scaling Policy 생성
+- 정책 수동 실행과 새 Backend 서비스 확인
 
-- 실습 구조와 완료 기준
-- Cloud DB 연결 확인
-- Backend 및 Cloud DB ACG 설정
-- 골든 Backend 준비와 Server Image 생성
-- Target Group과 Application Load Balancer 생성
-- Web 서버의 Backend 주소 전환
-- Launch Configuration과 Auto Scaling Group 생성
-- Cloud Insight Scale-out, Scale-in Event Rule
-- `curl`을 이용한 Health, CRUD, hostname 확인
-- `ApacheBench`를 이용한 CPU 부하 테스트
-- 화면별 관찰 순서와 예상 출력
-- 트러블슈팅 명령과 비용 정리
+다루지 않는 내용:
 
-## 문서와 코드 위치
-
-| 구분 | 위치 |
-| --- | --- |
-| 배포된 전체 교재 | [GitBook 013](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/013-auto-scaling/) |
-| 교재 원본 Markdown | [`gitbook/labs/013-auto-scaling.md`](../gitbook/labs/013-auto-scaling.md) |
-| 게시판 Backend | [`003-three tier web app/backend`](../003-three%20tier%20web%20app/backend/) |
-| 게시판 Web | [`003-three tier web app/web`](../003-three%20tier%20web%20app/web/) |
-| Cloud DB Migration | [`015-cloud db migration`](../015-cloud%20db%20migration/) |
+- DB 설치 또는 Cloud DB 마이그레이션
+- Target Group과 Load Balancer
+- Web 서버의 Backend 주소 변경
+- Cloud Insight Event Rule과 CPU 부하 테스트
 
 ## 실습 구조
 
 ```text
-고정 Web 서버
-  -> Public Application Load Balancer :80
-  -> Target Group :4000
-  -> Auto Scaling Backend 1~3대
-  -> Cloud DB for MySQL :3306
+003 기존 Backend
+  -> 내 서버 이미지
+  -> Launch Configuration
+  -> Auto Scaling Group
+  -> Backend 1~3대
 ```
 
-## 코드 사용 원칙
+기존 003 Backend 서버는 이미지의 원본일 뿐 Auto Scaling Group에 자동 편입되지 않습니다. ASG는 이미지로 새로운 Backend 서버를 만듭니다.
 
-Auto Scaling 리소스 생성과 검증은 GitBook의 CLI 코드 박스를 목적별로 복사해 직접 실행합니다. 같은 작업의 연속 명령은 한 박스로 제공하며 별도의 013 전용 자동화 스크립트는 사용하지 않습니다.
+## 문서와 코드
 
-Node.js 패키지와 systemd 서비스 설치에만 기존 007번의 `install-backend.sh`를 재사용합니다. Health 확인, 게시글 CRUD, Backend hostname 집계, CPU 부하는 각각 `curl`, `awk`, `ApacheBench`로 직접 확인합니다.
+| 구분 | 위치 |
+| --- | --- |
+| 전체 실습 교재 | [GitBook 013](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/013-auto-scaling/) |
+| 교재 원본 | [`gitbook/labs/013-auto-scaling.md`](../gitbook/labs/013-auto-scaling.md) |
+| 기존 Backend 코드 | [`003-three tier web app/backend`](../003-three%20tier%20web%20app/backend/) |
 
-## 문서 수정 원칙
-
-013 실습 절차를 변경할 때는 정본인 [`gitbook/labs/013-auto-scaling.md`](../gitbook/labs/013-auto-scaling.md)를 수정합니다. 이 README에는 실습 명령어를 복제하지 않고 정본 교재와 관련 코드의 연결만 유지합니다.
+013 절차를 변경할 때는 GitBook 원본을 수정합니다. 이 README에는 명령어를 중복해서 두지 않아 두 문서의 내용이 달라지는 문제를 방지합니다.
