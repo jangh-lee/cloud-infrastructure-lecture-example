@@ -1289,7 +1289,7 @@
   <span class="md-ellipsis">
     
   
-    013 Auto Scaling Hands-on
+    013 Web Auto Scaling
   
 
     
@@ -1670,7 +1670,7 @@
 
 <h1 id="003-three-tier-web-app">003 Three Tier Web App<a class="headerlink" href="#003-three-tier-web-app" title="Permanent link">&para;</a></h1>
 <h2 id="1">1. 목표<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
-<p>Web, Backend, DB 서버를 분리해 3계층 게시판을 구성하고 서버 간 사설 통신과 ACG를 확인합니다. 013에서는 이 구조의 Backend 한 대를 Private ALB와 Auto Scaling Group으로 확장합니다.</p>
+<p>Web, Backend, DB 서버를 분리해 3계층 게시판을 구성하고 서버 간 사설 통신과 ACG를 확인합니다. 013에서는 Public ALB 뒤에서 Web 서버를 Auto Scaling하고 Backend와 DB는 고정 서버로 유지합니다.</p>
 <h2 id="2">2. 실제 요청 구조<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>사용자 브라우저
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>   |
@@ -1745,11 +1745,10 @@
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>DB_NAME=chapter3_board
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>DB_USER=chapter3_user
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>DB_PASSWORD=AppDbPass123!
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>DB_ALLOWED_HOST=10.0.1.%
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>DB_ALLOWED_HOST=10.0.1.25
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>DB_BIND_ADDRESS=0.0.0.0
 </code></pre></div>
-<p><code>DB_ALLOWED_HOST=10.0.1.%</code>는 Backend Subnet이 <code>10.0.1.0/24</code>일 때 사용하는 MySQL Host 패턴입니다. 기존 Backend 한 대뿐 아니라 013에서 다른 Private IP로 생성되는 Auto Scaling Backend도 DB에 접속할 수 있습니다.</p>
-<p>Backend Subnet이 다르면 실제 대역에 맞게 수정합니다. DB ACG에서는 별도로 <code>3306/tcp</code> 접근 소스를 Backend ACG로 제한합니다.</p>
+<p><code>DB_ALLOWED_HOST</code>에는 고정 Backend Private IP를 입력합니다. 013의 Auto Scaling 대상은 Web 서버이므로 Backend와 DB 연결은 그대로 유지됩니다. DB ACG에서는 <code>3306/tcp</code> 접근 소스를 Backend ACG로 제한합니다.</p>
 <p>설치를 다시 실행합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>./install-db.sh
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>mariadb
@@ -1811,12 +1810,16 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>install
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>status
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/health
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/instance
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/healthz
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/web-instance
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/health
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/instance
 </code></pre></div>
 <p>확인할 결과:</p>
 <ul>
 <li><code>/</code>는 게시판 HTML을 반환합니다.</li>
+<li><code>/healthz</code>는 HTTP <code>200</code>과 <code>ok</code>를 반환하며 013 ALB Health Check에 사용합니다.</li>
+<li><code>/web-instance</code>와 <code>X-Web-Instance</code>는 현재 Web hostname을 보여줍니다.</li>
 <li><code>/api/health</code>는 Nginx를 거쳐 Backend의 HTTP <code>200</code>을 반환합니다.</li>
 <li><code>/api/instance</code>의 <code>X-Backend-Instance</code>와 JSON <code>instance</code>에 Backend hostname이 표시됩니다.</li>
 </ul>
@@ -1912,13 +1915,13 @@
 <a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
 </code></pre></div>
 <h2 id="10-013-auto-scaling">10. 013 Auto Scaling과 연결<a class="headerlink" href="#10-013-auto-scaling" title="Permanent link">&para;</a></h2>
-<p>003 완료 시 Web Nginx는 기존 Backend 한 대를 바라봅니다.</p>
+<p>003 완료 시 브라우저는 Web Public IP에 접속하고 Web Nginx는 고정 Backend를 바라봅니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
 </code></pre></div>
-<p>013에서 Private ALB와 Auto Scaling Backend가 준비되면 이 값만 변경합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>BACKEND_UPSTREAM=http://PRIVATE_ALB_ENDPOINT
+<p>013에서는 이 Web 서버로 이미지를 만들고 Public ALB 뒤에 Web Auto Scaling Group을 구성합니다. 모든 Web 복제 서버는 같은 <code>BACKEND_UPSTREAM</code>을 사용합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>브라우저 → Public ALB → Web ASG → 고정 Backend → DB
 </code></pre></div>
-<p>브라우저는 계속 같은 Web Public IP와 <code>/api</code> 경로를 사용합니다. Backend 인스턴스 IP가 Scale-out과 Scale-in으로 달라져도 Web은 Private ALB 주소 하나만 유지합니다.</p>
+<p>브라우저 진입 주소는 Web 서버 Public IP에서 Public ALB 주소로 바뀝니다. Backend와 DB의 IP는 바뀌지 않습니다.</p>
 
 
 
