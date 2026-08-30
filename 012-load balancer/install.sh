@@ -49,7 +49,7 @@ EOF
   chmod 755 "${TEMP_POLICY_RC_D}"
 fi
 
-apt-get install -y nginx
+apt-get install -y nginx python3-minimal
 
 mkdir -p "${APP_DIR}" "${WEB_ROOT}"
 
@@ -57,7 +57,8 @@ cp "$(dirname "$0")/update_status.sh" "${APP_DIR}/update_status.sh"
 cp "$(dirname "$0")/templates/index.html.template" "${APP_DIR}/index.html.template"
 chmod 755 "${APP_DIR}/update_status.sh"
 
-sed "s|__SERVER_NAME__|${SERVER_NAME}|g" "${APP_DIR}/index.html.template" > "${WEB_ROOT}/index.html"
+printf '%s\n' "${SERVER_NAME}" > "${APP_DIR}/display-name"
+cp "${APP_DIR}/index.html.template" "${WEB_ROOT}/index.html"
 echo "ok" > "${WEB_ROOT}/healthz"
 
 cat > "${NGINX_CONF}" <<'EOF'
@@ -125,7 +126,9 @@ fi
 
 echo
 echo "Installation complete."
-echo "Server name : ${SERVER_NAME}"
+echo "Display name: ${SERVER_NAME}"
+echo "Hostname    : $(hostname)"
+echo "Primary IP  : $(hostname -I 2>/dev/null | awk '{print $1}')"
 echo "Web root    : ${WEB_ROOT}"
 echo "Health check: /healthz"
 echo "Status JSON : /status.json"

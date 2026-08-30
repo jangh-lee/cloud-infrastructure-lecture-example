@@ -120,13 +120,13 @@
     <h1>Simple Ubuntu Backend Node</h1>
     <p>
       This page is designed for a load balancer practice environment.
-      Refresh the page or route traffic across multiple nodes to confirm which backend responded.
+      The user input is a shared display label. Hostname and IP identify the backend that responded.
     </p>
 
     <section class="grid">
       <article class="item">
-        <span class="label">Display Name</span>
-        <span class="value" id="serverName">__SERVER_NAME__</span>
+        <span class="label">User Input</span>
+        <span class="value" id="serverName">-</span>
       </article>
       <article class="item">
         <span class="label">Date</span>
@@ -141,7 +141,7 @@
         <span class="value" id="hostnameValue">-</span>
       </article>
       <article class="item">
-        <span class="label">Primary IP</span>
+        <span class="label">Primary IP (NIC)</span>
         <span class="value" id="primaryIpValue">-</span>
       </article>
       <article class="item">
