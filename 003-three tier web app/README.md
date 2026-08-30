@@ -469,7 +469,7 @@ curl -i http://127.0.0.1/api/health
 curl -i http://127.0.0.1/api/instance
 ```
 
-`/healthz`는 Public ALB의 Web Target Health Check에 사용합니다. `/web-instance`와 `X-Web-Instance` 헤더는 요청을 처리한 Web hostname을 보여줍니다. `/api/health`와 `/api/instance`는 Nginx를 거쳐 고정 Backend로 전달되며 `X-Backend-Instance`로 Backend hostname을 확인합니다.
+`/healthz`는 Public ALB의 Web Target Health Check에 사용합니다. `/web-instance`는 요청을 처리한 Web hostname과 Private IP를 반환하고, 게시판 하단 배지가 이 값을 5초마다 갱신합니다. `X-Web-Instance` 헤더는 Web hostname을 보여줍니다. `/api/health`와 `/api/instance`는 Nginx를 거쳐 고정 Backend로 전달되며 `X-Backend-Instance`로 Backend hostname을 확인합니다.
 
 브라우저에서는 웹서버 공인 IP로 접속합니다.
 

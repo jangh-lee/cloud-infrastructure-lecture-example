@@ -551,6 +551,25 @@ textarea:focus-visible {
   font-size: 13px;
 }
 
+.footer-statuses {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.web-instance-info {
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--surface-muted);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
 .connection-status {
   display: inline-flex;
   align-items: center;
@@ -749,6 +768,10 @@ textarea:focus-visible {
     justify-content: center;
     flex-direction: column;
     gap: 4px;
+  }
+
+  .footer-statuses {
+    justify-content: flex-start;
   }
 
   .toast {

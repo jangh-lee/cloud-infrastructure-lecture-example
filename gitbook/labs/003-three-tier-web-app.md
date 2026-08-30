@@ -204,9 +204,11 @@ curl -i http://127.0.0.1/api/instance
 
 - `/`는 게시판 HTML을 반환합니다.
 - `/healthz`는 HTTP `200`과 `ok`를 반환하며 013 ALB Health Check에 사용합니다.
-- `/web-instance`와 `X-Web-Instance`는 현재 Web hostname을 보여줍니다.
+- `/web-instance`는 현재 Web hostname과 Private IP를, `X-Web-Instance`는 hostname을 보여줍니다.
 - `/api/health`는 Nginx를 거쳐 Backend의 HTTP `200`을 반환합니다.
 - `/api/instance`의 `X-Backend-Instance`와 JSON `instance`에 Backend hostname이 표시됩니다.
+
+게시판 하단의 작은 `Web hostname · Private IP` 배지는 `/web-instance`를 5초마다 조회합니다. 013에서 Web 서버가 여러 대로 늘어나면 ALB가 선택한 서버에 따라 표시가 바뀌므로 Scale-out과 분산 상태를 브라우저에서도 확인할 수 있습니다.
 
 ## 7. 서버별 트래픽과 로그 확인
 

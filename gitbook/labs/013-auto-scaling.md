@@ -103,7 +103,7 @@ curl -i http://127.0.0.1/api/instance
 | --- | --- |
 | `/` | 게시판 HTML |
 | `/healthz` | HTTP `200`, 본문 `ok` |
-| `/web-instance` | 기존 Web hostname |
+| `/web-instance` | 기존 Web hostname과 Private IP |
 | `/api/health` | 고정 Backend Health `200` |
 | `/api/instance` | `X-Web-Instance`와 `X-Backend-Instance` |
 
@@ -425,7 +425,7 @@ for i in $(seq 1 40); do
 done | sed -n 's/.*"instance":"\([^"]*\)".*/\1/p' | sort | uniq -c
 ```
 
-서로 다른 Web hostname이 보이고 합계가 40이면 분산 성공입니다. 정확히 절반씩 나올 필요는 없습니다.
+서로 다른 Web hostname이 보이고 합계가 40이면 분산 성공입니다. 정확히 절반씩 나올 필요는 없습니다. 게시판 하단의 작은 Web 배지도 5초마다 hostname과 Private IP를 갱신하므로 브라우저에서 처리 서버가 바뀌는 모습을 함께 확인할 수 있습니다.
 
 게시판 API도 계속 정상인지 확인합니다.
 

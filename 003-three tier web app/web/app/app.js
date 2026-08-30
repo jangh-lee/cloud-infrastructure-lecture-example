@@ -5,6 +5,7 @@ const pageSize = 15;
 const elements = {
   siteTitle: document.getElementById("siteTitle"),
   healthStatus: document.getElementById("healthStatus"),
+  webInstanceInfo: document.getElementById("webInstanceInfo"),
   listView: document.getElementById("listView"),
   detailView: document.getElementById("detailView"),
   writeView: document.getElementById("writeView"),
@@ -230,6 +231,22 @@ async function checkHealth() {
   }
 }
 
+async function checkWebInstance() {
+  try {
+    const response = await fetch("/web-instance", { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error("Web instance check failed");
+    }
+
+    const web = await response.json();
+    const instance = web.instance || "unknown";
+    const privateIp = web.privateIp || "unknown";
+    elements.webInstanceInfo.textContent = `Web ${instance} · ${privateIp}`;
+  } catch (error) {
+    elements.webInstanceInfo.textContent = "Web 정보 확인 안 됨";
+  }
+}
+
 async function loadPosts({ announce = false } = {}) {
   state.isLoading = true;
   elements.listStatus.textContent = "";
@@ -359,4 +376,6 @@ window.addEventListener("popstate", renderRoute);
 
 updateCharacterCounts();
 checkHealth();
+checkWebInstance();
+setInterval(checkWebInstance, 5000);
 loadPosts();

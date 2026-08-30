@@ -160,7 +160,7 @@ server {
 
     location = /web-instance {
         default_type application/json;
-        return 200 '{"instance":"\$hostname","service":"chapter3-web"}';
+        return 200 '{"instance":"\$hostname","privateIp":"\$server_addr","service":"chapter3-web"}';
     }
 
     location /api/ {
