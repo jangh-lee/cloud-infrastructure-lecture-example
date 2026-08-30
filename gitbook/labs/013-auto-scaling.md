@@ -222,17 +222,18 @@ SITE_TITLE=DevForum Practice Board
 
 ## 10. Step 6 - Web 이미지 준비와 생성
 
-Auto Scaling 동작을 확실하게 검증할 수 있도록 기존 Web 서버에 `stress-ng`를 설치합니다. 이 패키지는 Bastion에서 원격 명령으로 Web CPU를 높일 때만 사용합니다.
+Auto Scaling 동작을 확실하게 검증할 수 있도록 기존 Web 서버에 `stress-ng`와 `htop`을 함께 설치합니다. `stress-ng`는 CPU 부하를 만들고, `htop`은 CPU·메모리와 실행 중인 프로세스를 실시간으로 확인할 때 사용합니다.
 
 ```bash
-sudo apt-get update && sudo apt-get install -y stress-ng
+sudo apt-get update && sudo apt-get install -y stress-ng htop
 stress-ng --version
+htop --version
 systemctl is-enabled nginx
 systemctl is-active nginx
 curl -i http://127.0.0.1/healthz
 ```
 
-`stress-ng` 버전, `enabled`, `active`, HTTP `200`을 확인한 뒤 이미지를 만듭니다.
+`stress-ng`와 `htop` 버전, `enabled`, `active`, HTTP `200`을 확인한 뒤 이미지를 만듭니다. 이 시점에 설치하면 이후 이미지로 생성되는 모든 Auto Scaling Web 서버에서 두 명령을 바로 사용할 수 있습니다.
 
 1. **Services > Compute > Server > Server**로 이동합니다.
 2. 기존 003 Web 서버를 선택합니다.
@@ -260,7 +261,7 @@ curl -i http://127.0.0.1/healthz
 | 이름 | `lab-web-lc-v1` |
 | 인증키 | 기존 수업용 인증키 |
 
-Nginx, 정적 파일, `.env`, `stress-ng`가 이미지에 이미 있으므로 Init Script를 사용하지 않습니다.
+Nginx, 정적 파일, `.env`, `stress-ng`, `htop`이 이미지에 이미 있으므로 Init Script를 사용하지 않습니다.
 
 ## 12. Step 8 - Web Auto Scaling Group 생성
 
@@ -369,11 +370,11 @@ Scale-in Rule은 Scale-out 검증이 끝난 뒤 활성화해도 됩니다. 두 �
 
 ## 16. Step 12 - Bastion에서 Web CPU 부하 실행
 
-콘솔의 ASG **서버 목록**에서 현재 Web 인스턴스 Private IP를 확인합니다. Bastion에서 먼저 SSH와 `stress-ng` 설치 상태를 확인합니다.
+콘솔의 ASG **서버 목록**에서 현재 Web 인스턴스 Private IP를 확인합니다. Bastion에서 먼저 SSH와 `stress-ng`, `htop` 설치 상태를 확인합니다.
 
 ```bash
 WEB_PRIVATE_IP="WEB_ASG_INSTANCE_PRIVATE_IP"
-ssh root@"$WEB_PRIVATE_IP" 'hostname; stress-ng --version'
+ssh root@"$WEB_PRIVATE_IP" 'hostname; stress-ng --version; htop --version'
 ```
 
 10분 동안 Web CPU를 약 90%로 높입니다.
@@ -388,6 +389,14 @@ ssh root@"$WEB_PRIVATE_IP" \
 ```bash
 ssh root@"$WEB_PRIVATE_IP" 'pgrep -af stress-ng; uptime'
 ```
+
+새 Bastion 터미널에서 `htop`을 열면 CPU 상승과 `stress-ng-cpu` 프로세스를 실시간으로 볼 수 있습니다.
+
+```bash
+ssh -t root@"$WEB_PRIVATE_IP" htop
+```
+
+`htop`에서 `1`은 CPU 코어별 표시, `P`는 CPU 사용률 순 정렬, `q`는 종료입니다. `htop`은 현재 접속한 Web 한 대만 보여주므로 Scale-out 후 새 서버도 보려면 해당 Private IP로 다시 접속합니다.
 
 명령을 입력하는 위치는 Bastion이지만 실제 CPU 부하는 Web 인스턴스에서 발생합니다. Backend의 `/api/stress`는 사용하지 않습니다.
 

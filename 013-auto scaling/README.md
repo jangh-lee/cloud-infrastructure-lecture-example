@@ -15,7 +15,7 @@
 - Web 내 서버 이미지와 Launch Configuration 생성
 - 최소 1대, 최대 3대의 Web Auto Scaling Group 생성
 - Cloud Insight와 Web 증감 정책 연결
-- Bastion에서 `stress-ng` 원격 실행
+- Web 이미지에 `stress-ng`와 `htop` 포함 후 Bastion에서 부하·CPU 관찰
 - Public ALB를 통한 Web hostname 분산 확인
 
 ## 실습 구조
