@@ -2117,7 +2117,7 @@
 </tr>
 <tr>
 <td><code>/web-instance</code></td>
-<td>기존 Web hostname</td>
+<td>기존 Web hostname과 Private IP</td>
 </tr>
 <tr>
 <td><code>/api/health</code></td>
@@ -2709,7 +2709,7 @@
 <a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">  </span><span class="nb">echo</span>
 <a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"instance":"\([^"]*\)".*/\1/p'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
 </code></pre></div>
-<p>서로 다른 Web hostname이 보이고 합계가 40이면 분산 성공입니다. 정확히 절반씩 나올 필요는 없습니다.</p>
+<p>서로 다른 Web hostname이 보이고 합계가 40이면 분산 성공입니다. 정확히 절반씩 나올 필요는 없습니다. 게시판 하단의 작은 Web 배지도 5초마다 hostname과 Private IP를 갱신하므로 브라우저에서 처리 서버가 바뀌는 모습을 함께 확인할 수 있습니다.</p>
 <p>게시판 API도 계속 정상인지 확인합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>curl<span class="w"> </span>-i<span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/api/health"</span>
 <a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>curl<span class="w"> </span>-sS<span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/api/posts"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head
