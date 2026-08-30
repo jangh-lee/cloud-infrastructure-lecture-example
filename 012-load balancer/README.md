@@ -98,9 +98,11 @@ http://SERVER_IP/
 
 ## 로드밸런서 100회 호출 테스트
 
-로드밸런서가 어떤 백엔드로 얼마나 분산했는지 `hostname` 기준으로 집계합니다. 사용하는 터미널에 맞는 명령 하나를 실행합니다.
+로드밸런서가 어떤 백엔드로 얼마나 분산했는지 `hostname` 기준으로 집계합니다. 먼저 Target Group의 Sticky Session을 끈 상태에서 사용하는 터미널에 맞는 명령 하나를 실행합니다.
 
-### Linux 또는 macOS 터미널
+### Sticky Session OFF
+
+#### Linux 또는 macOS 터미널
 
 ```bash
 LB_URL="http://YOUR_LOAD_BALANCER_URL"
@@ -110,7 +112,7 @@ for i in $(seq 1 100); do
 done | sort | uniq -c
 ```
 
-### Windows Terminal PowerShell
+#### Windows Terminal PowerShell
 
 ```powershell
 $LB_URL = "http://YOUR_LOAD_BALANCER_URL"
@@ -134,7 +136,53 @@ Count Name
    48 lb-node-002
 ```
 
-호출 횟수의 합이 `100`인지 확인합니다. Hostname이 하나만 나오면 Target Group에 Healthy 서버가 한 대만 연결되어 있는지 확인합니다.
+호출 횟수의 합이 `100`인지 확인합니다. Sticky Session이 꺼져 있는데 Hostname이 하나만 나오면 Target Group에 Healthy 서버가 한 대만 연결되어 있는지 확인합니다.
+
+### Sticky Session ON
+
+[Naver Cloud Target Group 공식 가이드](https://guide.ncloud-docs.com/docs/loadbalancer-targetgroup-vpc)는 Sticky Session을 서버 고유 ID를 헤더에 추가해 다음 요청도 같은 서버로 전달하는 기능으로 설명합니다. 따라서 100회 요청에서도 **같은 세션 정보를 계속 재사용**해야 합니다.
+
+기존 명령처럼 매번 새 `curl` 또는 새 PowerShell 요청을 만들면 세션이 유지되지 않아 Sticky Session을 켜도 여러 서버로 분산될 수 있습니다.
+
+#### Linux 또는 macOS 터미널
+
+```bash
+LB_URL="http://YOUR_LOAD_BALANCER_URL"
+COOKIE_JAR="$(mktemp)"
+
+for i in $(seq 1 100); do
+  curl -s -c "$COOKIE_JAR" -b "$COOKIE_JAR" "$LB_URL/status.json" |
+    sed -n 's/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
+done | sort | uniq -c
+
+rm -f "$COOKIE_JAR"
+```
+
+#### Windows Terminal PowerShell
+
+```powershell
+$LB_URL = "http://YOUR_LOAD_BALANCER_URL"
+$session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+
+$results = 1..100 | ForEach-Object {
+  (Invoke-RestMethod -Uri "$LB_URL/status.json" -WebSession $session).hostname
+}
+
+$results |
+  Group-Object |
+  Sort-Object Count -Descending |
+  Select-Object Count, Name
+```
+
+Sticky Session이 정상이라면 다음처럼 Hostname 하나에 100회가 집계됩니다.
+
+```text
+Count Name
+----- ----
+  100 lb-node-001
+```
+
+새 쿠키 파일, 새 PowerShell 세션, 시크릿 브라우저는 새로운 세션이므로 처음 선택되는 서버가 달라질 수 있습니다. 고정된 Target이 Unhealthy 상태가 되어 제외되어도 다른 서버로 전환될 수 있습니다.
 
 ## 동작 방식
 
