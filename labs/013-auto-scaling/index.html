@@ -2464,11 +2464,11 @@
 </tr>
 <tr>
 <td>Cooldown 기본값</td>
-<td><code>300</code>초</td>
+<td><code>60</code>초</td>
 </tr>
 <tr>
 <td>Health Check 보류 기간</td>
-<td><code>300</code>초</td>
+<td><code>60</code>초</td>
 </tr>
 <tr>
 <td>Health Check 유형</td>
@@ -2514,7 +2514,7 @@
 </tr>
 <tr>
 <td>Cooldown</td>
-<td><code>300</code>초</td>
+<td><code>60</code>초</td>
 </tr>
 </tbody>
 </table>
@@ -2541,7 +2541,7 @@
 </tr>
 <tr>
 <td>Cooldown</td>
-<td><code>300</code>초</td>
+<td><code>60</code>초</td>
 </tr>
 </tbody>
 </table>
@@ -2630,7 +2630,7 @@
 </tr>
 <tr>
 <td>지속 시간</td>
-<td><code>5 minutes</code></td>
+<td><code>1 minute</code></td>
 </tr>
 <tr>
 <td>액션</td>
@@ -2639,14 +2639,18 @@
 </tbody>
 </table>
 <p>Scale-in Rule은 Scale-out 검증이 끝난 뒤 활성화해도 됩니다. 두 규칙이 동시에 움직여 관찰이 어려워지는 것을 방지할 수 있습니다.</p>
+<div class="admonition note">
+<p class="admonition-title">1분의 의미</p>
+<p><code>1 minute</code>은 CPU 조건이 지속되어 Event가 실행되는 수업용 감지 기준입니다. Cloud Insight 수집 주기와 서버 생성, 부팅, Target Health Check가 추가로 필요하므로 새 Web 서버가 <code>정상</code>이 되는 전체 시간이 정확히 1분이라는 뜻은 아닙니다. 운영 환경에서는 순간 부하로 인한 반복 증감을 막기 위해 더 긴 지속 시간과 Cooldown을 사용합니다. 새 서버가 부팅 전에 비정상 판정되어 반복 반납되면 Health Check 보류 기간을 기본값인 <code>300초</code>로 되돌립니다.</p>
+</div>
 <h2 id="16-step-12-bastion-web-cpu">16. Step 12 - Bastion에서 Web CPU 부하 실행<a class="headerlink" href="#16-step-12-bastion-web-cpu" title="Permanent link">&para;</a></h2>
 <p>콘솔의 ASG <strong>서버 목록</strong>에서 현재 Web 인스턴스 Private IP를 확인합니다. Bastion에서 먼저 SSH와 <code>stress-ng</code>, <code>htop</code> 설치 상태를 확인합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nv">WEB_PRIVATE_IP</span><span class="o">=</span><span class="s2">"WEB_ASG_INSTANCE_PRIVATE_IP"</span>
 <a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="s1">'hostname; stress-ng --version; htop --version'</span>
 </code></pre></div>
-<p>10분 동안 Web CPU를 약 90%로 높입니다.</p>
+<p>메트릭 수집 지연을 고려해 최대 3분 동안 Web CPU를 약 90%로 높입니다. 정책 조건 자체는 1분입니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="s1">'nohup stress-ng --cpu 0 --cpu-load 90 --timeout 600s &gt;/tmp/web-stress.log 2&gt;&amp;1 &amp;'</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="s1">'nohup stress-ng --cpu 0 --cpu-load 90 --timeout 180s &gt;/tmp/web-stress.log 2&gt;&amp;1 &amp;'</span>
 </code></pre></div>
 <p>실행 상태를 확인합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="s1">'pgrep -af stress-ng; uptime'</span>
@@ -2713,11 +2717,11 @@
 <h2 id="18-bastion-http">18. 선택 실습 - Bastion에서 HTTP 트래픽 발생<a class="headerlink" href="#18-bastion-http" title="Permanent link">&para;</a></h2>
 <p>실제 사용자 요청 형태도 확인하려면 Bastion에 ApacheBench를 설치해 Public ALB를 호출합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>apache2-utils
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>ab<span class="w"> </span>-t<span class="w"> </span><span class="m">300</span><span class="w"> </span>-c<span class="w"> </span><span class="m">200</span><span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/"</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>ab<span class="w"> </span>-t<span class="w"> </span><span class="m">60</span><span class="w"> </span>-c<span class="w"> </span><span class="m">200</span><span class="w"> </span><span class="s2">"</span><span class="nv">$ALB_URL</span><span class="s2">/"</span>
 </code></pre></div>
 <p>이 요청은 <code>Public ALB → Web ASG</code> 경로를 사용합니다. 다만 Nginx 정적 페이지는 CPU 사용량이 낮을 수 있으므로 이 명령만으로 Scale-out되지 않아도 오류가 아닙니다.</p>
 <h2 id="19-step-14-scale-in">19. Step 14 - 부하 종료와 Scale-in 확인<a class="headerlink" href="#19-step-14-scale-in" title="Permanent link">&para;</a></h2>
-<p>10분 전에 부하를 중지하려면 Bastion에서 실행합니다.</p>
+<p>부하를 즉시 중지하려면 Bastion에서 실행합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="s1">'pkill -f stress-ng || true'</span>
 </code></pre></div>
 <p>CPU가 내려간 뒤 Scale-in Event와 <code>web-remove-1</code> 실행을 확인합니다. ASG 서버 수가 <code>2 → 1</code>이 되고 Target Group에서 종료 서버가 제거되어야 합니다.</p>
