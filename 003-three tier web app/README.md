@@ -218,6 +218,19 @@ SITE_TITLE="DevForum Practice Board"
 
 `BACKEND_UPSTREAM`은 Web 서버만 사용하는 Nginx 프록시 목적지입니다. 프런트 JavaScript에는 이 주소가 노출되지 않으며 모든 API 요청은 `/api` 상대경로를 사용합니다.
 
+> **참고: 이전 Nginx 실습 환경 삭제**
+>
+> 이전 실습의 Nginx와 설정이 남아 충돌할 때만 아래 명령을 실행합니다. 신규 서버이거나 기존 설정을 유지해야 한다면 건너뜁니다. `/etc/nginx`와 기존 로그까지 모두 삭제됩니다.
+
+```bash
+sudo systemctl stop nginx
+sudo apt-get remove --purge nginx nginx-full nginx-common
+sudo apt-get autoremove
+sudo apt-get clean
+sudo rm -rf /etc/nginx
+sudo rm -rf /var/log/nginx
+```
+
 ### 웹서버
 
 ```bash

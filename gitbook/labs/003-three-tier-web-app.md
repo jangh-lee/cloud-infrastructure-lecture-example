@@ -130,6 +130,18 @@ curl -i http://127.0.0.1:4000/api/instance
 
 `enabled`, `active`, HTTP `200`을 확인합니다. `/api/instance`에는 현재 Backend hostname이 표시됩니다.
 
+!!! warning "참고: 이전 Nginx 실습 환경 삭제"
+    이전 실습에서 설치한 Nginx와 설정이 남아 충돌할 때만 아래 명령을 실행합니다. 신규 Web 서버이거나 기존 Nginx 설정을 유지해야 한다면 건너뜁니다. `/etc/nginx`와 기존 로그까지 모두 삭제됩니다.
+
+    ```bash
+    sudo systemctl stop nginx
+    sudo apt-get remove --purge nginx nginx-full nginx-common
+    sudo apt-get autoremove
+    sudo apt-get clean
+    sudo rm -rf /etc/nginx
+    sudo rm -rf /var/log/nginx
+    ```
+
 ## 6. Step 3 - Web 서버 설치
 
 Web 서버에서 실행합니다.
