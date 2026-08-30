@@ -1,9 +1,9 @@
-# 013 Backend Auto Scaling Hands-on
+# 013 Web Auto Scaling Hands-on
 
-!!! info "이 실습에서 다루는 범위"
-    003번에서 완성한 Backend 서버로 이미지를 만들고, **Private Application Load Balancer 뒤에 Auto Scaling Backend**를 구성합니다.
+!!! info "최종 실습 범위"
+    003번 Web 서버로 이미지를 만들고 **Public Application Load Balancer 뒤에서 Web 서버를 Auto Scaling**합니다. Backend와 DB 서버는 기존 서버 한 대를 그대로 사용합니다.
 
-    내 서버 이미지, Launch Configuration, Target Group, Private ALB, Auto Scaling Group, Scaling Policy와 Web upstream 전환만 다룹니다. DB 이전, Public ALB, Cloud Insight, CPU 부하 테스트는 포함하지 않습니다.
+    Web 이미지, Launch Configuration, Target Group, Public ALB, Web Auto Scaling Group, Scaling Policy, Cloud Insight 연동과 Bastion 부하 명령만 다룹니다.
 
 - [003 Three Tier Web App 교재](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/003-three-tier-web-app/)
 - [GitHub 013 실습 폴더](https://github.com/jangh-lee/cloud-infrastructure-lecture-example/tree/main/013-auto%20scaling)
@@ -13,157 +13,134 @@
 ```text
 사용자 브라우저
       |
-      | http://WEB_PUBLIC_IP/api/...
       v
-003 Web 서버 Nginx
-      |
-      | BACKEND_UPSTREAM
-      v
-Private Application Load Balancer :80
+Public Application Load Balancer :80
       |
       v
-Target Group HTTP :4000
+Web Auto Scaling Group :80
+      |
+      | Nginx /api Reverse Proxy
+      v
+고정 Backend 서버 :4000
       |
       v
-Auto Scaling Backend 1~3대
-      |
-      v
-003 DB 서버 :3306
+고정 DB 서버 :3306
+
+Bastion
+  |-- Public ALB HTTP 호출과 분산 확인
+  +-- Web Private IP에 stress-ng 원격 실행
 ```
 
-브라우저와 Web 주소는 바뀌지 않습니다. 003에서는 Nginx가 기존 Backend Private IP를 바라보지만, 013에서는 `BACKEND_UPSTREAM`만 Private ALB 주소로 바꿉니다. ASG Backend의 개별 IP는 어디에도 직접 입력하지 않습니다.
-
-!!! warning "기존 Backend가 ASG에 편입되는 것은 아닙니다"
-    003 Backend는 이미지 원본이자 ALB 전환 중 임시 Target입니다. ASG는 이미지로 새로운 서버를 만들며, 새 서버가 정상 상태가 되면 기존 Backend를 Target Group에서 제거합니다.
-
-Naver Cloud 콘솔의 공식 템플릿 명칭은 **Launch Configuration**입니다.
-
-## 2. 완료 기준
-
-- [ ] 기존 Backend의 서비스와 `/api/health`가 정상입니다.
-- [ ] 내 서버 이미지 상태가 `생성됨`입니다.
-- [ ] Launch Configuration을 만들었습니다.
-- [ ] Target Group에서 기존 Backend가 `정상`입니다.
-- [ ] Private ALB를 Web 서버에서 호출하면 HTTP `200`입니다.
-- [ ] Web의 `BACKEND_UPSTREAM`을 Private ALB로 변경했습니다.
-- [ ] ASG가 만든 Backend가 Target Group에서 `정상`입니다.
-- [ ] 기존 Backend를 Target Group에서 제거했습니다.
-- [ ] Scale-out으로 ASG 서버가 `1대 → 2대`가 됩니다.
-- [ ] Web `/api/instance`에서 서로 다른 Backend hostname이 보입니다.
-- [ ] Scale-in으로 ASG 서버가 `2대 → 1대`가 됩니다.
-
-## 3. Step 0 - 기존 003 값 기록
-
-| 확인할 값 | 사용할 값 |
-| --- | --- |
-| Web 서버 | 003 Web 서버 |
-| 원본 Backend | 003 Backend 서버 |
-| VPC | 003 서버가 속한 VPC |
-| Backend Subnet | 기존 Backend가 속한 Private Subnet |
-| Backend ACG | 기존 Backend가 사용하는 ACG |
-| DB | 003 DB Private IP 또는 Private Domain |
-| 인증키 | 기존 수업용 인증키 |
-
-DB 서버를 직접 운영한다면 003 DB의 `.env`에서 `DB_ALLOWED_HOST`가 단일 Backend IP가 아니라 Backend Subnet 패턴인지 확인합니다.
+모든 Web 서버는 같은 `.env`를 사용합니다.
 
 ```env
-DB_ALLOWED_HOST=10.0.1.%
+BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
 ```
 
-위 예시는 Backend Subnet이 `10.0.1.0/24`일 때 사용합니다. Cloud DB for MySQL을 사용한다면 DB ACG가 Backend ACG의 `3306/tcp`를 허용해야 합니다.
+Web 서버가 늘어나도 Backend 주소는 바뀌지 않습니다. 이번 실습은 **Web 계층만 확장**하므로 Backend와 DB는 여전히 단일 장애 지점입니다.
 
-## 4. Step 1 - 이미지 생성 전 Backend 점검
+## 2. Backend가 아니라 Web에 부하를 주는 이유
 
-기존 Backend 서버에서 실행합니다.
+Auto Scaling 정책의 감시 대상은 Web Auto Scaling Group입니다. Backend의 `/api/stress`를 호출하면 Backend CPU만 올라가므로 Web ASG의 확장 조건을 검증할 수 없습니다.
+
+이번 실습에서는 Bastion에서 현재 Web 인스턴스에 `stress-ng`를 원격 실행해 Web CPU를 높입니다. Public ALB의 실제 분산은 `/web-instance` 반복 호출로 별도 확인합니다.
+
+!!! note "ApacheBench만으로는 CPU가 충분히 오르지 않을 수 있습니다"
+    정적 파일을 제공하는 Nginx는 효율적이어서 `ab`로 `/`를 많이 호출해도 서버 사양에 따라 CPU 임계값을 넘지 않을 수 있습니다. `ab`는 선택적인 HTTP 트래픽 테스트로 사용하고, 자동 확장 완료 기준은 `stress-ng`로 검증합니다.
+
+## 3. 완료 기준
+
+- [ ] 기존 Web의 `/healthz`가 HTTP `200`을 반환합니다.
+- [ ] 기존 Web의 `/web-instance`에 Web hostname이 보입니다.
+- [ ] Public ALB를 통해 게시판과 `/api/health`가 정상입니다.
+- [ ] Web 내 서버 이미지와 Launch Configuration을 만들었습니다.
+- [ ] Web ASG 서버 한 대가 Target Group에서 `정상`입니다.
+- [ ] 기존 003 Web 서버를 Target Group에서 제거했습니다.
+- [ ] Bastion에서 Web ASG 인스턴스에 CPU 부하를 실행했습니다.
+- [ ] Cloud Insight Event가 Scale-out 정책을 실행합니다.
+- [ ] Web ASG가 `1대 → 2대` 이상으로 확장됩니다.
+- [ ] Public ALB 호출에서 서로 다른 Web hostname이 보입니다.
+- [ ] 부하 종료 후 Web ASG가 최소 용량 `1`대로 축소됩니다.
+- [ ] Scale-out과 Scale-in 중에도 게시판 조회와 글쓰기가 정상입니다.
+
+## 4. Step 0 - 사용할 값 기록
+
+| 값 | 설명 |
+| --- | --- |
+| 기존 Web 서버 | 003 Web 서버, 이미지 원본과 임시 Target |
+| Web Private IP | 기존 Web의 사설 주소 |
+| Web ACG | 기존 Web에 적용된 ACG |
+| Backend Private IP | 모든 Web Nginx가 사용할 고정 upstream |
+| VPC | 003 서버가 속한 VPC |
+| Bastion | Web Private IP로 SSH 가능한 서버 |
+| 인증키 | Auto Scaling Web 서버 관리자 비밀번호 확인용 |
+
+003 Web, Backend, DB가 모두 정상인 상태에서 시작합니다.
+
+## 5. Step 1 - 기존 Web을 ALB Target으로 준비
+
+기존 Web 서버에서 최신 코드를 받고 Nginx 설정을 갱신합니다.
 
 ```bash
-systemctl is-enabled chapter3-backend
-systemctl is-active chapter3-backend
-sudo ss -lntp | grep ':4000'
-curl -i http://127.0.0.1:4000/api/health
-curl -i http://127.0.0.1:4000/api/instance
+cd ~/cloud-infrastructure-lecture-example
+git pull --ff-only origin main
+cd ~/cloud-infrastructure-lecture-example/003-three\ tier\ web\ app/web
+sudo ./install-web.sh configure
 ```
 
-| 명령 | 정상 결과 |
-| --- | --- |
-| `systemctl is-enabled` | `enabled` |
-| `systemctl is-active` | `active` |
-| `ss -lntp` | `:4000`, `LISTEN` |
-| `/api/health` | HTTP `200` |
-| `/api/instance` | 기존 Backend hostname |
-
-하나라도 실패하면 이미지를 만들지 말고 로그를 확인합니다.
+한 번에 상태를 확인합니다.
 
 ```bash
-sudo systemctl enable --now chapter3-backend
-sudo journalctl -u chapter3-backend -n 50 --no-pager
+sudo ./install-web.sh status
+curl -i http://127.0.0.1/
+curl -i http://127.0.0.1/healthz
+curl -i http://127.0.0.1/web-instance
+curl -i http://127.0.0.1/api/health
+curl -i http://127.0.0.1/api/instance
 ```
 
-이미지에 포함될 환경값을 비밀번호 없이 확인합니다.
+| 경로 | 확인할 결과 |
+| --- | --- |
+| `/` | 게시판 HTML |
+| `/healthz` | HTTP `200`, 본문 `ok` |
+| `/web-instance` | 기존 Web hostname |
+| `/api/health` | 고정 Backend Health `200` |
+| `/api/instance` | `X-Web-Instance`와 `X-Backend-Instance` |
+
+`.env`의 upstream이 기존 Backend Private IP인지 확인합니다.
 
 ```bash
-sudo test -f /opt/chapter3-backend/.env && echo '.env exists'
-sudo grep -E '^(PORT|FRONTEND_ORIGIN|DB_HOST|DB_PORT|DB_NAME|DB_USER|AUTO_POST_ENABLED)=' /opt/chapter3-backend/.env
+grep '^BACKEND_UPSTREAM=' .env
 ```
 
-`PORT=4000`, 올바른 DB 주소, Web Public 주소인 `FRONTEND_ORIGIN`, `AUTO_POST_ENABLED=false`를 확인합니다.
+```env
+BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
+```
 
-!!! warning "실습 이미지와 비밀번호"
-    기존 Backend의 `.env`도 이미지에 포함됩니다. 수업에서는 동일 설정 복제를 위해 사용하지만 운영 환경에서는 Secret Manager 등으로 비밀번호를 별도 주입해야 합니다.
+## 6. Step 2 - Web ACG와 Public LB Subnet 준비
 
-## 5. Step 2 - Backend 내 서버 이미지 생성
-
-1. **Services > Compute > Server > Server**로 이동합니다.
-2. 기존 Backend 서버를 선택합니다.
-3. **서버 관리 및 설정 변경 > 내 서버 이미지 생성**을 클릭합니다.
-4. 아래 값을 입력합니다.
-
-| 항목 | 입력값 |
-| --- | --- |
-| 이미지 이름 | `lab-backend-image-v1` |
-| 설명 | `003 backend image for auto scaling` |
-
-**Compute > Server > Server Image**에서 상태가 `생성 중`에서 `생성됨`으로 바뀔 때까지 기다립니다. 원본 Backend도 다시 `운영 중`인지 확인합니다.
-
-## 6. Step 3 - Launch Configuration 생성
-
-1. **Services > Compute > Auto Scaling > Launch Configuration**으로 이동합니다.
-2. **Launch Configuration 생성**을 클릭합니다.
-3. **내 서버 이미지** 탭에서 `lab-backend-image-v1`을 선택합니다.
-4. 아래 기준으로 설정합니다.
-
-| 항목 | 값 |
-| --- | --- |
-| 서버 이미지 | `lab-backend-image-v1` |
-| 서버 사양 | 원본과 같거나 수업용 최소 사양 |
-| 스토리지 | 기본값 |
-| Init Script | 사용 안 함 |
-| 이름 | `lab-backend-lc-v1` |
-| 인증키 | 기존 수업용 인증키 |
-
-이미지에 앱, `.env`, systemd 서비스가 이미 있으므로 Init Script로 설치를 반복하지 않습니다.
-
-## 7. Step 4 - Private Load Balancer Subnet 확인
-
-Private ALB는 전용 Load Balancer Subnet이 필요합니다. 기존 VPC에 없다면 **Services > Networking > VPC > Subnet**에서 생성합니다.
+Public ALB에는 **Public Load Balancer 전용 Subnet**이 필요합니다. 기존 VPC에 없다면 **Services > Networking > VPC > Subnet**에서 생성합니다.
 
 | 항목 | 예시 |
 | --- | --- |
-| 이름 | `lab-private-lb-subnet` |
+| 이름 | `lab-public-lb-subnet` |
 | VPC | 003 VPC |
 | IP 주소 범위 | 기존 Subnet과 겹치지 않는 대역 |
 | 용도 | Load Balancer |
-| 유형 | Private |
+| 유형 | Public |
 
-Backend ACG에는 이 **Private Load Balancer Subnet CIDR → TCP 4000** 규칙을 추가합니다. ALB Health Check와 API 요청이 모두 이 경로를 사용합니다.
+Web ACG에 다음 규칙을 추가합니다.
 
-| 프로토콜 | 포트 | 접근 소스 |
-| --- | --- | --- |
-| TCP | `4000` | Private Load Balancer Subnet CIDR |
+| 프로토콜 | 포트 | 접근 소스 | 목적 |
+| --- | --- | --- | --- |
+| TCP | `80` | Public LB Subnet CIDR | ALB 요청과 Health Check |
+| TCP | `22` | Bastion ACG 또는 Bastion Private IP | 부하 실행과 점검 |
 
-003에서 사용한 Web ACG 또는 Web Private IP의 `4000/tcp` 규칙은 ALB 전환이 끝난 뒤 제거할 수 있습니다.
+기존 Web 서버를 Public IP로 직접 확인하는 동안에는 `0.0.0.0/0 → 80` 규칙을 유지해도 됩니다. ALB 전환이 끝나면 Web `80/tcp`는 Public LB Subnet에서만 허용하는 것이 안전합니다.
 
-## 8. Step 5 - Target Group 생성
+Backend ACG의 `4000/tcp` 접근 소스는 개별 Web IP가 아니라 **Web ACG**로 설정합니다. 그래야 새 Web 인스턴스도 같은 Backend에 연결할 수 있습니다.
+
+## 7. Step 3 - Web Target Group 생성
 
 1. **Services > Networking > Load Balancer > Target Group**으로 이동합니다.
 2. **Target Group 생성**을 클릭합니다.
@@ -171,34 +148,35 @@ Backend ACG에는 이 **Private Load Balancer Subnet CIDR → TCP 4000** 규칙�
 
 | 항목 | 값 |
 | --- | --- |
-| 이름 | `lab-backend-tg` |
+| 이름 | `lab-web-tg` |
 | Target 유형 | 일반 VPC 서버 |
 | VPC | 003 VPC |
 | 프로토콜 | HTTP |
-| 포트 | `4000` |
+| 포트 | `80` |
 | 알고리즘 | Round Robin |
 | Sticky Session | 사용 안 함 |
 
-Health Check를 설정합니다.
+Health Check는 다음과 같이 설정합니다.
 
 | 항목 | 값 |
 | --- | --- |
 | 프로토콜 | HTTP |
-| 포트 | `4000` |
+| 포트 | `80` |
 | Method | GET |
-| URL Path | `/api/health` |
+| URL Path | `/healthz` |
 | 주기 | `10`초 |
 | 정상 임계값 | `2` |
 | 실패 임계값 | `3` |
 
-Target 추가 화면에서는 **기존 003 Backend 서버를 임시 Target으로 추가**합니다. Target Group 생성 후 **Target 상태 확인**에서 기존 Backend가 `정상`인지 확인합니다.
+Target 추가 화면에서 **기존 003 Web 서버**를 임시 Target으로 추가합니다. 생성 후 **Target 상태 확인**에서 기존 Web이 `정상`인지 확인합니다.
 
-로컬 Health는 정상인데 Target만 비정상이면 다음 두 항목을 확인합니다.
+비정상이면 다음을 다시 확인합니다.
 
-- Backend ACG가 Private Load Balancer Subnet CIDR의 `4000/tcp`를 허용합니다.
-- Health Check 경로가 `/api/health`입니다.
+- 기존 Web에서 `curl -i http://127.0.0.1/healthz`가 성공합니다.
+- Web ACG가 Public LB Subnet CIDR의 `80/tcp`를 허용합니다.
+- Target Group 포트는 `80`, Health 경로는 `/healthz`입니다.
 
-## 9. Step 6 - Private Application Load Balancer 생성
+## 8. Step 4 - Public Application Load Balancer 생성
 
 1. **Services > Networking > Load Balancer > Load Balancer**로 이동합니다.
 2. **로드밸런서 생성 > 애플리케이션 로드밸런서 생성**을 클릭합니다.
@@ -206,106 +184,147 @@ Target 추가 화면에서는 **기존 003 Backend 서버를 임시 Target으로
 
 | 항목 | 값 |
 | --- | --- |
-| 이름 | `lab-backend-alb` |
-| Network | Private IP |
+| 이름 | `lab-web-alb` |
+| Network | Public IP |
 | VPC | 003 VPC |
-| Subnet | `lab-private-lb-subnet` |
+| Subnet | `lab-public-lb-subnet` |
 | Listener | HTTP `80` |
-| Target Group | `lab-backend-tg` |
+| Target Group | `lab-web-tg` |
 
-상태가 `운영 중`이 되면 콘솔에 표시된 Private 접속 주소를 기록합니다. 이 주소는 인터넷 PC가 아니라 같은 VPC의 Web 서버에서 확인합니다.
-
-Web 서버에서 실행합니다.
+상태가 `운영 중`이 되면 제공된 Public 도메인을 기록합니다.
 
 ```bash
-PRIVATE_ALB_URL="http://PRIVATE_ALB_ENDPOINT"
-curl -i "$PRIVATE_ALB_URL/api/health"
-curl -i "$PRIVATE_ALB_URL/api/instance"
+ALB_URL="http://PUBLIC_ALB_DOMAIN"
+curl -i "$ALB_URL/healthz"
+curl -i "$ALB_URL/web-instance"
+curl -i "$ALB_URL/api/health"
 ```
 
-두 요청이 HTTP `200`이고 `X-Backend-Instance`가 기존 Backend hostname이면 Private ALB 경로가 정상입니다.
+세 요청이 모두 HTTP `200`이면 `Public ALB → 기존 Web → 고정 Backend` 경로가 정상입니다.
 
-## 10. Step 7 - Web upstream을 Private ALB로 전환
+## 9. Step 5 - ALB 주소를 Web Origin에 추가
 
-Web 서버에서 최신 코드를 받은 뒤 `.env`를 수정합니다.
+브라우저가 Public ALB 주소로 접속하면 요청의 Origin도 ALB 주소가 됩니다. Backend의 `FRONTEND_ORIGIN`에 실제 ALB 주소를 추가하지 않으면 글쓰기와 삭제가 CORS로 실패할 수 있습니다.
+
+기존 Backend 서버에서 `.env`를 수정합니다.
 
 ```bash
-cd ~/cloud-infrastructure-lecture-example
-git pull --ff-only origin main
-cd ~/cloud-infrastructure-lecture-example/003-three\ tier\ web\ app/web
+cd ~/cloud-infrastructure-lecture-example/003-three\ tier\ web\ app/backend
 nano .env
 ```
 
-기존 Backend Private IP를 Private ALB 주소로 교체합니다.
+기존 Web 주소와 Public ALB 주소를 쉼표로 나열합니다.
 
 ```env
-SITE_BASE_URL=http://WEB_SERVER_PUBLIC_IP
-BACKEND_UPSTREAM=http://PRIVATE_ALB_ENDPOINT
+FRONTEND_ORIGIN=http://WEB_SERVER_PUBLIC_IP,http://PUBLIC_ALB_DOMAIN
+```
+
+Backend 설정을 반영합니다.
+
+```bash
+sudo ./install-backend.sh configure
+curl -i http://127.0.0.1:4000/api/health
+```
+
+Web 서버의 `SITE_BASE_URL`도 대표 접속 주소인 Public ALB로 변경하되, Backend upstream은 그대로 둡니다.
+
+```bash
+cd ~/cloud-infrastructure-lecture-example/003-three\ tier\ web\ app/web
+nano .env
+sudo ./install-web.sh configure
+```
+
+```env
+SITE_BASE_URL=http://PUBLIC_ALB_DOMAIN
+BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
 SITE_TITLE=DevForum Practice Board
 ```
 
-패키지 설치 없이 Nginx 설정만 반영하고 Web 경유 API를 확인합니다.
+브라우저에서 Public ALB 주소로 게시판을 열고 글 조회, 작성, 삭제를 확인합니다.
+
+## 10. Step 6 - Web 이미지 준비와 생성
+
+Auto Scaling 동작을 확실하게 검증할 수 있도록 기존 Web 서버에 `stress-ng`를 설치합니다. 이 패키지는 Bastion에서 원격 명령으로 Web CPU를 높일 때만 사용합니다.
 
 ```bash
-sudo ./install-web.sh configure
-curl -i http://127.0.0.1/api/health
-curl -i http://127.0.0.1/api/instance
+sudo apt-get update && sudo apt-get install -y stress-ng
+stress-ng --version
+systemctl is-enabled nginx
+systemctl is-active nginx
+curl -i http://127.0.0.1/healthz
 ```
 
-브라우저 게시판도 새로 고침합니다. 주소는 계속 `http://WEB_SERVER_PUBLIC_IP/`이고 API Request URL도 `http://WEB_SERVER_PUBLIC_IP/api/...`입니다. Private ALB 주소는 브라우저에 노출되지 않습니다.
+`stress-ng` 버전, `enabled`, `active`, HTTP `200`을 확인한 뒤 이미지를 만듭니다.
 
-## 11. Step 8 - Auto Scaling Group 생성
-
-Naver Cloud 공식 순서상 Load Balancer를 먼저 만든 뒤 ASG에 연결합니다.
-
-1. **Services > Compute > Auto Scaling > Auto Scaling Group**으로 이동합니다.
-2. **Auto Scaling Group 생성**을 클릭합니다.
-3. `lab-backend-lc-v1`을 선택합니다.
-4. 다음 값을 입력합니다.
+1. **Services > Compute > Server > Server**로 이동합니다.
+2. 기존 003 Web 서버를 선택합니다.
+3. **서버 관리 및 설정 변경 > 내 서버 이미지 생성**을 클릭합니다.
 
 | 항목 | 값 |
 | --- | --- |
-| 이름 | `lab-backend-asg` |
+| 이미지 이름 | `lab-web-image-v1` |
+| 설명 | `003 web image for auto scaling` |
+
+**Compute > Server > Server Image**에서 상태가 `생성됨`이 될 때까지 기다립니다.
+
+## 11. Step 7 - Launch Configuration 생성
+
+1. **Services > Compute > Auto Scaling > Launch Configuration**으로 이동합니다.
+2. **Launch Configuration 생성**을 클릭합니다.
+3. **내 서버 이미지**에서 `lab-web-image-v1`을 선택합니다.
+
+| 항목 | 값 |
+| --- | --- |
+| 서버 이미지 | `lab-web-image-v1` |
+| 서버 사양 | 원본 Web과 같거나 수업용 최소 사양 |
+| 스토리지 | 기본값 |
+| Init Script | 사용 안 함 |
+| 이름 | `lab-web-lc-v1` |
+| 인증키 | 기존 수업용 인증키 |
+
+Nginx, 정적 파일, `.env`, `stress-ng`가 이미지에 이미 있으므로 Init Script를 사용하지 않습니다.
+
+## 12. Step 8 - Web Auto Scaling Group 생성
+
+1. **Services > Compute > Auto Scaling > Auto Scaling Group**으로 이동합니다.
+2. **Auto Scaling Group 생성**을 클릭합니다.
+3. `lab-web-lc-v1`을 선택합니다.
+
+| 항목 | 값 |
+| --- | --- |
+| 이름 | `lab-web-asg` |
 | VPC | 003 VPC |
-| Subnet | 기존 Backend Private Subnet |
-| 서버 이름 Prefix | `lab-backend-as` |
+| Subnet | Web 서버용 Private Subnet |
+| 서버 이름 Prefix | `lab-web-as` |
 | 최소 용량 | `1` |
 | 최대 용량 | `3` |
 | 기대 용량 | `1` |
-| 상세 모니터링 | 사용 안 함 |
+| 상세 모니터링 | 사용 |
 | Cooldown 기본값 | `300`초 |
 | Health Check 보류 기간 | `300`초 |
 | Health Check 유형 | Load Balancer |
-| Target Group | `lab-backend-tg` |
+| Target Group | `lab-web-tg` |
 
-네트워크 접근 설정에서 기존 Backend ACG를 선택합니다. 정책과 통보는 우선 **나중에 설정**을 선택하고 그룹을 생성합니다.
+네트워크 접근 설정에서 Web ACG를 선택합니다. 정책과 통보는 우선 **나중에 설정**으로 그룹을 생성합니다.
 
-다음 순서로 관찰합니다.
+다음 순서로 확인합니다.
 
-1. ASG 서버 수가 `0 → 1`로 바뀝니다.
-2. `lab-backend-as` Prefix의 서버가 생성됩니다.
-3. Target Group에 새 서버가 자동 추가됩니다.
-4. 새 ASG Backend가 `정상`이 됩니다.
+1. `lab-web-as` 서버가 생성됩니다.
+2. Target Group에 새 Web 서버가 자동 추가됩니다.
+3. `/healthz` 검사 후 새 Web이 `정상`이 됩니다.
+4. Public ALB로 게시판과 `/api/health`가 정상입니다.
 
-새 서버가 `정상`이 된 뒤 Target Group의 **Target 설정**에서 임시로 넣었던 기존 003 Backend를 제거합니다. 이제 Target Group에는 ASG Backend만 남아야 합니다.
+새 ASG Web이 정상 상태가 되면 Target Group의 **Target 설정**에서 임시로 넣었던 기존 003 Web 서버를 제거합니다. 이제 Target Group에는 ASG Web만 남아야 합니다.
 
-Web 서버에서 확인합니다.
+## 13. Step 9 - Scaling Policy 생성
 
-```bash
-curl -i http://127.0.0.1/api/instance
-```
-
-`X-Backend-Instance`와 JSON `instance`가 `lab-backend-as`로 시작하는 새 서버 hostname인지 확인합니다.
-
-## 12. Step 9 - Scaling Policy 생성
-
-`lab-backend-asg`를 선택하고 **설정 > 정책 > 생성**으로 이동합니다.
+`lab-web-asg`를 선택하고 **설정 > 정책 > 생성**으로 이동합니다.
 
 ### Scale-out 정책
 
 | 항목 | 값 |
 | --- | --- |
-| 정책 이름 | `backend-add-1` |
+| 정책 이름 | `web-add-1` |
 | Scaling 설정 | 증감 변경 |
 | 조정값 | `1` 증가 |
 | Cooldown | `300`초 |
@@ -314,125 +333,177 @@ curl -i http://127.0.0.1/api/instance
 
 | 항목 | 값 |
 | --- | --- |
-| 정책 이름 | `backend-remove-1` |
+| 정책 이름 | `web-remove-1` |
 | Scaling 설정 | 증감 변경 |
 | 조정값 | `1` 감소 |
 | Cooldown | `300`초 |
 
-정책은 서버 수를 어떻게 바꿀지 정의합니다. CPU 조건으로 자동 실행하려면 Cloud Insight Event Rule이 추가로 필요하지만 이번 실습에서는 정책을 직접 실행합니다.
+최대 용량 `3`보다 늘어나거나 최소 용량 `1`보다 줄어들지 않습니다.
 
-## 13. Step 10 - Scale-out 실행과 분산 확인
+## 14. Step 10 - 부하 전 Web 분산 확인
 
-1. **설정 > 정책**에서 `backend-add-1`을 선택합니다.
-2. **실행**을 클릭합니다.
-3. **서버 목록**과 **이력**을 확인합니다.
-4. ASG 서버 수가 `1 → 2`가 될 때까지 기다립니다.
-5. Target Group에서 두 ASG Backend가 모두 `정상`인지 확인합니다.
-
-Web 서버에서 20회 호출해 실제 처리 Backend를 집계합니다.
+Bastion에서 Public ALB를 20번 호출합니다.
 
 ```bash
+ALB_URL="http://PUBLIC_ALB_DOMAIN"
+
 for i in $(seq 1 20); do
-  curl -fsS http://127.0.0.1/api/instance
+  curl -fsS "$ALB_URL/web-instance"
   echo
 done | sed -n 's/.*"instance":"\([^"]*\)".*/\1/p' | sort | uniq -c
 ```
 
-예상 형태:
+현재 기대 용량이 `1`이므로 hostname 하나에 20회가 집계되어야 합니다.
 
 ```text
-10 lab-backend-as-xxxxx
-10 lab-backend-as-yyyyy
+20 lab-web-as-xxxxx
 ```
 
-정확히 10회씩일 필요는 없습니다. 서로 다른 ASG Backend hostname이 보이고 합계가 20이면 `Web → Private ALB → ASG Backend` 분산을 확인한 것입니다.
+## 15. Step 11 - Cloud Insight Event Rule 연결
 
-## 14. Step 11 - 새 Backend 내부 확인
+Scaling Policy만 만들면 CPU에 따라 자동 실행되지 않습니다. **Services > Management & Governance > Cloud Insight > Configuration > Event Rule**에서 두 규칙을 만듭니다.
 
-필요하면 콘솔에서 새 서버의 관리자 비밀번호를 확인한 뒤 기존 Backend 또는 Bastion에서 접속합니다.
+### Scale-out Event Rule
+
+| 항목 | 값 |
+| --- | --- |
+| 상품 | Server (VPC) |
+| 감시 대상 | Auto Scaling Group `lab-web-asg` |
+| Metric | `SERVER/avg_cpu_used_rto` |
+| 조건 | `>= 50` |
+| 집약 | AVG |
+| 지속 시간 | `1 minute` |
+| 액션 | Auto Scaling Policy `web-add-1` |
+
+### Scale-in Event Rule
+
+| 항목 | 값 |
+| --- | --- |
+| 상품 | Server (VPC) |
+| 감시 대상 | Auto Scaling Group `lab-web-asg` |
+| Metric | `SERVER/avg_cpu_used_rto` |
+| 조건 | `< 20` |
+| 집약 | AVG |
+| 지속 시간 | `5 minutes` |
+| 액션 | Auto Scaling Policy `web-remove-1` |
+
+Scale-in Rule은 Scale-out 검증이 끝난 뒤 활성화해도 됩니다. 두 규칙이 동시에 움직여 관찰이 어려워지는 것을 방지할 수 있습니다.
+
+## 16. Step 12 - Bastion에서 Web CPU 부하 실행
+
+콘솔의 ASG **서버 목록**에서 현재 Web 인스턴스 Private IP를 확인합니다. Bastion에서 먼저 SSH와 `stress-ng` 설치 상태를 확인합니다.
 
 ```bash
-ssh root@NEW_BACKEND_PRIVATE_IP
-hostname
-systemctl is-enabled chapter3-backend
-systemctl is-active chapter3-backend
-sudo ss -lntp | grep ':4000'
-curl -i http://127.0.0.1:4000/api/health
+WEB_PRIVATE_IP="WEB_ASG_INSTANCE_PRIVATE_IP"
+ssh root@"$WEB_PRIVATE_IP" 'hostname; stress-ng --version'
 ```
 
-서비스가 실패했다면 로그와 DB 설정을 확인합니다.
+10분 동안 Web CPU를 약 90%로 높입니다.
 
 ```bash
-sudo journalctl -u chapter3-backend -n 100 --no-pager
-sudo grep -E '^(PORT|DB_HOST|DB_PORT|DB_NAME|DB_USER)=' /opt/chapter3-backend/.env
+ssh root@"$WEB_PRIVATE_IP" \
+  'nohup stress-ng --cpu 0 --cpu-load 90 --timeout 600s >/tmp/web-stress.log 2>&1 &'
 ```
 
-DB 오류는 DB Host 허용 범위, DB ACG, ASG Subnet과 ACG를 확인합니다.
+실행 상태를 확인합니다.
 
-## 15. Step 12 - Scale-in 실행
+```bash
+ssh root@"$WEB_PRIVATE_IP" 'pgrep -af stress-ng; uptime'
+```
 
-1. **설정 > 정책**에서 `backend-remove-1`을 선택합니다.
-2. **실행**을 클릭합니다.
-3. ASG 서버 수가 `2 → 1`로 줄어드는지 확인합니다.
-4. Target Group에서도 종료된 서버가 제거되는지 확인합니다.
-5. Web 게시판 조회와 글쓰기가 계속 되는지 확인합니다.
+명령을 입력하는 위치는 Bastion이지만 실제 CPU 부하는 Web 인스턴스에서 발생합니다. Backend의 `/api/stress`는 사용하지 않습니다.
 
-최소 용량이 `1`이므로 다시 실행해도 `0`대로 줄어들지 않습니다.
+## 17. Step 13 - Scale-out 관찰과 재확인
 
-## 16. 최종 확인표
+다음 화면을 순서대로 확인합니다.
+
+| 순서 | 화면 | 확인할 변화 |
+| --- | --- | --- |
+| 1 | Cloud Insight | Web ASG 평균 CPU 50% 이상 |
+| 2 | Event Rule | Scale-out Event 발생 |
+| 3 | ASG 이력 | `web-add-1` 실행 |
+| 4 | Server | 새 `lab-web-as` 서버 생성 |
+| 5 | Target Group | 새 Web Target `정상` |
+| 6 | ASG | 서버 수 `1 → 2` |
+
+새 Web이 정상 상태가 된 뒤 Bastion에서 다시 집계합니다.
+
+```bash
+for i in $(seq 1 40); do
+  curl -fsS "$ALB_URL/web-instance"
+  echo
+done | sed -n 's/.*"instance":"\([^"]*\)".*/\1/p' | sort | uniq -c
+```
+
+서로 다른 Web hostname이 보이고 합계가 40이면 분산 성공입니다. 정확히 절반씩 나올 필요는 없습니다.
+
+게시판 API도 계속 정상인지 확인합니다.
+
+```bash
+curl -i "$ALB_URL/api/health"
+curl -sS "$ALB_URL/api/posts" | head
+```
+
+## 18. 선택 실습 - Bastion에서 HTTP 트래픽 발생
+
+실제 사용자 요청 형태도 확인하려면 Bastion에 ApacheBench를 설치해 Public ALB를 호출합니다.
+
+```bash
+sudo apt-get update && sudo apt-get install -y apache2-utils
+ab -t 300 -c 200 "$ALB_URL/"
+```
+
+이 요청은 `Public ALB → Web ASG` 경로를 사용합니다. 다만 Nginx 정적 페이지는 CPU 사용량이 낮을 수 있으므로 이 명령만으로 Scale-out되지 않아도 오류가 아닙니다.
+
+## 19. Step 14 - 부하 종료와 Scale-in 확인
+
+10분 전에 부하를 중지하려면 Bastion에서 실행합니다.
+
+```bash
+ssh root@"$WEB_PRIVATE_IP" 'pkill -f stress-ng || true'
+```
+
+CPU가 내려간 뒤 Scale-in Event와 `web-remove-1` 실행을 확인합니다. ASG 서버 수가 `2 → 1`이 되고 Target Group에서 종료 서버가 제거되어야 합니다.
+
+마지막으로 Public ALB에서 게시판을 조회하고 새 글을 작성합니다. Web 서버가 교체되어도 데이터는 고정 Backend와 DB에 있으므로 유지되어야 합니다.
+
+## 20. 최종 확인표
 
 | 확인 위치 | 결과 |
 | --- | --- |
-| Web 브라우저 주소 | 기존 Web Public IP 유지 |
-| Web API 경로 | `/api/...` 상대경로 |
-| Nginx upstream | Private ALB 주소 |
-| Load Balancer | Private Application Load Balancer |
-| Target Group | HTTP `4000`, `/api/health` |
-| Target | ASG Backend만 존재 |
-| ASG 용량 | 최소 `1`, 최대 `3`, 기대 `1` |
-| Health Check | Load Balancer, 보류 `300`초 |
-| Scale-out | `1대 → 2대`, hostname 2개 |
-| Scale-in | `2대 → 1대`, 게시판 정상 |
+| 외부 진입점 | Public ALB |
+| Target Group | Web HTTP `80`, `/healthz` |
+| Auto Scaling 대상 | Web 서버 |
+| Web API 처리 | `/api`를 고정 Backend로 프록시 |
+| Backend/DB | 기존 고정 서버 유지 |
+| 용량 | 최소 `1`, 최대 `3`, 기대 `1` |
+| Scale-out 부하 | Bastion에서 Web에 `stress-ng` 원격 실행 |
+| 분산 확인 | Public ALB `/web-instance` hostname 집계 |
+| 데이터 확인 | Scale-out/in 중 게시글 유지 |
 
-## 17. Backend 이미지 갱신
+## 21. 이미지 갱신
 
-Backend 코드를 변경해도 기존 이미지와 Launch Configuration은 자동으로 바뀌지 않습니다.
+Web 코드나 Nginx 설정을 변경하면 기존 이미지에는 자동 반영되지 않습니다.
 
-1. 원본 Backend 코드와 설정을 수정합니다.
-2. 서비스와 Health API를 점검합니다.
-3. `lab-backend-image-v2`를 만듭니다.
-4. 새 이미지로 `lab-backend-lc-v2`를 만듭니다.
+1. 원본 003 Web을 `git pull`과 `install-web.sh configure`로 갱신합니다.
+2. `/healthz`, `/web-instance`, `/api/health`를 확인합니다.
+3. `lab-web-image-v2`를 만듭니다.
+4. `lab-web-lc-v2`를 만듭니다.
 5. ASG의 Launch Configuration을 v2로 변경합니다.
-6. 기존 인스턴스를 최소 용량을 지키며 순차 교체합니다.
+6. 기존 Web 인스턴스를 최소 용량을 유지하며 순차 교체합니다.
 
-## 18. 실습 종료와 비용 정리
-
-Private ALB를 삭제하기 전에 Web을 기존 Backend로 되돌려 게시판 연결을 유지합니다.
-
-```bash
-cd ~/cloud-infrastructure-lecture-example/003-three\ tier\ web\ app/web
-nano .env
-sudo ./install-web.sh configure
-curl -i http://127.0.0.1/api/health
-```
-
-```env
-BACKEND_UPSTREAM=http://ORIGINAL_BACKEND_PRIVATE_IP:4000
-```
-
-그다음 순서대로 정리합니다.
+## 22. 실습 종료와 비용 정리
 
 1. ASG 최소 용량과 기대 용량을 `0`으로 변경합니다.
-2. ASG 서버가 모두 반납되면 Auto Scaling Group을 삭제합니다.
-3. Private ALB를 삭제합니다.
+2. ASG Web 서버가 모두 반납되면 Auto Scaling Group을 삭제합니다.
+3. Public ALB를 삭제합니다.
 4. Target Group을 삭제합니다.
 5. Launch Configuration을 삭제합니다.
-6. 더 이상 필요 없는 내 서버 이미지를 삭제합니다.
-7. 3세대 서버라면 이미지와 함께 만들어진 Snapshot도 삭제합니다.
+6. 내 서버 이미지와 연결 Snapshot을 삭제합니다.
 
-원본 003 Web, Backend, DB 서버는 삭제하지 않습니다.
+기존 003 Web, Backend, DB는 다음 실습을 위해 유지할 수 있습니다. Public ALB를 삭제한 뒤에는 기존 Web Public IP로 다시 접속합니다.
 
-## 19. 공식 문서
+## 23. 공식 문서
 
 - [Auto Scaling 시작 절차](https://guide.ncloud-docs.com/docs/autoscaling-procedure)
 - [내 서버 이미지](https://guide.ncloud-docs.com/docs/server-serverimage-vpc)
@@ -440,3 +511,4 @@ BACKEND_UPSTREAM=http://ORIGINAL_BACKEND_PRIVATE_IP:4000
 - [Auto Scaling Group](https://guide.ncloud-docs.com/docs/autoscaling-asg-vpc)
 - [Target Group](https://guide.ncloud-docs.com/docs/loadbalancer-targetgroup-vpc)
 - [Application Load Balancer](https://guide.ncloud-docs.com/docs/loadbalancer-application-vpc)
+- [Cloud Insight Event Rule](https://guide.ncloud-docs.com/docs/cloudinsight-use-eventrule)

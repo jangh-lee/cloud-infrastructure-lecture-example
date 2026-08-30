@@ -2,7 +2,7 @@
 
 ## 1. 목표
 
-Web, Backend, DB 서버를 분리해 3계층 게시판을 구성하고 서버 간 사설 통신과 ACG를 확인합니다. 013에서는 이 구조의 Backend 한 대를 Private ALB와 Auto Scaling Group으로 확장합니다.
+Web, Backend, DB 서버를 분리해 3계층 게시판을 구성하고 서버 간 사설 통신과 ACG를 확인합니다. 013에서는 Public ALB 뒤에서 Web 서버를 Auto Scaling하고 Backend와 DB는 고정 서버로 유지합니다.
 
 ## 2. 실제 요청 구조
 
@@ -65,13 +65,11 @@ DB_PREVIOUS_ROOT_PASSWORD=
 DB_NAME=chapter3_board
 DB_USER=chapter3_user
 DB_PASSWORD=AppDbPass123!
-DB_ALLOWED_HOST=10.0.1.%
+DB_ALLOWED_HOST=10.0.1.25
 DB_BIND_ADDRESS=0.0.0.0
 ```
 
-`DB_ALLOWED_HOST=10.0.1.%`는 Backend Subnet이 `10.0.1.0/24`일 때 사용하는 MySQL Host 패턴입니다. 기존 Backend 한 대뿐 아니라 013에서 다른 Private IP로 생성되는 Auto Scaling Backend도 DB에 접속할 수 있습니다.
-
-Backend Subnet이 다르면 실제 대역에 맞게 수정합니다. DB ACG에서는 별도로 `3306/tcp` 접근 소스를 Backend ACG로 제한합니다.
+`DB_ALLOWED_HOST`에는 고정 Backend Private IP를 입력합니다. 013의 Auto Scaling 대상은 Web 서버이므로 Backend와 DB 연결은 그대로 유지됩니다. DB ACG에서는 `3306/tcp` 접근 소스를 Backend ACG로 제한합니다.
 
 설치를 다시 실행합니다.
 
@@ -162,6 +160,8 @@ SITE_TITLE=DevForum Practice Board
 sudo ./install-web.sh install
 sudo ./install-web.sh status
 curl -i http://127.0.0.1/
+curl -i http://127.0.0.1/healthz
+curl -i http://127.0.0.1/web-instance
 curl -i http://127.0.0.1/api/health
 curl -i http://127.0.0.1/api/instance
 ```
@@ -169,6 +169,8 @@ curl -i http://127.0.0.1/api/instance
 확인할 결과:
 
 - `/`는 게시판 HTML을 반환합니다.
+- `/healthz`는 HTTP `200`과 `ok`를 반환하며 013 ALB Health Check에 사용합니다.
+- `/web-instance`와 `X-Web-Instance`는 현재 Web hostname을 보여줍니다.
 - `/api/health`는 Nginx를 거쳐 Backend의 HTTP `200`을 반환합니다.
 - `/api/instance`의 `X-Backend-Instance`와 JSON `instance`에 Backend hostname이 표시됩니다.
 
@@ -233,16 +235,16 @@ curl -i http://127.0.0.1:4000/api/health
 
 ## 10. 013 Auto Scaling과 연결
 
-003 완료 시 Web Nginx는 기존 Backend 한 대를 바라봅니다.
+003 완료 시 브라우저는 Web Public IP에 접속하고 Web Nginx는 고정 Backend를 바라봅니다.
 
 ```env
 BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
 ```
 
-013에서 Private ALB와 Auto Scaling Backend가 준비되면 이 값만 변경합니다.
+013에서는 이 Web 서버로 이미지를 만들고 Public ALB 뒤에 Web Auto Scaling Group을 구성합니다. 모든 Web 복제 서버는 같은 `BACKEND_UPSTREAM`을 사용합니다.
 
-```env
-BACKEND_UPSTREAM=http://PRIVATE_ALB_ENDPOINT
+```text
+브라우저 → Public ALB → Web ASG → 고정 Backend → DB
 ```
 
-브라우저는 계속 같은 Web Public IP와 `/api` 경로를 사용합니다. Backend 인스턴스 IP가 Scale-out과 Scale-in으로 달라져도 Web은 Private ALB 주소 하나만 유지합니다.
+브라우저 진입 주소는 Web 서버 Public IP에서 Public ALB 주소로 바뀝니다. Backend와 DB의 IP는 바뀌지 않습니다.

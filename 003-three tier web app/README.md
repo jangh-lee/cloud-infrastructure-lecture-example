@@ -28,7 +28,7 @@
 - `DB_USER`
 - `DB_PASSWORD`
 
-`BACKEND_UPSTREAM`은 브라우저에 공개하는 값이 아니라 Web Nginx가 API를 전달할 내부 주소입니다. 003에서는 Backend Private IP를 사용하고, 013에서는 Private ALB 주소로 교체합니다.
+`BACKEND_UPSTREAM`은 브라우저에 공개하는 값이 아니라 Web Nginx가 API를 전달할 내부 주소입니다. 003과 013 모두 고정 Backend Private IP를 사용합니다. 013에서는 Public ALB가 여러 Web 서버 앞에 추가됩니다.
 
 ## 2. 네트워크 구성
 
@@ -103,11 +103,11 @@ DB_PREVIOUS_ROOT_PASSWORD=
 DB_NAME=chapter3_board
 DB_USER=chapter3_user
 DB_PASSWORD=AppDbPass123!
-DB_ALLOWED_HOST=10.0.1.%
+DB_ALLOWED_HOST=10.0.1.25
 DB_BIND_ADDRESS=0.0.0.0
 ```
 
-`DB_ALLOWED_HOST`에는 Backend 서버가 속한 Subnet 범위를 MySQL Host 패턴으로 입력합니다. 예시 `10.0.1.%`는 `10.0.1.0/24`용입니다. 이렇게 해야 013에서 IP가 다른 Auto Scaling Backend도 같은 DB 계정으로 접속할 수 있습니다. 실제 접근 범위는 DB ACG에서 Backend ACG로 한 번 더 제한합니다.
+`DB_ALLOWED_HOST`에는 고정 Backend의 Private IP를 입력합니다. 013에서도 Auto Scaling 대상은 Web 계층이므로 Backend와 DB 연결값은 바뀌지 않습니다.
 
 ### DB 서버
 
@@ -389,11 +389,13 @@ curl http://localhost:4000/api/posts
 
 ```bash
 curl -i http://127.0.0.1/
+curl -i http://127.0.0.1/healthz
+curl -i http://127.0.0.1/web-instance
 curl -i http://127.0.0.1/api/health
 curl -i http://127.0.0.1/api/instance
 ```
 
-첫 번째 요청은 정적 페이지, 두 번째와 세 번째 요청은 Nginx를 거쳐 Backend로 전달됩니다. `/api/instance`의 `X-Backend-Instance` 헤더와 JSON `instance` 값으로 실제 요청을 처리한 Backend hostname을 확인합니다.
+`/healthz`는 Public ALB의 Web Target Health Check에 사용합니다. `/web-instance`와 `X-Web-Instance` 헤더는 요청을 처리한 Web hostname을 보여줍니다. `/api/health`와 `/api/instance`는 Nginx를 거쳐 고정 Backend로 전달되며 `X-Backend-Instance`로 Backend hostname을 확인합니다.
 
 브라우저에서는 웹서버 공인 IP로 접속합니다.
 
@@ -401,4 +403,4 @@ curl -i http://127.0.0.1/api/instance
 http://WEB_SERVER_PUBLIC_IP/
 ```
 
-브라우저 개발자 도구의 Network 탭에서 API 요청 주소가 Backend IP가 아니라 `http://WEB_SERVER_PUBLIC_IP/api/...`로 표시되는지 확인합니다. 013에서는 Web 주소는 그대로 두고 `BACKEND_UPSTREAM`만 Private ALB 주소로 변경합니다.
+브라우저 개발자 도구의 Network 탭에서 API 요청 주소가 Backend IP가 아니라 `http://WEB_SERVER_PUBLIC_IP/api/...`로 표시되는지 확인합니다. 013에서는 진입 주소가 Public ALB로 바뀌지만 각 Web 서버의 `BACKEND_UPSTREAM`은 같은 고정 Backend Private IP를 유지합니다.

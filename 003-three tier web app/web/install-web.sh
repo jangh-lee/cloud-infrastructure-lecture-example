@@ -151,6 +151,17 @@ server {
 
     root ${WEB_ROOT};
     index index.html;
+    add_header X-Web-Instance \$hostname always;
+
+    location = /healthz {
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    location = /web-instance {
+        default_type application/json;
+        return 200 '{"instance":"\$hostname","service":"chapter3-web"}';
+    }
 
     location /api/ {
         proxy_pass ${BACKEND_UPSTREAM};
@@ -184,4 +195,6 @@ echo "Web server configuration complete."
 echo "Site URL     : ${SITE_BASE_URL}"
 echo "API path     : ${SITE_BASE_URL%/}/api"
 echo "API upstream : ${BACKEND_UPSTREAM}"
+echo "ALB health   : ${SITE_BASE_URL%/}/healthz"
+echo "Web instance : ${SITE_BASE_URL%/}/web-instance"
 echo "Open browser : http://SERVER_PUBLIC_IP/"

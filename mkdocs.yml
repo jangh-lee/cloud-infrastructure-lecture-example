@@ -70,7 +70,7 @@ nav:
           - 011 Object Storage 정적 웹사이트: labs/011-static-website.md
       - Load Balancer 및 Auto Scaling 실습:
           - 012 Load Balancer: labs/012-load-balancer.md
-          - 013 Auto Scaling Hands-on: labs/013-auto-scaling.md
+          - 013 Web Auto Scaling: labs/013-auto-scaling.md
       - 데이터베이스 실습:
           - 014 Database 백업 및 복구: labs/014-database-backup-recovery.md
           - 015 Cloud DB Migration: labs/015-cloud-db-migration.md
