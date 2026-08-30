@@ -11,7 +11,7 @@
 - 기존 Web의 `/healthz`, `/web-instance` 점검
 - Public ALB용 Web Target Group 생성
 - Public Application Load Balancer 생성
-- Backend CORS에 Public ALB Origin 추가
+- Web 대표 접속 주소를 Public ALB로 변경
 - Web 내 서버 이미지와 Launch Configuration 생성
 - 최소 1대, 최대 3대의 Web Auto Scaling Group 생성
 - Cloud Insight와 Web 증감 정책 연결

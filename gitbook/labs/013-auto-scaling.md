@@ -202,31 +202,9 @@ curl -i "$ALB_URL/api/health"
 
 세 요청이 모두 HTTP `200`이면 `Public ALB → 기존 Web → 고정 Backend` 경로가 정상입니다.
 
-## 9. Step 5 - ALB 주소를 Web Origin에 추가
+## 9. Step 5 - Web 대표 주소를 Public ALB로 변경
 
-브라우저가 Public ALB 주소로 접속하면 요청의 Origin도 ALB 주소가 됩니다. Backend의 `FRONTEND_ORIGIN`에 실제 ALB 주소를 추가하지 않으면 글쓰기와 삭제가 CORS로 실패할 수 있습니다.
-
-기존 Backend 서버에서 `.env`를 수정합니다.
-
-```bash
-cd ~/cloud-infrastructure-lecture-example/003-three\ tier\ web\ app/backend
-nano .env
-```
-
-기존 Web 주소와 Public ALB 주소를 쉼표로 나열합니다.
-
-```env
-FRONTEND_ORIGIN=http://WEB_SERVER_PUBLIC_IP,http://PUBLIC_ALB_DOMAIN
-```
-
-Backend 설정을 반영합니다.
-
-```bash
-sudo ./install-backend.sh configure
-curl -i http://127.0.0.1:4000/api/health
-```
-
-Web 서버의 `SITE_BASE_URL`도 대표 접속 주소인 Public ALB로 변경하되, Backend upstream은 그대로 둡니다.
+Web 서버의 `SITE_BASE_URL`을 대표 접속 주소인 Public ALB로 변경합니다. Backend upstream은 그대로 둡니다.
 
 ```bash
 cd ~/cloud-infrastructure-lecture-example/003-three\ tier\ web\ app/web

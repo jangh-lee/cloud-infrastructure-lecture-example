@@ -2,7 +2,6 @@ const crypto = require("crypto");
 const os = require("os");
 const path = require("path");
 const express = require("express");
-const cors = require("cors");
 const mysql = require("mysql2/promise");
 const dotenv = require("dotenv");
 
@@ -12,11 +11,6 @@ const app = express();
 const port = Number(process.env.PORT || 4000);
 const instanceName = os.hostname();
 const labStressEnabled = String(process.env.LAB_STRESS_ENABLED || "false").toLowerCase() === "true";
-const frontendOrigins = String(process.env.FRONTEND_ORIGIN || "*")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-const allowAllOrigins = frontendOrigins.includes("*");
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -28,18 +22,6 @@ const pool = mysql.createPool({
   connectionLimit: 10
 });
 
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin || allowAllOrigins || frontendOrigins.includes(origin)) {
-      callback(null, true);
-      return;
-    }
-
-    callback(new Error(`CORS origin not allowed: ${origin}`));
-  },
-  methods: ["GET", "POST", "DELETE", "OPTIONS"],
-  exposedHeaders: ["X-Backend-Instance"]
-}));
 app.use(express.json());
 app.use((req, res, next) => {
   res.set("X-Backend-Instance", instanceName);

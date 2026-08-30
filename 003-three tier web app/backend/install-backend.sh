@@ -19,10 +19,9 @@ ensure_env_file() {
     return
   fi
 
-  if [[ -n "${DB_HOST:-}" && -n "${DB_NAME:-}" && -n "${DB_USER:-}" && -n "${DB_PASSWORD:-}" && -n "${FRONTEND_ORIGIN:-}" ]]; then
+  if [[ -n "${DB_HOST:-}" && -n "${DB_NAME:-}" && -n "${DB_USER:-}" && -n "${DB_PASSWORD:-}" ]]; then
     cat > "${SCRIPT_DIR}/.env" <<EOF
 PORT=${PORT:-4000}
-FRONTEND_ORIGIN=${FRONTEND_ORIGIN}
 DB_HOST=${DB_HOST}
 DB_PORT=${DB_PORT:-3306}
 DB_NAME=${DB_NAME}
@@ -39,7 +38,6 @@ EOF
 
   cat > "${SCRIPT_DIR}/.env" <<'EOF'
 PORT=4000
-FRONTEND_ORIGIN=http://WEB_SERVER_PUBLIC_IP
 DB_HOST=DB_SERVER_PRIVATE_IP
 DB_PORT=3306
 DB_NAME=chapter3_board

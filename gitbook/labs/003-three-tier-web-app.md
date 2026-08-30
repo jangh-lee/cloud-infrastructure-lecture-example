@@ -28,7 +28,6 @@ DB Private IP :3306
 !!! info "주소별 역할"
     - `SITE_BASE_URL`: 사용자가 브라우저로 접속하는 Web 주소
     - `BACKEND_UPSTREAM`: Web Nginx가 연결할 Backend 내부 주소
-    - `FRONTEND_ORIGIN`: Backend가 허용할 브라우저 Web Origin
     - `DB_HOST`: Backend가 연결할 DB 내부 주소
 
 ## 3. 설치 전 기록할 값
@@ -109,7 +108,6 @@ sudo ./install-backend.sh install
 
 ```env
 PORT=4000
-FRONTEND_ORIGIN=http://WEB_SERVER_PUBLIC_IP
 DB_HOST=DB_SERVER_PRIVATE_IP
 DB_PORT=3306
 DB_NAME=chapter3_board
@@ -125,7 +123,6 @@ LAB_STRESS_ENABLED=false
 | 변수 | 의미 | 입력 기준 |
 | --- | --- | --- |
 | `PORT` | Backend 애플리케이션 수신 포트 | 기본값은 `4000`이며 ACG와 Web의 `BACKEND_UPSTREAM` 포트도 같아야 합니다. |
-| `FRONTEND_ORIGIN` | CORS로 허용할 브라우저 접속 주소 | `http://` 또는 `https://`를 포함합니다. 003에서는 Web Public IP, 013에서는 Public ALB 주소를 사용합니다. 여러 주소는 쉼표로 구분합니다. |
 | `DB_HOST` | Backend가 접속할 DB 주소 | DB 서버 Private IP 또는 내부 도메인을 입력하며 `http://`는 붙이지 않습니다. |
 | `DB_PORT` | DB 접속 포트 | MariaDB/MySQL 기본 포트인 `3306`을 사용합니다. |
 | `DB_NAME` | 접속할 데이터베이스 이름 | DB 서버의 `DB_NAME`과 동일해야 합니다. |
@@ -136,12 +133,6 @@ LAB_STRESS_ENABLED=false
 | `AUTO_POST_TOTAL` | 자동 등록할 게시글의 최대 개수 | 필요한 실습 데이터 수를 정수로 입력합니다. |
 | `AUTO_POST_API_URL` | 자동 등록 기능이 호출할 게시글 API | 같은 Backend를 호출하므로 기본값 `http://127.0.0.1:4000/api/posts`를 사용합니다. |
 | `LAB_STRESS_ENABLED` | Backend 부하 발생용 실습 API 사용 여부 | 003과 Web Auto Scaling을 다루는 013에서는 `false`를 유지합니다. |
-
-`FRONTEND_ORIGIN`에는 Backend IP가 아니라 브라우저에서 접속할 Web Public IP 또는 도메인을 입력합니다. 주소를 여러 개 허용하려면 쉼표로 구분합니다.
-
-```env
-FRONTEND_ORIGIN=http://WEB_SERVER_PUBLIC_IP,http://board.example.com
-```
 
 설치와 점검을 실행합니다.
 
