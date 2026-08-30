@@ -107,6 +107,16 @@ DB_ALLOWED_HOST=10.0.1.25
 DB_BIND_ADDRESS=0.0.0.0
 ```
 
+| 변수 | 의미 | 입력 기준 |
+| --- | --- | --- |
+| `DB_ROOT_PASSWORD` | MariaDB `root` 관리자 비밀번호 | 최초 설치에 사용할 새 비밀번호를 입력합니다. |
+| `DB_PREVIOUS_ROOT_PASSWORD` | 변경 전 `root` 비밀번호 | 최초 설치는 비워 둡니다. 기존 비밀번호를 변경할 때만 임시로 입력하고 변경 후 다시 비웁니다. |
+| `DB_NAME` | 게시판이 사용할 데이터베이스 이름 | Backend의 `DB_NAME`과 동일해야 합니다. |
+| `DB_USER` | 게시판 전용 DB 계정 | Backend의 `DB_USER`와 동일해야 합니다. |
+| `DB_PASSWORD` | 게시판 전용 DB 계정 비밀번호 | Backend의 `DB_PASSWORD`와 동일해야 합니다. |
+| `DB_ALLOWED_HOST` | 게시판 DB 계정의 접속 허용 호스트 | 고정 Backend 서버의 Private IP를 입력합니다. |
+| `DB_BIND_ADDRESS` | MariaDB가 연결을 수신할 주소 | Private Network의 Backend 연결을 받도록 `0.0.0.0`을 사용하고, 실제 접근 범위는 ACG로 제한합니다. |
+
 `DB_ALLOWED_HOST`에는 고정 Backend의 Private IP를 입력합니다. 013에서도 Auto Scaling 대상은 Web 계층이므로 Backend와 DB 연결값은 바뀌지 않습니다.
 
 ### DB 서버
@@ -148,6 +158,21 @@ AUTO_POST_TOTAL="300"
 AUTO_POST_API_URL="http://127.0.0.1:4000/api/posts"
 LAB_STRESS_ENABLED="false"
 ```
+
+| 변수 | 의미 | 입력 기준 |
+| --- | --- | --- |
+| `PORT` | Backend 애플리케이션 수신 포트 | 기본값은 `4000`이며 ACG와 Web의 `BACKEND_UPSTREAM` 포트도 같아야 합니다. |
+| `FRONTEND_ORIGIN` | CORS로 허용할 브라우저 접속 주소 | `http://` 또는 `https://`를 포함합니다. 003에서는 Web Public IP, 013에서는 Public ALB 주소를 사용합니다. 여러 주소는 쉼표로 구분합니다. |
+| `DB_HOST` | Backend가 접속할 DB 주소 | DB 서버 Private IP 또는 내부 도메인을 입력하며 `http://`는 붙이지 않습니다. |
+| `DB_PORT` | DB 접속 포트 | MariaDB/MySQL 기본 포트인 `3306`을 사용합니다. |
+| `DB_NAME` | 접속할 데이터베이스 이름 | DB 서버의 `DB_NAME`과 동일해야 합니다. |
+| `DB_USER` | DB 접속 계정 | DB 서버의 `DB_USER`와 동일해야 합니다. |
+| `DB_PASSWORD` | DB 접속 계정 비밀번호 | DB 서버의 `DB_PASSWORD`와 동일해야 합니다. |
+| `AUTO_POST_ENABLED` | 실습용 게시글 자동 등록 기능 사용 여부 | 일반 실습은 `false`, 자동 데이터가 필요할 때만 `true`로 설정합니다. |
+| `AUTO_POST_INTERVAL_SECONDS` | 자동 게시글 등록 간격 | `AUTO_POST_ENABLED=true`일 때 적용되는 초 단위 값입니다. |
+| `AUTO_POST_TOTAL` | 자동 등록할 게시글의 최대 개수 | 필요한 실습 데이터 수를 정수로 입력합니다. |
+| `AUTO_POST_API_URL` | 자동 등록 기능이 호출할 게시글 API | 같은 Backend를 호출하므로 기본값 `http://127.0.0.1:4000/api/posts`를 사용합니다. |
+| `LAB_STRESS_ENABLED` | Backend 부하 발생용 실습 API 사용 여부 | 003과 Web Auto Scaling을 다루는 013에서는 `false`를 유지합니다. |
 
 `FRONTEND_ORIGIN`은 브라우저에서 접속하는 웹 주소를 적습니다. HTTP 수업이면 반드시 `http://`까지 포함합니다. 웹서버 공인 IP와 도메인을 둘 다 쓸 경우 콤마로 나열합니다.
 
@@ -215,6 +240,12 @@ SITE_BASE_URL="http://10.0.0.10"
 BACKEND_UPSTREAM="http://10.0.1.25:4000"
 SITE_TITLE="DevForum Practice Board"
 ```
+
+| 변수 | 의미 | 입력 기준 |
+| --- | --- | --- |
+| `SITE_BASE_URL` | 사용자가 브라우저로 접속할 대표 Web 주소 | 003에서는 Web Public IP, 013에서는 Public ALB 주소를 `http://` 또는 `https://`와 함께 입력합니다. |
+| `BACKEND_UPSTREAM` | Nginx가 `/api` 요청을 전달할 Backend 주소 | 고정 Backend의 Private IP와 포트까지 입력합니다. 예: `http://10.0.1.25:4000` |
+| `SITE_TITLE` | 게시판 화면에 표시할 서비스 제목 | 실습에서 구분하기 쉬운 원하는 제목을 입력합니다. |
 
 `BACKEND_UPSTREAM`은 Web 서버만 사용하는 Nginx 프록시 목적지입니다. 프런트 JavaScript에는 이 주소가 노출되지 않으며 모든 API 요청은 `/api` 상대경로를 사용합니다.
 
