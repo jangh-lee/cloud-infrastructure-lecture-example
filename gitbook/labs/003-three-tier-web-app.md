@@ -208,7 +208,52 @@ curl -i http://127.0.0.1/api/instance
 - `/api/health`는 Nginx를 거쳐 Backend의 HTTP `200`을 반환합니다.
 - `/api/instance`의 `X-Backend-Instance`와 JSON `instance`에 Backend hostname이 표시됩니다.
 
-## 7. ACG 권장 규칙
+## 7. 서버별 트래픽과 로그 확인
+
+각 명령은 해당 서버의 **새 SSH 터미널**에서 실행합니다. 로그 확인을 마치려면 `Ctrl+C`를 누릅니다.
+
+### Web 서버
+
+Nginx가 받은 요청은 `access.log`, 프록시 연결 실패와 설정 오류는 `error.log`에서 확인합니다. 브라우저에서 조회·글쓰기·삭제를 실행하면 `/api/...` 요청과 상태 코드가 표시됩니다.
+
+```bash
+sudo tail -F /var/log/nginx/access.log /var/log/nginx/error.log
+```
+
+### Backend 서버
+
+Backend 요청, 상태 코드, 처리 시간과 애플리케이션·DB 오류를 확인합니다. 자동 게시글 기능을 사용하면 seeder 로그도 함께 표시합니다.
+
+```bash
+sudo journalctl -u chapter3-backend -u chapter3-post-seeder -f
+```
+
+정상 글쓰기는 `POST /api/posts 201`, 오류는 `500`과 이어지는 stack trace로 구분합니다. 요청 본문과 DB 비밀번호는 기록하지 않습니다.
+
+### DB 서버
+
+MariaDB 시작·종료, 인증과 연결 오류는 서비스 로그에서 확인합니다.
+
+```bash
+sudo journalctl -u mariadb -f
+```
+
+실제 `SELECT`, `INSERT`, `DELETE` 쿼리를 관찰할 때만 General Log를 잠시 켭니다. 쿼리 내용이 기록되고 부하가 증가하므로 실습 후 반드시 끕니다.
+
+```bash
+GENERAL_LOG_FILE=$(sudo mariadb -Nse "SELECT IF(LEFT(@@general_log_file,1)='/',@@general_log_file,CONCAT(@@datadir,@@general_log_file));")
+sudo mariadb -e "SET GLOBAL log_output='FILE'; SET GLOBAL general_log=ON;"
+echo "$GENERAL_LOG_FILE"
+sudo tail -F "$GENERAL_LOG_FILE"
+```
+
+확인이 끝나면 `Ctrl+C`를 누른 뒤 General Log를 끕니다.
+
+```bash
+sudo mariadb -e "SET GLOBAL general_log=OFF;"
+```
+
+## 8. ACG 권장 규칙
 
 ### Web ACG
 
@@ -233,7 +278,7 @@ curl -i http://127.0.0.1/api/instance
 
 Backend의 `4000/tcp`를 인터넷에 공개하지 않습니다. 외부 사용자는 Web 서버에만 접속하고 API 요청은 Nginx가 내부로 전달합니다.
 
-## 8. 브라우저 확인
+## 9. 브라우저 확인
 
 브라우저에서 Web Public IP로 접속해 게시글을 조회하고 새 글을 작성합니다.
 
@@ -247,7 +292,7 @@ http://WEB_SERVER_PUBLIC_IP/
 - Backend Private IP는 브라우저에 표시되지 않습니다.
 - Health, 목록 조회, 글쓰기 요청이 모두 성공합니다.
 
-## 9. 설정만 다시 반영
+## 10. 설정만 다시 반영
 
 Web의 upstream이나 제목만 변경할 때는 패키지를 다시 설치하지 않습니다.
 
@@ -267,7 +312,7 @@ sudo ./install-backend.sh configure
 curl -i http://127.0.0.1:4000/api/health
 ```
 
-## 10. 013 Auto Scaling과 연결
+## 11. 013 Auto Scaling과 연결
 
 003 완료 시 브라우저는 Web Public IP에 접속하고 Web Nginx는 고정 Backend를 바라봅니다.
 

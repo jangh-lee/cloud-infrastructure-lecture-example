@@ -24,7 +24,15 @@ const pool = mysql.createPool({
 
 app.use(express.json());
 app.use((req, res, next) => {
+  const startedAt = process.hrtime.bigint();
+  const forwardedFor = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+  const clientIp = forwardedFor || req.socket.remoteAddress || "-";
+
   res.set("X-Backend-Instance", instanceName);
+  res.on("finish", () => {
+    const durationMs = Number(process.hrtime.bigint() - startedAt) / 1000000;
+    console.log(`[http] ${req.method} ${req.originalUrl} ${res.statusCode} ${durationMs.toFixed(1)}ms client=${clientIp}`);
+  });
   next();
 });
 

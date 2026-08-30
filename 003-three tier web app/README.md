@@ -267,7 +267,52 @@ sudo ./install-web.sh install
 sudo ./install-web.sh configure
 ```
 
-## 7. 동작 확인
+## 7. 서버별 트래픽과 로그 확인
+
+각 명령은 해당 서버의 새 SSH 터미널에서 실행하고, 확인을 마치면 `Ctrl+C`로 종료합니다.
+
+### Web 서버 로그
+
+Nginx 요청과 프록시 오류를 함께 확인합니다. 브라우저에서 기능을 실행하면 `/api/...` 요청과 상태 코드가 표시됩니다.
+
+```bash
+sudo tail -F /var/log/nginx/access.log /var/log/nginx/error.log
+```
+
+### Backend 서버 로그
+
+Backend 요청·상태 코드·처리 시간과 애플리케이션 오류를 확인합니다. 자동 게시글을 사용하면 seeder 로그도 함께 표시됩니다.
+
+```bash
+sudo journalctl -u chapter3-backend -u chapter3-post-seeder -f
+```
+
+정상 글쓰기는 `POST /api/posts 201`, 오류는 `500`과 이어지는 stack trace로 구분합니다. 요청 본문과 DB 비밀번호는 기록하지 않습니다.
+
+### DB 서버 로그
+
+MariaDB 서비스와 연결 오류는 다음 명령으로 확인합니다.
+
+```bash
+sudo journalctl -u mariadb -f
+```
+
+SQL 트래픽을 확인할 때만 General Log를 잠시 켭니다. 쿼리 내용이 기록되고 부하가 증가하므로 실습 후 반드시 끕니다.
+
+```bash
+GENERAL_LOG_FILE=$(sudo mariadb -Nse "SELECT IF(LEFT(@@general_log_file,1)='/',@@general_log_file,CONCAT(@@datadir,@@general_log_file));")
+sudo mariadb -e "SET GLOBAL log_output='FILE'; SET GLOBAL general_log=ON;"
+echo "$GENERAL_LOG_FILE"
+sudo tail -F "$GENERAL_LOG_FILE"
+```
+
+`Ctrl+C`로 조회를 끝낸 뒤 비활성화합니다.
+
+```bash
+sudo mariadb -e "SET GLOBAL general_log=OFF;"
+```
+
+## 8. 동작 확인
 
 ### DB 서버
 
