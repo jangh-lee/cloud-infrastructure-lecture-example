@@ -104,7 +104,9 @@ http://LOAD_BALANCER_URL/
 
 ## 분산 확인
 
-User Input이 모든 서버에서 같더라도 아래 명령은 `hostname`을 기준으로 응답 횟수를 집계합니다.
+User Input이 모든 서버에서 같더라도 `hostname`을 기준으로 응답 횟수를 집계합니다. 사용하는 터미널에 맞는 명령 하나를 실행합니다.
+
+### Linux 또는 macOS 터미널
 
 ```bash
 LB_URL="http://YOUR_LOAD_BALANCER_URL"
@@ -113,3 +115,29 @@ for i in $(seq 1 100); do
   curl -s "$LB_URL/status.json" | sed -n 's/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
 done | sort | uniq -c
 ```
+
+### Windows Terminal PowerShell
+
+```powershell
+$LB_URL = "http://YOUR_LOAD_BALANCER_URL"
+
+$results = 1..100 | ForEach-Object {
+  (Invoke-RestMethod -Uri "$LB_URL/status.json" -Method Get).hostname
+}
+
+$results |
+  Group-Object |
+  Sort-Object Count -Descending |
+  Select-Object Count, Name
+```
+
+정상적으로 분산되면 다음처럼 Hostname별 호출 횟수가 표시됩니다.
+
+```text
+Count Name
+----- ----
+   52 lb-node-001
+   48 lb-node-002
+```
+
+호출 횟수의 합이 `100`인지 확인합니다. Hostname이 하나만 나오면 Target Group에 Healthy 서버가 한 대만 연결되어 있는지 확인합니다.
