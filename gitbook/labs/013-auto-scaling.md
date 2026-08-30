@@ -279,8 +279,8 @@ Nginx, 정적 파일, `.env`, `stress-ng`, `htop`이 이미지에 이미 있으�
 | 최대 용량 | `3` |
 | 기대 용량 | `1` |
 | 상세 모니터링 | 사용 |
-| Cooldown 기본값 | `300`초 |
-| Health Check 보류 기간 | `300`초 |
+| Cooldown 기본값 | `60`초 |
+| Health Check 보류 기간 | `60`초 |
 | Health Check 유형 | Load Balancer |
 | Target Group | `lab-web-tg` |
 
@@ -306,7 +306,7 @@ Nginx, 정적 파일, `.env`, `stress-ng`, `htop`이 이미지에 이미 있으�
 | 정책 이름 | `web-add-1` |
 | Scaling 설정 | 증감 변경 |
 | 조정값 | `1` 증가 |
-| Cooldown | `300`초 |
+| Cooldown | `60`초 |
 
 ### Scale-in 정책
 
@@ -315,7 +315,7 @@ Nginx, 정적 파일, `.env`, `stress-ng`, `htop`이 이미지에 이미 있으�
 | 정책 이름 | `web-remove-1` |
 | Scaling 설정 | 증감 변경 |
 | 조정값 | `1` 감소 |
-| Cooldown | `300`초 |
+| Cooldown | `60`초 |
 
 최대 용량 `3`보다 늘어나거나 최소 용량 `1`보다 줄어들지 않습니다.
 
@@ -363,10 +363,13 @@ Scaling Policy만 만들면 CPU에 따라 자동 실행되지 않습니다. **Se
 | Metric | `SERVER/avg_cpu_used_rto` |
 | 조건 | `< 20` |
 | 집약 | AVG |
-| 지속 시간 | `5 minutes` |
+| 지속 시간 | `1 minute` |
 | 액션 | Auto Scaling Policy `web-remove-1` |
 
 Scale-in Rule은 Scale-out 검증이 끝난 뒤 활성화해도 됩니다. 두 규칙이 동시에 움직여 관찰이 어려워지는 것을 방지할 수 있습니다.
+
+!!! note "1분의 의미"
+    `1 minute`은 CPU 조건이 지속되어 Event가 실행되는 수업용 감지 기준입니다. Cloud Insight 수집 주기와 서버 생성, 부팅, Target Health Check가 추가로 필요하므로 새 Web 서버가 `정상`이 되는 전체 시간이 정확히 1분이라는 뜻은 아닙니다. 운영 환경에서는 순간 부하로 인한 반복 증감을 막기 위해 더 긴 지속 시간과 Cooldown을 사용합니다. 새 서버가 부팅 전에 비정상 판정되어 반복 반납되면 Health Check 보류 기간을 기본값인 `300초`로 되돌립니다.
 
 ## 16. Step 12 - Bastion에서 Web CPU 부하 실행
 
@@ -377,11 +380,11 @@ WEB_PRIVATE_IP="WEB_ASG_INSTANCE_PRIVATE_IP"
 ssh root@"$WEB_PRIVATE_IP" 'hostname; stress-ng --version; htop --version'
 ```
 
-10분 동안 Web CPU를 약 90%로 높입니다.
+메트릭 수집 지연을 고려해 최대 3분 동안 Web CPU를 약 90%로 높입니다. 정책 조건 자체는 1분입니다.
 
 ```bash
 ssh root@"$WEB_PRIVATE_IP" \
-  'nohup stress-ng --cpu 0 --cpu-load 90 --timeout 600s >/tmp/web-stress.log 2>&1 &'
+  'nohup stress-ng --cpu 0 --cpu-load 90 --timeout 180s >/tmp/web-stress.log 2>&1 &'
 ```
 
 실행 상태를 확인합니다.
@@ -437,14 +440,14 @@ curl -sS "$ALB_URL/api/posts" | head
 
 ```bash
 sudo apt-get update && sudo apt-get install -y apache2-utils
-ab -t 300 -c 200 "$ALB_URL/"
+ab -t 60 -c 200 "$ALB_URL/"
 ```
 
 이 요청은 `Public ALB → Web ASG` 경로를 사용합니다. 다만 Nginx 정적 페이지는 CPU 사용량이 낮을 수 있으므로 이 명령만으로 Scale-out되지 않아도 오류가 아닙니다.
 
 ## 19. Step 14 - 부하 종료와 Scale-in 확인
 
-10분 전에 부하를 중지하려면 Bastion에서 실행합니다.
+부하를 즉시 중지하려면 Bastion에서 실행합니다.
 
 ```bash
 ssh root@"$WEB_PRIVATE_IP" 'pkill -f stress-ng || true'
