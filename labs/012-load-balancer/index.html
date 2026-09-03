@@ -1842,13 +1842,16 @@
 </code></pre></div>
 <p><code>status.json</code>에서 <code>serverName</code>, <code>hostname</code>, <code>primaryIp</code>, <code>allIps</code>를 확인합니다. 공인 IP는 Naver Cloud에서 NAT 방식으로 연결될 수 있으므로 <code>primaryIp</code>에는 일반적으로 서버 NIC의 사설 IP가 표시됩니다.</p>
 <p><code>stress-ng</code>는 013에서 CPU 부하를 발생시키고, <code>htop</code>은 서버에 직접 접속해 문제를 확인할 때 사용할 수 있는 선택 도구입니다. 통합 Init Script가 두 패키지를 Nginx와 함께 설치하며, 013 기본 부하 실습에는 SSH를 사용하지 않습니다.</p>
-<p><code>lb-demo-stress.service</code>는 <code>127.0.0.1:8081</code>에서만 실행되고 Nginx의 <code>/stress</code> 요청을 받습니다. 요청이 반복되어도 서버마다 <code>stress-ng</code>를 하나만 실행하며 20초 뒤 자동 종료하므로, 013에서 Load Balancer를 통해 제한된 CPU 부하를 줄 수 있습니다. <code>/stress-status</code>에서는 요청을 처리한 Hostname, 부하 실행 여부, 프로세스 ID와 1분 Load Average를 확인할 수 있습니다.</p>
+<p><code>lb-demo-stress.service</code>는 <code>127.0.0.1:8081</code>에서만 실행되고 Nginx의 <code>/stress</code> 요청을 받습니다. <code>www-data</code>가 임시 파일을 만들 수 있도록 작업 디렉터리는 <code>/tmp</code>를 사용합니다. 요청이 반복되어도 서버마다 <code>stress-ng</code>를 하나만 실행하며 20초 뒤 자동 종료하므로, 013에서 Load Balancer를 통해 제한된 CPU 부하를 줄 수 있습니다. <code>/stress-status</code>에서는 요청을 처리한 Hostname, 부하 실행 여부, 프로세스 ID, 종료 코드와 1분 Load Average를 확인할 수 있습니다.</p>
+<p><code>stressRunning</code>이 바로 <code>false</code>가 되거나 <code>exitCode</code>가 <code>0</code>이 아니면 서비스 로그를 확인합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>lb-demo-stress.service<span class="w"> </span>-n<span class="w"> </span><span class="m">30</span><span class="w"> </span>--no-pager
+</code></pre></div>
 <h2 id="503">503 복구 확인<a class="headerlink" href="#503" title="Permanent link">&para;</a></h2>
 <p>통합 Init Script를 Target 서버마다 한 번 실행한 뒤 다음 명령을 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>nginx
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/healthz
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1/status.json
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>sudo<span class="w"> </span>ss<span class="w"> </span>-lntp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':80'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>nginx
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/healthz
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1/status.json
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>sudo<span class="w"> </span>ss<span class="w"> </span>-lntp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':80'</span>
 </code></pre></div>
 <p>다음 결과를 모두 확인하고 넘어갑니다.</p>
 <ul>
@@ -1889,8 +1892,8 @@
 </tbody>
 </table>
 <p>브라우저에서는 각 서버 공인 IP 또는 Load Balancer 주소로 접속합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>http://SERVER_PUBLIC_IP/
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>http://LOAD_BALANCER_URL/
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>http://SERVER_PUBLIC_IP/
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>http://LOAD_BALANCER_URL/
 </code></pre></div>
 <h2 id="acg">ACG<a class="headerlink" href="#acg" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1904,32 +1907,32 @@
 <h3 id="sticky-session-off">Sticky Session OFF<a class="headerlink" href="#sticky-session-off" title="Permanent link">&para;</a></h3>
 <h4 id="linux-macos">Linux 또는 macOS 터미널<a class="headerlink" href="#linux-macos" title="Permanent link">&para;</a></h4>
 <p>먼저 실제 Load Balancer 주소를 입력해 한 번 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nv">LB_URL</span><span class="o">=</span><span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">LB_URL</span><span class="o">=</span><span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
 </code></pre></div>
 <p>그다음 아래 박스만 복사해 100회 호출합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">100</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span>curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/status.json"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">100</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span>curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/status.json"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
 </code></pre></div>
 <h4 id="windows-terminal-powershell">Windows Terminal PowerShell<a class="headerlink" href="#windows-terminal-powershell" title="Permanent link">&para;</a></h4>
 <p>먼저 실제 Load Balancer 주소를 입력해 한 번 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nv">$LB_URL</span> <span class="p">=</span> <span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">$LB_URL</span> <span class="p">=</span> <span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
 </code></pre></div>
 <p>그다음 아래 박스만 복사해 100회 호출합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">$results</span> <span class="p">=</span> <span class="n">1</span><span class="p">..</span><span class="n">100</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  <span class="p">(</span><span class="nb">Invoke-RestMethod</span> <span class="n">-Uri</span> <span class="s2">"$LB_URL/status.json"</span> <span class="n">-Method</span> <span class="n">Get</span><span class="p">).</span><span class="n">hostname</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="p">}</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="nv">$results</span> <span class="p">|</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>  <span class="nb">Group-Object</span> <span class="p">|</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>  <span class="nb">Sort-Object</span> <span class="n">Count</span> <span class="n">-Descending</span> <span class="p">|</span>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>  <span class="nb">Select-Object</span> <span class="n">Count</span><span class="p">,</span> <span class="n">Name</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nv">$results</span> <span class="p">=</span> <span class="n">1</span><span class="p">..</span><span class="n">100</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  <span class="p">(</span><span class="nb">Invoke-RestMethod</span> <span class="n">-Uri</span> <span class="s2">"$LB_URL/status.json"</span> <span class="n">-Method</span> <span class="n">Get</span><span class="p">).</span><span class="n">hostname</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="p">}</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nv">$results</span> <span class="p">|</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  <span class="nb">Group-Object</span> <span class="p">|</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>  <span class="nb">Sort-Object</span> <span class="n">Count</span> <span class="n">-Descending</span> <span class="p">|</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>  <span class="nb">Select-Object</span> <span class="n">Count</span><span class="p">,</span> <span class="n">Name</span>
 </code></pre></div>
 <p>정상적으로 분산되면 다음처럼 Hostname별 호출 횟수가 표시됩니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Count Name
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>----- ----
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>   52 lb-node-001
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>   48 lb-node-002
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Count Name
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>----- ----
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>   52 lb-node-001
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>   48 lb-node-002
 </code></pre></div>
 <p>호출 횟수의 합이 <code>100</code>인지 확인합니다. Sticky Session이 꺼져 있는데 Hostname이 하나만 나오면 Target Group에 Healthy 서버가 한 대만 연결되어 있는지 확인합니다.</p>
 <h3 id="sticky-session-on">Sticky Session ON<a class="headerlink" href="#sticky-session-on" title="Permanent link">&para;</a></h3>
@@ -1937,38 +1940,38 @@
 <p>기존 명령처럼 매번 새 <code>curl</code> 또는 새 PowerShell 요청을 만들면 세션이 유지되지 않아 Sticky Session을 켜도 여러 서버로 분산될 수 있습니다.</p>
 <h4 id="linux-macos_1">Linux 또는 macOS 터미널<a class="headerlink" href="#linux-macos_1" title="Permanent link">&para;</a></h4>
 <p>먼저 실제 Load Balancer 주소를 입력해 한 번 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nv">LB_URL</span><span class="o">=</span><span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nv">LB_URL</span><span class="o">=</span><span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
 </code></pre></div>
 <p>그다음 아래 박스를 복사합니다. 임시 쿠키 파일 생성부터 삭제까지 한 번에 실행됩니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nv">COOKIE_JAR</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>mktemp<span class="k">)</span><span class="s2">"</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">100</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span>curl<span class="w"> </span>-s<span class="w"> </span>-c<span class="w"> </span><span class="s2">"</span><span class="nv">$COOKIE_JAR</span><span class="s2">"</span><span class="w"> </span>-b<span class="w"> </span><span class="s2">"</span><span class="nv">$COOKIE_JAR</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/status.json"</span><span class="w"> </span><span class="p">|</span>
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">    </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'</span>
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
-<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>
-<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>rm<span class="w"> </span>-f<span class="w"> </span><span class="s2">"</span><span class="nv">$COOKIE_JAR</span><span class="s2">"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nv">COOKIE_JAR</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>mktemp<span class="k">)</span><span class="s2">"</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">100</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span>curl<span class="w"> </span>-s<span class="w"> </span>-c<span class="w"> </span><span class="s2">"</span><span class="nv">$COOKIE_JAR</span><span class="s2">"</span><span class="w"> </span>-b<span class="w"> </span><span class="s2">"</span><span class="nv">$COOKIE_JAR</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/status.json"</span><span class="w"> </span><span class="p">|</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">    </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>rm<span class="w"> </span>-f<span class="w"> </span><span class="s2">"</span><span class="nv">$COOKIE_JAR</span><span class="s2">"</span>
 </code></pre></div>
 <h4 id="windows-terminal-powershell_1">Windows Terminal PowerShell<a class="headerlink" href="#windows-terminal-powershell_1" title="Permanent link">&para;</a></h4>
 <p>먼저 실제 Load Balancer 주소를 입력해 한 번 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nv">$LB_URL</span> <span class="p">=</span> <span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nv">$LB_URL</span> <span class="p">=</span> <span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
 </code></pre></div>
 <p>그다음 아래 박스를 복사합니다. 같은 PowerShell Web Session으로 100회 호출합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nv">$session</span> <span class="p">=</span> <span class="nb">New-Object</span> <span class="n">Microsoft</span><span class="p">.</span><span class="n">PowerShell</span><span class="p">.</span><span class="n">Commands</span><span class="p">.</span><span class="n">WebRequestSession</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="nv">$results</span> <span class="p">=</span> <span class="n">1</span><span class="p">..</span><span class="n">100</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>  <span class="p">(</span><span class="nb">Invoke-RestMethod</span> <span class="n">-Uri</span> <span class="s2">"$LB_URL/status.json"</span> <span class="n">-WebSession</span> <span class="nv">$session</span><span class="p">).</span><span class="n">hostname</span>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="p">}</span>
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="nv">$results</span> <span class="p">|</span>
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>  <span class="nb">Group-Object</span> <span class="p">|</span>
-<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>  <span class="nb">Sort-Object</span> <span class="n">Count</span> <span class="n">-Descending</span> <span class="p">|</span>
-<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>  <span class="nb">Select-Object</span> <span class="n">Count</span><span class="p">,</span> <span class="n">Name</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nv">$session</span> <span class="p">=</span> <span class="nb">New-Object</span> <span class="n">Microsoft</span><span class="p">.</span><span class="n">PowerShell</span><span class="p">.</span><span class="n">Commands</span><span class="p">.</span><span class="n">WebRequestSession</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="nv">$results</span> <span class="p">=</span> <span class="n">1</span><span class="p">..</span><span class="n">100</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>  <span class="p">(</span><span class="nb">Invoke-RestMethod</span> <span class="n">-Uri</span> <span class="s2">"$LB_URL/status.json"</span> <span class="n">-WebSession</span> <span class="nv">$session</span><span class="p">).</span><span class="n">hostname</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="p">}</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="nv">$results</span> <span class="p">|</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>  <span class="nb">Group-Object</span> <span class="p">|</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>  <span class="nb">Sort-Object</span> <span class="n">Count</span> <span class="n">-Descending</span> <span class="p">|</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>  <span class="nb">Select-Object</span> <span class="n">Count</span><span class="p">,</span> <span class="n">Name</span>
 </code></pre></div>
 <p>Sticky Session이 정상이라면 다음처럼 Hostname 하나에 100회가 집계됩니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>Count Name
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>----- ----
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>  100 lb-node-001
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>Count Name
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>----- ----
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>  100 lb-node-001
 </code></pre></div>
 <p>새 쿠키 파일, 새 PowerShell 세션, 시크릿 브라우저는 새로운 세션이므로 처음 선택되는 서버가 달라질 수 있습니다. 고정된 Target이 Unhealthy 상태가 되어 제외되어도 다른 서버로 전환될 수 있습니다.</p>
 <h2 id="013">013 실습으로 이어가기<a class="headerlink" href="#013" title="Permanent link">&para;</a></h2>
