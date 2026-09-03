@@ -109,6 +109,8 @@ Auto Scaling Nginx 서버 1~3대         새로 구성
 | Target Group | 012 Target Group |
 | ACG | 012 Web ACG |
 
+`서버 이름 Prefix`는 최대 7자까지 입력할 수 있으므로 이 실습에서는 `asg`로 통일합니다.
+
 정책, 일정, 통보는 우선 **나중에 설정**으로 두고 생성합니다.
 
 !!! note "1분 설정의 의미"
@@ -125,7 +127,7 @@ Auto Scaling Nginx 서버 1~3대         새로 구성
 
 다음 순서로 상태를 확인합니다.
 
-1. 이름이 `lab-asg-web...`인 서버 한 대가 생성됩니다.
+1. 이름이 `asg...`인 서버 한 대가 생성됩니다.
 2. 012 Target Group에 새 서버가 자동 등록됩니다.
 3. `/healthz` 검사 후 새 Target 상태가 `Healthy`가 됩니다.
 4. Load Balancer URL의 `/status.json`이 정상 응답합니다.
@@ -143,7 +145,7 @@ ASG 서버가 `Healthy`가 된 뒤에만 012에서 수동 등록한 서버들을
 교체 후 Target Group에는 다음 서버만 남아야 합니다.
 
 ```text
-lab-asg-web...    Healthy
+asg...    Healthy
 ```
 
 Load Balancer를 20번 호출해 ASG 서버 한 대만 응답하는지 확인합니다.
@@ -158,7 +160,7 @@ done | sort | uniq -c
 정상 예시는 다음과 같습니다.
 
 ```text
-20 lab-asg-web-xxxxx
+20 asg-xxxxx
 ```
 
 기존 012 Hostname이 섞여 나오면 수동 Target이 아직 Target Group에 남아 있는지 확인합니다.
@@ -256,7 +258,7 @@ ssh -t root@"$WEB_PRIVATE_IP" htop
 | 1 | Cloud Insight | ASG 평균 CPU 50% 이상 |
 | 2 | Event Rule | Scale-out Event 발생 |
 | 3 | ASG 이력 | `lab-asg-web-add-1` 실행 |
-| 4 | Server | 새 `lab-asg-web...` 서버 생성 |
+| 4 | Server | 새 `asg...` 서버 생성 |
 | 5 | Target Group | 새 Target이 `Healthy` |
 | 6 | ASG | 서버 수 `1 → 2` |
 
@@ -286,8 +288,8 @@ $LB_URL = "http://YOUR_LOAD_BALANCER_URL"
 ```text
 Count Name
 ----- ----
-   22 lab-asg-web-aaaaa
-   18 lab-asg-web-bbbbb
+   22 asg-aaaaa
+   18 asg-bbbbb
 ```
 
 페이지를 새로고침하면서 Hostname과 Private IP가 바뀌는지도 확인합니다. 같은 원본 이미지로 만들어졌지만 `lb-demo-status.timer`가 각 서버의 실제 값을 다시 기록합니다.
