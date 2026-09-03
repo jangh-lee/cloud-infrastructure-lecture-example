@@ -2194,7 +2194,7 @@
 <tbody>
 <tr>
 <td>이름</td>
-<td><code>lab-lb-lc-v1</code></td>
+<td><code>lab-asg-web-lc-v1</code></td>
 </tr>
 <tr>
 <td>서버 이미지</td>
@@ -2219,13 +2219,13 @@
 <ul>
 <li>[ ] Launch Configuration 이미지가 <code>lab-asg-web-image-v1</code>입니다.</li>
 <li>[ ] Init Script를 중복 입력하지 않았습니다.</li>
-<li>[ ] 이름이 <code>lab-lb-lc-v1</code>로 목록에 표시됩니다.</li>
+<li>[ ] 이름이 <code>lab-asg-web-lc-v1</code>로 목록에 표시됩니다.</li>
 </ul>
 <h2 id="5-step-3-auto-scaling-group">5. Step 3 - Auto Scaling Group 생성<a class="headerlink" href="#5-step-3-auto-scaling-group" title="Permanent link">&para;</a></h2>
 <ol>
 <li><strong>Services &gt; Compute &gt; Auto Scaling &gt; Auto Scaling Group</strong>으로 이동합니다.</li>
 <li><strong>Auto Scaling Group 생성</strong>을 클릭합니다.</li>
-<li><code>lab-lb-lc-v1</code>을 선택합니다.</li>
+<li><code>lab-asg-web-lc-v1</code>을 선택합니다.</li>
 </ol>
 <table>
 <thead>
@@ -2237,7 +2237,7 @@
 <tbody>
 <tr>
 <td>이름</td>
-<td><code>lab-lb-asg</code></td>
+<td><code>lab-asg-web-group</code></td>
 </tr>
 <tr>
 <td>VPC</td>
@@ -2249,7 +2249,7 @@
 </tr>
 <tr>
 <td>서버 이름 Prefix</td>
-<td><code>lab-lb-as</code></td>
+<td><code>lab-asg-web</code></td>
 </tr>
 <tr>
 <td>최소 용량</td>
@@ -2322,7 +2322,7 @@
 <h3 id="_3">확인하고 넘어가기<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <p>다음 순서로 상태를 확인합니다.</p>
 <ol>
-<li>이름이 <code>lab-lb-as...</code>인 서버 한 대가 생성됩니다.</li>
+<li>이름이 <code>lab-asg-web...</code>인 서버 한 대가 생성됩니다.</li>
 <li>012 Target Group에 새 서버가 자동 등록됩니다.</li>
 <li><code>/healthz</code> 검사 후 새 Target 상태가 <code>Healthy</code>가 됩니다.</li>
 <li>Load Balancer URL의 <code>/status.json</code>이 정상 응답합니다.</li>
@@ -2334,7 +2334,7 @@
 <h2 id="6-step-4-target-asg-target">6. Step 4 - 수동 Target을 ASG Target으로 교체<a class="headerlink" href="#6-step-4-target-asg-target" title="Permanent link">&para;</a></h2>
 <p>ASG 서버가 <code>Healthy</code>가 된 뒤에만 012에서 수동 등록한 서버들을 Target Group에서 제거합니다. 서버 자체를 바로 삭제할 필요는 없으며 Target 목록에서만 제거해도 됩니다.</p>
 <p>교체 후 Target Group에는 다음 서버만 남아야 합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>lab-lb-as...    Healthy
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>lab-asg-web...    Healthy
 </code></pre></div>
 <p>Load Balancer를 20번 호출해 ASG 서버 한 대만 응답하는지 확인합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">20</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
@@ -2343,11 +2343,11 @@
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
 </code></pre></div>
 <p>정상 예시는 다음과 같습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>20 lab-lb-as-xxxxx
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>20 lab-asg-web-xxxxx
 </code></pre></div>
 <p>기존 012 Hostname이 섞여 나오면 수동 Target이 아직 Target Group에 남아 있는지 확인합니다.</p>
 <h2 id="7-step-5-scaling-policy">7. Step 5 - Scaling Policy 생성<a class="headerlink" href="#7-step-5-scaling-policy" title="Permanent link">&para;</a></h2>
-<p><code>lab-lb-asg</code>를 선택하고 <strong>설정 &gt; 정책 &gt; 생성</strong>에서 두 정책을 만듭니다.</p>
+<p><code>lab-asg-web-group</code>을 선택하고 <strong>설정 &gt; 정책 &gt; 생성</strong>에서 두 정책을 만듭니다.</p>
 <h3 id="scale-out">Scale-out 정책<a class="headerlink" href="#scale-out" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -2359,7 +2359,7 @@
 <tbody>
 <tr>
 <td>정책 이름</td>
-<td><code>lb-add-1</code></td>
+<td><code>lab-asg-web-add-1</code></td>
 </tr>
 <tr>
 <td>Scaling 설정</td>
@@ -2386,7 +2386,7 @@
 <tbody>
 <tr>
 <td>정책 이름</td>
-<td><code>lb-remove-1</code></td>
+<td><code>lab-asg-web-remove-1</code></td>
 </tr>
 <tr>
 <td>Scaling 설정</td>
@@ -2420,7 +2420,7 @@
 </tr>
 <tr>
 <td>감시 대상</td>
-<td>Auto Scaling Group <code>lab-lb-asg</code></td>
+<td>Auto Scaling Group <code>lab-asg-web-group</code></td>
 </tr>
 <tr>
 <td>Metric</td>
@@ -2440,7 +2440,7 @@
 </tr>
 <tr>
 <td>액션</td>
-<td>Auto Scaling Policy <code>lb-add-1</code></td>
+<td>Auto Scaling Policy <code>lab-asg-web-add-1</code></td>
 </tr>
 </tbody>
 </table>
@@ -2459,7 +2459,7 @@
 </tr>
 <tr>
 <td>감시 대상</td>
-<td>Auto Scaling Group <code>lab-lb-asg</code></td>
+<td>Auto Scaling Group <code>lab-asg-web-group</code></td>
 </tr>
 <tr>
 <td>Metric</td>
@@ -2479,15 +2479,15 @@
 </tr>
 <tr>
 <td>액션</td>
-<td>Auto Scaling Policy <code>lb-remove-1</code></td>
+<td>Auto Scaling Policy <code>lab-asg-web-remove-1</code></td>
 </tr>
 </tbody>
 </table>
 <p>Scale-out을 관찰하기 전에는 Scale-in Rule을 비활성화해도 됩니다. 새 서버가 생기자마자 평균 CPU가 낮아져 축소되는 상황을 막아 변화 과정을 천천히 확인할 수 있습니다.</p>
 <h3 id="_4">확인하고 넘어가기<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <ul>
-<li>[ ] 감시 대상이 개별 서버가 아니라 <code>lab-lb-asg</code>입니다.</li>
-<li>[ ] Scale-out Rule 액션이 <code>lb-add-1</code>입니다.</li>
+<li>[ ] 감시 대상이 개별 서버가 아니라 <code>lab-asg-web-group</code>입니다.</li>
+<li>[ ] Scale-out Rule 액션이 <code>lab-asg-web-add-1</code>입니다.</li>
 <li>[ ] 조건 지속 시간이 <code>1 minute</code>입니다.</li>
 </ul>
 <h2 id="9-step-7-bastion-cpu">9. Step 7 - Bastion에서 CPU 부하 발생<a class="headerlink" href="#9-step-7-bastion-cpu" title="Permanent link">&para;</a></h2>
@@ -2496,7 +2496,7 @@
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="s1">'hostname; stress-ng --version; htop --version'</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="s1">'nohup stress-ng --cpu 0 --cpu-load 90 --timeout 180s &gt;/tmp/lb-stress.log 2&gt;&amp;1 &amp;'</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="s1">'nohup stress-ng --cpu 0 --cpu-load 90 --timeout 180s &gt;/tmp/asg-web-stress.log 2&gt;&amp;1 &amp;'</span>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="s1">'pgrep -af stress-ng; uptime'</span>
 </code></pre></div>
 <p>별도 Bastion 터미널에서 CPU를 눈으로 확인할 수 있습니다.</p>
@@ -2531,12 +2531,12 @@
 <tr>
 <td>3</td>
 <td>ASG 이력</td>
-<td><code>lb-add-1</code> 실행</td>
+<td><code>lab-asg-web-add-1</code> 실행</td>
 </tr>
 <tr>
 <td>4</td>
 <td>Server</td>
-<td>새 <code>lab-lb-as...</code> 서버 생성</td>
+<td>새 <code>lab-asg-web...</code> 서버 생성</td>
 </tr>
 <tr>
 <td>5</td>
@@ -2567,8 +2567,8 @@
 <p>서로 다른 ASG Hostname이 보이고 합계가 40이면 성공입니다. 정확히 20회씩 나뉠 필요는 없습니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Count Name
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>----- ----
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>   22 lab-lb-as-aaaaa
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>   18 lab-lb-as-bbbbb
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>   22 lab-asg-web-aaaaa
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>   18 lab-asg-web-bbbbb
 </code></pre></div>
 <p>페이지를 새로고침하면서 Hostname과 Private IP가 바뀌는지도 확인합니다. 같은 원본 이미지로 만들어졌지만 <code>lb-demo-status.timer</code>가 각 서버의 실제 값을 다시 기록합니다.</p>
 <h2 id="11-step-9-scale-in">11. Step 9 - 부하 종료와 Scale-in 확인<a class="headerlink" href="#11-step-9-scale-in" title="Permanent link">&para;</a></h2>
@@ -2579,7 +2579,7 @@
 <ol>
 <li>ASG 평균 CPU가 20% 미만으로 내려갑니다.</li>
 <li>Scale-in Event가 발생합니다.</li>
-<li><code>lb-remove-1</code> 정책이 실행됩니다.</li>
+<li><code>lab-asg-web-remove-1</code> 정책이 실행됩니다.</li>
 <li>ASG 서버 수가 <code>2 → 1</code>이 됩니다.</li>
 <li>종료된 서버가 Target Group에서 자동 제거됩니다.</li>
 <li>Load Balancer URL은 계속 HTTP <code>200</code>을 반환합니다.</li>
