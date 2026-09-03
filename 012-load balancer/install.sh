@@ -49,7 +49,7 @@ EOF
   chmod 755 "${TEMP_POLICY_RC_D}"
 fi
 
-apt-get install -y ca-certificates curl nginx python3-minimal
+apt-get install -y ca-certificates curl htop nginx python3-minimal stress-ng
 
 mkdir -p "${APP_DIR}" "${WEB_ROOT}"
 
@@ -135,3 +135,4 @@ echo "Primary IP  : $(hostname -I 2>/dev/null | awk '{print $1}')"
 echo "Web root    : ${WEB_ROOT}"
 echo "Health check: /healthz"
 echo "Status JSON : /status.json"
+echo "Load tools  : stress-ng, htop"

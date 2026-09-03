@@ -18,8 +18,9 @@
   * [011 Static Website](<011-static website/README.md>)
 * Load Balancer 및 Auto Scaling 실습
   * [012 Load Balancer](<012-load balancer/README.md>)
-  * [013 Web Auto Scaling](<013-auto scaling/README.md>)
+  * [013 Auto Scaling Hands-on (1)](<013-auto scaling/README.md>)
+  * [014 Auto Scaling Hands-on (2)](<014-auto scaling/README.md>)
 * 데이터베이스 실습
-  * [014 Database Backup Recovery](<014-database backup recovery/README.md>)
-  * [015 Cloud DB Migration](<015-cloud db migration/README.md>)
+  * [015 Database Backup Recovery](<015-database backup recovery/README.md>)
+  * [016 Cloud DB Migration](<016-cloud db migration/README.md>)
 * [Web Lecture Notes](gitbook/README.md)

@@ -21,7 +21,7 @@
     "id": "lab003-web",
     "title": "웹 서버 설정",
     "source": "/003-three tier web app/web/install-web.sh",
-    "content": "웹 서버는 Nginx로 정적 프론트엔드를 제공하고 /api 요청을 고정 Backend로 프록시한다. 프런트 JavaScript는 Backend IP 대신 /api 상대경로를 사용한다. 003-three tier web app/web/.env의 BACKEND_UPSTREAM에는 Backend Private IP를 입력하며 이 값은 브라우저에 노출되지 않는다. 013에서는 Public ALB가 Auto Scaling Web 서버 앞에 추가되고 모든 Web 서버가 같은 Backend를 사용한다."
+    "content": "웹 서버는 Nginx로 정적 프론트엔드를 제공하고 /api 요청을 고정 Backend로 프록시한다. 프런트 JavaScript는 Backend IP 대신 /api 상대경로를 사용한다. 003-three tier web app/web/.env의 BACKEND_UPSTREAM에는 Backend Private IP를 입력하며 이 값은 브라우저에 노출되지 않는다. 014에서는 Public ALB가 Auto Scaling Web 서버 앞에 추가되고 모든 Web 서버가 같은 Backend를 사용한다."
   },
   {
     "id": "lab003-backend-db",

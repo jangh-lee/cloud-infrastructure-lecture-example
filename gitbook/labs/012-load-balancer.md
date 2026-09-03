@@ -2,7 +2,7 @@
 
 ## 목표
 
-여러 Ubuntu 웹 노드를 만들고 Load Balancer 뒤에 연결해 헬스체크와 트래픽 분산을 확인합니다.
+여러 Ubuntu 웹 노드를 만들고 Load Balancer 뒤에 연결해 헬스체크와 트래픽 분산을 확인합니다. 마지막에는 Target 서버 한 대를 이미지로 만들어 013 Auto Scaling 실습에서 그대로 재사용합니다.
 
 `userinput`은 원하는 표시 문구 하나만 사용하고, 실제 백엔드 구분은 서버마다 자동으로 달라지는 Hostname과 IP로 확인합니다.
 
@@ -56,9 +56,13 @@ userinput="${userinput}" "${INIT_FILE}"
 ```bash
 curl http://localhost/healthz
 curl http://localhost/status.json
+stress-ng --version
+htop --version
 ```
 
 `status.json`에서 `serverName`, `hostname`, `primaryIp`, `allIps`를 확인합니다. 공인 IP는 Naver Cloud에서 NAT 방식으로 연결될 수 있으므로 `primaryIp`에는 일반적으로 서버 NIC의 사설 IP가 표시됩니다.
+
+`stress-ng`는 013에서 CPU 부하를 발생시키고, `htop`은 CPU와 프로세스 상태를 눈으로 확인할 때 사용합니다. 통합 Init Script가 두 패키지를 Nginx와 함께 설치하므로 013에서 다시 설치하지 않습니다.
 
 ## 503 복구 확인
 
@@ -189,3 +193,41 @@ Count Name
 ```
 
 새 쿠키 파일, 새 PowerShell 세션, 시크릿 브라우저는 새로운 세션이므로 처음 선택되는 서버가 달라질 수 있습니다. 고정된 Target이 Unhealthy 상태가 되어 제외되어도 다른 서버로 전환될 수 있습니다.
+
+## 013용 서버 이미지 준비
+
+012 실습을 마친 뒤 Target 서버 한 대를 이미지 원본으로 사용합니다. 먼저 서버에서 아래 명령을 한 번에 실행합니다.
+
+이미 012 서버를 만들어 둔 경우에는 이 페이지 위쪽의 **통합 Init Script** 코드 박스를 이미지 원본 서버에서 다시 실행합니다. 최신 설치기가 Nginx 설정을 갱신하고 `stress-ng`와 `htop`을 추가합니다.
+
+```bash
+sudo systemctl is-enabled nginx lb-demo-status.timer
+sudo systemctl is-active nginx lb-demo-status.timer
+curl -fsS http://127.0.0.1/healthz
+curl -fsS http://127.0.0.1/status.json
+stress-ng --version
+htop --version
+```
+
+`enabled`, `active`, `ok`, 현재 서버의 Hostname과 Private IP, 두 패키지 버전이 모두 보이면 이미지를 생성합니다.
+
+1. **Services > Compute > Server > Server**로 이동합니다.
+2. 확인한 012 Target 서버 한 대를 선택합니다.
+3. **서버 관리 및 설정 변경 > 내 서버 이미지 생성**을 클릭합니다.
+
+| 항목 | 값 |
+| --- | --- |
+| 이미지 이름 | `lab-lb-web-image-v1` |
+| 설명 | `012 load balancer target for auto scaling` |
+
+**Server Image**에서 상태가 `생성됨`이 되면 013으로 넘어갑니다. Nginx, 상태 페이지, `stress-ng`, `htop`, 상태 갱신 timer가 이미지에 모두 포함되므로 013 Launch Configuration에는 별도 Init Script를 넣지 않습니다.
+
+!!! note "복제 서버의 Hostname과 IP"
+    이미지 안의 `lb-demo-status.timer`가 부팅 후 `/status.json`을 다시 만들기 때문에 Auto Scaling으로 생성된 서버는 원본이 아니라 자신의 Hostname과 Private IP를 표시합니다.
+
+### 012 완료 기준
+
+- [ ] Load Balancer URL에서 두 개 이상의 Hostname이 집계됩니다.
+- [ ] 이미지 원본 서버에서 `stress-ng`와 `htop`이 실행됩니다.
+- [ ] `lab-lb-web-image-v1` 상태가 `생성됨`입니다.
+- [ ] 012 Load Balancer와 Target Group은 삭제하지 않고 013에서 재사용합니다.

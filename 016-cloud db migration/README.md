@@ -1,4 +1,4 @@
-# 015 Cloud DB for MySQL Migration
+# 016 Cloud DB for MySQL Migration
 
 003번 게시판 실습에서 Ubuntu 서버에 직접 설치한 MariaDB/MySQL 데이터를 Naver Cloud `Cloud DB for MySQL`로 마이그레이션하는 실습입니다.
 
@@ -165,7 +165,7 @@ Naver Cloud DB for MySQL의 DB 사용자 비밀번호 입력 제한을 피하려
 Source DB 서버에서:
 
 ```bash
-cd "015-cloud db migration/scripts"
+cd "016-cloud db migration/scripts"
 sudo SOURCE_DB_ADMIN_PASSWORD='RootPass123!' \
   MIGRATION_USER='dms_migration' \
   MIGRATION_PASSWORD='MigratePass123!' \
@@ -209,7 +209,7 @@ sudo SOURCE_DB_ADMIN_PASSWORD='RootPass123!' \
 Source DB의 binlog 설정, 마이그레이션 관련 전역 권한, `chapter3_board` 스키마 권한과 현재 게시글 범위를 한 번에 확인하려면 다음 SQL을 실행합니다.
 
 ```bash
-cd "015-cloud db migration"
+cd "016-cloud db migration"
 sudo mariadb -u root \
   -p chapter3_board \
   < sql/source-readiness.sql
@@ -415,7 +415,7 @@ sudo systemctl stop chapter3-backend
 Source DB에서 덤프 파일 생성:
 
 ```bash
-cd "015-cloud db migration/scripts"
+cd "016-cloud db migration/scripts"
 
 SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
 SOURCE_DB_USER='chapter3_user' \
@@ -472,7 +472,7 @@ MYSQL_PWD='TARGET_PASSWORD' mysql \
 Source DB와 Target DB의 데이터 수와 내용 지문을 비교합니다.
 
 ```bash
-cd "015-cloud db migration/scripts"
+cd "016-cloud db migration/scripts"
 
 SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
 SOURCE_DB_USER='chapter3_user' \
@@ -623,7 +623,7 @@ ORDER BY duplicate_candidate_count DESC, title;
 각 DB의 스키마, ID·시간 범위, 체크섬, 빈 값·미래 시각 같은 이상 데이터, 중복 후보, 최신 10건의 실제 제목·본문과 작성자별 건수를 직접 확인하려면 동일한 SQL을 Source와 Target에 각각 실행합니다.
 
 ```bash
-cd "015-cloud db migration"
+cd "016-cloud db migration"
 
 mysql -h SOURCE_DB_PRIVATE_IP \
   -u chapter3_user \
@@ -643,7 +643,7 @@ DMS로 변경분까지 이관하는 동안에는 Source에 쓰기가 계속 발�
 백엔드 서버에서 `.env`의 DB 접속 정보를 Cloud DB로 바꿉니다.
 
 ```bash
-cd "015-cloud db migration/scripts"
+cd "016-cloud db migration/scripts"
 
 sudo BACKEND_ENV_FILE='/opt/chapter3-backend/.env' \
   DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
@@ -702,7 +702,7 @@ Slave_SQL_Running: No
 수업 서버를 재설치해도 되는 경우에는 Source 데이터를 백업한 뒤 Ubuntu 공식 MySQL 8.0으로 변환하고 DMS 작업을 새로 생성할 수 있습니다. 다음 스크립트는 `chapter3_board`를 덤프하고 MariaDB 데이터·설정을 별도 백업 디렉터리로 이동한 후 MySQL을 설치하므로 운영 서버에서는 스냅샷을 먼저 생성해야 합니다.
 
 ```bash
-cd "/root/cloud-infrastructure-lecture-example/015-cloud db migration/scripts"
+cd "/root/cloud-infrastructure-lecture-example/016-cloud db migration/scripts"
 sudo CONFIRM_CONVERSION=YES ./convert-mariadb-source-to-mysql.sh
 ```
 
@@ -726,7 +726,7 @@ You have an error in your SQL syntax ... near 'LOG STATUS' at line 1 (1064)
 `SHOW BINARY LOG STATUS`는 MySQL 8.4 명령이며 MySQL 8.0은 `SHOW MASTER STATUS`를 사용합니다. 네트워크나 DMS 계정 권한 문제가 아니므로 재시작만 반복해도 해결되지 않습니다. 이 실습처럼 Target 버전을 바꿀 수 없다면 Source를 같은 MySQL 8.4 LTS로 업그레이드한 뒤 실패 작업을 삭제하고 새 작업을 생성합니다.
 
 ```bash
-cd "/root/cloud-infrastructure-lecture-example/015-cloud db migration/scripts"
+cd "/root/cloud-infrastructure-lecture-example/016-cloud db migration/scripts"
 sudo CONFIRM_UPGRADE=YES ./upgrade-mysql-source-to-84.sh
 sudo SOURCE_DB_ADMIN_PASSWORD='...' ./check-source-db.sh
 ```

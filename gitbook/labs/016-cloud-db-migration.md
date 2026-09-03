@@ -1,4 +1,4 @@
-# 015 Cloud DB Migration
+# 016 Cloud DB Migration
 
 ## 목표
 
@@ -60,7 +60,7 @@ erDiagram
 Naver Cloud DB for MySQL의 DB 사용자 비밀번호 입력 제한을 피하려고 예시 비밀번호는 2자 이상, 21자 이하인 `MigratePass123!`를 사용합니다.
 
 ```bash
-cd "015-cloud db migration/scripts"
+cd "016-cloud db migration/scripts"
 sudo MIGRATION_USER='dms_migration' \
   MIGRATION_PASSWORD='MigratePass123!' \
   SOURCE_DATABASE='chapter3_board' \
@@ -165,7 +165,7 @@ sudo systemctl stop chapter3-backend
 Source DB에서 덤프 파일 생성:
 
 ```bash
-cd "015-cloud db migration/scripts"
+cd "016-cloud db migration/scripts"
 
 SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
 SOURCE_DB_USER='chapter3_user' \
@@ -242,4 +242,4 @@ curl http://localhost:4000/api/posts
 
 ## 참고
 
-- 상세 자료는 저장소의 `015-cloud db migration/README.md`를 확인합니다.
+- 상세 자료는 저장소의 `016-cloud db migration/README.md`를 확인합니다.

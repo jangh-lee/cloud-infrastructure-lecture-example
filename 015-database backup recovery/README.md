@@ -1,4 +1,4 @@
-# 014 Database Backup Recovery
+# 015 Database Backup Recovery
 
 데이터베이스 백업 및 복구, 특히 **특정시점 복구(PITR, Point-in-Time Recovery)**를 실습하기 위한 예제입니다.
 
@@ -86,7 +86,7 @@ mysql -h DB_HOST -P 3306 -u DB_USER -p DB_NAME < sql/table_only.sql
 Ubuntu 서버에 이 저장소를 받은 뒤 006 폴더로 이동합니다.
 
 ```bash
-cd "014-database backup recovery"
+cd "015-database backup recovery"
 chmod +x scripts/db-writer.sh
 sudo ./scripts/db-writer.sh install
 ```

@@ -12,7 +12,7 @@
 cloud-infrastructure-lecture-example
 ├── 001-api server
 ├── ...
-├── 015-cloud db migration
+├── 016-cloud db migration
 └── gitbook
     ├── README.md
     ├── SUMMARY.md

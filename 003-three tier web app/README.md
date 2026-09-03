@@ -27,7 +27,7 @@
 - `DB_USER`
 - `DB_PASSWORD`
 
-`BACKEND_UPSTREAM`은 브라우저에 공개하는 값이 아니라 Web Nginx가 API를 전달할 내부 주소입니다. 003과 013 모두 고정 Backend Private IP를 사용합니다. 013에서는 Public ALB가 여러 Web 서버 앞에 추가됩니다.
+`BACKEND_UPSTREAM`은 브라우저에 공개하는 값이 아니라 Web Nginx가 API를 전달할 내부 주소입니다. 003과 014 모두 고정 Backend Private IP를 사용합니다. 014에서는 Public ALB가 여러 Web 서버 앞에 추가됩니다.
 
 ## 2. 네트워크 구성
 
@@ -116,7 +116,7 @@ DB_BIND_ADDRESS=0.0.0.0
 | `DB_ALLOWED_HOST` | 게시판 DB 계정의 접속 허용 호스트 | 고정 Backend 서버의 Private IP를 입력합니다. |
 | `DB_BIND_ADDRESS` | MariaDB가 연결을 수신할 주소 | Private Network의 Backend 연결을 받도록 `0.0.0.0`을 사용하고, 실제 접근 범위는 ACG로 제한합니다. |
 
-`DB_ALLOWED_HOST`에는 고정 Backend의 Private IP를 입력합니다. 013에서도 Auto Scaling 대상은 Web 계층이므로 Backend와 DB 연결값은 바뀌지 않습니다.
+`DB_ALLOWED_HOST`에는 고정 Backend의 Private IP를 입력합니다. 014에서도 Auto Scaling 대상은 Web 계층이므로 Backend와 DB 연결값은 바뀌지 않습니다.
 
 ### DB 서버
 
@@ -169,7 +169,7 @@ LAB_STRESS_ENABLED="false"
 | `AUTO_POST_INTERVAL_SECONDS` | 자동 게시글 등록 간격 | `AUTO_POST_ENABLED=true`일 때 적용되는 초 단위 값입니다. |
 | `AUTO_POST_TOTAL` | 자동 등록할 게시글의 최대 개수 | 필요한 실습 데이터 수를 정수로 입력합니다. |
 | `AUTO_POST_API_URL` | 자동 등록 기능이 호출할 게시글 API | 같은 Backend를 호출하므로 기본값 `http://127.0.0.1:4000/api/posts`를 사용합니다. |
-| `LAB_STRESS_ENABLED` | Backend 부하 발생용 실습 API 사용 여부 | 003과 Web Auto Scaling을 다루는 013에서는 `false`를 유지합니다. |
+| `LAB_STRESS_ENABLED` | Backend 부하 발생용 실습 API 사용 여부 | 003과 Web Auto Scaling을 다루는 014에서는 `false`를 유지합니다. |
 
 ### 백엔드 서버
 
@@ -202,7 +202,7 @@ sudo ./install-backend.sh configure
 
 이 기능은 백엔드 서버 안에서 별도 systemd 서비스가 1분에 한 번씩 자기 API에 `POST /api/posts`를 호출하는 방식입니다. 작성자는 여러 명처럼 보이도록 샘플 이름을 섞고, 제목과 본문은 실습 주제 조합으로 300개까지 생성합니다. 샘플은 매번 랜덤으로 선택하며, 이미 사용한 샘플 번호는 상태 파일에 저장해서 중복 등록하지 않습니다.
 
-`LAB_STRESS_ENABLED`는 별도의 CPU 부하 검증이 필요할 때만 `true`로 설정합니다. 활성화하면 수업용 `GET /api/stress`가 열리므로 인터넷에 공개된 운영 환경에서는 사용하지 않습니다. 013번 기본 실습에서는 사용하지 않으므로 `false`를 유지합니다. `GET /api/instance`와 응답 헤더 `X-Backend-Instance`로 요청을 처리한 백엔드 호스트를 확인할 수 있습니다.
+`LAB_STRESS_ENABLED`는 별도의 CPU 부하 검증이 필요할 때만 `true`로 설정합니다. 활성화하면 수업용 `GET /api/stress`가 열리므로 인터넷에 공개된 운영 환경에서는 사용하지 않습니다. 014번 게시판 Auto Scaling 실습에서는 사용하지 않으므로 `false`를 유지합니다. `GET /api/instance`와 응답 헤더 `X-Backend-Instance`로 요청을 처리한 백엔드 호스트를 확인할 수 있습니다.
 
 상태 확인:
 
@@ -228,7 +228,7 @@ SITE_TITLE="DevForum Practice Board"
 
 | 변수 | 의미 | 입력 기준 |
 | --- | --- | --- |
-| `SITE_BASE_URL` | 사용자가 브라우저로 접속할 대표 Web 주소 | 003에서는 Web Public IP, 013에서는 Public ALB 주소를 `http://` 또는 `https://`와 함께 입력합니다. |
+| `SITE_BASE_URL` | 사용자가 브라우저로 접속할 대표 Web 주소 | 003에서는 Web Public IP, 014에서는 Public ALB 주소를 `http://` 또는 `https://`와 함께 입력합니다. |
 | `BACKEND_UPSTREAM` | Nginx가 `/api` 요청을 전달할 Backend 주소 | 고정 Backend의 Private IP와 포트까지 입력합니다. 예: `http://10.0.1.25:4000` |
 | `SITE_TITLE` | 게시판 화면에 표시할 서비스 제목 | 실습에서 구분하기 쉬운 원하는 제목을 입력합니다. |
 
@@ -477,4 +477,4 @@ curl -i http://127.0.0.1/api/instance
 http://WEB_SERVER_PUBLIC_IP/
 ```
 
-브라우저 개발자 도구의 Network 탭에서 API 요청 주소가 Backend IP가 아니라 `http://WEB_SERVER_PUBLIC_IP/api/...`로 표시되는지 확인합니다. 013에서는 진입 주소가 Public ALB로 바뀌지만 각 Web 서버의 `BACKEND_UPSTREAM`은 같은 고정 Backend Private IP를 유지합니다.
+브라우저 개발자 도구의 Network 탭에서 API 요청 주소가 Backend IP가 아니라 `http://WEB_SERVER_PUBLIC_IP/api/...`로 표시되는지 확인합니다. 014에서는 진입 주소가 Public ALB로 바뀌지만 각 Web 서버의 `BACKEND_UPSTREAM`은 같은 고정 Backend Private IP를 유지합니다.

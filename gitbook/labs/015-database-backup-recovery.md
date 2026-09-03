@@ -1,4 +1,4 @@
-# 014 Database 백업 및 복구
+# 015 Database 백업 및 복구
 
 ## 목표
 
@@ -7,14 +7,14 @@ Ubuntu 서버에서 30초마다 MySQL 호환 DB에 데이터를 기록하고, �
 실습 폴더:
 
 ```text
-014-database backup recovery
+015-database backup recovery
 ```
 
 ## 설치
 
 ```bash
 cd ~/cloud-infrastructure-lecture-example
-cd "014-database backup recovery"
+cd "015-database backup recovery"
 
 chmod +x scripts/db-writer.sh
 sudo ./scripts/db-writer.sh install

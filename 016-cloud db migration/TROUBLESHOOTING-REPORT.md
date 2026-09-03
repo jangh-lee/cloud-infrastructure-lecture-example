@@ -52,7 +52,7 @@ The DMS dump client used the MySQL 8.4 command `SHOW BINARY LOG STATUS`, while M
 Recovery used for the lab:
 
 ```bash
-cd "/root/cloud-infrastructure-lecture-example/015-cloud db migration/scripts"
+cd "/root/cloud-infrastructure-lecture-example/016-cloud db migration/scripts"
 sudo CONFIRM_UPGRADE=YES ./upgrade-mysql-source-to-84.sh
 ```
 

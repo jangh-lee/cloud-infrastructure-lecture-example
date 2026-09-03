@@ -45,12 +45,13 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 
 | Folder | Topic |
 | --- | --- |
-| [`012-load balancer`](./012-load%20balancer/) | 여러 Ubuntu 웹 노드를 Load Balancer 뒤에 연결해 헬스체크와 트래픽 분산을 확인하는 예제입니다. |
-| [`013-auto scaling`](./013-auto%20scaling/) | 003번 Web 이미지를 사용해 Public ALB 뒤에 Web Auto Scaling Group을 구성하고 Bastion 부하로 자동 확장을 확인합니다. 전체 절차는 [GitBook 013 교재](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/013-auto-scaling/)에서 진행합니다. |
+| [`012-load balancer`](./012-load%20balancer/) | 여러 Ubuntu 웹 노드의 분산을 확인하고 `stress-ng`가 포함된 서버 이미지를 준비합니다. |
+| [`013-auto scaling`](./013-auto%20scaling/) | 012번의 이미지, Load Balancer, Target Group을 그대로 사용해 기본 Auto Scaling을 확인합니다. |
+| [`014-auto scaling`](./014-auto%20scaling/) | 003번 게시판 Web 이미지를 사용해 Public ALB 뒤에서 Web Auto Scaling과 데이터 유지를 확인합니다. |
 
 ### 6. 데이터베이스 실습
 
 | Folder | Topic |
 | --- | --- |
-| [`014-database backup recovery`](./014-database%20backup%20recovery/) | Ubuntu 서버에서 테스트 데이터를 기록하며 데이터베이스 백업, 복구, 특정시점 복구(PITR)를 실습합니다. |
-| [`015-cloud db migration`](./015-cloud%20db%20migration/) | 003번 게시판 DB를 Cloud DB for MySQL로 마이그레이션하고 정합성과 백엔드 연결을 검증합니다. |
+| [`015-database backup recovery`](./015-database%20backup%20recovery/) | Ubuntu 서버에서 테스트 데이터를 기록하며 데이터베이스 백업, 복구, 특정시점 복구(PITR)를 실습합니다. |
+| [`016-cloud db migration`](./016-cloud%20db%20migration/) | 003번 게시판 DB를 Cloud DB for MySQL로 마이그레이션하고 정합성과 백엔드 연결을 검증합니다. |

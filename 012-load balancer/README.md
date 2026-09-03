@@ -23,7 +23,7 @@ Ubuntu 서버에서 `nginx` 기반으로 아주 단순한 백엔드 노드를 �
 ## 구성 파일
 
 - `init.sh`: 신규 서버와 기존 서버가 공통으로 실행하는 통합 Init Script
-- `install.sh`: Ubuntu 서버 설치 스크립트
+- `install.sh`: Nginx와 Auto Scaling 부하 도구를 함께 설치하는 Ubuntu 스크립트
 - `update_status.sh`: 상태 JSON 갱신 스크립트
 - `templates/index.html.template`: 정적 HTML 템플릿
 
@@ -58,6 +58,8 @@ userinput="${userinput}" "${INIT_FILE}"
 ```bash
 curl http://localhost/healthz
 curl http://localhost/status.json
+stress-ng --version
+htop --version
 ```
 
 `status.json`에서는 다음 키를 확인합니다.
@@ -70,6 +72,33 @@ curl http://localhost/status.json
   "allIps": "10.x.x.x"
 }
 ```
+
+`stress-ng`는 013 Auto Scaling 실습에서 CPU 임계값을 넘기기 위한 도구이고, `htop`은 부하 상태를 눈으로 확인하기 위한 도구입니다. 두 패키지는 통합 Init Script가 Nginx와 함께 설치하므로 013에서 다시 설치하지 않습니다.
+
+## 013에서 재사용할 서버 이미지 만들기
+
+012 분산 실습을 마친 뒤 Target 서버 한 대를 이미지 원본으로 사용합니다. 이미지 생성 전에 아래 결과를 확인합니다.
+
+이전에 012 서버를 만든 경우에는 위의 **통합 Init Script** 코드 박스를 이미지 원본 서버에서 다시 실행합니다. 최신 설치기가 기존 Nginx 설정은 유지·갱신하고 `stress-ng`와 `htop`을 추가합니다.
+
+```bash
+sudo systemctl is-enabled nginx lb-demo-status.timer
+sudo systemctl is-active nginx lb-demo-status.timer
+curl -fsS http://127.0.0.1/healthz
+curl -fsS http://127.0.0.1/status.json
+stress-ng --version
+htop --version
+```
+
+Naver Cloud 콘솔의 **Services > Compute > Server > Server**에서 확인한 서버를 선택하고 **서버 관리 및 설정 변경 > 내 서버 이미지 생성**을 실행합니다.
+
+| 항목 | 값 |
+| --- | --- |
+| 이미지 이름 | `lab-lb-web-image-v1` |
+| 이미지 원본 | 012 Target 서버 한 대 |
+| 포함 항목 | Nginx, 상태 페이지, `stress-ng`, `htop`, 상태 갱신 timer |
+
+이미지 상태가 `생성됨`이면 013에서 이 이미지를 그대로 선택합니다. 복제 서버가 부팅되면 timer가 `status.json`을 새 Hostname과 Private IP로 갱신하므로 서버별 응답을 구분할 수 있습니다.
 
 ## 503 확인
 
