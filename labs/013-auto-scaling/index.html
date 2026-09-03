@@ -2289,6 +2289,7 @@
 </tr>
 </tbody>
 </table>
+<p><code>서버 이름 Prefix</code>는 최대 7자까지 입력할 수 있으므로 이 실습에서는 <code>asg</code>로 통일합니다.</p>
 <p>정책, 일정, 통보는 우선 <strong>나중에 설정</strong>으로 두고 생성합니다.</p>
 <div class="admonition note">
 <p class="admonition-title">1분 설정의 의미</p>
@@ -2322,7 +2323,7 @@
 <h3 id="_3">확인하고 넘어가기<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <p>다음 순서로 상태를 확인합니다.</p>
 <ol>
-<li>이름이 <code>lab-asg-web...</code>인 서버 한 대가 생성됩니다.</li>
+<li>이름이 <code>asg...</code>인 서버 한 대가 생성됩니다.</li>
 <li>012 Target Group에 새 서버가 자동 등록됩니다.</li>
 <li><code>/healthz</code> 검사 후 새 Target 상태가 <code>Healthy</code>가 됩니다.</li>
 <li>Load Balancer URL의 <code>/status.json</code>이 정상 응답합니다.</li>
@@ -2334,7 +2335,7 @@
 <h2 id="6-step-4-target-asg-target">6. Step 4 - 수동 Target을 ASG Target으로 교체<a class="headerlink" href="#6-step-4-target-asg-target" title="Permanent link">&para;</a></h2>
 <p>ASG 서버가 <code>Healthy</code>가 된 뒤에만 012에서 수동 등록한 서버들을 Target Group에서 제거합니다. 서버 자체를 바로 삭제할 필요는 없으며 Target 목록에서만 제거해도 됩니다.</p>
 <p>교체 후 Target Group에는 다음 서버만 남아야 합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>lab-asg-web...    Healthy
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>asg...    Healthy
 </code></pre></div>
 <p>Load Balancer를 20번 호출해 ASG 서버 한 대만 응답하는지 확인합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">20</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
@@ -2343,7 +2344,7 @@
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
 </code></pre></div>
 <p>정상 예시는 다음과 같습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>20 lab-asg-web-xxxxx
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>20 asg-xxxxx
 </code></pre></div>
 <p>기존 012 Hostname이 섞여 나오면 수동 Target이 아직 Target Group에 남아 있는지 확인합니다.</p>
 <h2 id="7-step-5-scaling-policy">7. Step 5 - Scaling Policy 생성<a class="headerlink" href="#7-step-5-scaling-policy" title="Permanent link">&para;</a></h2>
@@ -2536,7 +2537,7 @@
 <tr>
 <td>4</td>
 <td>Server</td>
-<td>새 <code>lab-asg-web...</code> 서버 생성</td>
+<td>새 <code>asg...</code> 서버 생성</td>
 </tr>
 <tr>
 <td>5</td>
@@ -2567,8 +2568,8 @@
 <p>서로 다른 ASG Hostname이 보이고 합계가 40이면 성공입니다. 정확히 20회씩 나뉠 필요는 없습니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Count Name
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>----- ----
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>   22 lab-asg-web-aaaaa
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>   18 lab-asg-web-bbbbb
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>   22 asg-aaaaa
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>   18 asg-bbbbb
 </code></pre></div>
 <p>페이지를 새로고침하면서 Hostname과 Private IP가 바뀌는지도 확인합니다. 같은 원본 이미지로 만들어졌지만 <code>lb-demo-status.timer</code>가 각 서버의 실제 값을 다시 기록합니다.</p>
 <h2 id="11-step-9-scale-in">11. Step 9 - 부하 종료와 Scale-in 확인<a class="headerlink" href="#11-step-9-scale-in" title="Permanent link">&para;</a></h2>
