@@ -254,13 +254,28 @@ sudo apt-get install -y hey
 LB_URL="http://YOUR_LOAD_BALANCER_URL"
 ```
 
-먼저 `/stress`가 응답하는지 한 번 확인합니다.
+먼저 `/stress`가 **JSON으로 응답하고 실제 부하가 시작됐는지** 확인합니다.
 
 ```bash
-curl -fsS -H 'X-Lab-Token: asg-lab' "$LB_URL/stress"
+STRESS_RESPONSE="$(curl -fsS -H 'X-Lab-Token: asg-lab' "$LB_URL/stress")"
+printf '%s\n' "$STRESS_RESPONSE"
+
+printf '%s' "$STRESS_RESPONSE" | grep -q '"stressRunning":true' && \
+  echo "PASS: CPU stress started" || \
+  { echo "FAIL: /stress API is not installed" >&2; false; }
 ```
 
-`status`, 요청을 처리한 `hostname`, `durationSeconds`가 출력되면 아래 명령으로 5분 동안 부하를 발생시킵니다.
+정상이면 다음처럼 JSON과 `PASS`가 출력됩니다. `stressRunning`이 `true`여야 실제 `stress-ng`가 실행된 것입니다.
+
+```text
+{"status":"started","hostname":"asg-abcde","durationSeconds":20,"stressRunning":true}
+PASS: CPU stress started
+```
+
+!!! danger "HTML 페이지가 출력되면 부하가 아닙니다"
+    게시판이나 `LB Demo Node` HTML이 출력되면 현재 Target 서버가 예전 버전이라 `/stress` 요청을 메인 페이지로 처리한 것입니다. [012 통합 Init Script](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/012-load-balancer/#init-script)를 기존 Target 서버에서 다시 실행하고 위 확인 명령을 재실행합니다. 이미 `lab-asg-web-image-v1`을 만들었다면 최신 설치가 반영된 서버로 이미지를 다시 생성해야 새 ASG 서버에도 `/stress`가 포함됩니다.
+
+`PASS`를 확인한 뒤 아래 명령으로 5분 동안 부하를 발생시킵니다.
 
 ```bash
 hey -z 5m -c 20 -q 5 -disable-keepalive \
@@ -276,6 +291,18 @@ hey -z 5m -c 20 -q 5 -disable-keepalive \
 | `-disable-keepalive` | 매 요청에 새 연결을 사용해 새 Target에도 트래픽 전달 |
 
 각 `/stress` 요청은 해당 Target 서버에서 최대 하나의 `stress-ng`만 실행합니다. CPU 부하는 20초 뒤 자동 종료되지만 요청이 계속 들어오면 다음 20초 부하가 다시 시작됩니다. 새 ASG 서버가 `Healthy`가 되면 Load Balancer의 새 연결을 받아 그 서버에도 자동으로 CPU 부하가 발생합니다.
+
+`hey`를 실행해 둔 상태에서 **두 번째 Bastion 터미널**을 열어 아래 명령을 실행하면, LB가 선택한 서버별 부하 상태를 2초 간격으로 확인할 수 있습니다.
+
+```bash
+for i in $(seq 1 30); do
+  curl -fsS -H 'X-Lab-Token: asg-lab' "$LB_URL/stress-status"
+  echo
+  sleep 2
+done
+```
+
+`hostname`이 달라지고 각 응답의 `stressRunning`이 `true`이면 새 서버까지 부하를 받고 있는 것입니다. `loadAverage1m`은 CPU 사용률이 아니라 최근 1분 동안 실행 중이거나 실행을 기다린 작업 수이므로, 최종 CPU 임계값은 Cloud Insight의 `SERVER/avg_cpu_used_rto` 그래프로 확인합니다.
 
 !!! warning "실습 비용 제한"
     `/stress` 응답은 1KB보다 작고 부하 명령은 5분 후 종료됩니다. 동시성이나 실행 시간을 임의로 크게 늘리지 말고, 중간에 멈추려면 `Ctrl+C`를 누릅니다. 테스트가 끝나면 ASG가 최소 용량 1대로 돌아오는지 반드시 확인합니다. Load Balancer 처리 트래픽은 별도 과금될 수 있으므로 비용이 0원이라고 보장되지는 않습니다. 자세한 기준은 [Naver Cloud Load Balancer 요금](https://www.ncloud.com/api-cms/service-product/static/loadBalancer)을 확인합니다.
@@ -363,6 +390,7 @@ Scale-in Rule을 활성화하고 다음 순서로 확인합니다.
 | CPU가 올라도 확장 안 됨 | 상세 모니터링, Event 대상 ASG, Metric, Policy 액션 |
 | `/stress`가 403 | `X-Lab-Token: asg-lab` 헤더 확인 |
 | `/stress`가 502 | 012 통합 Init Script 재실행 후 새 이미지 생성 |
+| `/stress`가 HTML 반환 | 예전 Nginx 설정이므로 012 통합 Init Script 재실행 후 이미지 재생성 |
 | 새 서버 CPU가 오르지 않음 | Target `Healthy`, `hey` 실행 유지, `-disable-keepalive` 확인 |
 | 서버가 너무 빨리 축소됨 | Scale-in Rule을 잠시 비활성화 |
 | 부팅 중 서버가 반납됨 | Health Check 보류 기간을 `300`초로 변경 |

@@ -41,6 +41,20 @@ def start_stress():
         return "started"
 
 
+def get_stress_status():
+    with process_lock:
+        running = stress_process is not None and stress_process.poll() is None
+        pid = stress_process.pid if running else None
+
+    return {
+        "status": "ok",
+        "hostname": os.uname().nodename,
+        "stressRunning": running,
+        "stressPid": pid,
+        "loadAverage1m": round(os.getloadavg()[0], 2),
+    }
+
+
 class StressHandler(BaseHTTPRequestHandler):
     def send_json(self, status_code, payload):
         body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
@@ -58,12 +72,16 @@ class StressHandler(BaseHTTPRequestHandler):
             self.send_json(200, {"status": "ok"})
             return
 
-        if path != "/stress":
+        if path not in {"/stress", "/stress-status"}:
             self.send_json(404, {"error": "not_found"})
             return
 
         if self.headers.get("X-Lab-Token") != TOKEN:
             self.send_json(403, {"error": "forbidden"})
+            return
+
+        if path == "/stress-status":
+            self.send_json(200, get_stress_status())
             return
 
         state = start_stress()
@@ -73,6 +91,7 @@ class StressHandler(BaseHTTPRequestHandler):
                 "status": state,
                 "hostname": os.uname().nodename,
                 "durationSeconds": STRESS_SECONDS,
+                "stressRunning": True,
             },
         )
 

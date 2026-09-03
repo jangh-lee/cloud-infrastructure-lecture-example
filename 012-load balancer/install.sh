@@ -90,6 +90,14 @@ server {
         proxy_read_timeout 5s;
     }
 
+    location = /stress-status {
+        proxy_pass http://127.0.0.1:8081/stress-status;
+        proxy_set_header X-Lab-Token $http_x_lab_token;
+        proxy_set_header Host $host;
+        proxy_connect_timeout 2s;
+        proxy_read_timeout 5s;
+    }
+
     location / {
         try_files $uri $uri/ /index.html;
     }
@@ -174,3 +182,4 @@ echo "Health check: /healthz"
 echo "Status JSON : /status.json"
 echo "Load tools  : stress-ng, htop"
 echo "Stress API  : /stress (X-Lab-Token: asg-lab)"
+echo "Stress state: /stress-status (X-Lab-Token: asg-lab)"

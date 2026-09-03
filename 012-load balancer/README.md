@@ -59,6 +59,7 @@ userinput="${userinput}" "${INIT_FILE}"
 ```bash
 curl http://localhost/healthz
 curl http://localhost/status.json
+curl -fsS -H 'X-Lab-Token: asg-lab' http://localhost/stress-status
 sudo systemctl is-active lb-demo-stress.service
 stress-ng --version
 htop --version
@@ -77,7 +78,7 @@ htop --version
 
 `stress-ng`는 013 Auto Scaling 실습에서 CPU 임계값을 넘기기 위한 도구이고, `htop`은 서버에 직접 접속해 문제를 확인할 때 사용할 수 있는 선택 도구입니다. 두 패키지는 통합 Init Script가 Nginx와 함께 설치되며, 기본 부하 실습에는 SSH를 사용하지 않습니다.
 
-통합 설치기는 `lb-demo-stress.service`도 설치합니다. 이 서비스는 `127.0.0.1:8081`에서만 동작하며 Nginx의 `/stress`와 실습 토큰을 통해 호출됩니다. 요청이 반복되어도 서버마다 `stress-ng` 프로세스는 하나만 실행되고 20초 뒤 자동 종료됩니다.
+통합 설치기는 `lb-demo-stress.service`도 설치합니다. 이 서비스는 `127.0.0.1:8081`에서만 동작하며 Nginx의 `/stress`와 실습 토큰을 통해 호출됩니다. 요청이 반복되어도 서버마다 `stress-ng` 프로세스는 하나만 실행되고 20초 뒤 자동 종료됩니다. `/stress-status`에서는 요청을 처리한 Hostname, 부하 실행 여부, 프로세스 ID와 1분 Load Average를 확인할 수 있습니다.
 
 012 실습이 끝나도 Load Balancer, Target Group, Target 서버 한 대는 삭제하지 않습니다. 013 Step 1에서 이 Target 서버를 선택해 내 서버 이미지를 만듭니다. 이미지에는 HTTP Stress API와 `stress-ng`가 함께 포함됩니다.
 
