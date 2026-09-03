@@ -73,7 +73,7 @@ Auto Scaling Nginx 서버 1~3대         새로 구성
 
 | 항목 | 값 |
 | --- | --- |
-| 이름 | `lab-lb-lc-v1` |
+| 이름 | `lab-asg-web-lc-v1` |
 | 서버 이미지 | `lab-asg-web-image-v1` |
 | 서버 사양 | 012 원본과 같거나 수업용 최소 사양 |
 | 인증키 | 수업용 인증키 |
@@ -85,20 +85,20 @@ Auto Scaling Nginx 서버 1~3대         새로 구성
 
 - [ ] Launch Configuration 이미지가 `lab-asg-web-image-v1`입니다.
 - [ ] Init Script를 중복 입력하지 않았습니다.
-- [ ] 이름이 `lab-lb-lc-v1`로 목록에 표시됩니다.
+- [ ] 이름이 `lab-asg-web-lc-v1`로 목록에 표시됩니다.
 
 ## 5. Step 3 - Auto Scaling Group 생성
 
 1. **Services > Compute > Auto Scaling > Auto Scaling Group**으로 이동합니다.
 2. **Auto Scaling Group 생성**을 클릭합니다.
-3. `lab-lb-lc-v1`을 선택합니다.
+3. `lab-asg-web-lc-v1`을 선택합니다.
 
 | 항목 | 값 |
 | --- | --- |
-| 이름 | `lab-lb-asg` |
+| 이름 | `lab-asg-web-group` |
 | VPC | 012와 같은 VPC |
 | Subnet | 012 웹 서버와 같은 Private Subnet |
-| 서버 이름 Prefix | `lab-lb-as` |
+| 서버 이름 Prefix | `lab-asg-web` |
 | 최소 용량 | `1` |
 | 최대 용량 | `3` |
 | 기대 용량 | `1` |
@@ -125,7 +125,7 @@ Auto Scaling Nginx 서버 1~3대         새로 구성
 
 다음 순서로 상태를 확인합니다.
 
-1. 이름이 `lab-lb-as...`인 서버 한 대가 생성됩니다.
+1. 이름이 `lab-asg-web...`인 서버 한 대가 생성됩니다.
 2. 012 Target Group에 새 서버가 자동 등록됩니다.
 3. `/healthz` 검사 후 새 Target 상태가 `Healthy`가 됩니다.
 4. Load Balancer URL의 `/status.json`이 정상 응답합니다.
@@ -143,7 +143,7 @@ ASG 서버가 `Healthy`가 된 뒤에만 012에서 수동 등록한 서버들을
 교체 후 Target Group에는 다음 서버만 남아야 합니다.
 
 ```text
-lab-lb-as...    Healthy
+lab-asg-web...    Healthy
 ```
 
 Load Balancer를 20번 호출해 ASG 서버 한 대만 응답하는지 확인합니다.
@@ -158,20 +158,20 @@ done | sort | uniq -c
 정상 예시는 다음과 같습니다.
 
 ```text
-20 lab-lb-as-xxxxx
+20 lab-asg-web-xxxxx
 ```
 
 기존 012 Hostname이 섞여 나오면 수동 Target이 아직 Target Group에 남아 있는지 확인합니다.
 
 ## 7. Step 5 - Scaling Policy 생성
 
-`lab-lb-asg`를 선택하고 **설정 > 정책 > 생성**에서 두 정책을 만듭니다.
+`lab-asg-web-group`을 선택하고 **설정 > 정책 > 생성**에서 두 정책을 만듭니다.
 
 ### Scale-out 정책
 
 | 항목 | 값 |
 | --- | --- |
-| 정책 이름 | `lb-add-1` |
+| 정책 이름 | `lab-asg-web-add-1` |
 | Scaling 설정 | 증감 변경 |
 | 조정값 | `1` 증가 |
 | Cooldown | `60`초 |
@@ -180,7 +180,7 @@ done | sort | uniq -c
 
 | 항목 | 값 |
 | --- | --- |
-| 정책 이름 | `lb-remove-1` |
+| 정책 이름 | `lab-asg-web-remove-1` |
 | Scaling 설정 | 증감 변경 |
 | 조정값 | `1` 감소 |
 | Cooldown | `60`초 |
@@ -196,31 +196,31 @@ Scaling Policy는 실행 동작만 정의합니다. CPU 조건으로 자동 실�
 | 항목 | 값 |
 | --- | --- |
 | 상품 | Server (VPC) |
-| 감시 대상 | Auto Scaling Group `lab-lb-asg` |
+| 감시 대상 | Auto Scaling Group `lab-asg-web-group` |
 | Metric | `SERVER/avg_cpu_used_rto` |
 | 조건 | `>= 50` |
 | 집약 | AVG |
 | 지속 시간 | `1 minute` |
-| 액션 | Auto Scaling Policy `lb-add-1` |
+| 액션 | Auto Scaling Policy `lab-asg-web-add-1` |
 
 ### Scale-in Event Rule
 
 | 항목 | 값 |
 | --- | --- |
 | 상품 | Server (VPC) |
-| 감시 대상 | Auto Scaling Group `lab-lb-asg` |
+| 감시 대상 | Auto Scaling Group `lab-asg-web-group` |
 | Metric | `SERVER/avg_cpu_used_rto` |
 | 조건 | `< 20` |
 | 집약 | AVG |
 | 지속 시간 | `1 minute` |
-| 액션 | Auto Scaling Policy `lb-remove-1` |
+| 액션 | Auto Scaling Policy `lab-asg-web-remove-1` |
 
 Scale-out을 관찰하기 전에는 Scale-in Rule을 비활성화해도 됩니다. 새 서버가 생기자마자 평균 CPU가 낮아져 축소되는 상황을 막아 변화 과정을 천천히 확인할 수 있습니다.
 
 ### 확인하고 넘어가기
 
-- [ ] 감시 대상이 개별 서버가 아니라 `lab-lb-asg`입니다.
-- [ ] Scale-out Rule 액션이 `lb-add-1`입니다.
+- [ ] 감시 대상이 개별 서버가 아니라 `lab-asg-web-group`입니다.
+- [ ] Scale-out Rule 액션이 `lab-asg-web-add-1`입니다.
 - [ ] 조건 지속 시간이 `1 minute`입니다.
 
 ## 9. Step 7 - Bastion에서 CPU 부하 발생
@@ -232,7 +232,7 @@ WEB_PRIVATE_IP="ASG_SERVER_PRIVATE_IP"
 
 ssh root@"$WEB_PRIVATE_IP" 'hostname; stress-ng --version; htop --version'
 ssh root@"$WEB_PRIVATE_IP" \
-  'nohup stress-ng --cpu 0 --cpu-load 90 --timeout 180s >/tmp/lb-stress.log 2>&1 &'
+  'nohup stress-ng --cpu 0 --cpu-load 90 --timeout 180s >/tmp/asg-web-stress.log 2>&1 &'
 ssh root@"$WEB_PRIVATE_IP" 'pgrep -af stress-ng; uptime'
 ```
 
@@ -255,8 +255,8 @@ ssh -t root@"$WEB_PRIVATE_IP" htop
 | --- | --- | --- |
 | 1 | Cloud Insight | ASG 평균 CPU 50% 이상 |
 | 2 | Event Rule | Scale-out Event 발생 |
-| 3 | ASG 이력 | `lb-add-1` 실행 |
-| 4 | Server | 새 `lab-lb-as...` 서버 생성 |
+| 3 | ASG 이력 | `lab-asg-web-add-1` 실행 |
+| 4 | Server | 새 `lab-asg-web...` 서버 생성 |
 | 5 | Target Group | 새 Target이 `Healthy` |
 | 6 | ASG | 서버 수 `1 → 2` |
 
@@ -286,8 +286,8 @@ $LB_URL = "http://YOUR_LOAD_BALANCER_URL"
 ```text
 Count Name
 ----- ----
-   22 lab-lb-as-aaaaa
-   18 lab-lb-as-bbbbb
+   22 lab-asg-web-aaaaa
+   18 lab-asg-web-bbbbb
 ```
 
 페이지를 새로고침하면서 Hostname과 Private IP가 바뀌는지도 확인합니다. 같은 원본 이미지로 만들어졌지만 `lb-demo-status.timer`가 각 서버의 실제 값을 다시 기록합니다.
@@ -304,7 +304,7 @@ Scale-in Rule을 활성화하고 다음 순서로 확인합니다.
 
 1. ASG 평균 CPU가 20% 미만으로 내려갑니다.
 2. Scale-in Event가 발생합니다.
-3. `lb-remove-1` 정책이 실행됩니다.
+3. `lab-asg-web-remove-1` 정책이 실행됩니다.
 4. ASG 서버 수가 `2 → 1`이 됩니다.
 5. 종료된 서버가 Target Group에서 자동 제거됩니다.
 6. Load Balancer URL은 계속 HTTP `200`을 반환합니다.
