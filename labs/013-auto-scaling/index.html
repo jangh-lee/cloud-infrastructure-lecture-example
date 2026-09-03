@@ -1307,6 +1307,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        쿨다운이란?
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1347,7 +1358,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         확인하고 넘어가기
@@ -1860,6 +1871,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        쿨다운이란?
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1900,7 +1922,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         확인하고 넘어가기
@@ -2395,7 +2417,7 @@
 </tr>
 <tr>
 <td>조정값</td>
-<td><code>1</code> 감소</td>
+<td><code>1</code> 반납</td>
 </tr>
 <tr>
 <td>Cooldown</td>
@@ -2403,6 +2425,13 @@
 </tr>
 </tbody>
 </table>
+<h3 id="_4">쿨다운이란?<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p>쿨다운은 한 번의 Scaling을 수행한 뒤 서버가 준비되는 동안 <strong>다른 알람에 바로 반응하지 않고 기다리는 시간</strong>입니다. 이번 실습에서는 Scale-out과 Scale-in 정책 모두 <code>60초</code>로 설정합니다.</p>
+<p>예를 들어 Scale-out으로 서버 한 대를 생성한 직후 CPU 알람이 다시 발생하더라도, 쿨다운 60초 동안에는 같은 알람으로 서버를 연속 생성하지 않습니다. 빠른 수업 진행을 위한 값이며 운영 환경에서는 실제 서버 부팅 시간과 애플리케이션 준비 시간을 고려해 더 길게 설정합니다.</p>
+<div class="admonition note">
+<p class="admonition-title">다른 시간 설정과 구분</p>
+<p>Cloud Insight의 <code>1 minute</code>은 CPU 조건이 얼마나 오래 지속되어야 알람을 발생시킬지 정하는 값입니다. Health Check 보류 기간은 새 서버가 부팅되는 동안 Health Check 실패를 정상으로 간주하는 시간입니다. 쿨다운은 Scaling 직후 추가 알람에 반응하지 않는 시간입니다.</p>
+</div>
 <p>최대 용량 3보다 늘어나거나 최소 용량 1보다 줄어들지 않습니다.</p>
 <h2 id="8-step-6-cloud-insight-event-rule">8. Step 6 - Cloud Insight Event Rule 연결<a class="headerlink" href="#8-step-6-cloud-insight-event-rule" title="Permanent link">&para;</a></h2>
 <p>Scaling Policy는 실행 동작만 정의합니다. CPU 조건으로 자동 실행하려면 <strong>Services &gt; Management &amp; Governance &gt; Cloud Insight &gt; Configuration &gt; Event Rule</strong>에서 두 규칙을 연결합니다.</p>
@@ -2485,7 +2514,7 @@
 </tbody>
 </table>
 <p>Scale-out을 관찰하기 전에는 Scale-in Rule을 비활성화해도 됩니다. 새 서버가 생기자마자 평균 CPU가 낮아져 축소되는 상황을 막아 변화 과정을 천천히 확인할 수 있습니다.</p>
-<h3 id="_4">확인하고 넘어가기<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<h3 id="_5">확인하고 넘어가기<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
 <ul>
 <li>[ ] 감시 대상이 개별 서버가 아니라 <code>lab-asg-web-group</code>입니다.</li>
 <li>[ ] Scale-out Rule 액션이 <code>lab-asg-web-add-1</code>입니다.</li>
