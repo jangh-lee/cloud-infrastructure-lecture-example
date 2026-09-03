@@ -37,6 +37,7 @@ download() {
 
 download "${RAW_BASE}/install.sh" "${INSTALLER_DIR}/install.sh"
 download "${RAW_BASE}/update_status.sh" "${INSTALLER_DIR}/update_status.sh"
+download "${RAW_BASE}/stress_server.py" "${INSTALLER_DIR}/stress_server.py"
 download "${RAW_BASE}/templates/index.html.template" "${INSTALLER_DIR}/templates/index.html.template"
 
 chmod 755 "${INSTALLER_DIR}/install.sh" "${INSTALLER_DIR}/update_status.sh"

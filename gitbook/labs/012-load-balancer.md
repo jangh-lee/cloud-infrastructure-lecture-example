@@ -56,13 +56,16 @@ userinput="${userinput}" "${INIT_FILE}"
 ```bash
 curl http://localhost/healthz
 curl http://localhost/status.json
+sudo systemctl is-active lb-demo-stress.service
 stress-ng --version
 htop --version
 ```
 
 `status.json`에서 `serverName`, `hostname`, `primaryIp`, `allIps`를 확인합니다. 공인 IP는 Naver Cloud에서 NAT 방식으로 연결될 수 있으므로 `primaryIp`에는 일반적으로 서버 NIC의 사설 IP가 표시됩니다.
 
-`stress-ng`는 013에서 CPU 부하를 발생시키고, `htop`은 CPU와 프로세스 상태를 눈으로 확인할 때 사용합니다. 통합 Init Script가 두 패키지를 Nginx와 함께 설치하므로 013에서 다시 설치하지 않습니다.
+`stress-ng`는 013에서 CPU 부하를 발생시키고, `htop`은 서버에 직접 접속해 문제를 확인할 때 사용할 수 있는 선택 도구입니다. 통합 Init Script가 두 패키지를 Nginx와 함께 설치하며, 013 기본 부하 실습에는 SSH를 사용하지 않습니다.
+
+`lb-demo-stress.service`는 `127.0.0.1:8081`에서만 실행되고 Nginx의 `/stress` 요청을 받습니다. 요청이 반복되어도 서버마다 `stress-ng`를 하나만 실행하며 20초 뒤 자동 종료하므로, 013에서 Load Balancer를 통해 제한된 CPU 부하를 줄 수 있습니다.
 
 ## 503 복구 확인
 
@@ -228,4 +231,4 @@ Count Name
 - Target Group
 - 이미지 원본으로 사용할 Target 서버 한 대
 
-013 Step 1에서 기존 Target 서버를 선택해 내 서버 이미지를 생성합니다. `stress-ng`, `htop`, Nginx와 상태 갱신 timer는 012 통합 Init Script로 이미 설치되어 있습니다.
+013 Step 1에서 기존 Target 서버를 선택해 내 서버 이미지를 생성합니다. HTTP Stress API, `stress-ng`, `htop`, Nginx와 상태 갱신 timer는 012 통합 Init Script로 이미 설치되어 있습니다.

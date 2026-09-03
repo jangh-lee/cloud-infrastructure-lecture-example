@@ -33,6 +33,7 @@ NGINX_CONF="/etc/nginx/sites-available/lb-demo"
 NGINX_LINK="/etc/nginx/sites-enabled/lb-demo"
 SYSTEMD_SERVICE="/etc/systemd/system/lb-demo-status.service"
 SYSTEMD_TIMER="/etc/systemd/system/lb-demo-status.timer"
+STRESS_SERVICE="/etc/systemd/system/lb-demo-stress.service"
 TEMP_POLICY_RC_D=""
 
 export DEBIAN_FRONTEND=noninteractive
@@ -54,6 +55,7 @@ apt-get install -y ca-certificates curl htop nginx python3-minimal stress-ng
 mkdir -p "${APP_DIR}" "${WEB_ROOT}"
 
 cp "$(dirname "$0")/update_status.sh" "${APP_DIR}/update_status.sh"
+cp "$(dirname "$0")/stress_server.py" "${APP_DIR}/stress_server.py"
 cp "$(dirname "$0")/templates/index.html.template" "${APP_DIR}/index.html.template"
 chmod 755 "${APP_DIR}/update_status.sh"
 
@@ -78,6 +80,14 @@ server {
         default_type application/json;
         add_header Cache-Control "no-store";
         try_files /status.json =404;
+    }
+
+    location = /stress {
+        proxy_pass http://127.0.0.1:8081/stress;
+        proxy_set_header X-Lab-Token $http_x_lab_token;
+        proxy_set_header Host $host;
+        proxy_connect_timeout 2s;
+        proxy_read_timeout 5s;
     }
 
     location / {
@@ -111,21 +121,48 @@ Unit=lb-demo-status.service
 WantedBy=timers.target
 EOF
 
+cat > "${STRESS_SERVICE}" <<'EOF'
+[Unit]
+Description=Bounded HTTP stress trigger for the Auto Scaling lab
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+Environment=LAB_STRESS_TOKEN=asg-lab
+Environment=LAB_STRESS_SECONDS=20
+ExecStart=/usr/bin/python3 /opt/lb-demo/stress_server.py
+Restart=on-failure
+RestartSec=2s
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 nginx -t
 
 if command -v systemctl >/dev/null 2>&1 && [[ -d /run/systemd/system ]]; then
   systemctl daemon-reload
   systemctl enable --now lb-demo-status.timer
+  systemctl enable lb-demo-stress.service
+  systemctl restart lb-demo-stress.service
   systemctl start lb-demo-status.service
   systemctl enable nginx
   systemctl restart nginx
 else
   "${APP_DIR}/update_status.sh"
+  nohup python3 "${APP_DIR}/stress_server.py" >/tmp/lb-demo-stress-service.log 2>&1 &
   service nginx restart
 fi
 
 curl -fsS --retry 5 --retry-delay 1 http://127.0.0.1/healthz >/dev/null
 curl -fsS --retry 5 --retry-delay 1 http://127.0.0.1/status.json >/dev/null
+curl -fsS --retry 5 --retry-delay 1 http://127.0.0.1:8081/health >/dev/null
 
 echo
 echo "Installation complete."
@@ -136,3 +173,4 @@ echo "Web root    : ${WEB_ROOT}"
 echo "Health check: /healthz"
 echo "Status JSON : /status.json"
 echo "Load tools  : stress-ng, htop"
+echo "Stress API  : /stress (X-Lab-Token: asg-lab)"

@@ -9,7 +9,7 @@
 ## 1. 완성 구조
 
 ```text
-사용자 또는 Bastion
+사용자 또는 Bastion의 지속적인 HTTP 요청
         |
         v
 012 Load Balancer :80                 그대로 사용
@@ -20,8 +20,7 @@
         v
 Auto Scaling Nginx 서버 1~3대         새로 구성
   |-- /status.json: Hostname, Private IP
-  |-- stress-ng: CPU 부하 발생
-  +-- htop: CPU와 프로세스 확인
+  +-- /stress: 서버당 하나의 제한된 CPU 부하 실행
 ```
 
 012에서 수동으로 만든 서버 여러 대를 Auto Scaling으로 관리되는 서버 1~3대로 교체합니다. 웹 페이지와 `/status.json`은 그대로이므로 **서버 수만 자동으로 바뀌는 과정**에 집중할 수 있습니다.
@@ -37,14 +36,17 @@ Auto Scaling Nginx 서버 1~3대         새로 구성
 | LB URL | `http://...kr.lb.naverncp.com` | 반복 호출 |
 | Target Group | 012에서 만든 TG | ASG 연결과 Health Check |
 | VPC / 서버 Subnet | 012 서버와 같은 환경 | ASG 서버 배치 |
-| Web ACG | 012 서버에 적용한 ACG | HTTP와 SSH 허용 |
-| Bastion | Private IP로 SSH 가능한 서버 | 부하 명령 실행 |
+| Web ACG | 012 서버에 적용한 ACG | Load Balancer Subnet의 HTTP 허용 |
+| Bastion | Load Balancer URL 호출이 가능한 서버 | `hey` 부하 명령 실행 |
 | 인증키 | 서버 생성에 사용한 키 | 관리자 비밀번호 확인 |
 
 !!! warning "012 리소스를 삭제하지 않습니다"
     Load Balancer와 Target Group은 013에서도 사용합니다. 012 수동 서버도 새 ASG Target이 Healthy가 될 때까지 유지합니다.
 
 ## 3. Step 1 - 기존 Target 서버 이미지 생성
+
+!!! warning "기존 012 서버를 이미 만들어 둔 경우"
+    이미지 생성 전에 [012 통합 Init Script](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/012-load-balancer/#init-script)를 Target 서버에서 한 번 다시 실행합니다. 최신 설치기에 HTTP Stress API가 추가되어 있으므로 예전에 만든 서버를 그대로 이미지로 만들면 `/stress`가 동작하지 않습니다.
 
 1. **Services > Compute > Server > Server**로 이동합니다.
 2. 012 Load Balancer의 Target으로 사용한 서버 한 대를 선택합니다.
@@ -57,7 +59,7 @@ Auto Scaling Nginx 서버 1~3대         새로 구성
 
 **Services > Compute > Server > Server Image**에서 `lab-asg-web-image-v1`의 상태가 `생성됨`이 될 때까지 기다립니다.
 
-012 통합 Init Script로 설치한 Nginx, 상태 페이지, `stress-ng`, `htop`, 상태 갱신 timer가 이미지에 포함됩니다. Auto Scaling 서버가 부팅되면 timer가 `/status.json`을 자신의 Hostname과 Private IP로 다시 기록합니다.
+012 통합 Init Script로 설치한 Nginx, 상태 페이지, HTTP Stress API, `stress-ng`, `htop`, 상태 갱신 timer가 이미지에 포함됩니다. Auto Scaling 서버가 부팅되면 timer가 `/status.json`을 자신의 Hostname과 Private IP로 다시 기록합니다.
 
 ### 확인하고 넘어가기
 
@@ -79,7 +81,7 @@ Auto Scaling Nginx 서버 1~3대         새로 구성
 | 인증키 | 수업용 인증키 |
 | Init Script | 사용 안 함 |
 
-이미지 안에 Nginx, `stress-ng`, `htop`, 상태 갱신 timer가 이미 들어 있으므로 Init Script는 비워 둡니다.
+이미지 안에 Nginx, HTTP Stress API, `stress-ng`, `htop`, 상태 갱신 timer가 이미 들어 있으므로 Init Script는 비워 둡니다.
 
 ### 확인하고 넘어가기
 
@@ -121,7 +123,8 @@ Auto Scaling Nginx 서버 1~3대         새로 구성
 | 프로토콜 | 포트 | 접근 소스 | 목적 |
 | --- | --- | --- | --- |
 | TCP | `80` | Load Balancer Subnet CIDR | 서비스 요청과 Health Check |
-| TCP | `22` | Bastion ACG 또는 Bastion Private IP | 부하와 상태 확인 |
+
+부하는 Load Balancer의 HTTP `80`으로 전달하므로 Bastion에서 ASG 서버로 SSH 접속할 필요가 없습니다.
 
 ### 확인하고 넘어가기
 
@@ -193,6 +196,8 @@ done | sort | uniq -c
 
 예를 들어 Scale-out으로 서버 한 대를 생성한 직후 CPU 알람이 다시 발생하더라도, 쿨다운 60초 동안에는 같은 알람으로 서버를 연속 생성하지 않습니다. 빠른 수업 진행을 위한 값이며 운영 환경에서는 실제 서버 부팅 시간과 애플리케이션 준비 시간을 고려해 더 길게 설정합니다.
 
+Cloud Insight Event가 계속 유지되면 쿨다운이 끝날 때마다 정책이 반복 실행되고, CPU 조건이 해제되어 Event가 종료되면 반복도 멈춥니다.
+
 !!! note "다른 시간 설정과 구분"
     Cloud Insight의 `1 minute`은 CPU 조건이 얼마나 오래 지속되어야 알람을 발생시킬지 정하는 값입니다. Health Check 보류 기간은 새 서버가 부팅되는 동안 Health Check 실패를 정상으로 간주하는 시간입니다. 쿨다운은 Scaling 직후 추가 알람에 반응하지 않는 시간입니다.
 
@@ -234,29 +239,46 @@ Scale-out을 관찰하기 전에는 Scale-in Rule을 비활성화해도 됩니�
 - [ ] Scale-out Rule 액션이 `lab-asg-web-add-1`입니다.
 - [ ] 조건 지속 시간이 `1 minute`입니다.
 
-## 9. Step 7 - Bastion에서 CPU 부하 발생
+## 9. Step 7 - Load Balancer로 HTTP 부하 발생
 
-ASG의 서버 목록에서 현재 서버 Private IP를 확인합니다. 다음 명령은 **Bastion에서** 실행하고 CPU 부하는 원격 ASG 서버에 발생합니다.
-
-```bash
-WEB_PRIVATE_IP="ASG_SERVER_PRIVATE_IP"
-
-ssh root@"$WEB_PRIVATE_IP" 'hostname; stress-ng --version; htop --version'
-ssh root@"$WEB_PRIVATE_IP" \
-  'nohup stress-ng --cpu 0 --cpu-load 90 --timeout 180s >/tmp/asg-web-stress.log 2>&1 &'
-ssh root@"$WEB_PRIVATE_IP" 'pgrep -af stress-ng; uptime'
-```
-
-별도 Bastion 터미널에서 CPU를 눈으로 확인할 수 있습니다.
+명령은 Bastion에서 실행하지만 ASG 서버에 SSH로 접속하지 않습니다. Bastion에 HTTP 부하 도구 `hey`를 설치합니다.
 
 ```bash
-ssh -t root@"$WEB_PRIVATE_IP" htop
+sudo apt-get update
+sudo apt-get install -y hey
 ```
 
-`htop`에서 `1`은 CPU 코어별 표시, `P`는 CPU 사용률 순 정렬, `q`는 종료입니다. `htop`은 현재 접속한 서버 한 대만 보여줍니다.
+실제 Load Balancer 주소를 입력해 한 번 실행합니다.
 
-!!! note "왜 HTTP 요청 대신 stress-ng를 사용하나요?"
-    정적 파일을 제공하는 Nginx는 가벼워서 많은 HTTP 요청에도 CPU 50%를 안정적으로 넘지 않을 수 있습니다. `stress-ng`는 선택한 ASG 서버의 CPU를 확실하게 올려 정책 동작 자체를 검증합니다. 여러 서버에 동시에 실행되는 명령은 아니며, 위 SSH 대상 한 대에만 부하가 걸립니다.
+```bash
+LB_URL="http://YOUR_LOAD_BALANCER_URL"
+```
+
+먼저 `/stress`가 응답하는지 한 번 확인합니다.
+
+```bash
+curl -fsS -H 'X-Lab-Token: asg-lab' "$LB_URL/stress"
+```
+
+`status`, 요청을 처리한 `hostname`, `durationSeconds`가 출력되면 아래 명령으로 5분 동안 부하를 발생시킵니다.
+
+```bash
+hey -z 5m -c 20 -q 5 -disable-keepalive \
+  -H 'X-Lab-Token: asg-lab' \
+  "$LB_URL/stress"
+```
+
+| 옵션 | 의미 |
+| --- | --- |
+| `-z 5m` | 5분 후 자동 종료 |
+| `-c 20` | 동시 Worker 20개 |
+| `-q 5` | Worker당 최대 5 QPS, 전체 약 100 QPS |
+| `-disable-keepalive` | 매 요청에 새 연결을 사용해 새 Target에도 트래픽 전달 |
+
+각 `/stress` 요청은 해당 Target 서버에서 최대 하나의 `stress-ng`만 실행합니다. CPU 부하는 20초 뒤 자동 종료되지만 요청이 계속 들어오면 다음 20초 부하가 다시 시작됩니다. 새 ASG 서버가 `Healthy`가 되면 Load Balancer의 새 연결을 받아 그 서버에도 자동으로 CPU 부하가 발생합니다.
+
+!!! warning "실습 비용 제한"
+    `/stress` 응답은 1KB보다 작고 부하 명령은 5분 후 종료됩니다. 동시성이나 실행 시간을 임의로 크게 늘리지 말고, 중간에 멈추려면 `Ctrl+C`를 누릅니다. 테스트가 끝나면 ASG가 최소 용량 1대로 돌아오는지 반드시 확인합니다. Load Balancer 처리 트래픽은 별도 과금될 수 있으므로 비용이 0원이라고 보장되지는 않습니다. 자세한 기준은 [Naver Cloud Load Balancer 요금](https://www.ncloud.com/api-cms/service-product/static/loadBalancer)을 확인합니다.
 
 ## 10. Step 8 - Scale-out 관찰
 
@@ -269,7 +291,9 @@ ssh -t root@"$WEB_PRIVATE_IP" htop
 | 3 | ASG 이력 | `lab-asg-web-add-1` 실행 |
 | 4 | Server | 새 `asg...` 서버 생성 |
 | 5 | Target Group | 새 Target이 `Healthy` |
-| 6 | ASG | 서버 수 `1 → 2` |
+| 6 | ASG | 서버 수 `1 → 2 → 3` |
+
+첫 Scale-out 후에도 `hey`를 종료하지 않습니다. 새 서버가 `Healthy`가 되면 `/stress` 요청을 받아 CPU가 올라갑니다. [Cloud Insight Event Rule 가이드](https://guide.ncloud-docs.com/docs/cloudinsight-use-eventrule)에 따라 Event가 유지되는 동안 쿨다운 주기로 정책이 반복 실행되므로 최대 용량 3대까지 확장됩니다. 5분 안에 2대까지만 생성됐다면 첫 명령이 끝난 뒤 같은 명령을 2분 정도 더 실행합니다.
 
 새 서버가 `Healthy`가 된 뒤 Load Balancer를 40번 호출합니다.
 
@@ -305,18 +329,14 @@ Count Name
 
 ## 11. Step 9 - 부하 종료와 Scale-in 확인
 
-3분이 지나면 `stress-ng`가 자동 종료됩니다. 즉시 중지하려면 Bastion에서 실행합니다.
-
-```bash
-ssh root@"$WEB_PRIVATE_IP" 'pkill -f stress-ng || true'
-```
+5분이 지나면 `hey`가 자동 종료됩니다. 즉시 중지하려면 실행 중인 Bastion 터미널에서 `Ctrl+C`를 누릅니다. 마지막 HTTP 요청 이후 서버별 `stress-ng`도 최대 20초 안에 자동 종료됩니다.
 
 Scale-in Rule을 활성화하고 다음 순서로 확인합니다.
 
 1. ASG 평균 CPU가 20% 미만으로 내려갑니다.
 2. Scale-in Event가 발생합니다.
 3. `lab-asg-web-remove-1` 정책이 실행됩니다.
-4. ASG 서버 수가 `2 → 1`이 됩니다.
+4. 쿨다운과 다음 감지를 거쳐 ASG 서버 수가 `3 → 2 → 1`로 줄어듭니다.
 5. 종료된 서버가 Target Group에서 자동 제거됩니다.
 6. Load Balancer URL은 계속 HTTP `200`을 반환합니다.
 
@@ -328,9 +348,10 @@ Scale-in Rule을 활성화하고 다음 순서로 확인합니다.
 | Launch Configuration | 별도 Init Script 없음 |
 | Auto Scaling Group | 최소 1, 최대 3, 기대 1 |
 | Target Group | ASG 서버 자동 등록, `/healthz` Healthy |
-| Scale-out | CPU 50% 이상 1분 후 `1 → 2` |
+| Scale-out 부하 | Bastion에서 LB `/stress`를 약 100 QPS로 5분 호출 |
+| Scale-out | 새 Target도 부하를 받으며 `1 → 2 → 3` |
 | 분산 | `/status.json`에서 서로 다른 Hostname |
-| Scale-in | CPU 20% 미만 1분 후 `2 → 1` |
+| Scale-in | 부하 종료 후 `3 → 2 → 1` |
 | 서비스 연속성 | 증감 중에도 LB HTTP `200` |
 
 ## 13. 자주 막히는 지점
@@ -340,6 +361,9 @@ Scale-in Rule을 활성화하고 다음 순서로 확인합니다.
 | 새 Target이 Unhealthy | Web ACG의 LB Subnet CIDR `80/tcp`, `/healthz`, Nginx 상태 |
 | 새 서버가 원본 Hostname 표시 | 15초 뒤 재조회, `systemctl status lb-demo-status.timer` |
 | CPU가 올라도 확장 안 됨 | 상세 모니터링, Event 대상 ASG, Metric, Policy 액션 |
+| `/stress`가 403 | `X-Lab-Token: asg-lab` 헤더 확인 |
+| `/stress`가 502 | 012 통합 Init Script 재실행 후 새 이미지 생성 |
+| 새 서버 CPU가 오르지 않음 | Target `Healthy`, `hey` 실행 유지, `-disable-keepalive` 확인 |
 | 서버가 너무 빨리 축소됨 | Scale-in Rule을 잠시 비활성화 |
 | 부팅 중 서버가 반납됨 | Health Check 보류 기간을 `300`초로 변경 |
 | 기존 서버 응답이 섞임 | 012 수동 Target을 Target Group에서 제거 |
