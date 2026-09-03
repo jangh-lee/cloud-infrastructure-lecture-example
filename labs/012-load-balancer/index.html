@@ -1835,13 +1835,14 @@
 <h2 id="_4">서버 확인<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl<span class="w"> </span>http://localhost/healthz
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>http://localhost/status.json
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>lb-demo-stress.service
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>stress-ng<span class="w"> </span>--version
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>htop<span class="w"> </span>--version
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>-H<span class="w"> </span><span class="s1">'X-Lab-Token: asg-lab'</span><span class="w"> </span>http://localhost/stress-status
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>lb-demo-stress.service
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>stress-ng<span class="w"> </span>--version
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>htop<span class="w"> </span>--version
 </code></pre></div>
 <p><code>status.json</code>에서 <code>serverName</code>, <code>hostname</code>, <code>primaryIp</code>, <code>allIps</code>를 확인합니다. 공인 IP는 Naver Cloud에서 NAT 방식으로 연결될 수 있으므로 <code>primaryIp</code>에는 일반적으로 서버 NIC의 사설 IP가 표시됩니다.</p>
 <p><code>stress-ng</code>는 013에서 CPU 부하를 발생시키고, <code>htop</code>은 서버에 직접 접속해 문제를 확인할 때 사용할 수 있는 선택 도구입니다. 통합 Init Script가 두 패키지를 Nginx와 함께 설치하며, 013 기본 부하 실습에는 SSH를 사용하지 않습니다.</p>
-<p><code>lb-demo-stress.service</code>는 <code>127.0.0.1:8081</code>에서만 실행되고 Nginx의 <code>/stress</code> 요청을 받습니다. 요청이 반복되어도 서버마다 <code>stress-ng</code>를 하나만 실행하며 20초 뒤 자동 종료하므로, 013에서 Load Balancer를 통해 제한된 CPU 부하를 줄 수 있습니다.</p>
+<p><code>lb-demo-stress.service</code>는 <code>127.0.0.1:8081</code>에서만 실행되고 Nginx의 <code>/stress</code> 요청을 받습니다. 요청이 반복되어도 서버마다 <code>stress-ng</code>를 하나만 실행하며 20초 뒤 자동 종료하므로, 013에서 Load Balancer를 통해 제한된 CPU 부하를 줄 수 있습니다. <code>/stress-status</code>에서는 요청을 처리한 Hostname, 부하 실행 여부, 프로세스 ID와 1분 Load Average를 확인할 수 있습니다.</p>
 <h2 id="503">503 복구 확인<a class="headerlink" href="#503" title="Permanent link">&para;</a></h2>
 <p>통합 Init Script를 Target 서버마다 한 번 실행한 뒤 다음 명령을 실행합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>nginx

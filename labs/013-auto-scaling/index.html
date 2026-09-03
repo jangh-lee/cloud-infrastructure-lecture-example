@@ -2527,13 +2527,26 @@
 <p>실제 Load Balancer 주소를 입력해 한 번 실행합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">LB_URL</span><span class="o">=</span><span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
 </code></pre></div>
-<p>먼저 <code>/stress</code>가 응답하는지 한 번 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>-H<span class="w"> </span><span class="s1">'X-Lab-Token: asg-lab'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/stress"</span>
+<p>먼저 <code>/stress</code>가 <strong>JSON으로 응답하고 실제 부하가 시작됐는지</strong> 확인합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nv">STRESS_RESPONSE</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>curl<span class="w"> </span>-fsS<span class="w"> </span>-H<span class="w"> </span><span class="s1">'X-Lab-Token: asg-lab'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/stress"</span><span class="k">)</span><span class="s2">"</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">printf</span><span class="w"> </span><span class="s1">'%s\n'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$STRESS_RESPONSE</span><span class="s2">"</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="nb">printf</span><span class="w"> </span><span class="s1">'%s'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$STRESS_RESPONSE</span><span class="s2">"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-q<span class="w"> </span><span class="s1">'"stressRunning":true'</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"PASS: CPU stress started"</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span><span class="o">{</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"FAIL: /stress API is not installed"</span><span class="w"> </span>&gt;<span class="p">&amp;</span><span class="m">2</span><span class="p">;</span><span class="w"> </span>false<span class="p">;</span><span class="w"> </span><span class="o">}</span>
 </code></pre></div>
-<p><code>status</code>, 요청을 처리한 <code>hostname</code>, <code>durationSeconds</code>가 출력되면 아래 명령으로 5분 동안 부하를 발생시킵니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>hey<span class="w"> </span>-z<span class="w"> </span>5m<span class="w"> </span>-c<span class="w"> </span><span class="m">20</span><span class="w"> </span>-q<span class="w"> </span><span class="m">5</span><span class="w"> </span>-disable-keepalive<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'X-Lab-Token: asg-lab'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/stress"</span>
+<p>정상이면 다음처럼 JSON과 <code>PASS</code>가 출력됩니다. <code>stressRunning</code>이 <code>true</code>여야 실제 <code>stress-ng</code>가 실행된 것입니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>{"status":"started","hostname":"asg-abcde","durationSeconds":20,"stressRunning":true}
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>PASS: CPU stress started
+</code></pre></div>
+<div class="admonition danger">
+<p class="admonition-title">HTML 페이지가 출력되면 부하가 아닙니다</p>
+<p>게시판이나 <code>LB Demo Node</code> HTML이 출력되면 현재 Target 서버가 예전 버전이라 <code>/stress</code> 요청을 메인 페이지로 처리한 것입니다. <a href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/012-load-balancer/#init-script">012 통합 Init Script</a>를 기존 Target 서버에서 다시 실행하고 위 확인 명령을 재실행합니다. 이미 <code>lab-asg-web-image-v1</code>을 만들었다면 최신 설치가 반영된 서버로 이미지를 다시 생성해야 새 ASG 서버에도 <code>/stress</code>가 포함됩니다.</p>
+</div>
+<p><code>PASS</code>를 확인한 뒤 아래 명령으로 5분 동안 부하를 발생시킵니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>hey<span class="w"> </span>-z<span class="w"> </span>5m<span class="w"> </span>-c<span class="w"> </span><span class="m">20</span><span class="w"> </span>-q<span class="w"> </span><span class="m">5</span><span class="w"> </span>-disable-keepalive<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'X-Lab-Token: asg-lab'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/stress"</span>
 </code></pre></div>
 <table>
 <thead>
@@ -2562,6 +2575,14 @@
 </tbody>
 </table>
 <p>각 <code>/stress</code> 요청은 해당 Target 서버에서 최대 하나의 <code>stress-ng</code>만 실행합니다. CPU 부하는 20초 뒤 자동 종료되지만 요청이 계속 들어오면 다음 20초 부하가 다시 시작됩니다. 새 ASG 서버가 <code>Healthy</code>가 되면 Load Balancer의 새 연결을 받아 그 서버에도 자동으로 CPU 부하가 발생합니다.</p>
+<p><code>hey</code>를 실행해 둔 상태에서 <strong>두 번째 Bastion 터미널</strong>을 열어 아래 명령을 실행하면, LB가 선택한 서버별 부하 상태를 2초 간격으로 확인할 수 있습니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">30</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span>curl<span class="w"> </span>-fsS<span class="w"> </span>-H<span class="w"> </span><span class="s1">'X-Lab-Token: asg-lab'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/stress-status"</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="nb">echo</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span>sleep<span class="w"> </span><span class="m">2</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="k">done</span>
+</code></pre></div>
+<p><code>hostname</code>이 달라지고 각 응답의 <code>stressRunning</code>이 <code>true</code>이면 새 서버까지 부하를 받고 있는 것입니다. <code>loadAverage1m</code>은 CPU 사용률이 아니라 최근 1분 동안 실행 중이거나 실행을 기다린 작업 수이므로, 최종 CPU 임계값은 Cloud Insight의 <code>SERVER/avg_cpu_used_rto</code> 그래프로 확인합니다.</p>
 <div class="admonition warning">
 <p class="admonition-title">실습 비용 제한</p>
 <p><code>/stress</code> 응답은 1KB보다 작고 부하 명령은 5분 후 종료됩니다. 동시성이나 실행 시간을 임의로 크게 늘리지 말고, 중간에 멈추려면 <code>Ctrl+C</code>를 누릅니다. 테스트가 끝나면 ASG가 최소 용량 1대로 돌아오는지 반드시 확인합니다. Load Balancer 처리 트래픽은 별도 과금될 수 있으므로 비용이 0원이라고 보장되지는 않습니다. 자세한 기준은 <a href="https://www.ncloud.com/api-cms/service-product/static/loadBalancer">Naver Cloud Load Balancer 요금</a>을 확인합니다.</p>
@@ -2612,23 +2633,23 @@
 <p>첫 Scale-out 후에도 <code>hey</code>를 종료하지 않습니다. 새 서버가 <code>Healthy</code>가 되면 <code>/stress</code> 요청을 받아 CPU가 올라갑니다. <a href="https://guide.ncloud-docs.com/docs/cloudinsight-use-eventrule">Cloud Insight Event Rule 가이드</a>에 따라 Event가 유지되는 동안 쿨다운 주기로 정책이 반복 실행되므로 최대 용량 3대까지 확장됩니다. 5분 안에 2대까지만 생성됐다면 첫 명령이 끝난 뒤 같은 명령을 2분 정도 더 실행합니다.</p>
 <p>새 서버가 <code>Healthy</code>가 된 뒤 Load Balancer를 40번 호출합니다.</p>
 <h3 id="linux-macos">Linux 또는 macOS<a class="headerlink" href="#linux-macos" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">40</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span>curl<span class="w"> </span>-fsS<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/status.json"</span><span class="w"> </span><span class="p">|</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">40</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span>curl<span class="w"> </span>-fsS<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/status.json"</span><span class="w"> </span><span class="p">|</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
 </code></pre></div>
 <h3 id="windows-terminal-powershell">Windows Terminal PowerShell<a class="headerlink" href="#windows-terminal-powershell" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nv">$LB_URL</span> <span class="p">=</span> <span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">1</span><span class="p">..</span><span class="n">40</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>  <span class="p">(</span><span class="nb">Invoke-RestMethod</span> <span class="n">-Uri</span> <span class="s2">"$LB_URL/status.json"</span><span class="p">).</span><span class="n">hostname</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="p">}</span> <span class="p">|</span> <span class="nb">Group-Object</span> <span class="p">|</span> <span class="nb">Sort-Object</span> <span class="n">Count</span> <span class="n">-Descending</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">Count</span><span class="p">,</span> <span class="n">Name</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nv">$LB_URL</span> <span class="p">=</span> <span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="n">1</span><span class="p">..</span><span class="n">40</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>  <span class="p">(</span><span class="nb">Invoke-RestMethod</span> <span class="n">-Uri</span> <span class="s2">"$LB_URL/status.json"</span><span class="p">).</span><span class="n">hostname</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="p">}</span> <span class="p">|</span> <span class="nb">Group-Object</span> <span class="p">|</span> <span class="nb">Sort-Object</span> <span class="n">Count</span> <span class="n">-Descending</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">Count</span><span class="p">,</span> <span class="n">Name</span>
 </code></pre></div>
 <p>서로 다른 ASG Hostname이 보이고 합계가 40이면 성공입니다. 정확히 20회씩 나뉠 필요는 없습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Count Name
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>----- ----
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>   22 asg-aaaaa
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>   18 asg-bbbbb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>Count Name
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>----- ----
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>   22 asg-aaaaa
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>   18 asg-bbbbb
 </code></pre></div>
 <p>페이지를 새로고침하면서 Hostname과 Private IP가 바뀌는지도 확인합니다. 같은 원본 이미지로 만들어졌지만 <code>lb-demo-status.timer</code>가 각 서버의 실제 값을 다시 기록합니다.</p>
 <h2 id="11-step-9-scale-in">11. Step 9 - 부하 종료와 Scale-in 확인<a class="headerlink" href="#11-step-9-scale-in" title="Permanent link">&para;</a></h2>
@@ -2717,6 +2738,10 @@
 <tr>
 <td><code>/stress</code>가 502</td>
 <td>012 통합 Init Script 재실행 후 새 이미지 생성</td>
+</tr>
+<tr>
+<td><code>/stress</code>가 HTML 반환</td>
+<td>예전 Nginx 설정이므로 012 통합 Init Script 재실행 후 이미지 재생성</td>
 </tr>
 <tr>
 <td>새 서버 CPU가 오르지 않음</td>
