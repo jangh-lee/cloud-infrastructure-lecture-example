@@ -52,29 +52,29 @@ Auto Scaling Nginx 서버 1~3대         새로 구성
 
 | 항목 | 값 |
 | --- | --- |
-| 이미지 이름 | `lab-lb-web-image-v1` |
+| 이미지 이름 | `lab-asg-web-image-v1` |
 | 설명 | `012 load balancer target for auto scaling` |
 
-**Services > Compute > Server > Server Image**에서 `lab-lb-web-image-v1`의 상태가 `생성됨`이 될 때까지 기다립니다.
+**Services > Compute > Server > Server Image**에서 `lab-asg-web-image-v1`의 상태가 `생성됨`이 될 때까지 기다립니다.
 
 012 통합 Init Script로 설치한 Nginx, 상태 페이지, `stress-ng`, `htop`, 상태 갱신 timer가 이미지에 포함됩니다. Auto Scaling 서버가 부팅되면 timer가 `/status.json`을 자신의 Hostname과 Private IP로 다시 기록합니다.
 
 ### 확인하고 넘어가기
 
 - [ ] 이미지 원본이 012 Load Balancer의 기존 Target 서버입니다.
-- [ ] 이미지 이름이 `lab-lb-web-image-v1`입니다.
+- [ ] 이미지 이름이 `lab-asg-web-image-v1`입니다.
 - [ ] Server Image 상태가 `생성됨`입니다.
 
 ## 4. Step 2 - Launch Configuration 생성
 
 1. **Services > Compute > Auto Scaling > Launch Configuration**으로 이동합니다.
 2. **Launch Configuration 생성**을 클릭합니다.
-3. **내 서버 이미지**에서 `lab-lb-web-image-v1`을 선택합니다.
+3. **내 서버 이미지**에서 `lab-asg-web-image-v1`을 선택합니다.
 
 | 항목 | 값 |
 | --- | --- |
 | 이름 | `lab-lb-lc-v1` |
-| 서버 이미지 | `lab-lb-web-image-v1` |
+| 서버 이미지 | `lab-asg-web-image-v1` |
 | 서버 사양 | 012 원본과 같거나 수업용 최소 사양 |
 | 인증키 | 수업용 인증키 |
 | Init Script | 사용 안 함 |
@@ -83,7 +83,7 @@ Auto Scaling Nginx 서버 1~3대         새로 구성
 
 ### 확인하고 넘어가기
 
-- [ ] Launch Configuration 이미지가 `lab-lb-web-image-v1`입니다.
+- [ ] Launch Configuration 이미지가 `lab-asg-web-image-v1`입니다.
 - [ ] Init Script를 중복 입력하지 않았습니다.
 - [ ] 이름이 `lab-lb-lc-v1`로 목록에 표시됩니다.
 
@@ -313,7 +313,7 @@ Scale-in Rule을 활성화하고 다음 순서로 확인합니다.
 
 | 확인 위치 | 완료 조건 |
 | --- | --- |
-| Server Image | 012 Target 서버에서 `lab-lb-web-image-v1` 생성 |
+| Server Image | 012 Target 서버에서 `lab-asg-web-image-v1` 생성 |
 | Launch Configuration | 별도 Init Script 없음 |
 | Auto Scaling Group | 최소 1, 최대 3, 기대 1 |
 | Target Group | ASG 서버 자동 등록, `/healthz` Healthy |
