@@ -45,8 +45,8 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 
 | Folder | Topic |
 | --- | --- |
-| [`012-load balancer`](./012-load%20balancer/) | 여러 Ubuntu 웹 노드의 분산을 확인하고 `stress-ng`가 포함된 서버 이미지를 준비합니다. |
-| [`013-auto scaling`](./013-auto%20scaling/) | 012번의 이미지, Load Balancer, Target Group을 그대로 사용해 기본 Auto Scaling을 확인합니다. |
+| [`012-load balancer`](./012-load%20balancer/) | 여러 Ubuntu 웹 노드의 분산을 확인하고 Target 서버에 `stress-ng`를 함께 설치합니다. |
+| [`013-auto scaling`](./013-auto%20scaling/) | 012번 Target 서버로 이미지를 만들고 기존 Load Balancer와 Target Group을 사용해 기본 Auto Scaling을 확인합니다. |
 | [`014-auto scaling`](./014-auto%20scaling/) | 003번 게시판 Web 이미지를 사용해 Public ALB 뒤에서 Web Auto Scaling과 데이터 유지를 확인합니다. |
 
 ### 6. 데이터베이스 실습

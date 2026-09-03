@@ -20,7 +20,7 @@ Naver Cloud 기반 클라우드 인프라 실습 교안입니다.
 | CLI 및 IaC | 010 | 비용 조회 Slack 자동화 | `010-cost slack alert` |
 | 스토리지 | 011 | Object Storage 정적 웹사이트 | `011-static website` |
 | Load Balancer 및 Auto Scaling | 012 | Load Balancer 분산 실습 | `012-load balancer` |
-| Load Balancer 및 Auto Scaling | 013 | 012 이미지 기반 Auto Scaling (1) | `013-auto scaling` |
+| Load Balancer 및 Auto Scaling | 013 | 012 Target 서버 이미지 기반 Auto Scaling (1) | `013-auto scaling` |
 | Load Balancer 및 Auto Scaling | 014 | 게시판 Auto Scaling (2) | `014-auto scaling` |
 | 데이터베이스 | 015 | Database 백업 및 특정시점 복구 | `015-database backup recovery` |
 | 데이터베이스 | 016 | Cloud DB for MySQL 마이그레이션 | `016-cloud db migration` |
