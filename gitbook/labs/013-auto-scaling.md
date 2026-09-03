@@ -98,7 +98,7 @@ Auto Scaling Nginx 서버 1~3대         새로 구성
 | 이름 | `lab-asg-web-group` |
 | VPC | 012와 같은 VPC |
 | Subnet | 012 웹 서버와 같은 Private Subnet |
-| 서버 이름 Prefix | `lab-asg-web` |
+| 서버 이름 Prefix | `asg` |
 | 최소 용량 | `1` |
 | 최대 용량 | `3` |
 | 기대 용량 | `1` |
