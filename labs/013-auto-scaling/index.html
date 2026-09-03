@@ -1374,10 +1374,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#9-step-7-bastion-cpu" class="md-nav__link">
+  <a href="#9-step-7-load-balancer-http" class="md-nav__link">
     <span class="md-ellipsis">
       
-        9. Step 7 - Bastion에서 CPU 부하 발생
+        9. Step 7 - Load Balancer로 HTTP 부하 발생
       
     </span>
   </a>
@@ -1938,10 +1938,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#9-step-7-bastion-cpu" class="md-nav__link">
+  <a href="#9-step-7-load-balancer-http" class="md-nav__link">
     <span class="md-ellipsis">
       
-        9. Step 7 - Bastion에서 CPU 부하 발생
+        9. Step 7 - Load Balancer로 HTTP 부하 발생
       
     </span>
   </a>
@@ -2096,7 +2096,7 @@
 <li><a href="https://github.com/jangh-lee/cloud-infrastructure-lecture-example/tree/main/013-auto%20scaling">GitHub 013 실습 폴더</a></li>
 </ul>
 <h2 id="1">1. 완성 구조<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>사용자 또는 Bastion
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>사용자 또는 Bastion의 지속적인 HTTP 요청
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>        |
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>        v
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>012 Load Balancer :80                 그대로 사용
@@ -2107,8 +2107,7 @@
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        v
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>Auto Scaling Nginx 서버 1~3대         새로 구성
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>  |-- /status.json: Hostname, Private IP
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  |-- stress-ng: CPU 부하 발생
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  +-- htop: CPU와 프로세스 확인
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  +-- /stress: 서버당 하나의 제한된 CPU 부하 실행
 </code></pre></div>
 <p>012에서 수동으로 만든 서버 여러 대를 Auto Scaling으로 관리되는 서버 1~3대로 교체합니다. 웹 페이지와 <code>/status.json</code>은 그대로이므로 <strong>서버 수만 자동으로 바뀌는 과정</strong>에 집중할 수 있습니다.</p>
 <h2 id="2">2. 실습 전 준비<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
@@ -2150,12 +2149,12 @@
 <tr>
 <td>Web ACG</td>
 <td>012 서버에 적용한 ACG</td>
-<td>HTTP와 SSH 허용</td>
+<td>Load Balancer Subnet의 HTTP 허용</td>
 </tr>
 <tr>
 <td>Bastion</td>
-<td>Private IP로 SSH 가능한 서버</td>
-<td>부하 명령 실행</td>
+<td>Load Balancer URL 호출이 가능한 서버</td>
+<td><code>hey</code> 부하 명령 실행</td>
 </tr>
 <tr>
 <td>인증키</td>
@@ -2169,6 +2168,10 @@
 <p>Load Balancer와 Target Group은 013에서도 사용합니다. 012 수동 서버도 새 ASG Target이 Healthy가 될 때까지 유지합니다.</p>
 </div>
 <h2 id="3-step-1-target">3. Step 1 - 기존 Target 서버 이미지 생성<a class="headerlink" href="#3-step-1-target" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">기존 012 서버를 이미 만들어 둔 경우</p>
+<p>이미지 생성 전에 <a href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/012-load-balancer/#init-script">012 통합 Init Script</a>를 Target 서버에서 한 번 다시 실행합니다. 최신 설치기에 HTTP Stress API가 추가되어 있으므로 예전에 만든 서버를 그대로 이미지로 만들면 <code>/stress</code>가 동작하지 않습니다.</p>
+</div>
 <ol>
 <li><strong>Services &gt; Compute &gt; Server &gt; Server</strong>로 이동합니다.</li>
 <li>012 Load Balancer의 Target으로 사용한 서버 한 대를 선택합니다.</li>
@@ -2193,7 +2196,7 @@
 </tbody>
 </table>
 <p><strong>Services &gt; Compute &gt; Server &gt; Server Image</strong>에서 <code>lab-asg-web-image-v1</code>의 상태가 <code>생성됨</code>이 될 때까지 기다립니다.</p>
-<p>012 통합 Init Script로 설치한 Nginx, 상태 페이지, <code>stress-ng</code>, <code>htop</code>, 상태 갱신 timer가 이미지에 포함됩니다. Auto Scaling 서버가 부팅되면 timer가 <code>/status.json</code>을 자신의 Hostname과 Private IP로 다시 기록합니다.</p>
+<p>012 통합 Init Script로 설치한 Nginx, 상태 페이지, HTTP Stress API, <code>stress-ng</code>, <code>htop</code>, 상태 갱신 timer가 이미지에 포함됩니다. Auto Scaling 서버가 부팅되면 timer가 <code>/status.json</code>을 자신의 Hostname과 Private IP로 다시 기록합니다.</p>
 <h3 id="_1">확인하고 넘어가기<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li>[ ] 이미지 원본이 012 Load Balancer의 기존 Target 서버입니다.</li>
@@ -2236,7 +2239,7 @@
 </tr>
 </tbody>
 </table>
-<p>이미지 안에 Nginx, <code>stress-ng</code>, <code>htop</code>, 상태 갱신 timer가 이미 들어 있으므로 Init Script는 비워 둡니다.</p>
+<p>이미지 안에 Nginx, HTTP Stress API, <code>stress-ng</code>, <code>htop</code>, 상태 갱신 timer가 이미 들어 있으므로 Init Script는 비워 둡니다.</p>
 <h3 id="_2">확인하고 넘어가기<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li>[ ] Launch Configuration 이미지가 <code>lab-asg-web-image-v1</code>입니다.</li>
@@ -2334,14 +2337,9 @@
 <td>Load Balancer Subnet CIDR</td>
 <td>서비스 요청과 Health Check</td>
 </tr>
-<tr>
-<td>TCP</td>
-<td><code>22</code></td>
-<td>Bastion ACG 또는 Bastion Private IP</td>
-<td>부하와 상태 확인</td>
-</tr>
 </tbody>
 </table>
+<p>부하는 Load Balancer의 HTTP <code>80</code>으로 전달하므로 Bastion에서 ASG 서버로 SSH 접속할 필요가 없습니다.</p>
 <h3 id="_3">확인하고 넘어가기<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <p>다음 순서로 상태를 확인합니다.</p>
 <ol>
@@ -2428,6 +2426,7 @@
 <h3 id="_4">쿨다운이란?<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <p>쿨다운은 한 번의 Scaling을 수행한 뒤 서버가 준비되는 동안 <strong>다른 알람에 바로 반응하지 않고 기다리는 시간</strong>입니다. 이번 실습에서는 Scale-out과 Scale-in 정책 모두 <code>60초</code>로 설정합니다.</p>
 <p>예를 들어 Scale-out으로 서버 한 대를 생성한 직후 CPU 알람이 다시 발생하더라도, 쿨다운 60초 동안에는 같은 알람으로 서버를 연속 생성하지 않습니다. 빠른 수업 진행을 위한 값이며 운영 환경에서는 실제 서버 부팅 시간과 애플리케이션 준비 시간을 고려해 더 길게 설정합니다.</p>
+<p>Cloud Insight Event가 계속 유지되면 쿨다운이 끝날 때마다 정책이 반복 실행되고, CPU 조건이 해제되어 Event가 종료되면 반복도 멈춥니다.</p>
 <div class="admonition note">
 <p class="admonition-title">다른 시간 설정과 구분</p>
 <p>Cloud Insight의 <code>1 minute</code>은 CPU 조건이 얼마나 오래 지속되어야 알람을 발생시킬지 정하는 값입니다. Health Check 보류 기간은 새 서버가 부팅되는 동안 Health Check 실패를 정상으로 간주하는 시간입니다. 쿨다운은 Scaling 직후 추가 알람에 반응하지 않는 시간입니다.</p>
@@ -2520,22 +2519,52 @@
 <li>[ ] Scale-out Rule 액션이 <code>lab-asg-web-add-1</code>입니다.</li>
 <li>[ ] 조건 지속 시간이 <code>1 minute</code>입니다.</li>
 </ul>
-<h2 id="9-step-7-bastion-cpu">9. Step 7 - Bastion에서 CPU 부하 발생<a class="headerlink" href="#9-step-7-bastion-cpu" title="Permanent link">&para;</a></h2>
-<p>ASG의 서버 목록에서 현재 서버 Private IP를 확인합니다. 다음 명령은 <strong>Bastion에서</strong> 실행하고 CPU 부하는 원격 ASG 서버에 발생합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nv">WEB_PRIVATE_IP</span><span class="o">=</span><span class="s2">"ASG_SERVER_PRIVATE_IP"</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="s1">'hostname; stress-ng --version; htop --version'</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="s1">'nohup stress-ng --cpu 0 --cpu-load 90 --timeout 180s &gt;/tmp/asg-web-stress.log 2&gt;&amp;1 &amp;'</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="s1">'pgrep -af stress-ng; uptime'</span>
+<h2 id="9-step-7-load-balancer-http">9. Step 7 - Load Balancer로 HTTP 부하 발생<a class="headerlink" href="#9-step-7-load-balancer-http" title="Permanent link">&para;</a></h2>
+<p>명령은 Bastion에서 실행하지만 ASG 서버에 SSH로 접속하지 않습니다. Bastion에 HTTP 부하 도구 <code>hey</code>를 설치합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>hey
 </code></pre></div>
-<p>별도 Bastion 터미널에서 CPU를 눈으로 확인할 수 있습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>ssh<span class="w"> </span>-t<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span>htop
+<p>실제 Load Balancer 주소를 입력해 한 번 실행합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">LB_URL</span><span class="o">=</span><span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
 </code></pre></div>
-<p><code>htop</code>에서 <code>1</code>은 CPU 코어별 표시, <code>P</code>는 CPU 사용률 순 정렬, <code>q</code>는 종료입니다. <code>htop</code>은 현재 접속한 서버 한 대만 보여줍니다.</p>
-<div class="admonition note">
-<p class="admonition-title">왜 HTTP 요청 대신 stress-ng를 사용하나요?</p>
-<p>정적 파일을 제공하는 Nginx는 가벼워서 많은 HTTP 요청에도 CPU 50%를 안정적으로 넘지 않을 수 있습니다. <code>stress-ng</code>는 선택한 ASG 서버의 CPU를 확실하게 올려 정책 동작 자체를 검증합니다. 여러 서버에 동시에 실행되는 명령은 아니며, 위 SSH 대상 한 대에만 부하가 걸립니다.</p>
+<p>먼저 <code>/stress</code>가 응답하는지 한 번 확인합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>-H<span class="w"> </span><span class="s1">'X-Lab-Token: asg-lab'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/stress"</span>
+</code></pre></div>
+<p><code>status</code>, 요청을 처리한 <code>hostname</code>, <code>durationSeconds</code>가 출력되면 아래 명령으로 5분 동안 부하를 발생시킵니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>hey<span class="w"> </span>-z<span class="w"> </span>5m<span class="w"> </span>-c<span class="w"> </span><span class="m">20</span><span class="w"> </span>-q<span class="w"> </span><span class="m">5</span><span class="w"> </span>-disable-keepalive<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'X-Lab-Token: asg-lab'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/stress"</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>옵션</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-z 5m</code></td>
+<td>5분 후 자동 종료</td>
+</tr>
+<tr>
+<td><code>-c 20</code></td>
+<td>동시 Worker 20개</td>
+</tr>
+<tr>
+<td><code>-q 5</code></td>
+<td>Worker당 최대 5 QPS, 전체 약 100 QPS</td>
+</tr>
+<tr>
+<td><code>-disable-keepalive</code></td>
+<td>매 요청에 새 연결을 사용해 새 Target에도 트래픽 전달</td>
+</tr>
+</tbody>
+</table>
+<p>각 <code>/stress</code> 요청은 해당 Target 서버에서 최대 하나의 <code>stress-ng</code>만 실행합니다. CPU 부하는 20초 뒤 자동 종료되지만 요청이 계속 들어오면 다음 20초 부하가 다시 시작됩니다. 새 ASG 서버가 <code>Healthy</code>가 되면 Load Balancer의 새 연결을 받아 그 서버에도 자동으로 CPU 부하가 발생합니다.</p>
+<div class="admonition warning">
+<p class="admonition-title">실습 비용 제한</p>
+<p><code>/stress</code> 응답은 1KB보다 작고 부하 명령은 5분 후 종료됩니다. 동시성이나 실행 시간을 임의로 크게 늘리지 말고, 중간에 멈추려면 <code>Ctrl+C</code>를 누릅니다. 테스트가 끝나면 ASG가 최소 용량 1대로 돌아오는지 반드시 확인합니다. Load Balancer 처리 트래픽은 별도 과금될 수 있으므로 비용이 0원이라고 보장되지는 않습니다. 자세한 기준은 <a href="https://www.ncloud.com/api-cms/service-product/static/loadBalancer">Naver Cloud Load Balancer 요금</a>을 확인합니다.</p>
 </div>
 <h2 id="10-step-8-scale-out">10. Step 8 - Scale-out 관찰<a class="headerlink" href="#10-step-8-scale-out" title="Permanent link">&para;</a></h2>
 <p>다음 화면을 순서대로 확인합니다.</p>
@@ -2576,41 +2605,40 @@
 <tr>
 <td>6</td>
 <td>ASG</td>
-<td>서버 수 <code>1 → 2</code></td>
+<td>서버 수 <code>1 → 2 → 3</code></td>
 </tr>
 </tbody>
 </table>
+<p>첫 Scale-out 후에도 <code>hey</code>를 종료하지 않습니다. 새 서버가 <code>Healthy</code>가 되면 <code>/stress</code> 요청을 받아 CPU가 올라갑니다. <a href="https://guide.ncloud-docs.com/docs/cloudinsight-use-eventrule">Cloud Insight Event Rule 가이드</a>에 따라 Event가 유지되는 동안 쿨다운 주기로 정책이 반복 실행되므로 최대 용량 3대까지 확장됩니다. 5분 안에 2대까지만 생성됐다면 첫 명령이 끝난 뒤 같은 명령을 2분 정도 더 실행합니다.</p>
 <p>새 서버가 <code>Healthy</code>가 된 뒤 Load Balancer를 40번 호출합니다.</p>
 <h3 id="linux-macos">Linux 또는 macOS<a class="headerlink" href="#linux-macos" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">40</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span>curl<span class="w"> </span>-fsS<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/status.json"</span><span class="w"> </span><span class="p">|</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">40</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span>curl<span class="w"> </span>-fsS<span class="w"> </span><span class="s2">"</span><span class="nv">$LB_URL</span><span class="s2">/status.json"</span><span class="w"> </span><span class="p">|</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'s/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
 </code></pre></div>
 <h3 id="windows-terminal-powershell">Windows Terminal PowerShell<a class="headerlink" href="#windows-terminal-powershell" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">$LB_URL</span> <span class="p">=</span> <span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">1</span><span class="p">..</span><span class="n">40</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>  <span class="p">(</span><span class="nb">Invoke-RestMethod</span> <span class="n">-Uri</span> <span class="s2">"$LB_URL/status.json"</span><span class="p">).</span><span class="n">hostname</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="p">}</span> <span class="p">|</span> <span class="nb">Group-Object</span> <span class="p">|</span> <span class="nb">Sort-Object</span> <span class="n">Count</span> <span class="n">-Descending</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">Count</span><span class="p">,</span> <span class="n">Name</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nv">$LB_URL</span> <span class="p">=</span> <span class="s2">"http://YOUR_LOAD_BALANCER_URL"</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">1</span><span class="p">..</span><span class="n">40</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>  <span class="p">(</span><span class="nb">Invoke-RestMethod</span> <span class="n">-Uri</span> <span class="s2">"$LB_URL/status.json"</span><span class="p">).</span><span class="n">hostname</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="p">}</span> <span class="p">|</span> <span class="nb">Group-Object</span> <span class="p">|</span> <span class="nb">Sort-Object</span> <span class="n">Count</span> <span class="n">-Descending</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">Count</span><span class="p">,</span> <span class="n">Name</span>
 </code></pre></div>
 <p>서로 다른 ASG Hostname이 보이고 합계가 40이면 성공입니다. 정확히 20회씩 나뉠 필요는 없습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Count Name
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>----- ----
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>   22 asg-aaaaa
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>   18 asg-bbbbb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Count Name
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>----- ----
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>   22 asg-aaaaa
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>   18 asg-bbbbb
 </code></pre></div>
 <p>페이지를 새로고침하면서 Hostname과 Private IP가 바뀌는지도 확인합니다. 같은 원본 이미지로 만들어졌지만 <code>lb-demo-status.timer</code>가 각 서버의 실제 값을 다시 기록합니다.</p>
 <h2 id="11-step-9-scale-in">11. Step 9 - 부하 종료와 Scale-in 확인<a class="headerlink" href="#11-step-9-scale-in" title="Permanent link">&para;</a></h2>
-<p>3분이 지나면 <code>stress-ng</code>가 자동 종료됩니다. 즉시 중지하려면 Bastion에서 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>ssh<span class="w"> </span>root@<span class="s2">"</span><span class="nv">$WEB_PRIVATE_IP</span><span class="s2">"</span><span class="w"> </span><span class="s1">'pkill -f stress-ng || true'</span>
-</code></pre></div>
+<p>5분이 지나면 <code>hey</code>가 자동 종료됩니다. 즉시 중지하려면 실행 중인 Bastion 터미널에서 <code>Ctrl+C</code>를 누릅니다. 마지막 HTTP 요청 이후 서버별 <code>stress-ng</code>도 최대 20초 안에 자동 종료됩니다.</p>
 <p>Scale-in Rule을 활성화하고 다음 순서로 확인합니다.</p>
 <ol>
 <li>ASG 평균 CPU가 20% 미만으로 내려갑니다.</li>
 <li>Scale-in Event가 발생합니다.</li>
 <li><code>lab-asg-web-remove-1</code> 정책이 실행됩니다.</li>
-<li>ASG 서버 수가 <code>2 → 1</code>이 됩니다.</li>
+<li>쿨다운과 다음 감지를 거쳐 ASG 서버 수가 <code>3 → 2 → 1</code>로 줄어듭니다.</li>
 <li>종료된 서버가 Target Group에서 자동 제거됩니다.</li>
 <li>Load Balancer URL은 계속 HTTP <code>200</code>을 반환합니다.</li>
 </ol>
@@ -2640,8 +2668,12 @@
 <td>ASG 서버 자동 등록, <code>/healthz</code> Healthy</td>
 </tr>
 <tr>
+<td>Scale-out 부하</td>
+<td>Bastion에서 LB <code>/stress</code>를 약 100 QPS로 5분 호출</td>
+</tr>
+<tr>
 <td>Scale-out</td>
-<td>CPU 50% 이상 1분 후 <code>1 → 2</code></td>
+<td>새 Target도 부하를 받으며 <code>1 → 2 → 3</code></td>
 </tr>
 <tr>
 <td>분산</td>
@@ -2649,7 +2681,7 @@
 </tr>
 <tr>
 <td>Scale-in</td>
-<td>CPU 20% 미만 1분 후 <code>2 → 1</code></td>
+<td>부하 종료 후 <code>3 → 2 → 1</code></td>
 </tr>
 <tr>
 <td>서비스 연속성</td>
@@ -2677,6 +2709,18 @@
 <tr>
 <td>CPU가 올라도 확장 안 됨</td>
 <td>상세 모니터링, Event 대상 ASG, Metric, Policy 액션</td>
+</tr>
+<tr>
+<td><code>/stress</code>가 403</td>
+<td><code>X-Lab-Token: asg-lab</code> 헤더 확인</td>
+</tr>
+<tr>
+<td><code>/stress</code>가 502</td>
+<td>012 통합 Init Script 재실행 후 새 이미지 생성</td>
+</tr>
+<tr>
+<td>새 서버 CPU가 오르지 않음</td>
+<td>Target <code>Healthy</code>, <code>hey</code> 실행 유지, <code>-disable-keepalive</code> 확인</td>
 </tr>
 <tr>
 <td>서버가 너무 빨리 축소됨</td>
