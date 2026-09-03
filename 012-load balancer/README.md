@@ -133,9 +133,15 @@ http://SERVER_IP/
 
 #### Linux 또는 macOS 터미널
 
+먼저 실제 Load Balancer 주소를 입력해 한 번 실행합니다.
+
 ```bash
 LB_URL="http://YOUR_LOAD_BALANCER_URL"
+```
 
+그다음 아래 박스만 복사해 100회 호출합니다.
+
+```bash
 for i in $(seq 1 100); do
   curl -s "$LB_URL/status.json" | sed -n 's/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
 done | sort | uniq -c
@@ -143,9 +149,15 @@ done | sort | uniq -c
 
 #### Windows Terminal PowerShell
 
+먼저 실제 Load Balancer 주소를 입력해 한 번 실행합니다.
+
 ```powershell
 $LB_URL = "http://YOUR_LOAD_BALANCER_URL"
+```
 
+그다음 아래 박스만 복사해 100회 호출합니다.
+
+```powershell
 $results = 1..100 | ForEach-Object {
   (Invoke-RestMethod -Uri "$LB_URL/status.json" -Method Get).hostname
 }
@@ -175,8 +187,15 @@ Count Name
 
 #### Linux 또는 macOS 터미널
 
+먼저 실제 Load Balancer 주소를 입력해 한 번 실행합니다.
+
 ```bash
 LB_URL="http://YOUR_LOAD_BALANCER_URL"
+```
+
+그다음 아래 박스를 복사합니다. 임시 쿠키 파일 생성부터 삭제까지 한 번에 실행됩니다.
+
+```bash
 COOKIE_JAR="$(mktemp)"
 
 for i in $(seq 1 100); do
@@ -189,8 +208,15 @@ rm -f "$COOKIE_JAR"
 
 #### Windows Terminal PowerShell
 
+먼저 실제 Load Balancer 주소를 입력해 한 번 실행합니다.
+
 ```powershell
 $LB_URL = "http://YOUR_LOAD_BALANCER_URL"
+```
+
+그다음 아래 박스를 복사합니다. 같은 PowerShell Web Session으로 100회 호출합니다.
+
+```powershell
 $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 
 $results = 1..100 | ForEach-Object {
