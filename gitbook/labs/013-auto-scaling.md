@@ -268,7 +268,7 @@ printf '%s' "$STRESS_RESPONSE" | grep -q '"stressRunning":true' && \
 정상이면 다음처럼 JSON과 `PASS`가 출력됩니다. `stressRunning`이 `true`여야 실제 `stress-ng`가 실행된 것입니다.
 
 ```text
-{"status":"started","hostname":"asg-abcde","durationSeconds":20,"stressRunning":true}
+{"status":"started","hostname":"asg-abcde","durationSeconds":20,"stressRunning":true,"stressPid":1234,"exitCode":null}
 PASS: CPU stress started
 ```
 
@@ -391,6 +391,7 @@ Scale-in Rule을 활성화하고 다음 순서로 확인합니다.
 | `/stress`가 403 | `X-Lab-Token: asg-lab` 헤더 확인 |
 | `/stress`가 502 | 012 통합 Init Script 재실행 후 새 이미지 생성 |
 | `/stress`가 HTML 반환 | 예전 Nginx 설정이므로 012 통합 Init Script 재실행 후 이미지 재생성 |
+| `stressRunning`이 바로 `false` | 최신 012 통합 Init Script 재실행, `journalctl -u lb-demo-stress.service -n 30` 확인 |
 | 새 서버 CPU가 오르지 않음 | Target `Healthy`, `hey` 실행 유지, `-disable-keepalive` 확인 |
 | 서버가 너무 빨리 축소됨 | Scale-in Rule을 잠시 비활성화 |
 | 부팅 중 서버가 반납됨 | Health Check 보류 기간을 `300`초로 변경 |

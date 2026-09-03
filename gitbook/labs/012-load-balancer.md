@@ -66,7 +66,13 @@ htop --version
 
 `stress-ng`는 013에서 CPU 부하를 발생시키고, `htop`은 서버에 직접 접속해 문제를 확인할 때 사용할 수 있는 선택 도구입니다. 통합 Init Script가 두 패키지를 Nginx와 함께 설치하며, 013 기본 부하 실습에는 SSH를 사용하지 않습니다.
 
-`lb-demo-stress.service`는 `127.0.0.1:8081`에서만 실행되고 Nginx의 `/stress` 요청을 받습니다. 요청이 반복되어도 서버마다 `stress-ng`를 하나만 실행하며 20초 뒤 자동 종료하므로, 013에서 Load Balancer를 통해 제한된 CPU 부하를 줄 수 있습니다. `/stress-status`에서는 요청을 처리한 Hostname, 부하 실행 여부, 프로세스 ID와 1분 Load Average를 확인할 수 있습니다.
+`lb-demo-stress.service`는 `127.0.0.1:8081`에서만 실행되고 Nginx의 `/stress` 요청을 받습니다. `www-data`가 임시 파일을 만들 수 있도록 작업 디렉터리는 `/tmp`를 사용합니다. 요청이 반복되어도 서버마다 `stress-ng`를 하나만 실행하며 20초 뒤 자동 종료하므로, 013에서 Load Balancer를 통해 제한된 CPU 부하를 줄 수 있습니다. `/stress-status`에서는 요청을 처리한 Hostname, 부하 실행 여부, 프로세스 ID, 종료 코드와 1분 Load Average를 확인할 수 있습니다.
+
+`stressRunning`이 바로 `false`가 되거나 `exitCode`가 `0`이 아니면 서비스 로그를 확인합니다.
+
+```bash
+sudo journalctl -u lb-demo-stress.service -n 30 --no-pager
+```
 
 ## 503 복구 확인
 

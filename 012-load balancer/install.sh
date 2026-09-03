@@ -138,6 +138,7 @@ After=network.target
 Type=simple
 User=www-data
 Group=www-data
+WorkingDirectory=/tmp
 Environment=LAB_STRESS_TOKEN=asg-lab
 Environment=LAB_STRESS_SECONDS=20
 ExecStart=/usr/bin/python3 /opt/lb-demo/stress_server.py
