@@ -1293,27 +1293,10 @@
   <a href="#013" class="md-nav__link">
     <span class="md-ellipsis">
       
-        013용 서버 이미지 준비
+        013 실습으로 이어가기
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="013용 서버 이미지 준비">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#012" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        012 완료 기준
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1741,27 +1724,10 @@
   <a href="#013" class="md-nav__link">
     <span class="md-ellipsis">
       
-        013용 서버 이미지 준비
+        013 실습으로 이어가기
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="013용 서버 이미지 준비">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#012" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        012 완료 기준
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1800,7 +1766,7 @@
 
 <h1 id="012-load-balancer">012 Load Balancer<a class="headerlink" href="#012-load-balancer" title="Permanent link">&para;</a></h1>
 <h2 id="_1">목표<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>여러 Ubuntu 웹 노드를 만들고 Load Balancer 뒤에 연결해 헬스체크와 트래픽 분산을 확인합니다. 마지막에는 Target 서버 한 대를 이미지로 만들어 013 Auto Scaling 실습에서 그대로 재사용합니다.</p>
+<p>여러 Ubuntu 웹 노드를 만들고 Load Balancer 뒤에 연결해 헬스체크와 트래픽 분산을 확인합니다. Target 서버에는 013 Auto Scaling 부하 실습에 사용할 패키지도 함께 설치합니다.</p>
 <p><code>userinput</code>은 원하는 표시 문구 하나만 사용하고, 실제 백엔드 구분은 서버마다 자동으로 달라지는 Hostname과 IP로 확인합니다.</p>
 <h2 id="_2">실습 폴더<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>012-load balancer
@@ -2002,52 +1968,14 @@
 <a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>  100 lb-node-001
 </code></pre></div>
 <p>새 쿠키 파일, 새 PowerShell 세션, 시크릿 브라우저는 새로운 세션이므로 처음 선택되는 서버가 달라질 수 있습니다. 고정된 Target이 Unhealthy 상태가 되어 제외되어도 다른 서버로 전환될 수 있습니다.</p>
-<h2 id="013">013용 서버 이미지 준비<a class="headerlink" href="#013" title="Permanent link">&para;</a></h2>
-<p>012 실습을 마친 뒤 Target 서버 한 대를 이미지 원본으로 사용합니다. 먼저 서버에서 아래 명령을 한 번에 실행합니다.</p>
-<p>이미 012 서버를 만들어 둔 경우에는 이 페이지 위쪽의 <strong>통합 Init Script</strong> 코드 박스를 이미지 원본 서버에서 다시 실행합니다. 최신 설치기가 Nginx 설정을 갱신하고 <code>stress-ng</code>와 <code>htop</code>을 추가합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-enabled<span class="w"> </span>nginx<span class="w"> </span>lb-demo-status.timer
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>nginx<span class="w"> </span>lb-demo-status.timer
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>http://127.0.0.1/healthz
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>http://127.0.0.1/status.json
-<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>stress-ng<span class="w"> </span>--version
-<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>htop<span class="w"> </span>--version
-</code></pre></div>
-<p><code>enabled</code>, <code>active</code>, <code>ok</code>, 현재 서버의 Hostname과 Private IP, 두 패키지 버전이 모두 보이면 이미지를 생성합니다.</p>
-<ol>
-<li><strong>Services &gt; Compute &gt; Server &gt; Server</strong>로 이동합니다.</li>
-<li>확인한 012 Target 서버 한 대를 선택합니다.</li>
-<li><strong>서버 관리 및 설정 변경 &gt; 내 서버 이미지 생성</strong>을 클릭합니다.</li>
-</ol>
-<table>
-<thead>
-<tr>
-<th>항목</th>
-<th>값</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>이미지 이름</td>
-<td><code>lab-lb-web-image-v1</code></td>
-</tr>
-<tr>
-<td>설명</td>
-<td><code>012 load balancer target for auto scaling</code></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Server Image</strong>에서 상태가 <code>생성됨</code>이 되면 013으로 넘어갑니다. Nginx, 상태 페이지, <code>stress-ng</code>, <code>htop</code>, 상태 갱신 timer가 이미지에 모두 포함되므로 013 Launch Configuration에는 별도 Init Script를 넣지 않습니다.</p>
-<div class="admonition note">
-<p class="admonition-title">복제 서버의 Hostname과 IP</p>
-<p>이미지 안의 <code>lb-demo-status.timer</code>가 부팅 후 <code>/status.json</code>을 다시 만들기 때문에 Auto Scaling으로 생성된 서버는 원본이 아니라 자신의 Hostname과 Private IP를 표시합니다.</p>
-</div>
-<h3 id="012">012 완료 기준<a class="headerlink" href="#012" title="Permanent link">&para;</a></h3>
+<h2 id="013">013 실습으로 이어가기<a class="headerlink" href="#013" title="Permanent link">&para;</a></h2>
+<p>012 실습이 끝나도 다음 리소스는 삭제하지 않습니다.</p>
 <ul>
-<li>[ ] Load Balancer URL에서 두 개 이상의 Hostname이 집계됩니다.</li>
-<li>[ ] 이미지 원본 서버에서 <code>stress-ng</code>와 <code>htop</code>이 실행됩니다.</li>
-<li>[ ] <code>lab-lb-web-image-v1</code> 상태가 <code>생성됨</code>입니다.</li>
-<li>[ ] 012 Load Balancer와 Target Group은 삭제하지 않고 013에서 재사용합니다.</li>
+<li>Load Balancer</li>
+<li>Target Group</li>
+<li>이미지 원본으로 사용할 Target 서버 한 대</li>
 </ul>
+<p>013 Step 1에서 기존 Target 서버를 선택해 내 서버 이미지를 생성합니다. <code>stress-ng</code>, <code>htop</code>, Nginx와 상태 갱신 timer는 012 통합 Init Script로 이미 설치되어 있습니다.</p>
 
 
 
