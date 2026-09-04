@@ -33,14 +33,14 @@ Backend에 관리자 계정을 넣지 않습니다. 스키마 작업은 `board_a
 
 ## 2. 시작 전 확인
 
-003 게시판에서 Web과 Backend가 정상인지 먼저 확인합니다.
+003에서 사용한 기존 Backend를 그대로 전환하거나 새로 생성한 Backend 서버에 애플리케이션을 설치할 수 있습니다. 기존 Backend를 사용할 때만 다음 명령으로 현재 상태를 확인합니다.
 
 ```bash
 curl -fsS http://127.0.0.1:4000/api/health
 curl -fsS http://127.0.0.1:4000/api/posts
 ```
 
-콘솔과 Backend 서버에서 다음 값을 기록합니다.
+콘솔에서 다음 값을 기록합니다.
 
 | 확인 값 | 예시 |
 | --- | --- |
@@ -124,11 +124,18 @@ Cloud DB Server를 선택하고 **DB 관리 > DB User 관리**로 이동해 사�
 
 ## 6. Step 4 - Backend에서 네트워크와 로그인 확인
 
-Backend 서버에 접속해 MySQL 클라이언트를 설치합니다.
+생성한 Backend 서버에 접속한 뒤 필요한 패키지와 전체 실습 저장소를 준비합니다. 기존에 저장소를 내려받았다면 최신 코드만 갱신합니다.
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y default-mysql-client
+sudo apt-get install -y git curl ca-certificates default-mysql-client
+
+if [ -d ~/cloud-infrastructure-lecture-example/.git ]; then
+  git -C ~/cloud-infrastructure-lecture-example pull --ff-only origin main
+else
+  git clone https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git \
+    ~/cloud-infrastructure-lecture-example
+fi
 ```
 
 Private 도메인과 실제 암호를 입력합니다. 이후 명령은 같은 터미널에서 실행합니다.
@@ -195,9 +202,38 @@ MYSQL_PWD="$DB_APP_PASSWORD" mysql \
 - [ ] `Cloud DB 연결 완료` 게시글이 출력됩니다.
 - [ ] 접속 계정은 `board_app`이며 관리자 계정을 사용하지 않았습니다.
 
-## 8. Step 6 - Backend DB 연결 전환
+## 8. Step 6 - Backend 신규 설치 또는 DB 연결 전환
 
-003 저장소의 Backend `.env`를 백업한 뒤 Cloud DB 값으로 바꿉니다.
+새 Backend 서버를 만들었는지, 기존 003 Backend를 사용하는지에 따라 아래 두 방법 중 하나만 실행합니다. Step 4에서 정의한 DB 변수와 같은 터미널을 사용합니다.
+
+### 방법 A - 새 Backend 서버에 설치
+
+Backend 설정 파일을 만들고 설치 스크립트를 실행합니다. `board_app`은 Cloud DB에서 CRUD 권한만 가진 애플리케이션 계정입니다.
+
+```bash
+cd ~/cloud-infrastructure-lecture-example/"003-three tier web app"/backend
+
+cat > .env <<EOF
+PORT=4000
+DB_HOST=$DB_HOST
+DB_PORT=$DB_PORT
+DB_NAME=$DB_NAME
+DB_USER=$DB_APP_USER
+DB_PASSWORD=$DB_APP_PASSWORD
+AUTO_POST_ENABLED=false
+AUTO_POST_INTERVAL_SECONDS=60
+AUTO_POST_TOTAL=300
+AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
+LAB_STRESS_ENABLED=false
+EOF
+
+chmod +x install-backend.sh
+sudo ./install-backend.sh install
+```
+
+### 방법 B - 기존 003 Backend의 DB만 전환
+
+기존 `.env`를 백업한 뒤 Cloud DB 값으로 바꿉니다.
 
 ```bash
 cd ~/cloud-infrastructure-lecture-example/"003-three tier web app"/backend

@@ -1,6 +1,6 @@
 # 015 Cloud DB for MySQL 생성 및 연결
 
-003 게시판의 Backend가 직접 설치한 Ubuntu MariaDB 대신 Naver Cloud `Cloud DB for MySQL`을 사용하도록 전환하는 실습입니다.
+003 게시판의 Backend가 직접 설치한 Ubuntu MariaDB 대신 Naver Cloud `Cloud DB for MySQL`을 사용하도록 전환하는 실습입니다. 새 Backend 서버를 사용하는 경우에도 교안 안의 명령으로 애플리케이션을 설치할 수 있습니다.
 
 이 실습은 빈 관리형 DB 생성과 애플리케이션 연결에 집중합니다. 기존 DB의 데이터를 옮기는 마이그레이션은 `017-cloud db migration`에서 진행합니다.
 
@@ -23,7 +23,7 @@
 
 ## 전체 교안
 
-콘솔 생성값, ACG, DB User, 접속 확인, Backend 전환과 게시글 검증은 아래 웹 교안에서 순서대로 진행합니다.
+콘솔 생성값, ACG, DB User, 신규 Backend 설치 또는 기존 Backend 전환과 게시글 검증은 아래 웹 교안에서 순서대로 진행합니다.
 
 ```text
 https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/015-cloud-db-mysql/
