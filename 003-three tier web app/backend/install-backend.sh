@@ -9,6 +9,7 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 APP_DIR="/opt/board-service-backend"
+DEPENDENCY_STAMP="${APP_DIR}/.package-lock.sha256"
 SERVICE_FILE="/etc/systemd/system/board-service-backend.service"
 SEEDER_SERVICE_FILE="/etc/systemd/system/board-service-post-seeder.service"
 LEGACY_SERVICE_FILE="/etc/systemd/system/chapter3-backend.service"
@@ -31,9 +32,9 @@ DB_USER=${DB_USER}
 DB_PASSWORD=${DB_PASSWORD}
 AUTO_POST_ENABLED=${AUTO_POST_ENABLED:-false}
 AUTO_POST_INTERVAL_SECONDS=${AUTO_POST_INTERVAL_SECONDS:-60}
-    AUTO_POST_TOTAL=${AUTO_POST_TOTAL:-300}
-    AUTO_POST_API_URL=${AUTO_POST_API_URL:-http://127.0.0.1:${PORT:-4000}/api/posts}
-    LAB_STRESS_ENABLED=${LAB_STRESS_ENABLED:-false}
+AUTO_POST_TOTAL=${AUTO_POST_TOTAL:-300}
+AUTO_POST_API_URL=${AUTO_POST_API_URL:-http://127.0.0.1:${PORT:-4000}/api/posts}
+LAB_STRESS_ENABLED=${LAB_STRESS_ENABLED:-false}
 EOF
     return
   fi
@@ -107,6 +108,7 @@ sync_app_files() {
   mkdir -p "${APP_DIR}"
 
   copy_or_fetch_file "${SCRIPT_DIR}/app/package.json" "${APP_DIR}/package.json" "package.json"
+  copy_or_fetch_file "${SCRIPT_DIR}/app/package-lock.json" "${APP_DIR}/package-lock.json" "package-lock.json"
   copy_or_fetch_file "${SCRIPT_DIR}/app/server.js" "${APP_DIR}/server.js" "server.js"
   copy_or_fetch_file "${SCRIPT_DIR}/app/seed-worker.js" "${APP_DIR}/seed-worker.js" "seed-worker.js"
   cp "${SCRIPT_DIR}/.env" "${APP_DIR}/.env"
@@ -124,14 +126,33 @@ install_packages() {
 install_node_dependencies() {
   cd "${APP_DIR}"
 
-  if [[ ! -d node_modules ]]; then
-    npm install --omit=dev
+  local current_hash
+  local installed_hash=""
+
+  current_hash="$(sha256sum package-lock.json | awk '{print $1}')"
+  if [[ -f "${DEPENDENCY_STAMP}" ]]; then
+    installed_hash="$(<"${DEPENDENCY_STAMP}")"
+  fi
+
+  if [[ -d node_modules && "${current_hash}" == "${installed_hash}" ]]; then
+    echo "Node.js dependencies are already up to date."
     return
   fi
 
-  if [[ package.json -nt node_modules || package-lock.json -nt node_modules ]]; then
-    npm install --omit=dev
+  echo "Installing Node.js dependencies from package-lock.json..."
+  if ! timeout --foreground 180s npm ci \
+    --omit=dev \
+    --no-audit \
+    --no-fund \
+    --progress=false \
+    --fetch-retries=2 \
+    --fetch-timeout=30000; then
+    echo "npm dependency installation failed or exceeded 180 seconds." >&2
+    echo "Check registry access with: npm ping --registry=https://registry.npmjs.org/" >&2
+    exit 1
   fi
+
+  printf '%s\n' "${current_hash}" > "${DEPENDENCY_STAMP}"
 }
 
 restart_services() {
