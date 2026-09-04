@@ -1446,14 +1446,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../015-database-backup-recovery/" class="md-nav__link">
+      <a href="../015-cloud-db-mysql/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    015 Database 백업 및 복구
+    015 Cloud DB for MySQL 생성 및 연결
   
 
     
@@ -1474,14 +1474,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../016-cloud-db-migration/" class="md-nav__link">
+      <a href="../016-database-backup-recovery/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    016 Cloud DB Migration
+    016 Database 백업 및 복구
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../017-cloud-db-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    017 Cloud DB Migration
   
 
     
@@ -2009,7 +2037,7 @@
 </code></pre></div>
 <p>백엔드 서버:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>/var/log/lab11-init.log
-<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>chapter3-backend<span class="w"> </span>--no-pager
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>board-service-backend<span class="w"> </span>--no-pager
 <a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://localhost:4000/api/health
 </code></pre></div>
 <p>DB 서버:</p>

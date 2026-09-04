@@ -1447,14 +1447,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../015-database-backup-recovery/" class="md-nav__link">
+      <a href="../015-cloud-db-mysql/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    015 Database 백업 및 복구
+    015 Cloud DB for MySQL 생성 및 연결
   
 
     
@@ -1475,14 +1475,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../016-cloud-db-migration/" class="md-nav__link">
+      <a href="../016-database-backup-recovery/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    016 Cloud DB Migration
+    016 Database 백업 및 복구
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../017-cloud-db-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    017 Cloud DB Migration
   
 
     
@@ -1799,6 +1827,7 @@
 <h1 id="003-three-tier-web-app">003 Three Tier Web App<a class="headerlink" href="#003-three-tier-web-app" title="Permanent link">&para;</a></h1>
 <h2 id="1">1. 목표<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
 <p>Web, Backend, DB 서버를 분리해 3계층 게시판을 구성하고 서버 간 사설 통신과 ACG를 확인합니다. 014에서는 Public ALB 뒤에서 Web 서버를 Auto Scaling하고 Backend와 DB는 고정 서버로 유지합니다.</p>
+<p>게시판 서비스의 기본 Database는 <code>board_service</code>, Backend 전용 DB 계정은 <code>board_app</code>입니다. <code>003</code>은 강의 순서일 뿐 서비스 역할이 아니므로 DB와 계정 이름에 챕터 번호를 넣지 않습니다. 015 Cloud DB 생성과 017 마이그레이션에서도 같은 값을 사용합니다.</p>
 <h2 id="2">2. 실제 요청 구조<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>사용자 브라우저
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>   |
@@ -1869,9 +1898,9 @@
 <p>생성된 <code>.env</code>를 편집합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>DB_ROOT_PASSWORD=RootPass123!
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>DB_PREVIOUS_ROOT_PASSWORD=
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>DB_NAME=chapter3_board
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>DB_USER=chapter3_user
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>DB_PASSWORD=AppDbPass123!
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>DB_NAME=board_service
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>DB_USER=board_app
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>DB_PASSWORD=BoardApp123!
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>DB_ALLOWED_HOST=10.0.1.25
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>DB_BIND_ADDRESS=0.0.0.0
 </code></pre></div>
@@ -1927,7 +1956,7 @@
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>mariadb
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-p<span class="w"> </span>-e<span class="w"> </span><span class="s2">"SHOW DATABASES;"</span>
 </code></pre></div>
-<p><code>active</code>와 <code>chapter3_board</code>를 확인합니다.</p>
+<p><code>active</code>와 <code>board_service</code>를 확인합니다.</p>
 <h2 id="5-step-2-backend">5. Step 2 - Backend 서버 설치<a class="headerlink" href="#5-step-2-backend" title="Permanent link">&para;</a></h2>
 <p>Backend 서버에서 실행합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git
@@ -1942,9 +1971,9 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>PORT=4000
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>DB_HOST=DB_SERVER_PRIVATE_IP
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>DB_PORT=3306
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>DB_NAME=chapter3_board
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>DB_USER=chapter3_user
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>DB_PASSWORD=AppDbPass123!
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>DB_NAME=board_service
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>DB_USER=board_app
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>DB_PASSWORD=BoardApp123!
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>AUTO_POST_ENABLED=false
 <a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>AUTO_POST_INTERVAL_SECONDS=60
 <a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>AUTO_POST_TOTAL=300
@@ -2019,8 +2048,8 @@
 </table>
 <p>설치와 점검을 실행합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>install
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>systemctl<span class="w"> </span>is-enabled<span class="w"> </span>chapter3-backend
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>systemctl<span class="w"> </span>is-active<span class="w"> </span>chapter3-backend
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>systemctl<span class="w"> </span>is-enabled<span class="w"> </span>board-service-backend
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>systemctl<span class="w"> </span>is-active<span class="w"> </span>board-service-backend
 <a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
 <a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/instance
 </code></pre></div>
@@ -2104,7 +2133,7 @@
 </code></pre></div>
 <h3 id="backend">Backend 서버<a class="headerlink" href="#backend" title="Permanent link">&para;</a></h3>
 <p>Backend 요청, 상태 코드, 처리 시간과 애플리케이션·DB 오류를 확인합니다. 자동 게시글 기능을 사용하면 seeder 로그도 함께 표시합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>chapter3-backend<span class="w"> </span>-u<span class="w"> </span>chapter3-post-seeder<span class="w"> </span>-f
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>board-service-backend<span class="w"> </span>-u<span class="w"> </span>board-service-post-seeder<span class="w"> </span>-f
 </code></pre></div>
 <p>정상 글쓰기는 <code>POST /api/posts 201</code>, 오류는 <code>500</code>과 이어지는 stack trace로 구분합니다. 요청 본문과 DB 비밀번호는 기록하지 않습니다.</p>
 <h3 id="db">DB 서버<a class="headerlink" href="#db" title="Permanent link">&para;</a></h3>
