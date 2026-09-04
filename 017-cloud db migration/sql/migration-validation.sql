@@ -1,5 +1,5 @@
 -- Source DB와 Target DB에서 각각 실행해 구조와 데이터가 같은지 비교합니다.
--- 실행할 때 chapter3_board를 기본 DB로 선택해야 합니다.
+-- 실행할 때 board_service를 기본 DB로 선택해야 합니다.
 
 SELECT
   DATABASE() AS database_name,

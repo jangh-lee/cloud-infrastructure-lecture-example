@@ -30,7 +30,7 @@ The IO thread could read the Source binlog, so this was not an ACG, routing, or 
 
 Recovery used for the disposable lab server:
 
-1. Back up `chapter3_board` and the database configuration.
+1. Back up `board_service` and the database configuration.
 2. Replace MariaDB with Oracle MySQL.
 3. Recreate the application and DMS users.
 4. Run `prepare-source-db.sh` and `check-source-db.sh`.
@@ -52,7 +52,7 @@ The DMS dump client used the MySQL 8.4 command `SHOW BINARY LOG STATUS`, while M
 Recovery used for the lab:
 
 ```bash
-cd "/root/cloud-infrastructure-lecture-example/016-cloud db migration/scripts"
+cd "/root/cloud-infrastructure-lecture-example/017-cloud db migration/scripts"
 sudo CONFIRM_UPGRADE=YES ./upgrade-mysql-source-to-84.sh
 ```
 
@@ -89,7 +89,7 @@ SOURCE_DB_PASSWORD='SOURCE_PASSWORD' \
 TARGET_DB_HOST='TARGET_HOST' \
 TARGET_DB_USER='TARGET_USER' \
 TARGET_DB_PASSWORD='TARGET_PASSWORD' \
-DB_NAME='chapter3_board' \
+DB_NAME='board_service' \
   ./scripts/compare-post-counts.sh
 ```
 

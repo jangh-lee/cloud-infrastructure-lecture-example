@@ -53,5 +53,6 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 
 | Folder | Topic |
 | --- | --- |
-| [`015-database backup recovery`](./015-database%20backup%20recovery/) | Ubuntu 서버에서 테스트 데이터를 기록하며 데이터베이스 백업, 복구, 특정시점 복구(PITR)를 실습합니다. |
-| [`016-cloud db migration`](./016-cloud%20db%20migration/) | 003번 게시판 DB를 Cloud DB for MySQL로 마이그레이션하고 정합성과 백엔드 연결을 검증합니다. |
+| [`015-cloud db mysql`](./015-cloud%20db%20mysql/) | Cloud DB for MySQL을 생성하고 `board_service` DB와 `board_app` 계정으로 003 게시판 Backend를 연결합니다. |
+| [`016-database backup recovery`](./016-database%20backup%20recovery/) | Cloud DB에 테스트 데이터를 기록하며 데이터베이스 백업, 복구, 특정시점 복구(PITR)를 실습합니다. |
+| [`017-cloud db migration`](./017-cloud%20db%20migration/) | 기존 게시판 DB를 Cloud DB for MySQL로 마이그레이션하고 정합성과 Backend 연결을 검증합니다. |

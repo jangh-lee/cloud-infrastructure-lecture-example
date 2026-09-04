@@ -37,13 +37,13 @@ app.use((req, res, next) => {
 });
 
 app.get("/api/instance", (req, res) => {
-  res.json({ instance: instanceName, service: "chapter3-backend" });
+  res.json({ instance: instanceName, service: "board-service-backend" });
 });
 
 app.get("/api/health", async (req, res) => {
   try {
     await pool.query("SELECT 1");
-    res.json({ status: "ok", service: "chapter3-backend", instance: instanceName });
+    res.json({ status: "ok", service: "board-service-backend", instance: instanceName });
   } catch (error) {
     res.status(500).json({ status: "error", message: error.message });
   }

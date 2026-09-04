@@ -21,6 +21,7 @@
   * [013 Auto Scaling Hands-on (1)](<013-auto scaling/README.md>)
   * [014 Auto Scaling Hands-on (2)](<014-auto scaling/README.md>)
 * 데이터베이스 실습
-  * [015 Database Backup Recovery](<015-database backup recovery/README.md>)
-  * [016 Cloud DB Migration](<016-cloud db migration/README.md>)
+  * [015 Cloud DB for MySQL](<015-cloud db mysql/README.md>)
+  * [016 Database Backup Recovery](<016-database backup recovery/README.md>)
+  * [017 Cloud DB Migration](<017-cloud db migration/README.md>)
 * [Web Lecture Notes](gitbook/README.md)

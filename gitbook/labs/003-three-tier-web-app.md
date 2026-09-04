@@ -4,6 +4,8 @@
 
 Web, Backend, DB 서버를 분리해 3계층 게시판을 구성하고 서버 간 사설 통신과 ACG를 확인합니다. 014에서는 Public ALB 뒤에서 Web 서버를 Auto Scaling하고 Backend와 DB는 고정 서버로 유지합니다.
 
+게시판 서비스의 기본 Database는 `board_service`, Backend 전용 DB 계정은 `board_app`입니다. `003`은 강의 순서일 뿐 서비스 역할이 아니므로 DB와 계정 이름에 챕터 번호를 넣지 않습니다. 015 Cloud DB 생성과 017 마이그레이션에서도 같은 값을 사용합니다.
+
 ## 2. 실제 요청 구조
 
 ```text
@@ -61,9 +63,9 @@ sudo ./install-db.sh
 ```env
 DB_ROOT_PASSWORD=RootPass123!
 DB_PREVIOUS_ROOT_PASSWORD=
-DB_NAME=chapter3_board
-DB_USER=chapter3_user
-DB_PASSWORD=AppDbPass123!
+DB_NAME=board_service
+DB_USER=board_app
+DB_PASSWORD=BoardApp123!
 DB_ALLOWED_HOST=10.0.1.25
 DB_BIND_ADDRESS=0.0.0.0
 ```
@@ -88,7 +90,7 @@ sudo systemctl is-active mariadb
 sudo mariadb -u root -p -e "SHOW DATABASES;"
 ```
 
-`active`와 `chapter3_board`를 확인합니다.
+`active`와 `board_service`를 확인합니다.
 
 ## 5. Step 2 - Backend 서버 설치
 
@@ -110,9 +112,9 @@ sudo ./install-backend.sh install
 PORT=4000
 DB_HOST=DB_SERVER_PRIVATE_IP
 DB_PORT=3306
-DB_NAME=chapter3_board
-DB_USER=chapter3_user
-DB_PASSWORD=AppDbPass123!
+DB_NAME=board_service
+DB_USER=board_app
+DB_PASSWORD=BoardApp123!
 AUTO_POST_ENABLED=false
 AUTO_POST_INTERVAL_SECONDS=60
 AUTO_POST_TOTAL=300
@@ -138,8 +140,8 @@ LAB_STRESS_ENABLED=false
 
 ```bash
 sudo ./install-backend.sh install
-systemctl is-enabled chapter3-backend
-systemctl is-active chapter3-backend
+systemctl is-enabled board-service-backend
+systemctl is-active board-service-backend
 curl -i http://127.0.0.1:4000/api/health
 curl -i http://127.0.0.1:4000/api/instance
 ```
@@ -227,7 +229,7 @@ sudo tail -F /var/log/nginx/access.log /var/log/nginx/error.log
 Backend 요청, 상태 코드, 처리 시간과 애플리케이션·DB 오류를 확인합니다. 자동 게시글 기능을 사용하면 seeder 로그도 함께 표시합니다.
 
 ```bash
-sudo journalctl -u chapter3-backend -u chapter3-post-seeder -f
+sudo journalctl -u board-service-backend -u board-service-post-seeder -f
 ```
 
 정상 글쓰기는 `POST /api/posts 201`, 오류는 `500`과 이어지는 stack trace로 구분합니다. 요청 본문과 DB 비밀번호는 기록하지 않습니다.

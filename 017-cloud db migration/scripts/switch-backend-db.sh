@@ -7,12 +7,12 @@ if [[ "${EUID}" -ne 0 ]]; then
   exit 1
 fi
 
-BACKEND_ENV_FILE="${BACKEND_ENV_FILE:-/opt/chapter3-backend/.env}"
+BACKEND_ENV_FILE="${BACKEND_ENV_FILE:-/opt/board-service-backend/.env}"
 DB_HOST="${DB_HOST:?DB_HOST is required}"
 DB_PORT="${DB_PORT:-3306}"
 DB_USER="${DB_USER:?DB_USER is required}"
 DB_PASSWORD="${DB_PASSWORD:?DB_PASSWORD is required}"
-DB_NAME="${DB_NAME:-chapter3_board}"
+DB_NAME="${DB_NAME:-board_service}"
 
 if [[ ! -f "${BACKEND_ENV_FILE}" ]]; then
   echo "${BACKEND_ENV_FILE} does not exist."
@@ -36,10 +36,10 @@ set_env_value DB_USER "${DB_USER}"
 set_env_value DB_PASSWORD "${DB_PASSWORD}"
 set_env_value DB_NAME "${DB_NAME}"
 
-systemctl restart chapter3-backend.service
+systemctl restart board-service-backend.service
 
-if systemctl is-enabled chapter3-post-seeder.service >/dev/null 2>&1; then
-  systemctl restart chapter3-post-seeder.service
+if systemctl is-enabled board-service-post-seeder.service >/dev/null 2>&1; then
+  systemctl restart board-service-post-seeder.service
 fi
 
 echo "Backend DB settings updated."

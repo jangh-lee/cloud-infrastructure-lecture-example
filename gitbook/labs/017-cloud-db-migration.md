@@ -1,8 +1,11 @@
-# 016 Cloud DB Migration
+# 017 Cloud DB Migration
 
 ## 목표
 
 003번 게시판 DB를 Ubuntu 서버의 MariaDB/MySQL에서 Naver Cloud `Cloud DB for MySQL`로 마이그레이션합니다.
+
+!!! warning "015에서 사용 중인 DB와 분리"
+    DMS 실습의 Target에는 Source와 같은 `board_service`가 없어야 합니다. 015에서 생성해 서비스 중인 Cloud DB를 그대로 Target으로 쓰지 말고, DMS용 빈 Cloud DB Service를 새로 만들거나 015 리소스를 더 이상 사용하지 않을 때만 초기화합니다.
 
 이 실습에서는 두 가지 방식을 소개합니다.
 
@@ -57,13 +60,13 @@ erDiagram
 
 ## 1. Source DB 준비
 
-Naver Cloud DB for MySQL의 DB 사용자 비밀번호 입력 제한을 피하려고 예시 비밀번호는 2자 이상, 21자 이하인 `MigratePass123!`를 사용합니다.
+Naver Cloud DB for MySQL의 DB 사용자 비밀번호 조건에 맞춰 예시 비밀번호는 8자 이상, 20자 이하인 `MigratePass123!`를 사용합니다.
 
 ```bash
-cd "016-cloud db migration/scripts"
+cd "017-cloud db migration/scripts"
 sudo MIGRATION_USER='dms_migration' \
   MIGRATION_PASSWORD='MigratePass123!' \
-  SOURCE_DATABASE='chapter3_board' \
+  SOURCE_DATABASE='board_service' \
   ./prepare-source-db.sh
 ```
 
@@ -75,7 +78,7 @@ sudo MIGRATION_USER='dms_migration' \
 sudo SOURCE_DB_ADMIN_PASSWORD='DB_ROOT_PASSWORD' \
   MIGRATION_USER='dms_migration' \
   MIGRATION_PASSWORD='MigratePass123!' \
-  SOURCE_DATABASE='chapter3_board' \
+  SOURCE_DATABASE='board_service' \
   ./prepare-source-db.sh
 ```
 
@@ -139,7 +142,7 @@ Database Migration Service
 | Port | `3306` |
 | User | `dms_migration` |
 | Password | migration user password |
-| Database | `chapter3_board` |
+| Database | `board_service` |
 
 `Test Connection`을 먼저 통과시킵니다.
 
@@ -151,27 +154,27 @@ Database Migration Service
   -> Migration 생성
 ```
 
-Source Endpoint와 Target Cloud DB for MySQL을 선택하고 `chapter3_board`를 이관합니다.
+Source Endpoint와 Target Cloud DB for MySQL을 선택하고 `board_service`를 이관합니다.
 
 ## 6. 방법 B: mysqldump 이관
 
 정확한 이관을 위해 덤프 중에는 게시판 백엔드와 자동 게시글 생성을 잠시 멈춥니다.
 
 ```bash
-sudo systemctl stop chapter3-post-seeder || true
-sudo systemctl stop chapter3-backend
+sudo systemctl stop board-service-post-seeder || true
+sudo systemctl stop board-service-backend
 ```
 
 Source DB에서 덤프 파일 생성:
 
 ```bash
-cd "016-cloud db migration/scripts"
+cd "017-cloud db migration/scripts"
 
 SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
-SOURCE_DB_USER='chapter3_user' \
-SOURCE_DB_PASSWORD='AppDbPass123!' \
-DB_NAME='chapter3_board' \
-DUMP_FILE='/tmp/chapter3_board.sql' \
+SOURCE_DB_USER='board_app' \
+SOURCE_DB_PASSWORD='BoardApp123!' \
+DB_NAME='board_service' \
+DUMP_FILE='/tmp/board_service.sql' \
 ./dump-source-db.sh
 ```
 
@@ -181,7 +184,7 @@ Cloud DB for MySQL에 복원:
 TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
 TARGET_DB_USER='TARGET_USER' \
 TARGET_DB_PASSWORD='TARGET_PASSWORD' \
-DUMP_FILE='/tmp/chapter3_board.sql' \
+DUMP_FILE='/tmp/board_service.sql' \
 ./restore-target-db.sh
 ```
 
@@ -190,46 +193,46 @@ DUMP_FILE='/tmp/chapter3_board.sql' \
 ```bash
 MYSQL_PWD='SOURCE_PASSWORD' mysqldump \
   -h SOURCE_DB_PRIVATE_IP \
-  -u chapter3_user \
+  -u board_app \
   --single-transaction \
   --quick \
   --routines \
   --triggers \
   --events \
   --default-character-set=utf8mb4 \
-  --databases chapter3_board \
-  > /tmp/chapter3_board.sql
+  --databases board_service \
+  > /tmp/board_service.sql
 ```
 
 ```bash
 MYSQL_PWD='TARGET_PASSWORD' mysql \
   -h db-xxxx.vpc-cdb.ntruss.com \
   -u TARGET_USER \
-  < /tmp/chapter3_board.sql
+  < /tmp/board_service.sql
 ```
 
 ## 7. 데이터 검증
 
 ```bash
 SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
-SOURCE_DB_USER='chapter3_user' \
-SOURCE_DB_PASSWORD='AppDbPass123!' \
+SOURCE_DB_USER='board_app' \
+SOURCE_DB_PASSWORD='BoardApp123!' \
 TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
 TARGET_DB_USER='TARGET_USER' \
 TARGET_DB_PASSWORD='TARGET_PASSWORD' \
-DB_NAME='chapter3_board' \
+DB_NAME='board_service' \
 ./compare-post-counts.sh
 ```
 
 ## 8. 백엔드 전환
 
 ```bash
-sudo BACKEND_ENV_FILE='/opt/chapter3-backend/.env' \
+sudo BACKEND_ENV_FILE='/opt/board-service-backend/.env' \
   DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
   DB_PORT='3306' \
   DB_USER='TARGET_USER' \
   DB_PASSWORD='TARGET_PASSWORD' \
-  DB_NAME='chapter3_board' \
+  DB_NAME='board_service' \
   ./switch-backend-db.sh
 ```
 
@@ -242,4 +245,4 @@ curl http://localhost:4000/api/posts
 
 ## 참고
 
-- 상세 자료는 저장소의 `016-cloud db migration/README.md`를 확인합니다.
+- 상세 자료는 저장소의 `017-cloud db migration/README.md`를 확인합니다.

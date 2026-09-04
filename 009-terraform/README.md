@@ -309,7 +309,7 @@ curl -i http://localhost/backend-api/api/health
 
 ```bash
 sudo tail -n 100 /var/log/lab11-init.log
-sudo systemctl status chapter3-backend --no-pager
+sudo systemctl status board-service-backend --no-pager
 curl -i http://localhost:4000/api/health
 ```
 

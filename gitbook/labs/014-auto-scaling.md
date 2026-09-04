@@ -494,6 +494,8 @@ Web 코드나 Nginx 설정을 변경하면 기존 이미지에는 자동 반영�
 
 기존 003 Web, Backend, DB는 다음 실습을 위해 유지할 수 있습니다. Public ALB를 삭제한 뒤에는 기존 Web Public IP로 다시 접속합니다.
 
+다음 실습에서는 [015 Cloud DB for MySQL 생성 및 연결](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/015-cloud-db-mysql/)을 진행합니다.
+
 ## 23. 공식 문서
 
 - [Auto Scaling 시작 절차](https://guide.ncloud-docs.com/docs/autoscaling-procedure)

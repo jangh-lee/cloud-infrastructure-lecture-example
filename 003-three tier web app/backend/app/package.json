@@ -1,5 +1,5 @@
 {
-  "name": "chapter3-backend",
+  "name": "board-service-backend",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {

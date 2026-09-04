@@ -1,4 +1,4 @@
-const config = window.CHAPTER3_CONFIG || {};
+const config = window.BOARD_SERVICE_CONFIG || {};
 const siteTitle = config.SITE_TITLE || "DevForum";
 const pageSize = 15;
 

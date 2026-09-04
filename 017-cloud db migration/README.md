@@ -1,6 +1,8 @@
-# 016 Cloud DB for MySQL Migration
+# 017 Cloud DB for MySQL Migration
 
 003번 게시판 실습에서 Ubuntu 서버에 직접 설치한 MariaDB/MySQL 데이터를 Naver Cloud `Cloud DB for MySQL`로 마이그레이션하는 실습입니다.
+
+> 015에서 생성해 현재 서비스 중인 `board_service`를 DMS Target으로 그대로 사용하지 않습니다. DMS Target에는 Source와 같은 이름의 Database가 없어야 하므로 별도의 빈 Cloud DB Service를 만들거나, 015 리소스를 더 이상 사용하지 않을 때만 초기화합니다.
 
 실제 실습에서 재현한 MariaDB relay log 오류와 MySQL 8.0/8.4 `mysqldump` 오류의 원인, 복구, 최종 CDC 검증 결과는 [TROUBLESHOOTING-REPORT.md](./TROUBLESHOOTING-REPORT.md)에 정리했습니다.
 
@@ -111,7 +113,7 @@ erDiagram
 데이터베이스 이름 기본값:
 
 ```text
-chapter3_board
+board_service
 ```
 
 테이블:
@@ -133,11 +135,11 @@ chapter3_board
 DDL:
 
 ```sql
-CREATE DATABASE IF NOT EXISTS `chapter3_board`
+CREATE DATABASE IF NOT EXISTS `board_service`
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE `chapter3_board`;
+USE `board_service`;
 
 CREATE TABLE IF NOT EXISTS posts (
   id BIGINT NOT NULL AUTO_INCREMENT,
@@ -158,18 +160,18 @@ DMS가 Source DB를 읽으려면 보통 아래 준비가 필요합니다.
 - 마이그레이션 전용 계정 생성
 - DMS 또는 Cloud DB 쪽에서 Source DB `3306/tcp`로 접근 가능하도록 ACG 허용
 
-Naver Cloud DB for MySQL의 DB 사용자 비밀번호 입력 제한을 피하려고 예시 비밀번호는 2자 이상, 21자 이하인 `MigratePass123!`를 사용합니다.
+Naver Cloud DB for MySQL의 DB 사용자 비밀번호 조건에 맞춰 예시 비밀번호는 8자 이상, 20자 이하인 `MigratePass123!`를 사용합니다.
 
 003 설치 스크립트는 `root@localhost`에 `DB_ROOT_PASSWORD`를 설정합니다. 따라서 003을 그대로 설치한 Source DB에서는 DB 서버의 `003-three tier web app/db/.env`에 기록한 비밀번호를 사용합니다.
 
 Source DB 서버에서:
 
 ```bash
-cd "016-cloud db migration/scripts"
+cd "017-cloud db migration/scripts"
 sudo SOURCE_DB_ADMIN_PASSWORD='RootPass123!' \
   MIGRATION_USER='dms_migration' \
   MIGRATION_PASSWORD='MigratePass123!' \
-  SOURCE_DATABASE='chapter3_board' \
+  SOURCE_DATABASE='board_service' \
   ALLOWED_HOST='10.0.2.%' \
   ./prepare-source-db.sh
 ```
@@ -200,18 +202,18 @@ sudo mariadb -u root -e "SELECT CURRENT_USER(), VERSION();"
 ```bash
 sudo SOURCE_DB_ADMIN_PASSWORD='RootPass123!' \
   MIGRATION_USER='dms_migration' \
-  SOURCE_DATABASE='chapter3_board' \
+  SOURCE_DATABASE='board_service' \
   ./check-source-db.sh
 ```
 
-모든 항목이 `OK`이고 마지막에 `Preflight passed`가 출력되어야 다음 단계로 넘어갑니다. `ERROR 1227 ... CREATE USER privilege`가 나오면 관리자 계정이 아니라 일반 애플리케이션 계정으로 접속한 것입니다. `chapter3_user`는 앱 계정이므로 DMS 계정을 생성하거나 전역 replication 권한을 부여할 수 없습니다.
+모든 항목이 `OK`이고 마지막에 `Preflight passed`가 출력되어야 다음 단계로 넘어갑니다. `ERROR 1227 ... CREATE USER privilege`가 나오면 관리자 계정이 아니라 일반 애플리케이션 계정으로 접속한 것입니다. `board_app`는 앱 계정이므로 DMS 계정을 생성하거나 전역 replication 권한을 부여할 수 없습니다.
 
-Source DB의 binlog 설정, 마이그레이션 관련 전역 권한, `chapter3_board` 스키마 권한과 현재 게시글 범위를 한 번에 확인하려면 다음 SQL을 실행합니다.
+Source DB의 binlog 설정, 마이그레이션 관련 전역 권한, `board_service` 스키마 권한과 현재 게시글 범위를 한 번에 확인하려면 다음 SQL을 실행합니다.
 
 ```bash
-cd "016-cloud db migration"
+cd "017-cloud db migration"
 sudo mariadb -u root \
-  -p chapter3_board \
+  -p board_service \
   < sql/source-readiness.sql
 ```
 
@@ -220,7 +222,7 @@ sudo mariadb -u root \
 - `server_id`가 `0`이 아닌지
 - `log_bin=ON`, `binlog_format=ROW`인지
 - `SHOW MASTER STATUS` 결과가 비어 있지 않은지
-- 마이그레이션 계정에 복제 관련 권한과 `chapter3_board` 조회 권한이 있는지
+- 마이그레이션 계정에 복제 관련 권한과 `board_service` 조회 권한이 있는지
 - `posts` 테이블과 이관할 게시글이 실제로 존재하는지
 
 ### Source 준비 상태를 SQL로 직접 확인
@@ -228,7 +230,7 @@ sudo mariadb -u root \
 스크립트 결과만 보지 않고 Source DB 서버에서 관리자 계정으로 접속해 항목별 쿼리를 직접 실행합니다.
 
 ```bash
-sudo mariadb -u root -p chapter3_board
+sudo mariadb -u root -p board_service
 ```
 
 먼저 DMS가 변경 데이터를 읽는 데 필요한 binlog 설정을 확인합니다.
@@ -265,11 +267,11 @@ ORDER BY GRANTEE, PRIVILEGE_TYPE;
 
 SELECT GRANTEE, TABLE_SCHEMA, PRIVILEGE_TYPE
 FROM information_schema.SCHEMA_PRIVILEGES
-WHERE TABLE_SCHEMA = 'chapter3_board'
+WHERE TABLE_SCHEMA = 'board_service'
 ORDER BY GRANTEE, PRIVILEGE_TYPE;
 ```
 
-결과의 `GRANTEE`에서 DMS Endpoint에 입력할 계정을 찾습니다. 계정이 없거나 `chapter3_board`의 `SELECT` 권한이 없다면 Endpoint 연결은 되더라도 테이블 이관이 실패할 수 있습니다.
+결과의 `GRANTEE`에서 DMS Endpoint에 입력할 계정을 찾습니다. 계정이 없거나 `board_service`의 `SELECT` 권한이 없다면 Endpoint 연결은 되더라도 테이블 이관이 실패할 수 있습니다.
 
 마이그레이션 시작 전 기준값도 직접 기록합니다.
 
@@ -336,7 +338,7 @@ Naver Cloud Console
 
 Cloud DB for MySQL은 사용자가 DB 서버 OS에 접속해서 `root@localhost`로 계정을 만드는 방식이 아닙니다. Naver Cloud 콘솔의 `Cloud DB for MySQL > DB Server > Manage DB > Manage DB user`에서 DB User를 만들고 접근 대역을 허용합니다.
 
-DMS를 시작하기 전 Target에 `chapter3_board`를 미리 만들지 마십시오. Target에 Source와 같은 이름의 데이터베이스가 이미 있으면 Migration 작업이 실행되지 않습니다. DB 사용자만 콘솔에서 만들고, 데이터베이스와 테이블은 DMS가 이관하도록 둡니다.
+DMS를 시작하기 전 Target에 `board_service`를 미리 만들지 마십시오. Target에 Source와 같은 이름의 데이터베이스가 이미 있으면 Migration 작업이 실행되지 않습니다. DB 사용자만 콘솔에서 만들고, 데이터베이스와 테이블은 DMS가 이관하도록 둡니다.
 
 공식 문서의 접속 예시도 `root`가 아니라 콘솔에서 확인한 `user_id`로 접속합니다.
 
@@ -370,7 +372,7 @@ Naver Cloud Console
 | Port | `3306` |
 | User | `dms_migration` |
 | Password | `MigratePass123!` |
-| Database | `chapter3_board` |
+| Database | `board_service` |
 
 `Test Connection`을 눌러 연결이 되는지 먼저 확인합니다.
 
@@ -391,7 +393,7 @@ Naver Cloud Console
 | --- | --- |
 | Source Endpoint | `src-board-db` |
 | Target DB | 생성한 Cloud DB for MySQL |
-| Migration 대상 DB | `chapter3_board` |
+| Migration 대상 DB | `board_service` |
 | Backup type | 작은 실습 DB는 `mysqldump` |
 
 작업 생성 화면의 `Test Connection`이 성공하면 Source/Target DB 버전과 GTID 상태가 자동으로 표시됩니다. 마이그레이션은 Exporting, Importing, Replication 순서로 진행됩니다. Replication 완료 상태에서도 Source 변경분은 계속 동기화되며, 최종 검증과 쓰기 중지 후 콘솔의 [Complete]를 눌러야 Target이 정상 운영 상태로 전환됩니다.
@@ -408,20 +410,20 @@ Naver Cloud Console
 백엔드와 자동 게시글 생성을 잠시 멈추는 예시:
 
 ```bash
-sudo systemctl stop chapter3-post-seeder || true
-sudo systemctl stop chapter3-backend
+sudo systemctl stop board-service-post-seeder || true
+sudo systemctl stop board-service-backend
 ```
 
 Source DB에서 덤프 파일 생성:
 
 ```bash
-cd "016-cloud db migration/scripts"
+cd "017-cloud db migration/scripts"
 
 SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
-SOURCE_DB_USER='chapter3_user' \
-SOURCE_DB_PASSWORD='AppDbPass123!' \
-DB_NAME='chapter3_board' \
-DUMP_FILE='/tmp/chapter3_board.sql' \
+SOURCE_DB_USER='board_app' \
+SOURCE_DB_PASSWORD='BoardApp123!' \
+DB_NAME='board_service' \
+DUMP_FILE='/tmp/board_service.sql' \
 ./dump-source-db.sh
 ```
 
@@ -431,15 +433,15 @@ Cloud DB for MySQL에 복원:
 TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
 TARGET_DB_USER='TARGET_USER' \
 TARGET_DB_PASSWORD='TARGET_PASSWORD' \
-DUMP_FILE='/tmp/chapter3_board.sql' \
+DUMP_FILE='/tmp/board_service.sql' \
 ./restore-target-db.sh
 ```
 
 복원 후 백엔드는 다시 켤 수 있습니다. 단, DB 전환 전이라면 기존 Source DB로 다시 쓰게 됩니다.
 
 ```bash
-sudo systemctl start chapter3-backend
-sudo systemctl start chapter3-post-seeder || true
+sudo systemctl start board-service-backend
+sudo systemctl start board-service-post-seeder || true
 ```
 
 `mysqldump` 명령어를 직접 쓰면 아래와 같습니다.
@@ -447,15 +449,15 @@ sudo systemctl start chapter3-post-seeder || true
 ```bash
 MYSQL_PWD='SOURCE_PASSWORD' mysqldump \
   -h SOURCE_DB_PRIVATE_IP \
-  -u chapter3_user \
+  -u board_app \
   --single-transaction \
   --quick \
   --routines \
   --triggers \
   --events \
   --default-character-set=utf8mb4 \
-  --databases chapter3_board \
-  > /tmp/chapter3_board.sql
+  --databases board_service \
+  > /tmp/board_service.sql
 ```
 
 복원 명령어:
@@ -464,7 +466,7 @@ MYSQL_PWD='SOURCE_PASSWORD' mysqldump \
 MYSQL_PWD='TARGET_PASSWORD' mysql \
   -h db-xxxx.vpc-cdb.ntruss.com \
   -u TARGET_USER \
-  < /tmp/chapter3_board.sql
+  < /tmp/board_service.sql
 ```
 
 ## 10. 마이그레이션 검증
@@ -472,15 +474,15 @@ MYSQL_PWD='TARGET_PASSWORD' mysql \
 Source DB와 Target DB의 데이터 수와 내용 지문을 비교합니다.
 
 ```bash
-cd "016-cloud db migration/scripts"
+cd "017-cloud db migration/scripts"
 
 SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
-SOURCE_DB_USER='chapter3_user' \
-SOURCE_DB_PASSWORD='AppDbPass123!' \
+SOURCE_DB_USER='board_app' \
+SOURCE_DB_PASSWORD='BoardApp123!' \
 TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
 TARGET_DB_USER='TARGET_USER' \
 TARGET_DB_PASSWORD='TARGET_PASSWORD' \
-DB_NAME='chapter3_board' \
+DB_NAME='board_service' \
 ./compare-post-counts.sh
 ```
 
@@ -497,10 +499,10 @@ DB_NAME='chapter3_board' \
 직접 확인:
 
 ```bash
-mysql -h SOURCE_DB_PRIVATE_IP -u chapter3_user -p chapter3_board \
+mysql -h SOURCE_DB_PRIVATE_IP -u board_app -p board_service \
   -e "SELECT COUNT(*) AS source_posts FROM posts;"
 
-mysql -h db-xxxx.vpc-cdb.ntruss.com -u TARGET_USER -p chapter3_board \
+mysql -h db-xxxx.vpc-cdb.ntruss.com -u TARGET_USER -p board_service \
   -e "SELECT COUNT(*) AS target_posts FROM posts;"
 ```
 
@@ -510,10 +512,10 @@ mysql -h db-xxxx.vpc-cdb.ntruss.com -u TARGET_USER -p chapter3_board \
 
 ```bash
 # 터미널 1: Source
-mysql -h SOURCE_DB_PRIVATE_IP -u chapter3_user -p chapter3_board
+mysql -h SOURCE_DB_PRIVATE_IP -u board_app -p board_service
 
 # 터미널 2: Target Cloud DB
-mysql -h db-xxxx.vpc-cdb.ntruss.com -u TARGET_USER -p chapter3_board
+mysql -h db-xxxx.vpc-cdb.ntruss.com -u TARGET_USER -p board_service
 ```
 
 먼저 테이블 컬럼 순서와 타입을 비교합니다.
@@ -623,16 +625,16 @@ ORDER BY duplicate_candidate_count DESC, title;
 각 DB의 스키마, ID·시간 범위, 체크섬, 빈 값·미래 시각 같은 이상 데이터, 중복 후보, 최신 10건의 실제 제목·본문과 작성자별 건수를 직접 확인하려면 동일한 SQL을 Source와 Target에 각각 실행합니다.
 
 ```bash
-cd "016-cloud db migration"
+cd "017-cloud db migration"
 
 mysql -h SOURCE_DB_PRIVATE_IP \
-  -u chapter3_user \
-  -p chapter3_board \
+  -u board_app \
+  -p board_service \
   < sql/migration-validation.sql
 
 mysql -h db-xxxx.vpc-cdb.ntruss.com \
   -u TARGET_USER \
-  -p chapter3_board \
+  -p board_service \
   < sql/migration-validation.sql
 ```
 
@@ -643,25 +645,25 @@ DMS로 변경분까지 이관하는 동안에는 Source에 쓰기가 계속 발�
 백엔드 서버에서 `.env`의 DB 접속 정보를 Cloud DB로 바꿉니다.
 
 ```bash
-cd "016-cloud db migration/scripts"
+cd "017-cloud db migration/scripts"
 
-sudo BACKEND_ENV_FILE='/opt/chapter3-backend/.env' \
+sudo BACKEND_ENV_FILE='/opt/board-service-backend/.env' \
   DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
   DB_PORT='3306' \
   DB_USER='TARGET_USER' \
   DB_PASSWORD='TARGET_PASSWORD' \
-  DB_NAME='chapter3_board' \
+  DB_NAME='board_service' \
   ./switch-backend-db.sh
 ```
 
-스크립트는 `.env`를 수정하고 `chapter3-backend` 서비스를 재시작합니다.
+스크립트는 `.env`를 수정하고 `board-service-backend` 서비스를 재시작합니다.
 
 확인:
 
 ```bash
 curl http://localhost:4000/api/health
 curl http://localhost:4000/api/posts
-sudo systemctl status chapter3-backend --no-pager
+sudo systemctl status board-service-backend --no-pager
 ```
 
 ## 12. 장애 확인 포인트
@@ -682,7 +684,7 @@ sudo systemctl status chapter3-backend --no-pager
 - `server-id` 설정 확인
 - Source DB와 Target DB major version 차이 확인
 - 마이그레이션 계정 권한 확인
-- Target에 `chapter3_board`가 이미 존재하지 않는지 확인
+- Target에 `board_service`가 이미 존재하지 않는지 확인
 - Source DB의 테이블 엔진과 문자셋이 DMS 지원 범위인지 확인
 - MariaDB가 EOL 버전이면 Source 업그레이드 또는 호환되는 Target 버전 검토
 
@@ -699,10 +701,10 @@ Slave_SQL_Running: No
 
 이 상태는 네트워크 문제가 아닙니다. IO 스레드는 Source binlog를 읽었지만 Target MySQL SQL 스레드가 MariaDB 전용 GTID/row 이벤트를 해석하지 못한 엔진 호환성 문제입니다. Naver Cloud는 MariaDB Source를 지원하지만 같은 major version 간 마이그레이션을 권장하며, 버전 조합에 따라 호환성 오류가 발생할 수 있다고 안내합니다.
 
-수업 서버를 재설치해도 되는 경우에는 Source 데이터를 백업한 뒤 Ubuntu 공식 MySQL 8.0으로 변환하고 DMS 작업을 새로 생성할 수 있습니다. 다음 스크립트는 `chapter3_board`를 덤프하고 MariaDB 데이터·설정을 별도 백업 디렉터리로 이동한 후 MySQL을 설치하므로 운영 서버에서는 스냅샷을 먼저 생성해야 합니다.
+수업 서버를 재설치해도 되는 경우에는 Source 데이터를 백업한 뒤 Ubuntu 공식 MySQL 8.0으로 변환하고 DMS 작업을 새로 생성할 수 있습니다. 다음 스크립트는 `board_service`를 덤프하고 MariaDB 데이터·설정을 별도 백업 디렉터리로 이동한 후 MySQL을 설치하므로 운영 서버에서는 스냅샷을 먼저 생성해야 합니다.
 
 ```bash
-cd "/root/cloud-infrastructure-lecture-example/016-cloud db migration/scripts"
+cd "/root/cloud-infrastructure-lecture-example/017-cloud db migration/scripts"
 sudo CONFIRM_CONVERSION=YES ./convert-mariadb-source-to-mysql.sh
 ```
 
@@ -712,7 +714,7 @@ Target이 MySQL 8.4이면 아래 절의 DMS `mysqldump` 호환성 문제를 피�
 sudo CONFIRM_UPGRADE=YES ./upgrade-mysql-source-to-84.sh
 ```
 
-변환 후에는 실패한 DMS 작업을 삭제하고, Target의 중복 `chapter3_board`를 삭제한 다음 Test Connection부터 새로 실행합니다. `복제 오류 스킵`은 해당 트랜잭션을 누락시킬 수 있으므로 데이터 정합성 검증 없이 해결책으로 사용하지 않습니다.
+변환 후에는 실패한 DMS 작업을 삭제하고, Target의 중복 `board_service`를 삭제한 다음 Test Connection부터 새로 실행합니다. `복제 오류 스킵`은 해당 트랜잭션을 누락시킬 수 있으므로 데이터 정합성 검증 없이 해결책으로 사용하지 않습니다.
 
 ### Exporting에서 `SHOW BINARY LOG STATUS` 문법 오류 발생
 
@@ -726,7 +728,7 @@ You have an error in your SQL syntax ... near 'LOG STATUS' at line 1 (1064)
 `SHOW BINARY LOG STATUS`는 MySQL 8.4 명령이며 MySQL 8.0은 `SHOW MASTER STATUS`를 사용합니다. 네트워크나 DMS 계정 권한 문제가 아니므로 재시작만 반복해도 해결되지 않습니다. 이 실습처럼 Target 버전을 바꿀 수 없다면 Source를 같은 MySQL 8.4 LTS로 업그레이드한 뒤 실패 작업을 삭제하고 새 작업을 생성합니다.
 
 ```bash
-cd "/root/cloud-infrastructure-lecture-example/016-cloud db migration/scripts"
+cd "/root/cloud-infrastructure-lecture-example/017-cloud db migration/scripts"
 sudo CONFIRM_UPGRADE=YES ./upgrade-mysql-source-to-84.sh
 sudo SOURCE_DB_ADMIN_PASSWORD='...' ./check-source-db.sh
 ```

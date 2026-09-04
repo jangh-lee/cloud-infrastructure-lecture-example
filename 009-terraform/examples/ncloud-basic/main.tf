@@ -1,6 +1,6 @@
 locals {
-  db_name          = "chapter3_board"
-  db_user          = "chapter3_user"
+  db_name          = "board_service"
+  db_user          = "board_app"
   db_password      = var.board_db_password
   backend_port     = 4000
   backend_base_url = "/backend-api"
@@ -550,7 +550,7 @@ location /backend-api/ {
 }
 NGINX
 
-sed -i '/listen \[::\]:80/d' /etc/nginx/sites-available/chapter3-web
+sed -i '/listen \[::\]:80/d' /etc/nginx/sites-available/board-service-web
 cat > /etc/nginx/sites-available/terraform-board <<'NGINX'
 server {
     listen 80 default_server;
@@ -567,7 +567,7 @@ server {
 }
 NGINX
 
-rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/chapter3-web
+rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/board-service-web
 ln -sf /etc/nginx/sites-available/terraform-board /etc/nginx/sites-enabled/terraform-board
 
 systemctl daemon-reload

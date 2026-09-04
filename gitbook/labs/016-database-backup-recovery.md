@@ -1,4 +1,4 @@
-# 015 Database 백업 및 복구
+# 016 Database 백업 및 복구
 
 ## 목표
 
@@ -7,14 +7,14 @@ Ubuntu 서버에서 30초마다 MySQL 호환 DB에 데이터를 기록하고, �
 실습 폴더:
 
 ```text
-015-database backup recovery
+016-database backup recovery
 ```
 
 ## 설치
 
 ```bash
 cd ~/cloud-infrastructure-lecture-example
-cd "015-database backup recovery"
+cd "016-database backup recovery"
 
 chmod +x scripts/db-writer.sh
 sudo ./scripts/db-writer.sh install
@@ -126,3 +126,7 @@ SELECT COUNT(*) AS total_rows FROM recovery_events;
 SELECT MIN(created_at) AS first_event, MAX(created_at) AS last_event
 FROM recovery_events;
 ```
+
+## 다음 실습
+
+[017 Cloud DB Migration](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/017-cloud-db-migration/)에서는 003 Ubuntu DB의 `board_service` 데이터를 Cloud DB for MySQL로 이관합니다.

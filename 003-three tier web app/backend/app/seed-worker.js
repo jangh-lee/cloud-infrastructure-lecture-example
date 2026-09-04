@@ -11,7 +11,7 @@ const port = Number(process.env.PORT || 4000);
 const apiUrl = process.env.AUTO_POST_API_URL || `http://127.0.0.1:${port}/api/posts`;
 const intervalSeconds = Number(process.env.AUTO_POST_INTERVAL_SECONDS || 60);
 const totalPosts = Number(process.env.AUTO_POST_TOTAL || 300);
-const stateFile = process.env.AUTO_POST_STATE_FILE || "/var/lib/chapter3-post-seeder/progress.json";
+const stateFile = process.env.AUTO_POST_STATE_FILE || "/var/lib/board-service-post-seeder/progress.json";
 
 const authors = [
   "김민준", "이서연", "박지훈", "최유진", "정도윤", "한지아", "오준호", "강수빈",

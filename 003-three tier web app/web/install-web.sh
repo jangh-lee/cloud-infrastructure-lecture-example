@@ -16,10 +16,10 @@ if [[ "${EUID}" -ne 0 ]]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-APP_DIR="/opt/chapter3-web"
-WEB_ROOT="/var/www/chapter3-web"
-NGINX_CONF="/etc/nginx/sites-available/chapter3-web"
-NGINX_LINK="/etc/nginx/sites-enabled/chapter3-web"
+APP_DIR="/opt/board-service-web"
+WEB_ROOT="/var/www/board-service-web"
+NGINX_CONF="/etc/nginx/sites-available/board-service-web"
+NGINX_LINK="/etc/nginx/sites-enabled/board-service-web"
 RAW_BASE="https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/web/app"
 TEMP_POLICY_RC_D=""
 COMMAND="${1:-install}"
@@ -138,7 +138,7 @@ cp "${APP_DIR}/styles.css" "${WEB_ROOT}/styles.css"
 cp "${APP_DIR}/app.js" "${WEB_ROOT}/app.js"
 
 cat > "${WEB_ROOT}/config.js" <<EOF
-window.CHAPTER3_CONFIG = {
+window.BOARD_SERVICE_CONFIG = {
   SITE_BASE_URL: "${SITE_BASE_URL}",
   SITE_TITLE: "${SITE_TITLE:-DevForum Practice Board}"
 };
@@ -160,7 +160,7 @@ server {
 
     location = /web-instance {
         default_type application/json;
-        return 200 '{"instance":"\$hostname","privateIp":"\$server_addr","service":"chapter3-web"}';
+        return 200 '{"instance":"\$hostname","privateIp":"\$server_addr","service":"board-service-web"}';
     }
 
     location /api/ {
@@ -178,7 +178,7 @@ server {
 }
 EOF
 
-rm -f /etc/nginx/sites-enabled/default
+rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/chapter3-web
 ln -sf "${NGINX_CONF}" "${NGINX_LINK}"
 
 nginx -t

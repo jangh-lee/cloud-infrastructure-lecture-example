@@ -73,6 +73,7 @@ nav:
           - 013 Auto Scaling Hands-on (1): labs/013-auto-scaling.md
           - 014 Auto Scaling Hands-on (2): labs/014-auto-scaling.md
       - 데이터베이스 실습:
-          - 015 Database 백업 및 복구: labs/015-database-backup-recovery.md
-          - 016 Cloud DB Migration: labs/016-cloud-db-migration.md
+          - 015 Cloud DB for MySQL 생성 및 연결: labs/015-cloud-db-mysql.md
+          - 016 Database 백업 및 복구: labs/016-database-backup-recovery.md
+          - 017 Cloud DB Migration: labs/017-cloud-db-migration.md
   - GitBook 목차: SUMMARY.md

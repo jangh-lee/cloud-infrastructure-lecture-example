@@ -12,7 +12,9 @@
 cloud-infrastructure-lecture-example
 ├── 001-api server
 ├── ...
-├── 016-cloud db migration
+├── 015-cloud db mysql
+├── 016-database backup recovery
+├── 017-cloud db migration
 └── gitbook
     ├── README.md
     ├── SUMMARY.md

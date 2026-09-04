@@ -92,16 +92,26 @@ git pull origin main
 스크립트는 `.env`가 없으면 같은 폴더에 템플릿 `.env`를 자동으로 만들어주고 종료합니다.
 즉, 스크립트만 서버에 복사해 넣어도 1회 실행 후 `.env`를 채우고 다시 실행하는 방식으로 사용할 수 있습니다.
 
-Naver Cloud DB for MySQL 콘솔에서 같은 값을 재사용할 수 있도록 예시 비밀번호는 2자 이상, 21자 이하로 구성했습니다.
+Naver Cloud DB for MySQL 콘솔에서 같은 값을 재사용할 수 있도록 예시 비밀번호는 8자 이상, 20자 이하로 구성했습니다.
+
+### 게시판 서비스 표준 이름
+
+| 항목 | 값 | 의미 |
+| --- | --- | --- |
+| Database | `board_service` | 게시판 데이터 스키마 |
+| DB User | `board_app` | Backend 전용 애플리케이션 계정 |
+| Backend Service | `board-service-backend` | 상태 API에 표시되는 서비스 이름 |
+
+`003`은 강의 순서이므로 운영 리소스 이름에 넣지 않습니다. 이후 015 Cloud DB 생성과 017 마이그레이션에서도 같은 이름을 사용합니다.
 
 ### DB 서버 `.env` 예시
 
 ```env
 DB_ROOT_PASSWORD=RootPass123!
 DB_PREVIOUS_ROOT_PASSWORD=
-DB_NAME=chapter3_board
-DB_USER=chapter3_user
-DB_PASSWORD=AppDbPass123!
+DB_NAME=board_service
+DB_USER=board_app
+DB_PASSWORD=BoardApp123!
 DB_ALLOWED_HOST=10.0.1.25
 DB_BIND_ADDRESS=0.0.0.0
 ```
@@ -147,9 +157,9 @@ DB_PREVIOUS_ROOT_PASSWORD=CurrentRootPassword
 PORT="4000"
 DB_HOST="10.0.1.30"
 DB_PORT="3306"
-DB_NAME="chapter3_board"
-DB_USER="chapter3_user"
-DB_PASSWORD="AppDbPass123!"
+DB_NAME="board_service"
+DB_USER="board_app"
+DB_PASSWORD="BoardApp123!"
 AUTO_POST_ENABLED="true"
 AUTO_POST_INTERVAL_SECONDS="60"
 AUTO_POST_TOTAL="300"
@@ -208,14 +218,14 @@ sudo ./install-backend.sh configure
 
 ```bash
 sudo ./install-backend.sh status
-sudo systemctl status chapter3-post-seeder --no-pager
-sudo journalctl -u chapter3-post-seeder -f
+sudo systemctl status board-service-post-seeder --no-pager
+sudo journalctl -u board-service-post-seeder -f
 ```
 
 중지:
 
 ```bash
-sudo systemctl disable --now chapter3-post-seeder
+sudo systemctl disable --now board-service-post-seeder
 ```
 
 ### 웹서버 `.env` 예시
@@ -284,7 +294,7 @@ sudo tail -F /var/log/nginx/access.log /var/log/nginx/error.log
 Backend 요청·상태 코드·처리 시간과 애플리케이션 오류를 확인합니다. 자동 게시글을 사용하면 seeder 로그도 함께 표시됩니다.
 
 ```bash
-sudo journalctl -u chapter3-backend -u chapter3-post-seeder -f
+sudo journalctl -u board-service-backend -u board-service-post-seeder -f
 ```
 
 정상 글쓰기는 `POST /api/posts 201`, 오류는 `500`과 이어지는 stack trace로 구분합니다. 요청 본문과 DB 비밀번호는 기록하지 않습니다.
@@ -325,12 +335,12 @@ sudo mariadb -u root -p -e "SHOW DATABASES;"
 ```bash
 cd "003-three tier web app"
 mysql -h DB_SERVER_PRIVATE_IP \
-  -u chapter3_user \
-  -p chapter3_board \
+  -u board_app \
+  -p board_service \
   < db/queries/board-data.sql
 ```
 
-이 예제에는 회원가입 기능과 `users` 테이블이 없습니다. `posts.author_name`은 게시글에 저장되는 작성자 표시 이름입니다. 실제 MariaDB 접속 계정과 허용 호스트, 인증 방식, `chapter3_board` 권한은 DB 서버에서 관리자용 SQL로 확인합니다.
+이 예제에는 회원가입 기능과 `users` 테이블이 없습니다. `posts.author_name`은 게시글에 저장되는 작성자 표시 이름입니다. 실제 MariaDB 접속 계정과 허용 호스트, 인증 방식, `board_service` 권한은 DB 서버에서 관리자용 SQL로 확인합니다.
 
 ```bash
 cd "003-three tier web app"
@@ -342,7 +352,7 @@ sudo mariadb -u root -p < db/queries/database-accounts.sql
 SQL 파일만 실행하고 넘어가지 말고, 아래처럼 DB에 접속해서 쿼리를 하나씩 입력해 봅니다.
 
 ```bash
-mysql -h DB_SERVER_PRIVATE_IP -u chapter3_user -p chapter3_board
+mysql -h DB_SERVER_PRIVATE_IP -u board_app -p board_service
 ```
 
 접속 후 현재 선택된 DB와 실제 인증 계정을 확인합니다.
@@ -357,7 +367,7 @@ SELECT
 SHOW GRANTS FOR CURRENT_USER;
 ```
 
-`database_name`은 `chapter3_board`여야 합니다. `CURRENT_USER()`는 DB가 권한을 판정할 때 사용한 계정이고, `USER()`는 클라이언트가 접속할 때 사용한 계정과 접속 출발지를 보여줍니다.
+`database_name`은 `board_service`여야 합니다. `CURRENT_USER()`는 DB가 권한을 판정할 때 사용한 계정이고, `USER()`는 클라이언트가 접속할 때 사용한 계정과 접속 출발지를 보여줍니다.
 
 테이블과 컬럼 구조를 직접 확인합니다.
 
@@ -448,7 +458,7 @@ ORDER BY User, Host;
 
 SELECT GRANTEE, TABLE_SCHEMA, PRIVILEGE_TYPE
 FROM information_schema.SCHEMA_PRIVILEGES
-WHERE TABLE_SCHEMA = 'chapter3_board'
+WHERE TABLE_SCHEMA = 'board_service'
 ORDER BY GRANTEE, PRIVILEGE_TYPE;
 ```
 

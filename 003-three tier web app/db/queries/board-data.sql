@@ -1,6 +1,6 @@
 -- 007 게시판 DB의 구조와 데이터 적재 상태를 확인합니다.
 -- 실행 예시:
--- mysql -h DB_SERVER_PRIVATE_IP -u chapter3_user -p chapter3_board < db/queries/board-data.sql
+-- mysql -h DB_SERVER_PRIVATE_IP -u board_app -p board_service < db/queries/board-data.sql
 
 SELECT
   DATABASE() AS database_name,

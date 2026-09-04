@@ -1,5 +1,5 @@
 -- DMS 마이그레이션 전에 Source DB의 설정과 읽기 권한을 확인합니다.
--- 관리자 계정으로 chapter3_board에 연결해서 실행합니다.
+-- 관리자 계정으로 board_service에 연결해서 실행합니다.
 
 SELECT
   DATABASE() AS database_name,
@@ -31,32 +31,32 @@ SELECT
   TABLE_ROWS AS estimated_rows,
   TABLE_COLLATION
 FROM information_schema.TABLES
-WHERE TABLE_SCHEMA = 'chapter3_board'
+WHERE TABLE_SCHEMA = 'board_service'
 ORDER BY TABLE_NAME;
 
 SELECT
   TABLE_NAME,
   ENGINE AS unsupported_engine
 FROM information_schema.TABLES
-WHERE TABLE_SCHEMA = 'chapter3_board'
+WHERE TABLE_SCHEMA = 'board_service'
   AND ENGINE IN ('MyISAM', 'BLACKHOLE', 'FEDERATED', 'ARCHIVE', 'MEMORY');
 
 SELECT
   TABLE_NAME,
   TABLE_COLLATION
 FROM information_schema.TABLES
-WHERE TABLE_SCHEMA = 'chapter3_board'
+WHERE TABLE_SCHEMA = 'board_service'
   AND TABLE_COLLATION IS NOT NULL
   AND TABLE_COLLATION NOT LIKE 'utf8%'
   AND TABLE_COLLATION NOT LIKE 'euckr%';
 
 SELECT DEFINER, ROUTINE_TYPE, ROUTINE_NAME
 FROM information_schema.ROUTINES
-WHERE ROUTINE_SCHEMA = 'chapter3_board';
+WHERE ROUTINE_SCHEMA = 'board_service';
 
 SELECT DEFINER, TABLE_NAME
 FROM information_schema.VIEWS
-WHERE TABLE_SCHEMA = 'chapter3_board';
+WHERE TABLE_SCHEMA = 'board_service';
 
 SELECT
   GRANTEE,
@@ -77,7 +77,7 @@ SELECT
   TABLE_SCHEMA,
   PRIVILEGE_TYPE
 FROM information_schema.SCHEMA_PRIVILEGES
-WHERE TABLE_SCHEMA = 'chapter3_board'
+WHERE TABLE_SCHEMA = 'board_service'
 ORDER BY GRANTEE, PRIVILEGE_TYPE;
 
 SELECT

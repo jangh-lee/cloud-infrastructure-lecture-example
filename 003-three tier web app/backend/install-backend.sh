@@ -8,9 +8,11 @@ if [[ "${EUID}" -ne 0 ]]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-APP_DIR="/opt/chapter3-backend"
-SERVICE_FILE="/etc/systemd/system/chapter3-backend.service"
-SEEDER_SERVICE_FILE="/etc/systemd/system/chapter3-post-seeder.service"
+APP_DIR="/opt/board-service-backend"
+SERVICE_FILE="/etc/systemd/system/board-service-backend.service"
+SEEDER_SERVICE_FILE="/etc/systemd/system/board-service-post-seeder.service"
+LEGACY_SERVICE_FILE="/etc/systemd/system/chapter3-backend.service"
+LEGACY_SEEDER_SERVICE_FILE="/etc/systemd/system/chapter3-post-seeder.service"
 RAW_BASE="https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/backend/app"
 COMMAND="${1:-install}"
 
@@ -40,9 +42,9 @@ EOF
 PORT=4000
 DB_HOST=DB_SERVER_PRIVATE_IP
 DB_PORT=3306
-DB_NAME=chapter3_board
-DB_USER=chapter3_user
-DB_PASSWORD=AppDbPass123!
+DB_NAME=board_service
+DB_USER=board_app
+DB_PASSWORD=BoardApp123!
 AUTO_POST_ENABLED=false
 AUTO_POST_INTERVAL_SECONDS=60
 AUTO_POST_TOTAL=300
@@ -85,8 +87,8 @@ EOF
   cat > "${SEEDER_SERVICE_FILE}" <<EOF
 [Unit]
 Description=Board sample post seeder
-After=chapter3-backend.service
-Requires=chapter3-backend.service
+After=board-service-backend.service
+Requires=board-service-backend.service
 
 [Service]
 Type=simple
@@ -133,17 +135,21 @@ install_node_dependencies() {
 }
 
 restart_services() {
+  systemctl disable --now chapter3-post-seeder.service >/dev/null 2>&1 || true
+  systemctl disable --now chapter3-backend.service >/dev/null 2>&1 || true
+  rm -f "${LEGACY_SERVICE_FILE}" "${LEGACY_SEEDER_SERVICE_FILE}"
+
   systemctl daemon-reload
-  systemctl enable chapter3-backend.service
-  systemctl restart chapter3-backend.service
+  systemctl enable board-service-backend.service
+  systemctl restart board-service-backend.service
 
   if grep -Eq '^AUTO_POST_ENABLED="?true"?' "${APP_DIR}/.env"; then
-    mkdir -p /var/lib/chapter3-post-seeder
-    systemctl enable chapter3-post-seeder.service
-    systemctl restart chapter3-post-seeder.service
+    mkdir -p /var/lib/board-service-post-seeder
+    systemctl enable board-service-post-seeder.service
+    systemctl restart board-service-post-seeder.service
   else
-    systemctl disable chapter3-post-seeder.service >/dev/null 2>&1 || true
-    systemctl stop chapter3-post-seeder.service >/dev/null 2>&1 || true
+    systemctl disable board-service-post-seeder.service >/dev/null 2>&1 || true
+    systemctl stop board-service-post-seeder.service >/dev/null 2>&1 || true
   fi
 }
 
@@ -158,11 +164,9 @@ case "${COMMAND}" in
     restart_services
     ;;
   configure)
-    if [[ ! -d "${APP_DIR}" ]]; then
-      echo "${APP_DIR} does not exist. Run: sudo ./install-backend.sh install"
-      exit 1
-    fi
+    install_packages
     sync_app_files
+    install_node_dependencies
     write_service_files
     restart_services
     ;;
@@ -170,8 +174,8 @@ case "${COMMAND}" in
     restart_services
     ;;
   status)
-    systemctl status chapter3-backend.service --no-pager || true
-    systemctl status chapter3-post-seeder.service --no-pager || true
+    systemctl status board-service-backend.service --no-pager || true
+    systemctl status board-service-post-seeder.service --no-pager || true
     exit 0
     ;;
   *)
