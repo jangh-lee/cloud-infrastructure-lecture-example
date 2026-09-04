@@ -1408,10 +1408,38 @@
   <a href="#8-step-6-backend-db" class="md-nav__link">
     <span class="md-ellipsis">
       
-        8. Step 6 - Backend DB 연결 전환
+        8. Step 6 - Backend 신규 설치 또는 DB 연결 전환
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="8. Step 6 - Backend 신규 설치 또는 DB 연결 전환">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        방법 A - 새 Backend 서버에 설치
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-003-backend-db" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        방법 B - 기존 003 Backend의 DB만 전환
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1751,10 +1779,38 @@
   <a href="#8-step-6-backend-db" class="md-nav__link">
     <span class="md-ellipsis">
       
-        8. Step 6 - Backend DB 연결 전환
+        8. Step 6 - Backend 신규 설치 또는 DB 연결 전환
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="8. Step 6 - Backend 신규 설치 또는 DB 연결 전환">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        방법 A - 새 Backend 서버에 설치
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-003-backend-db" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        방법 B - 기존 003 Backend의 DB만 전환
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1913,11 +1969,11 @@
 </table>
 <p>Backend에 관리자 계정을 넣지 않습니다. 스키마 작업은 <code>board_admin</code>, 게시글 조회·등록·삭제는 <code>board_app</code>으로 분리해 필요한 권한만 부여합니다.</p>
 <h2 id="2">2. 시작 전 확인<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
-<p>003 게시판에서 Web과 Backend가 정상인지 먼저 확인합니다.</p>
+<p>003에서 사용한 기존 Backend를 그대로 전환하거나 새로 생성한 Backend 서버에 애플리케이션을 설치할 수 있습니다. 기존 Backend를 사용할 때만 다음 명령으로 현재 상태를 확인합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>http://127.0.0.1:4000/api/health
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>http://127.0.0.1:4000/api/posts
 </code></pre></div>
-<p>콘솔과 Backend 서버에서 다음 값을 기록합니다.</p>
+<p>콘솔에서 다음 값을 기록합니다.</p>
 <table>
 <thead>
 <tr>
@@ -2107,9 +2163,16 @@
 </table>
 <p><code>CRUD</code>는 게시글 조회·등록·수정·삭제에 필요한 권한입니다. 테이블 생성은 <code>board_admin</code>이 담당하므로 앱 계정에 DDL 권한을 주지 않습니다. 저장 후 DB 상태가 다시 <code>운영중</code>이 될 때까지 기다립니다.</p>
 <h2 id="6-step-4-backend">6. Step 4 - Backend에서 네트워크와 로그인 확인<a class="headerlink" href="#6-step-4-backend" title="Permanent link">&para;</a></h2>
-<p>Backend 서버에 접속해 MySQL 클라이언트를 설치합니다.</p>
+<p>생성한 Backend 서버에 접속한 뒤 필요한 패키지와 전체 실습 저장소를 준비합니다. 기존에 저장소를 내려받았다면 최신 코드만 갱신합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>default-mysql-client
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git<span class="w"> </span>curl<span class="w"> </span>ca-certificates<span class="w"> </span>default-mysql-client
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-d<span class="w"> </span>~/cloud-infrastructure-lecture-example/.git<span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span>git<span class="w"> </span>-C<span class="w"> </span>~/cloud-infrastructure-lecture-example<span class="w"> </span>pull<span class="w"> </span>--ff-only<span class="w"> </span>origin<span class="w"> </span>main
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="k">else</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span>~/cloud-infrastructure-lecture-example
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="k">fi</span>
 </code></pre></div>
 <p>Private 도메인과 실제 암호를 입력합니다. 이후 명령은 같은 터미널에서 실행합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">DB_HOST</span><span class="o">=</span><span class="s2">"YOUR_PRIVATE_DOMAIN"</span>
@@ -2157,31 +2220,54 @@
 <li>[ ] <code>Cloud DB 연결 완료</code> 게시글이 출력됩니다.</li>
 <li>[ ] 접속 계정은 <code>board_app</code>이며 관리자 계정을 사용하지 않았습니다.</li>
 </ul>
-<h2 id="8-step-6-backend-db">8. Step 6 - Backend DB 연결 전환<a class="headerlink" href="#8-step-6-backend-db" title="Permanent link">&para;</a></h2>
-<p>003 저장소의 Backend <code>.env</code>를 백업한 뒤 Cloud DB 값으로 바꿉니다.</p>
+<h2 id="8-step-6-backend-db">8. Step 6 - Backend 신규 설치 또는 DB 연결 전환<a class="headerlink" href="#8-step-6-backend-db" title="Permanent link">&para;</a></h2>
+<p>새 Backend 서버를 만들었는지, 기존 003 Backend를 사용하는지에 따라 아래 두 방법 중 하나만 실행합니다. Step 4에서 정의한 DB 변수와 같은 터미널을 사용합니다.</p>
+<h3 id="a-backend">방법 A - 새 Backend 서버에 설치<a class="headerlink" href="#a-backend" title="Permanent link">&para;</a></h3>
+<p>Backend 설정 파일을 만들고 설치 스크립트를 실행합니다. <code>board_app</code>은 Cloud DB에서 CRUD 권한만 가진 애플리케이션 계정입니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/<span class="s2">"003-three tier web app"</span>/backend
 <a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>sudo<span class="w"> </span>cp<span class="w"> </span>.env<span class="w"> </span>.env.before-cloud-db
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>sudo<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"s|^DB_HOST=.*|DB_HOST=</span><span class="nv">$DB_HOST</span><span class="s2">|"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"s|^DB_PORT=.*|DB_PORT=</span><span class="nv">$DB_PORT</span><span class="s2">|"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"s|^DB_NAME=.*|DB_NAME=</span><span class="nv">$DB_NAME</span><span class="s2">|"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"s|^DB_USER=.*|DB_USER=</span><span class="nv">$DB_APP_USER</span><span class="s2">|"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"s|^DB_PASSWORD=.*|DB_PASSWORD=</span><span class="nv">$DB_APP_PASSWORD</span><span class="s2">|"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">  </span>.env
-<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>
-<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>configure
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>.env<span class="w"> </span><span class="s">&lt;&lt;EOF</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="s">PORT=4000</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="s">DB_HOST=$DB_HOST</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="s">DB_PORT=$DB_PORT</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="s">DB_NAME=$DB_NAME</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="s">DB_USER=$DB_APP_USER</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="s">DB_PASSWORD=$DB_APP_PASSWORD</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="s">AUTO_POST_ENABLED=false</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="s">AUTO_POST_INTERVAL_SECONDS=60</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="s">AUTO_POST_TOTAL=300</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="s">AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="s">LAB_STRESS_ENABLED=false</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="s">EOF</span>
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>chmod<span class="w"> </span>+x<span class="w"> </span>install-backend.sh
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>install
+</code></pre></div>
+<h3 id="b-003-backend-db">방법 B - 기존 003 Backend의 DB만 전환<a class="headerlink" href="#b-003-backend-db" title="Permanent link">&para;</a></h3>
+<p>기존 <code>.env</code>를 백업한 뒤 Cloud DB 값으로 바꿉니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/<span class="s2">"003-three tier web app"</span>/backend
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>sudo<span class="w"> </span>cp<span class="w"> </span>.env<span class="w"> </span>.env.before-cloud-db
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>sudo<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"s|^DB_HOST=.*|DB_HOST=</span><span class="nv">$DB_HOST</span><span class="s2">|"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"s|^DB_PORT=.*|DB_PORT=</span><span class="nv">$DB_PORT</span><span class="s2">|"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"s|^DB_NAME=.*|DB_NAME=</span><span class="nv">$DB_NAME</span><span class="s2">|"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"s|^DB_USER=.*|DB_USER=</span><span class="nv">$DB_APP_USER</span><span class="s2">|"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"s|^DB_PASSWORD=.*|DB_PASSWORD=</span><span class="nv">$DB_APP_PASSWORD</span><span class="s2">|"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">  </span>.env
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>configure
 </code></pre></div>
 <p>설정값과 서비스 상태를 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'^DB_(HOST|PORT|NAME|USER)='</span><span class="w"> </span>/opt/board-service-backend/.env
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>board-service-backend
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>http://127.0.0.1:4000/api/health
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>http://127.0.0.1:4000/api/posts
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>sudo<span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'^DB_(HOST|PORT|NAME|USER)='</span><span class="w"> </span>/opt/board-service-backend/.env
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>board-service-backend
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>http://127.0.0.1:4000/api/health
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>http://127.0.0.1:4000/api/posts
 </code></pre></div>
 <p>다음 값이 확인되면 Backend 전환이 완료된 것입니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>DB_NAME=board_service
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>DB_USER=board_app
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>{"status":"ok","service":"board-service-backend",...}
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>DB_NAME=board_service
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>DB_USER=board_app
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>{"status":"ok","service":"board-service-backend",...}
 </code></pre></div>
 <h2 id="9-step-7-alb">9. Step 7 - ALB에서 게시글 등록 검증<a class="headerlink" href="#9-step-7-alb" title="Permanent link">&para;</a></h2>
 <p>브라우저에서 003 게시판의 Public ALB 주소로 접속합니다.</p>
@@ -2192,10 +2278,10 @@
 <li>새 글이 화면에 즉시 나타나는지 확인합니다.</li>
 </ol>
 <p>Cloud DB에서도 같은 글을 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s2">"</span><span class="nv">$DB_APP_PASSWORD</span><span class="s2">"</span><span class="w"> </span>mysql<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span>-h<span class="w"> </span><span class="s2">"</span><span class="nv">$DB_HOST</span><span class="s2">"</span><span class="w"> </span>-P<span class="w"> </span><span class="s2">"</span><span class="nv">$DB_PORT</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span>-u<span class="w"> </span><span class="s2">"</span><span class="nv">$DB_APP_USER</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$DB_NAME</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"SELECT id, title, author_name, created_at FROM posts ORDER BY id DESC LIMIT 10;"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s2">"</span><span class="nv">$DB_APP_PASSWORD</span><span class="s2">"</span><span class="w"> </span>mysql<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span>-h<span class="w"> </span><span class="s2">"</span><span class="nv">$DB_HOST</span><span class="s2">"</span><span class="w"> </span>-P<span class="w"> </span><span class="s2">"</span><span class="nv">$DB_PORT</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span>-u<span class="w"> </span><span class="s2">"</span><span class="nv">$DB_APP_USER</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$DB_NAME</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"SELECT id, title, author_name, created_at FROM posts ORDER BY id DESC LIMIT 10;"</span>
 </code></pre></div>
 <p>브라우저와 SQL 양쪽에서 같은 게시글이 보이면 <code>ALB -&gt; Web -&gt; Backend -&gt; Cloud DB</code> 전체 경로가 검증된 것입니다.</p>
 <h2 id="10">10. 장애 확인<a class="headerlink" href="#10" title="Permanent link">&para;</a></h2>
@@ -2238,15 +2324,15 @@
 </tbody>
 </table>
 <p>Backend 로그:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>board-service-backend<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>--no-pager
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>board-service-backend<span class="w"> </span>-f
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>board-service-backend<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>--no-pager
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>board-service-backend<span class="w"> </span>-f
 </code></pre></div>
 <h2 id="11">11. 롤백<a class="headerlink" href="#11" title="Permanent link">&para;</a></h2>
 <p>Cloud DB 연결에 실패하면 저장해 둔 기존 설정으로 돌아갑니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/<span class="s2">"003-three tier web app"</span>/backend
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>sudo<span class="w"> </span>cp<span class="w"> </span>.env.before-cloud-db<span class="w"> </span>.env
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>configure
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>http://127.0.0.1:4000/api/health
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/<span class="s2">"003-three tier web app"</span>/backend
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>sudo<span class="w"> </span>cp<span class="w"> </span>.env.before-cloud-db<span class="w"> </span>.env
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>configure
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>http://127.0.0.1:4000/api/health
 </code></pre></div>
 <h2 id="12">12. 실습 종료와 다음 단계<a class="headerlink" href="#12" title="Permanent link">&para;</a></h2>
 <p>016 백업·복구 실습을 이어서 진행한다면 Cloud DB와 Backend를 유지합니다. 모든 DB 실습이 끝난 경우에만 DB Server의 반납 보호를 해제하고 삭제합니다. Cloud DB는 서버가 운영되는 동안 과금되며, HA를 사용하면 서버가 두 대 구성됩니다.</p>
