@@ -75,7 +75,7 @@ Source DB 데이터 변경 중지 또는 점검 시간 확보
 | --- | --- | --- |
 | Source DB 사설 IP | `10.0.1.30` | DMS Endpoint, Target ACG outbound |
 | Source DB 공인 IP | `49.50.x.x` | 서로 다른 VPC에서 NAT로 연결할 때만 사용 |
-| Source DB 관리자 비밀번호 | `RootPass123!` | Source 설정 및 계정 생성 |
+| Source DB 관리자 비밀번호 | `ChangeRootPass123!` | Source 설정 및 계정 생성 |
 | Target DB private domain | `db-xxxx.vpc-cdb.ntruss.com` | 백엔드 전환, Target 접속 |
 | Target DB 사설 IP 또는 서브넷 | `10.0.2.0/24` | Source ACG inbound와 Source DB 계정 Host |
 | Target DB 사용자/비밀번호 | 콘솔에서 생성 | 복원, 검증, 백엔드 전환 |

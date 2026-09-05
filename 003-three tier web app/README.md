@@ -107,7 +107,7 @@ Naver Cloud DB for MySQL 콘솔에서 같은 값을 재사용할 수 있도록 �
 ### DB 서버 `.env` 예시
 
 ```env
-DB_ROOT_PASSWORD=RootPass123!
+DB_ROOT_PASSWORD=ChangeRootPass123!
 DB_PREVIOUS_ROOT_PASSWORD=
 DB_NAME=board_service
 DB_USER=board_app
@@ -147,8 +147,8 @@ DB 서버의 `DB_PASSWORD`를 변경한 경우 `.env`를 저장하고 `sudo ./in
 `DB_ROOT_PASSWORD` 자체를 변경하면서 기존 루트 비밀번호 인증이 필요한 환경이라면 DB 서버 `.env`에 이전 값을 임시로 지정합니다. 변경 완료 후에는 `DB_PREVIOUS_ROOT_PASSWORD`를 다시 비워두세요.
 
 ```env
-DB_ROOT_PASSWORD=NewRootPassword
-DB_PREVIOUS_ROOT_PASSWORD=CurrentRootPassword
+DB_ROOT_PASSWORD=YOUR_NEW_ROOT_PASSWORD
+DB_PREVIOUS_ROOT_PASSWORD=YOUR_CURRENT_ROOT_PASSWORD
 ```
 
 ### 백엔드 서버 `.env` 예시

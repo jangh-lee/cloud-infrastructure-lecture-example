@@ -81,7 +81,7 @@ EOF
   fi
 
   cat > "${SCRIPT_DIR}/.env" <<'EOF'
-DB_ROOT_PASSWORD=RootPass123!
+DB_ROOT_PASSWORD=ChangeRootPass123!
 DB_PREVIOUS_ROOT_PASSWORD=
 DB_NAME=board_service
 DB_USER=board_app
