@@ -1878,17 +1878,17 @@
 </code></pre></div>
 <p>마지막 결과가 <code>active</code>인지 확인합니다.</p>
 <h3 id="1-2-dms">1-2. DMS 전용 계정 생성<a class="headerlink" href="#1-2-dms" title="Permanent link">&para;</a></h3>
-<p>MariaDB 관리자 비밀번호는 003 DB 서버의 <code>~/cloud-infrastructure-lecture-example/003-three tier web app/db/.env</code>에 있는 <code>DB_ROOT_PASSWORD</code>를 입력합니다. 아래 <code>%</code>는 실습 편의를 위한 값이며 실제 운영 환경에서는 DMS가 접근하는 IP 대역으로 제한합니다.</p>
+<p>MariaDB 관리자 비밀번호는 003 DB 서버의 <code>~/cloud-infrastructure-lecture-example/003-three tier web app/db/.env</code>에 있는 <code>DB_ROOT_PASSWORD</code>를 입력합니다. 이 실습의 Target Cloud DB Subnet이 <code>10.10.120.0/24</code>이므로 MariaDB 계정의 Host는 MySQL 대역 표기인 <code>10.10.120.%</code>를 사용합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-p<span class="w"> </span><span class="s">&lt;&lt;'SQL'</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="s">CREATE USER IF NOT EXISTS 'dms_migration'@'%'</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="s">CREATE USER IF NOT EXISTS 'dms_migration'@'10.10.120.%'</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="s">  IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="s">ALTER USER 'dms_migration'@'%'</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="s">ALTER USER 'dms_migration'@'10.10.120.%'</span>
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="s">  IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');</span>
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="s">GRANT RELOAD, PROCESS, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="s">  ON *.* TO 'dms_migration'@'%';</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="s">GRANT SELECT ON mysql.* TO 'dms_migration'@'%';</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="s">  ON *.* TO 'dms_migration'@'10.10.120.%';</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="s">GRANT SELECT ON mysql.* TO 'dms_migration'@'10.10.120.%';</span>
 <a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="s">GRANT SELECT, SHOW VIEW, LOCK TABLES, TRIGGER</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="s">  ON board_service.* TO 'dms_migration'@'%';</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="s">  ON board_service.* TO 'dms_migration'@'10.10.120.%';</span>
 <a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="s">FLUSH PRIVILEGES;</span>
 <a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="s">SQL</span>
 </code></pre></div>
@@ -1901,7 +1901,7 @@
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="s">  'binlog_row_image', 'expire_logs_days', 'bind_address'</span>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="s">);</span>
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="s">SHOW MASTER STATUS;</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="s">SHOW GRANTS FOR 'dms_migration'@'%';</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="s">SHOW GRANTS FOR 'dms_migration'@'10.10.120.%';</span>
 <a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="s">SELECT COUNT(*) AS total_posts FROM posts;</span>
 <a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="s">SQL</span>
 </code></pre></div>
@@ -1971,7 +1971,9 @@
 </tbody>
 </table>
 <h2 id="3-acg">3. ACG 확인<a class="headerlink" href="#3-acg" title="Permanent link">&para;</a></h2>
-<p>Source DB inbound:</p>
+<p>이 실습처럼 Source DB와 Target Cloud DB가 같은 VPC에 있으면 별도의 <code>DMS 접근 주소</code>를 찾지 않습니다. DMS 마이그레이션 과정에서는 <strong>Target Cloud DB가 Source DB의 3306 포트로 접속</strong>하므로 Target Cloud DB가 속한 Subnet 대역을 허용합니다.</p>
+<p>콘솔의 <strong>Cloud DB for MySQL &gt; DB Server</strong>에서 Target DB의 Subnet을 확인한 다음, <strong>VPC &gt; Subnet</strong>에서 그 Subnet의 IP 주소 범위(CIDR)를 확인합니다. 이 실습에서는 해당 값이 <code>10.10.120.0/24</code>입니다.</p>
+<p>Source DB 서버에 적용된 ACG의 <strong>Inbound</strong> 규칙:</p>
 <table>
 <thead>
 <tr>
@@ -1984,10 +1986,32 @@
 <tr>
 <td>TCP</td>
 <td><code>3306</code></td>
-<td>DMS/Cloud DB에서 Source DB로 접근하는 IP 또는 NAT Gateway IP</td>
+<td>Target Cloud DB Subnet CIDR: <code>10.10.120.0/24</code></td>
 </tr>
 </tbody>
 </table>
+<p>Target Cloud DB에 적용된 ACG의 <strong>Outbound</strong> 규칙:</p>
+<table>
+<thead>
+<tr>
+<th>프로토콜</th>
+<th>포트</th>
+<th>목적지</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TCP</td>
+<td><code>3306</code></td>
+<td>Source DB Private IP <code>/32</code> 또는 Source DB Subnet CIDR</td>
+</tr>
+</tbody>
+</table>
+<p>예를 들어 Source DB Private IP가 <code>10.10.120.7</code>이면 목적지를 <code>10.10.120.7/32</code>로 입력합니다. Source DB ACG의 접근 소스, Target Cloud DB ACG의 목적지, <code>dms_migration</code> 계정 Host가 모두 맞아야 DMS의 <code>Test Connection</code>이 성공합니다.</p>
+<div class="admonition note">
+<p class="admonition-title">NAT Gateway IP는 언제 사용하는가</p>
+<p>Source DB와 Target Cloud DB가 같은 VPC에서 사설 통신하는 이번 실습에는 NAT Gateway IP를 입력하지 않습니다. 서로 다른 네트워크를 공인 경로로 연결할 때만 Target 측 NAT Gateway의 공인 IP를 Source DB ACG와 DB 계정 Host에 허용합니다.</p>
+</div>
 <p>Backend에서 Cloud DB로 전환할 때:</p>
 <table>
 <thead>
