@@ -32,7 +32,7 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 | Folder | Topic |
 | --- | --- |
 | [`008-cloud cli`](./008-cloud%20cli/) | Ncloud CLI를 설치하고 인증한 뒤 VPC 리소스를 조회하고 서버를 생성하는 예제입니다. |
-| [`009-terraform`](./009-terraform/) | Terraform으로 Naver Cloud VPC, Subnet, ACG, Init Script, Server를 코드로 생성하고 삭제하는 예제입니다. |
+| [`009-terraform`](./009-terraform/) | Terraform으로 `lab7-vpc`, Subnet, NAT Gateway, ACG, Bastion, Public ALB와 003 게시판 3-tier 서버를 한 번에 생성하는 예제입니다. |
 | [`010-cost slack alert`](./010-cost%20slack%20alert/) | Cloud Functions에서 Naver Cloud 비용을 조회하고 Slack으로 알림을 보내는 자동화 예제입니다. |
 
 ### 4. 스토리지 실습

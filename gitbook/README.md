@@ -16,7 +16,7 @@ Naver Cloud 기반 클라우드 인프라 실습 교안입니다.
 | 서버 | 006 | Linux 기본 명령어 | `006-linux commands` |
 | 네트워크 | 007 | ACG 변경 Slack 알림 | `007-acg slack alert` |
 | CLI 및 IaC | 008 | Ncloud CLI로 서버 생성 | `008-cloud cli` |
-| CLI 및 IaC | 009 | Terraform 인프라 코드 | `009-terraform` |
+| CLI 및 IaC | 009 | Terraform 003 게시판 빠른 환경 구성 | `009-terraform` |
 | CLI 및 IaC | 010 | 비용 조회 Slack 자동화 | `010-cost slack alert` |
 | 스토리지 | 011 | Object Storage 정적 웹사이트 | `011-static website` |
 | Load Balancer 및 Auto Scaling | 012 | Load Balancer 분산 실습 | `012-load balancer` |
