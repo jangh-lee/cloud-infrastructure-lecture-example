@@ -4,7 +4,7 @@ resource "ncloud_vpc" "lab" {
 }
 
 resource "ncloud_subnet" "public_kr1" {
-  name           = "${var.name_prefix}-pub-kr1"
+  name           = "${var.name_prefix}-sub-pub-kr1"
   vpc_no         = ncloud_vpc.lab.id
   subnet         = local.public_kr1_cidr
   zone           = var.zone_kr1
@@ -14,7 +14,7 @@ resource "ncloud_subnet" "public_kr1" {
 }
 
 resource "ncloud_subnet" "nat_kr2" {
-  name           = "${var.name_prefix}-pub-kr2"
+  name           = "${var.name_prefix}-sub-pub-kr2"
   vpc_no         = ncloud_vpc.lab.id
   subnet         = local.nat_kr2_cidr
   zone           = var.zone_kr2
@@ -24,7 +24,7 @@ resource "ncloud_subnet" "nat_kr2" {
 }
 
 resource "ncloud_subnet" "lb_kr1" {
-  name           = "${var.name_prefix}-lb-kr1"
+  name           = "${var.name_prefix}-sub-lb-kr1"
   vpc_no         = ncloud_vpc.lab.id
   subnet         = local.lb_kr1_cidr
   zone           = var.zone_kr1
@@ -34,7 +34,7 @@ resource "ncloud_subnet" "lb_kr1" {
 }
 
 resource "ncloud_subnet" "private_kr1" {
-  name           = "${var.name_prefix}-pri-kr1"
+  name           = "${var.name_prefix}-sub-pri-kr1"
   vpc_no         = ncloud_vpc.lab.id
   subnet         = local.private_kr1_cidr
   zone           = var.zone_kr1
@@ -44,7 +44,7 @@ resource "ncloud_subnet" "private_kr1" {
 }
 
 resource "ncloud_subnet" "private_kr2" {
-  name           = "${var.name_prefix}-pri-kr2"
+  name           = "${var.name_prefix}-sub-pri-kr2"
   vpc_no         = ncloud_vpc.lab.id
   subnet         = local.private_kr2_cidr
   zone           = var.zone_kr2

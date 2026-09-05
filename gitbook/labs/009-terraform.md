@@ -28,11 +28,11 @@ VPC 이름은 `lab7-vpc`, CIDR은 `10.10.0.0/16`입니다.
 
 | 구분 | Subnet 이름 | CIDR | Zone | Internet Gateway | 용도 |
 | --- | --- | --- | --- | --- | --- |
-| Public 1 | `lab7-pub-kr1` | `10.10.10.0/24` | KR-1 | Y | Bastion |
-| Public 2 | `lab7-pub-kr2` | `10.10.20.0/24` | KR-2 | Y | NAT Gateway |
-| Load Balancer | `lab7-lb-kr1` | `10.10.30.0/24` | KR-1 | Y | Public ALB 전용 |
-| Private 1 | `lab7-pri-kr1` | `10.10.110.0/24` | KR-1 | N | Web, Backend |
-| Private 2 | `lab7-pri-kr2` | `10.10.120.0/24` | KR-2 | N | DB |
+| Public 1 | `lab7-sub-pub-kr1` | `10.10.10.0/24` | KR-1 | Y | Bastion |
+| Public 2 | `lab7-sub-pub-kr2` | `10.10.20.0/24` | KR-2 | Y | NAT Gateway |
+| Load Balancer | `lab7-sub-lb-kr1` | `10.10.30.0/24` | KR-1 | Y | Public ALB 전용 |
+| Private 1 | `lab7-sub-pri-kr1` | `10.10.110.0/24` | KR-1 | N | Web, Backend |
+| Private 2 | `lab7-sub-pri-kr2` | `10.10.120.0/24` | KR-2 | N | DB |
 
 !!! note "LB 전용 Subnet을 추가한 이유"
     Naver Cloud Load Balancer는 `usage_type = "LOADB"`인 전용 Subnet이 필요합니다. 일반 Public Subnet이나 NAT Gateway Subnet을 ALB에 같이 사용할 수 없으므로 `10.10.30.0/24`를 추가했습니다.
