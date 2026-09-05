@@ -45,7 +45,8 @@ curl -fsS http://127.0.0.1:4000/api/posts
 | 확인 값 | 예시 |
 | --- | --- |
 | 003에서 사용한 VPC | `lab-vpc` |
-| DB 전용 Subnet | `10.10.120.0/24` |
+| Cloud DB Subnet | `lab7-sub-pri-kr1` |
+| Cloud DB Subnet CIDR | `10.10.110.0/24` |
 | Backend Private IP | `10.10.110.7` |
 | Backend ACG | `lab-backend-acg` |
 | Backend Subnet 대역 | `10.10.110.0/24` |
@@ -64,7 +65,7 @@ Naver Cloud Console에서 **Services > Database > Cloud DB for MySQL > DB Server
 | 고가용성 | 실습 비용 절감을 위해 사용 안 함 |
 | Multi Zone | 사용 안 함 |
 | VPC | 003 게시판과 같은 VPC |
-| Subnet | DB 전용 Subnet |
+| Subnet | `lab7-sub-pri-kr1` (`10.10.110.0/24`) |
 | DB Server 타입 | 실습 가능한 최소 사양 |
 | 데이터 스토리지 | SSD, 기본 용량 |
 | DB Server 이름 | `board-mysql` |

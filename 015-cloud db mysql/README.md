@@ -17,6 +17,8 @@
 
 챕터 번호는 강의 순서일 뿐 운영 리소스의 역할을 설명하지 못하므로 DB와 계정 이름에 `chapter3`를 사용하지 않습니다. `board_admin`은 스키마 변경용 DDL 계정이고, Backend는 CRUD 권한만 가진 `board_app`을 사용합니다.
 
+이 실습에서 Cloud DB는 `lab7-sub-pri-kr1` Subnet에 생성하며 CIDR은 `10.10.110.0/24`입니다. Backend와 Cloud DB가 같은 Private Subnet을 사용해도 ACG와 DB User의 `HOST(IP)` 제한은 그대로 적용됩니다.
+
 ## 포함 파일
 
 - `sql/board-service-schema.sql`: `posts` 테이블과 최초 확인 게시글 생성

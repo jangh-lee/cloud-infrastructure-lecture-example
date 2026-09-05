@@ -4,6 +4,8 @@
 
 > 이 실습은 추가 Cloud DB를 만들지 않고 015 Cloud DB 서버를 Target으로 재사용합니다. DMS 시작 전에 Backend와 자동 게시글 서비스를 중지하고 Target의 `board_service`를 삭제합니다. Cloud DB 서버와 DB User는 유지합니다.
 
+실습 기준으로 Source Ubuntu DB는 `lab7-sub-pri-kr2` (`10.10.120.0/24`), Target Cloud DB는 `lab7-sub-pri-kr1` (`10.10.110.0/24`)에 있습니다. 따라서 Source의 DMS 계정 Host는 Target에서 접속할 수 있도록 `10.10.110.%`를 사용합니다.
+
 실제 실습에서 재현한 MariaDB relay log 오류와 MySQL 8.0/8.4 `mysqldump` 오류의 원인, 복구, 최종 CDC 검증 결과는 [TROUBLESHOOTING-REPORT.md](./TROUBLESHOOTING-REPORT.md)에 정리했습니다.
 
 이 실습에서는 두 가지 방식으로 Source DB에서 Target DB로 데이터를 옮기는 방법을 소개합니다.
@@ -73,11 +75,11 @@ Source DB 데이터 변경 중지 또는 점검 시간 확보
 
 | 값 | 예시 | 사용하는 곳 |
 | --- | --- | --- |
-| Source DB 사설 IP | `10.0.1.30` | DMS Endpoint, Target ACG outbound |
+| Source DB 사설 IP | `10.10.120.x` | DMS Endpoint, Target ACG outbound |
 | Source DB 공인 IP | `49.50.x.x` | 서로 다른 VPC에서 NAT로 연결할 때만 사용 |
 | Source DB 관리자 비밀번호 | `ChangeRootPass123!` | Source 설정 및 계정 생성 |
 | Target DB private domain | `db-xxxx.vpc-cdb.ntruss.com` | 백엔드 전환, Target 접속 |
-| Target DB 사설 IP 또는 서브넷 | `10.0.2.0/24` | Source ACG inbound와 Source DB 계정 Host |
+| Target DB 서브넷 | `10.10.110.0/24` | Source ACG inbound와 Source DB 계정 Host |
 | Target DB 사용자/비밀번호 | 콘솔에서 생성 | 복원, 검증, 백엔드 전환 |
 
 먼저 Source와 Target이 같은 VPC인지 확인합니다. 같은 VPC면 사설 IP/서브넷으로 연결하고, 서로 다른 VPC면 VPC Peering과 양쪽 Route Table을 구성합니다. 공인 IP로 연결할 때는 Target DB 서브넷의 Route Table에 NAT Gateway가 필요합니다.
@@ -211,19 +213,19 @@ sudo systemctl is-active mariadb
 | `expire_logs_days` | `7` | 7일 이전 binlog를 자동 정리하며, DMS의 5일 초과 보존 권장을 따릅니다. | DMS 지연보다 보존 기간이 짧으면 필요한 로그가 삭제되어 Migration을 새로 만들어야 합니다. |
 | `bind-address` | `0.0.0.0` | MariaDB가 원격 `3306/tcp` 연결을 듣게 합니다. | `127.0.0.1`이면 DMS 접속이 거절됩니다. ACG와 DB User Host를 Target 서브넷으로 제한해야 합니다. |
 
-이어서 DMS 전용 계정을 생성합니다. 관리자 암호에는 003 DB 서버의 `.env`에 기록한 `DB_ROOT_PASSWORD`를 입력합니다. 이 실습의 Target Cloud DB Subnet `10.10.120.0/24`를 MySQL Host 형식인 `10.10.120.%`로 지정합니다.
+이어서 DMS 전용 계정을 생성합니다. 관리자 암호에는 003 DB 서버의 `.env`에 기록한 `DB_ROOT_PASSWORD`를 입력합니다. 이 실습의 Target Cloud DB Subnet `10.10.110.0/24`를 MySQL Host 형식인 `10.10.110.%`로 지정합니다.
 
 ```bash
 sudo mariadb -u root -p <<'SQL'
-CREATE USER IF NOT EXISTS 'dms_migration'@'10.10.120.%'
+CREATE USER IF NOT EXISTS 'dms_migration'@'10.10.110.%'
   IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');
-ALTER USER 'dms_migration'@'10.10.120.%'
+ALTER USER 'dms_migration'@'10.10.110.%'
   IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');
 GRANT RELOAD, PROCESS, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT
-  ON *.* TO 'dms_migration'@'10.10.120.%';
-GRANT SELECT ON mysql.* TO 'dms_migration'@'10.10.120.%';
+  ON *.* TO 'dms_migration'@'10.10.110.%';
+GRANT SELECT ON mysql.* TO 'dms_migration'@'10.10.110.%';
 GRANT SELECT, SHOW VIEW, LOCK TABLES, TRIGGER
-  ON board_service.* TO 'dms_migration'@'10.10.120.%';
+  ON board_service.* TO 'dms_migration'@'10.10.110.%';
 FLUSH PRIVILEGES;
 SQL
 ```
@@ -256,7 +258,7 @@ WHERE Variable_name IN (
   'binlog_row_image', 'expire_logs_days', 'bind_address'
 );
 SHOW MASTER STATUS;
-SHOW GRANTS FOR 'dms_migration'@'10.10.120.%';
+SHOW GRANTS FOR 'dms_migration'@'10.10.110.%';
 SELECT COUNT(*) AS total_posts FROM posts;
 SQL
 ```
@@ -375,7 +377,7 @@ DMS 연결 테스트가 실패하면 대부분 네트워크 또는 권한 문제
 
 | 프로토콜 | 포트 | 접근 소스 |
 | --- | --- | --- |
-| TCP | `3306` | Target DB가 속한 서브넷 CIDR |
+| TCP | `3306` | Target DB Subnet CIDR: `10.10.110.0/24` |
 
 Target Cloud DB ACG outbound:
 

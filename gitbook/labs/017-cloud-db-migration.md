@@ -7,6 +7,12 @@
 !!! warning "015 Cloud DB 재사용"
     이 실습은 추가 Cloud DB를 만들지 않고 015에서 생성한 Cloud DB를 Target으로 재사용합니다. DMS 시작 전 Backend와 자동 게시글 서비스를 중지하고 Target의 `board_service`를 삭제합니다. 015에서 Target에 작성한 데이터는 삭제되지만, 마이그레이션할 003 Source DB의 데이터는 그대로 유지됩니다.
 
+| 구분 | Subnet | CIDR/주소 | 역할 |
+| --- | --- | --- | --- |
+| 003 Source Ubuntu DB | `lab7-sub-pri-kr2` | `10.10.120.0/24` 내 DB Private IP | 원본 MariaDB |
+| 015 Target Cloud DB | `lab7-sub-pri-kr1` | `10.10.110.0/24` | 마이그레이션 목적지 |
+| Source의 DMS 계정 Host | - | `10.10.110.%` | Target Cloud DB Subnet에서 오는 DB 로그인 허용 |
+
 이 실습에서는 두 가지 방식을 소개합니다.
 
 | 방식 | 적합한 상황 | 특징 |
@@ -116,19 +122,19 @@ sudo systemctl is-active mariadb
 
 ### 1-2. DMS 전용 계정 생성
 
-MariaDB 관리자 비밀번호는 003 DB 서버의 `~/cloud-infrastructure-lecture-example/003-three tier web app/db/.env`에 있는 `DB_ROOT_PASSWORD`를 입력합니다. 이 실습의 Target Cloud DB Subnet이 `10.10.120.0/24`이므로 MariaDB 계정의 Host는 MySQL 대역 표기인 `10.10.120.%`를 사용합니다.
+MariaDB 관리자 비밀번호는 003 DB 서버의 `~/cloud-infrastructure-lecture-example/003-three tier web app/db/.env`에 있는 `DB_ROOT_PASSWORD`를 입력합니다. 이 실습의 Target Cloud DB가 `lab7-sub-pri-kr1` (`10.10.110.0/24`)에 있으므로 MariaDB 계정의 Host는 MySQL 대역 표기인 `10.10.110.%`를 사용합니다.
 
 ```bash
 sudo mariadb -u root -p <<'SQL'
-CREATE USER IF NOT EXISTS 'dms_migration'@'10.10.120.%'
+CREATE USER IF NOT EXISTS 'dms_migration'@'10.10.110.%'
   IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');
-ALTER USER 'dms_migration'@'10.10.120.%'
+ALTER USER 'dms_migration'@'10.10.110.%'
   IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');
 GRANT RELOAD, PROCESS, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT
-  ON *.* TO 'dms_migration'@'10.10.120.%';
-GRANT SELECT ON mysql.* TO 'dms_migration'@'10.10.120.%';
+  ON *.* TO 'dms_migration'@'10.10.110.%';
+GRANT SELECT ON mysql.* TO 'dms_migration'@'10.10.110.%';
 GRANT SELECT, SHOW VIEW, LOCK TABLES, TRIGGER
-  ON board_service.* TO 'dms_migration'@'10.10.120.%';
+  ON board_service.* TO 'dms_migration'@'10.10.110.%';
 FLUSH PRIVILEGES;
 SQL
 ```
@@ -163,7 +169,7 @@ WHERE Variable_name IN (
   'binlog_row_image', 'expire_logs_days', 'bind_address'
 );
 SHOW MASTER STATUS;
-SHOW GRANTS FOR 'dms_migration'@'10.10.120.%';
+SHOW GRANTS FOR 'dms_migration'@'10.10.110.%';
 SELECT COUNT(*) AS total_posts FROM posts;
 SQL
 ```
@@ -177,7 +183,7 @@ SQL
 | `binlog_format` | `ROW` | SQL 문장이 아닌 행 변경 기반으로 적재되었음을 뜻합니다. |
 | `binlog_row_image` | `FULL` | 변경 전·후의 모든 컬럼이 기록되는 형식입니다. |
 | `expire_logs_days` | `7.000000` 등 `5`보다 큰 값 | DMS가 지연되어도 추적할 binlog 보존 여유가 있습니다. |
-| `bind_address` | `0.0.0.0` | MariaDB가 원격 TCP 접속을 듣고 있습니다. 실제 허용 대상은 ACG와 `dms_migration@10.10.120.%`가 제한합니다. |
+| `bind_address` | `0.0.0.0` | MariaDB가 원격 TCP 접속을 듣고 있습니다. 실제 허용 대상은 ACG와 `dms_migration@10.10.110.%`가 제한합니다. |
 | `SHOW MASTER STATUS` | 한 행 이상 | `File`은 현재 binlog 파일, `Position`은 다음 이벤트가 기록될 바이트 위치입니다. DMS가 초기 백업 후 변경분을 어디서부터 읽을지 판별하는 좌표입니다. |
 | `SHOW GRANTS` | 전역·`mysql.*`·`board_service.*` 권한 모두 표시 | 복제 권한만이 아니라 시스템 메타데이터와 실제 게시판 데이터를 읽을 수 있어야 합니다. |
 | `total_posts` | `0` 이상의 숫자 | 이값은 성공 조건이라기보다 Migration 전 기준 행 수입니다. 마이그레이션 후 Target의 값과 비교합니다. |
@@ -239,13 +245,13 @@ Cloud DB for MySQL은 DB 서버 OS에 접속해서 `root@localhost`로 계정을
 
 이 실습처럼 Source DB와 Target Cloud DB가 같은 VPC에 있으면 별도의 `DMS 접근 주소`를 찾지 않습니다. DMS 마이그레이션 과정에서는 **Target Cloud DB가 Source DB의 3306 포트로 접속**하므로 Target Cloud DB가 속한 Subnet 대역을 허용합니다.
 
-콘솔의 **Cloud DB for MySQL > DB Server**에서 Target DB의 Subnet을 확인한 다음, **VPC > Subnet**에서 그 Subnet의 IP 주소 범위(CIDR)를 확인합니다. 이 실습에서는 해당 값이 `10.10.120.0/24`입니다.
+콘솔의 **Cloud DB for MySQL > DB Server**에서 Target DB의 Subnet을 확인한 다음, **VPC > Subnet**에서 그 Subnet의 IP 주소 범위(CIDR)를 확인합니다. 이 실습에서는 `lab7-sub-pri-kr1`, `10.10.110.0/24`입니다.
 
 Source DB 서버에 적용된 ACG의 **Inbound** 규칙:
 
 | 프로토콜 | 포트 | 접근 소스 |
 | --- | --- | --- |
-| TCP | `3306` | Target Cloud DB Subnet CIDR: `10.10.120.0/24` |
+| TCP | `3306` | Target Cloud DB Subnet CIDR: `10.10.110.0/24` |
 
 Target Cloud DB에 적용된 ACG의 **Outbound** 규칙:
 
