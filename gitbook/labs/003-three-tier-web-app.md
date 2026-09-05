@@ -115,7 +115,7 @@ DB_PORT=3306
 DB_NAME=board_service
 DB_USER=board_app
 DB_PASSWORD=BoardApp123!
-AUTO_POST_ENABLED=false
+AUTO_POST_ENABLED=true
 AUTO_POST_INTERVAL_SECONDS=60
 AUTO_POST_TOTAL=300
 AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
@@ -130,7 +130,7 @@ LAB_STRESS_ENABLED=false
 | `DB_NAME` | 접속할 데이터베이스 이름 | DB 서버의 `DB_NAME`과 동일해야 합니다. |
 | `DB_USER` | DB 접속 계정 | DB 서버의 `DB_USER`와 동일해야 합니다. |
 | `DB_PASSWORD` | DB 접속 계정 비밀번호 | DB 서버의 `DB_PASSWORD`와 동일해야 합니다. |
-| `AUTO_POST_ENABLED` | 실습용 게시글 자동 등록 기능 사용 여부 | 일반 실습은 `false`, 자동 데이터가 필요할 때만 `true`로 설정합니다. |
+| `AUTO_POST_ENABLED` | 실습용 게시글 자동 등록 기능 사용 여부 | 기본값은 `true`이며 자동 등록을 중지할 때만 `false`로 설정합니다. |
 | `AUTO_POST_INTERVAL_SECONDS` | 자동 게시글 등록 간격 | `AUTO_POST_ENABLED=true`일 때 적용되는 초 단위 값입니다. |
 | `AUTO_POST_TOTAL` | 자동 등록할 게시글의 최대 개수 | 필요한 실습 데이터 수를 정수로 입력합니다. |
 | `AUTO_POST_API_URL` | 자동 등록 기능이 호출할 게시글 API | 같은 Backend를 호출하므로 기본값 `http://127.0.0.1:4000/api/posts`를 사용합니다. |

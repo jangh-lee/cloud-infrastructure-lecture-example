@@ -30,7 +30,7 @@ DB_PORT=${DB_PORT:-3306}
 DB_NAME=${DB_NAME}
 DB_USER=${DB_USER}
 DB_PASSWORD=${DB_PASSWORD}
-AUTO_POST_ENABLED=${AUTO_POST_ENABLED:-false}
+AUTO_POST_ENABLED=${AUTO_POST_ENABLED:-true}
 AUTO_POST_INTERVAL_SECONDS=${AUTO_POST_INTERVAL_SECONDS:-60}
 AUTO_POST_TOTAL=${AUTO_POST_TOTAL:-300}
 AUTO_POST_API_URL=${AUTO_POST_API_URL:-http://127.0.0.1:${PORT:-4000}/api/posts}
@@ -46,7 +46,7 @@ DB_PORT=3306
 DB_NAME=board_service
 DB_USER=board_app
 DB_PASSWORD=BoardApp123!
-AUTO_POST_ENABLED=false
+AUTO_POST_ENABLED=true
 AUTO_POST_INTERVAL_SECONDS=60
 AUTO_POST_TOTAL=300
 AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
@@ -209,5 +209,5 @@ echo
 echo "Backend installation complete."
 echo "API health : http://SERVER_PRIVATE_OR_PUBLIC_IP:4000/api/health"
 echo "Posts API  : http://SERVER_PRIVATE_OR_PUBLIC_IP:4000/api/posts"
-echo "Auto posts : set AUTO_POST_ENABLED=true in ${SCRIPT_DIR}/.env and rerun this script"
+echo "Auto posts : enabled by default; set AUTO_POST_ENABLED=false in ${SCRIPT_DIR}/.env to disable"
 echo "Lab stress : keep LAB_STRESS_ENABLED=false unless running an isolated load test"

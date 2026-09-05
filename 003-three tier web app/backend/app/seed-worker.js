@@ -6,7 +6,7 @@ const dotenv = require("dotenv");
 
 dotenv.config({ path: path.join(__dirname, ".env") });
 
-const enabled = String(process.env.AUTO_POST_ENABLED || "false").toLowerCase() === "true";
+const enabled = String(process.env.AUTO_POST_ENABLED || "true").toLowerCase() === "true";
 const port = Number(process.env.PORT || 4000);
 const apiUrl = process.env.AUTO_POST_API_URL || `http://127.0.0.1:${port}/api/posts`;
 const intervalSeconds = Number(process.env.AUTO_POST_INTERVAL_SECONDS || 60);
