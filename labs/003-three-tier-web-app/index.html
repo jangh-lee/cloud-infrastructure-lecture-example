@@ -1980,6 +1980,15 @@
 <a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
 <a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>LAB_STRESS_ENABLED=false
 </code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">실습 메모: Backend 설정 파일 위치</p>
+<p>설치 작업과 설정 변경은 Git 저장소의 <code>~/cloud-infrastructure-lecture-example/003-three tier web app/backend</code>에서 진행합니다. 사용자가 수정할 원본 설정 파일은 이 경로의 <code>.env</code>입니다.</p>
+<p>설치 스크립트는 애플리케이션과 <code>.env</code>를 <code>/opt/board-service-backend</code>로 복사하고, systemd는 이 배포 경로에서 서비스를 실행합니다. <code>/opt/board-service-backend/.env</code>를 직접 수정하면 다음 설치 또는 <code>configure</code> 실행 때 원본 설정으로 덮어써지므로 직접 편집하지 않습니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/<span class="s2">"003-three tier web app"</span>/backend
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>vi<span class="w"> </span>.env
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>configure
+</code></pre></div>
+</div>
 <table>
 <thead>
 <tr>
@@ -2047,38 +2056,38 @@
 </tbody>
 </table>
 <p>설치와 점검을 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>install
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>systemctl<span class="w"> </span>is-enabled<span class="w"> </span>board-service-backend
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>systemctl<span class="w"> </span>is-active<span class="w"> </span>board-service-backend
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/instance
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>install
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>systemctl<span class="w"> </span>is-enabled<span class="w"> </span>board-service-backend
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>systemctl<span class="w"> </span>is-active<span class="w"> </span>board-service-backend
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/instance
 </code></pre></div>
 <p><code>enabled</code>, <code>active</code>, HTTP <code>200</code>을 확인합니다. <code>/api/instance</code>에는 현재 Backend hostname이 표시됩니다.</p>
 <div class="admonition warning">
 <p class="admonition-title">참고: 이전 Nginx 실습 환경 삭제</p>
 <p>이전 실습에서 설치한 Nginx와 설정이 남아 충돌할 때만 아래 명령을 실행합니다. 신규 Web 서버이거나 기존 Nginx 설정을 유지해야 한다면 건너뜁니다. <code>/etc/nginx</code>와 기존 로그까지 모두 삭제됩니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>nginx
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>remove<span class="w"> </span>--purge<span class="w"> </span>nginx<span class="w"> </span>nginx-full<span class="w"> </span>nginx-common
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>autoremove
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>clean
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/etc/nginx
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/log/nginx
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>nginx
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>remove<span class="w"> </span>--purge<span class="w"> </span>nginx<span class="w"> </span>nginx-full<span class="w"> </span>nginx-common
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>autoremove
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>clean
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/etc/nginx
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/log/nginx
 </code></pre></div>
 </div>
 <h2 id="6-step-3-web">6. Step 3 - Web 서버 설치<a class="headerlink" href="#6-step-3-web" title="Permanent link">&para;</a></h2>
 <p>Web 서버에서 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>git<span class="w"> </span>pull<span class="w"> </span>--ff-only<span class="w"> </span>origin<span class="w"> </span>main
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"003-three tier web app/web"</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>chmod<span class="w"> </span>+x<span class="w"> </span>install-web.sh
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>install
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>git<span class="w"> </span>pull<span class="w"> </span>--ff-only<span class="w"> </span>origin<span class="w"> </span>main
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"003-three tier web app/web"</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>chmod<span class="w"> </span>+x<span class="w"> </span>install-web.sh
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>install
 </code></pre></div>
 <p>생성된 <code>.env</code>를 편집합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>SITE_BASE_URL=http://WEB_SERVER_PUBLIC_IP
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>SITE_TITLE=DevForum Practice Board
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>SITE_BASE_URL=http://WEB_SERVER_PUBLIC_IP
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>SITE_TITLE=DevForum Practice Board
 </code></pre></div>
 <table>
 <thead>
@@ -2108,13 +2117,13 @@
 </table>
 <p><code>BACKEND_UPSTREAM</code>은 브라우저에 전달되지 않습니다. Web Nginx 설정 안에서만 사용하는 Backend 목적지입니다.</p>
 <p>설치와 점검을 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>install
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>status
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/healthz
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/web-instance
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/health
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/instance
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>install
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>status
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/healthz
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/web-instance
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/health
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/instance
 </code></pre></div>
 <p>확인할 결과:</p>
 <ul>
@@ -2129,25 +2138,25 @@
 <p>각 명령은 해당 서버의 <strong>새 SSH 터미널</strong>에서 실행합니다. 로그 확인을 마치려면 <code>Ctrl+C</code>를 누릅니다.</p>
 <h3 id="web">Web 서버<a class="headerlink" href="#web" title="Permanent link">&para;</a></h3>
 <p>Nginx가 받은 요청은 <code>access.log</code>, 프록시 연결 실패와 설정 오류는 <code>error.log</code>에서 확인합니다. 브라우저에서 조회·글쓰기·삭제를 실행하면 <code>/api/...</code> 요청과 상태 코드가 표시됩니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-F<span class="w"> </span>/var/log/nginx/access.log<span class="w"> </span>/var/log/nginx/error.log
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-F<span class="w"> </span>/var/log/nginx/access.log<span class="w"> </span>/var/log/nginx/error.log
 </code></pre></div>
 <h3 id="backend">Backend 서버<a class="headerlink" href="#backend" title="Permanent link">&para;</a></h3>
 <p>Backend 요청, 상태 코드, 처리 시간과 애플리케이션·DB 오류를 확인합니다. 자동 게시글 기능을 사용하면 seeder 로그도 함께 표시합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>board-service-backend<span class="w"> </span>-u<span class="w"> </span>board-service-post-seeder<span class="w"> </span>-f
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>board-service-backend<span class="w"> </span>-u<span class="w"> </span>board-service-post-seeder<span class="w"> </span>-f
 </code></pre></div>
 <p>정상 글쓰기는 <code>POST /api/posts 201</code>, 오류는 <code>500</code>과 이어지는 stack trace로 구분합니다. 요청 본문과 DB 비밀번호는 기록하지 않습니다.</p>
 <h3 id="db">DB 서버<a class="headerlink" href="#db" title="Permanent link">&para;</a></h3>
 <p>MariaDB 시작·종료, 인증과 연결 오류는 서비스 로그에서 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>mariadb<span class="w"> </span>-f
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>mariadb<span class="w"> </span>-f
 </code></pre></div>
 <p>실제 <code>SELECT</code>, <code>INSERT</code>, <code>DELETE</code> 쿼리를 관찰할 때만 General Log를 잠시 켭니다. 쿼리 내용이 기록되고 부하가 증가하므로 실습 후 반드시 끕니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nv">GENERAL_LOG_FILE</span><span class="o">=</span><span class="k">$(</span>sudo<span class="w"> </span>mariadb<span class="w"> </span>-Nse<span class="w"> </span><span class="s2">"SELECT IF(LEFT(@@general_log_file,1)='/',@@general_log_file,CONCAT(@@datadir,@@general_log_file));"</span><span class="k">)</span>
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-e<span class="w"> </span><span class="s2">"SET GLOBAL log_output='FILE'; SET GLOBAL general_log=ON;"</span>
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$GENERAL_LOG_FILE</span><span class="s2">"</span>
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-F<span class="w"> </span><span class="s2">"</span><span class="nv">$GENERAL_LOG_FILE</span><span class="s2">"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nv">GENERAL_LOG_FILE</span><span class="o">=</span><span class="k">$(</span>sudo<span class="w"> </span>mariadb<span class="w"> </span>-Nse<span class="w"> </span><span class="s2">"SELECT IF(LEFT(@@general_log_file,1)='/',@@general_log_file,CONCAT(@@datadir,@@general_log_file));"</span><span class="k">)</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-e<span class="w"> </span><span class="s2">"SET GLOBAL log_output='FILE'; SET GLOBAL general_log=ON;"</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$GENERAL_LOG_FILE</span><span class="s2">"</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-F<span class="w"> </span><span class="s2">"</span><span class="nv">$GENERAL_LOG_FILE</span><span class="s2">"</span>
 </code></pre></div>
 <p>확인이 끝나면 <code>Ctrl+C</code>를 누른 뒤 General Log를 끕니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-e<span class="w"> </span><span class="s2">"SET GLOBAL general_log=OFF;"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-e<span class="w"> </span><span class="s2">"SET GLOBAL general_log=OFF;"</span>
 </code></pre></div>
 <h2 id="8-acg">8. ACG 권장 규칙<a class="headerlink" href="#8-acg" title="Permanent link">&para;</a></h2>
 <h3 id="web-acg">Web ACG<a class="headerlink" href="#web-acg" title="Permanent link">&para;</a></h3>
@@ -2219,7 +2228,7 @@
 <p>Backend의 <code>4000/tcp</code>를 인터넷에 공개하지 않습니다. 외부 사용자는 Web 서버에만 접속하고 API 요청은 Nginx가 내부로 전달합니다.</p>
 <h2 id="9">9. 브라우저 확인<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
 <p>브라우저에서 Web Public IP로 접속해 게시글을 조회하고 새 글을 작성합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>http://WEB_SERVER_PUBLIC_IP/
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>http://WEB_SERVER_PUBLIC_IP/
 </code></pre></div>
 <p>개발자 도구의 Network 탭에서 다음을 확인합니다.</p>
 <ul>
@@ -2229,23 +2238,23 @@
 </ul>
 <h2 id="10">10. 설정만 다시 반영<a class="headerlink" href="#10" title="Permanent link">&para;</a></h2>
 <p>Web의 upstream이나 제목만 변경할 때는 패키지를 다시 설치하지 않습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/003-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/web
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>nano<span class="w"> </span>.env
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>configure
-<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/health
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/003-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/web
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>nano<span class="w"> </span>.env
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>sudo<span class="w"> </span>./install-web.sh<span class="w"> </span>configure
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/health
 </code></pre></div>
 <p>Backend <code>.env</code>만 변경할 때도 같은 방식으로 설정만 반영합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/003-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/backend
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>nano<span class="w"> </span>.env
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>configure
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/003-three<span class="se">\ </span>tier<span class="se">\ </span>web<span class="se">\ </span>app/backend
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>nano<span class="w"> </span>.env
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>sudo<span class="w"> </span>./install-backend.sh<span class="w"> </span>configure
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
 </code></pre></div>
 <h2 id="11-014-auto-scaling">11. 014 Auto Scaling과 연결<a class="headerlink" href="#11-014-auto-scaling" title="Permanent link">&para;</a></h2>
 <p>003 완료 시 브라우저는 Web Public IP에 접속하고 Web Nginx는 고정 Backend를 바라봅니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
 </code></pre></div>
 <p>014에서는 이 Web 서버로 이미지를 만들고 Public ALB 뒤에 Web Auto Scaling Group을 구성합니다. 모든 Web 복제 서버는 같은 <code>BACKEND_UPSTREAM</code>을 사용합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>브라우저 → Public ALB → Web ASG → 고정 Backend → DB
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>브라우저 → Public ALB → Web ASG → 고정 Backend → DB
 </code></pre></div>
 <p>브라우저 진입 주소는 Web 서버 Public IP에서 Public ALB 주소로 바뀝니다. Backend와 DB의 IP는 바뀌지 않습니다.</p>
 
