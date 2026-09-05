@@ -124,7 +124,7 @@ curl -fsSL "${local.github_raw_base_url}/003-three%20tier%20web%20app/web/instal
 cat > .env <<'EOF'
 SITE_BASE_URL=http://${ncloud_lb.web.domain}
 BACKEND_UPSTREAM=http://${ncloud_network_interface.backend.private_ip}:${local.backend_port}
-SITE_TITLE=DevForum Practice Board
+SITE_TITLE="DevForum Practice Board"
 EOF
 
 chmod +x install-web.sh
