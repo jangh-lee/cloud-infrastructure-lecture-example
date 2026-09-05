@@ -1917,13 +1917,62 @@
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="s">log_bin=mysql-bin</span>
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="s">binlog_format=ROW</span>
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="s">binlog_row_image=FULL</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="s">expire_logs_days=5</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="s">expire_logs_days=7</span>
 <a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="s">bind-address=0.0.0.0</span>
 <a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="s">EOF</span>
 <a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
 <a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>mariadb
 <a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>mariadb
 </code></pre></div>
+<p>각 설정은 다음 역할을 합니다.</p>
+<table>
+<thead>
+<tr>
+<th>설정</th>
+<th>실습값</th>
+<th>의미와 DMS에 필요한 이유</th>
+<th>잘못 설정했을 때</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>server-id</code></td>
+<td><code>1</code></td>
+<td>바이너리 로그 이벤트를 만든 DB 서버를 식별하는 고유 번호입니다. 이 실습은 Source가 하나이므로 <code>1</code>을 사용하며, 복제 구성에 서버가 여러 대면 서로 다른 값을 사용해야 합니다.</td>
+<td>미지정 또는 중복 값은 복제 이벤트의 출처 식별을 방해합니다.</td>
+</tr>
+<tr>
+<td><code>log_bin</code></td>
+<td><code>mysql-bin</code></td>
+<td>변경 이력을 <code>mysql-bin.000001</code> 같은 바이너리 로그 파일에 기록하도록 활성화하고 파일 이름 접두어를 지정합니다. DMS는 초기 백업을 복구한 뒤 이 로그를 읽어 이후의 <code>INSERT</code>·<code>UPDATE</code>·<code>DELETE</code>를 Target에 반영합니다.</td>
+<td>실행 값이 <code>OFF</code>면 변경분 동기화를 시작할 수 없습니다.</td>
+</tr>
+<tr>
+<td><code>binlog_format</code></td>
+<td><code>ROW</code></td>
+<td>실행한 SQL 문장보다 실제로 바뀐 각 행의 값을 기록합니다. <code>NOW()</code>나 <code>UUID()</code> 같은 함수가 Target에서 다르게 계산되는 문제를 피하고 DMS가 행 변경을 확정적으로 재현하게 합니다.</td>
+<td><code>STATEMENT</code>는 SQL 재실행 결과가 Source와 달라질 수 있고, <code>MIXED</code>는 이벤트 형식이 섞입니다.</td>
+</tr>
+<tr>
+<td><code>binlog_row_image</code></td>
+<td><code>FULL</code></td>
+<td><code>ROW</code> 이벤트에 변경 전·후 행의 모든 컬럼을 담습니다. DMS가 스키마를 별도로 추정하지 않고 <code>UPDATE</code>와 <code>DELETE</code>를 해석하기 쉬운 형식입니다.</td>
+<td><code>MINIMAL</code>보다 로그 용량은 커지지만, 가변적인 컬럼 구성을 DMS가 해석해야 하는 부담을 줄입니다.</td>
+</tr>
+<tr>
+<td><code>expire_logs_days</code></td>
+<td><code>7</code></td>
+<td>7일이 지난 바이너리 로그를 자동 정리해 디스크 고갈을 방지합니다. NAVER Cloud DMS의 5일 초과 보존 권장을 따른 실습값입니다.</td>
+<td>DMS 지연 시간보다 보존 기간이 짧으면 필요한 이전 로그가 삭제되어 복제가 끊기고, 설정 변경 후 Migration을 새로 만들어야 합니다.</td>
+</tr>
+<tr>
+<td><code>bind-address</code></td>
+<td><code>0.0.0.0</code></td>
+<td>MariaDB가 Loopback만이 아니라 서버의 네트워크 인터페이스에서도 <code>3306/tcp</code> 연결을 받게 합니다. Target Cloud DB가 Source에 접속하려면 필요합니다.</td>
+<td><code>127.0.0.1</code>이면 원격 DMS 연결이 거절됩니다. <code>0.0.0.0</code>은 모든 인터페이스에서 듣는다는 뜻이므로 ACG와 DB User Host를 Target 서브넷으로 제한해야 합니다.</td>
+</tr>
+</tbody>
+</table>
 <p>마지막 결과가 <code>active</code>인지 확인합니다.</p>
 <h3 id="1-2-dms">1-2. DMS 전용 계정 생성<a class="headerlink" href="#1-2-dms" title="Permanent link">&para;</a></h3>
 <p>MariaDB 관리자 비밀번호는 003 DB 서버의 <code>~/cloud-infrastructure-lecture-example/003-three tier web app/db/.env</code>에 있는 <code>DB_ROOT_PASSWORD</code>를 입력합니다. 이 실습의 Target Cloud DB Subnet이 <code>10.10.120.0/24</code>이므로 MariaDB 계정의 Host는 MySQL 대역 표기인 <code>10.10.120.%</code>를 사용합니다.</p>
@@ -1940,6 +1989,74 @@
 <a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="s">FLUSH PRIVILEGES;</span>
 <a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="s">SQL</span>
 </code></pre></div>
+<p>권한은 적용 범위와 용도가 다릅니다.</p>
+<table>
+<thead>
+<tr>
+<th>인증/권한</th>
+<th>범위</th>
+<th>DMS에서의 역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mysql_native_password</code></td>
+<td>계정 인증</td>
+<td>DMS Source Endpoint가 사용할 암호 인증 방식입니다. 권한이 충분해도 인증 방식이 맞지 않으면 연결 테스트가 실패할 수 있습니다.</td>
+</tr>
+<tr>
+<td><code>RELOAD</code></td>
+<td><code>*.*</code> 전역</td>
+<td>GTID를 사용하지 않는 Source에서 초기 백업의 일관된 기준 시점을 만들 때 필요한 <code>FLUSH</code> 계열 작업을 허용합니다.</td>
+</tr>
+<tr>
+<td><code>PROCESS</code></td>
+<td><code>*.*</code> 전역</td>
+<td>백업 도구가 서버 실행 상태와 세션 정보를 확인하는 데 사용하는 DMS 최소 권한입니다.</td>
+</tr>
+<tr>
+<td><code>SHOW DATABASES</code></td>
+<td><code>*.*</code> 전역</td>
+<td>Source에 있는 DB 목록을 조회해 Migration 대상을 탐색하게 합니다.</td>
+</tr>
+<tr>
+<td><code>REPLICATION SLAVE</code></td>
+<td><code>*.*</code> 전역</td>
+<td>DMS가 Source에 복제 클라이언트로 접속해 binlog 이벤트 스트림을 읽게 합니다. MariaDB의 기존 권한명으로, 최근 용어의 Replica와 같은 의미입니다.</td>
+</tr>
+<tr>
+<td><code>REPLICATION CLIENT</code></td>
+<td><code>*.*</code> 전역</td>
+<td><code>SHOW MASTER STATUS</code>와 바이너리 로그 목록을 조회해 현재 File/Position을 확인하게 합니다. MariaDB 10.5 이상의 <code>SHOW GRANTS</code>에서는 별칭인 <code>BINLOG MONITOR</code>로 표시될 수 있습니다.</td>
+</tr>
+<tr>
+<td><code>SELECT ON mysql.*</code></td>
+<td><code>mysql</code> 시스템 DB</td>
+<td>계정·권한·메타데이터를 조회합니다. NAVER Cloud DMS의 <code>시스템 테이블 권한=Y</code>에 해당합니다.</td>
+</tr>
+<tr>
+<td><code>SELECT</code></td>
+<td><code>board_service.*</code></td>
+<td>초기 전체 적재에서 게시판 테이블의 스키마와 행 데이터를 읽습니다.</td>
+</tr>
+<tr>
+<td><code>SHOW VIEW</code></td>
+<td><code>board_service.*</code></td>
+<td>View가 있는 경우 정의문을 조회해 Target에 재생성하게 합니다.</td>
+</tr>
+<tr>
+<td><code>LOCK TABLES</code></td>
+<td><code>board_service.*</code></td>
+<td><code>mysqldump</code> 백업 구간에서 테이블을 일관된 시점으로 읽도록 명시적 Lock을 허용합니다.</td>
+</tr>
+<tr>
+<td><code>TRIGGER</code></td>
+<td><code>board_service.*</code></td>
+<td>Trigger 정의를 백업·복원 대상으로 조회하게 합니다. 현재 게시판에 Trigger가 없어도 DMS 표준 최소 권한으로 미리 부여합니다.</td>
+</tr>
+</tbody>
+</table>
+<p><code>*.*</code>는 서버 전체에 적용되는 전역 권한이고, <code>board_service.*</code>는 게시판 DB 내부로 제한된 권한입니다. <code>FLUSH PRIVILEGES</code> 후에도 DMS와 기존 연결은 새 세션으로 다시 연결하여 변경된 전역 권한을 적용받도록 합니다.</p>
 <p><code>ERROR 1227 ... CREATE USER privilege</code>가 나오면 <code>board_app</code> 같은 일반 앱 계정으로 접속한 것입니다. 반드시 MariaDB <code>root</code> 관리자 계정으로 실행합니다.</p>
 <h3 id="1-3-source-db">1-3. Source DB 준비 상태 확인<a class="headerlink" href="#1-3-source-db" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span><span class="s">&lt;&lt;'SQL'</span>
@@ -1953,7 +2070,68 @@
 <a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="s">SELECT COUNT(*) AS total_posts FROM posts;</span>
 <a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="s">SQL</span>
 </code></pre></div>
-<p><code>log_bin=ON</code>, <code>binlog_format=ROW</code>, <code>binlog_row_image=FULL</code>이고 <code>SHOW MASTER STATUS</code>에 바이너리 로그 파일이 표시되어야 다음 단계로 넘어갑니다. 권한 결과에는 복제 관련 전역 권한과 <code>board_service</code> 조회 권한이 모두 보여야 합니다.</p>
+<p>다음 기준을 하나씩 확인합니다.</p>
+<table>
+<thead>
+<tr>
+<th>확인 항목</th>
+<th>통과 기준</th>
+<th>출력을 읽는 방법</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>server_id</code></td>
+<td><code>1</code> 등 <code>0</code>이 아닌 고유값</td>
+<td>Source가 binlog 이벤트의 출처 서버로 식별될 수 있음을 뜻합니다.</td>
+</tr>
+<tr>
+<td><code>log_bin</code></td>
+<td><code>ON</code></td>
+<td>설정 파일의 <code>mysql-bin</code>은 파일 접두어이고, <code>SHOW VARIABLES</code>의 <code>ON</code>이 실제 활성화 여부입니다.</td>
+</tr>
+<tr>
+<td><code>binlog_format</code></td>
+<td><code>ROW</code></td>
+<td>SQL 문장이 아닌 행 변경 기반으로 적재되었음을 뜻합니다.</td>
+</tr>
+<tr>
+<td><code>binlog_row_image</code></td>
+<td><code>FULL</code></td>
+<td>변경 전·후의 모든 컬럼이 기록되는 형식입니다.</td>
+</tr>
+<tr>
+<td><code>expire_logs_days</code></td>
+<td><code>7.000000</code> 등 <code>5</code>보다 큰 값</td>
+<td>DMS가 지연되어도 추적할 binlog 보존 여유가 있습니다.</td>
+</tr>
+<tr>
+<td><code>bind_address</code></td>
+<td><code>0.0.0.0</code></td>
+<td>MariaDB가 원격 TCP 접속을 듣고 있습니다. 실제 허용 대상은 ACG와 <code>dms_migration@10.10.120.%</code>가 제한합니다.</td>
+</tr>
+<tr>
+<td><code>SHOW MASTER STATUS</code></td>
+<td>한 행 이상</td>
+<td><code>File</code>은 현재 binlog 파일, <code>Position</code>은 다음 이벤트가 기록될 바이트 위치입니다. DMS가 초기 백업 후 변경분을 어디서부터 읽을지 판별하는 좌표입니다.</td>
+</tr>
+<tr>
+<td><code>SHOW GRANTS</code></td>
+<td>전역·<code>mysql.*</code>·<code>board_service.*</code> 권한 모두 표시</td>
+<td>복제 권한만이 아니라 시스템 메타데이터와 실제 게시판 데이터를 읽을 수 있어야 합니다.</td>
+</tr>
+<tr>
+<td><code>total_posts</code></td>
+<td><code>0</code> 이상의 숫자</td>
+<td>이값은 성공 조건이라기보다 Migration 전 기준 행 수입니다. 마이그레이션 후 Target의 값과 비교합니다.</td>
+</tr>
+</tbody>
+</table>
+<p><code>SHOW MASTER STATUS</code>가 빈 결과이면 binlog가 아직 활성화되지 않은 것이므로 다음 단계로 넘어가지 않습니다. <code>Binlog_Do_DB</code>와 <code>Binlog_Ignore_DB</code>가 비어 있는 것은 서버 수준의 DB 필터를 걸지 않았다는 뜻이며, 이 실습의 <code>board_service</code> 선택은 DMS Migration 작업에서 지정합니다.</p>
+<div class="admonition note">
+<p class="admonition-title">공식 기준</p>
+<p>NAVER Cloud DMS의 Source DB 요구 사항은 <a href="https://guide.ncloud-docs.com/docs/dms-connect">Source DB 및 Target DB 접속 설정</a>, 각 binlog 형식의 차이는 <a href="https://mariadb.com/docs/server/server-management/server-monitoring-logs/binary-log/binary-log-formats">MariaDB Binary Log Formats</a>에서 확인할 수 있습니다.</p>
+</div>
 <h2 id="2-015-cloud-db-target">2. 015 Cloud DB Target 초기화<a class="headerlink" href="#2-015-cloud-db-target" title="Permanent link">&para;</a></h2>
 <p>015에서 Backend가 Target의 <code>board_service</code>를 계속 사용하면 데이터베이스를 삭제할 수 없고 DMS 데이터와 기존 쓰기가 섞일 수 있습니다. <strong>Backend 서버</strong>에서 먼저 두 서비스를 중지합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>board-service-post-seeder<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
