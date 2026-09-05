@@ -202,25 +202,25 @@ sudo systemctl stop board-service-post-seeder || true
 sudo systemctl stop board-service-backend
 ```
 
-Cloud DB 콘솔에서 다음 순서로 `board_service` 데이터베이스만 삭제합니다. Cloud DB 서버와 DB User는 삭제하지 않습니다.
-
-```text
-Cloud DB for MySQL
-  -> DB Server
-  -> 015에서 만든 board-mysql 선택
-  -> DB 관리
-  -> Database 관리
-  -> board_service 행의 삭제
-```
-
-삭제 작업이 끝나고 Cloud DB 상태가 다시 `운영중`이 될 때까지 기다립니다. Backend 서버에서 아래 명령을 실행했을 때 결과가 출력되지 않으면 DMS Target 준비가 완료된 것입니다.
+Backend 서버에서 015 Cloud DB의 **Private 도메인**을 입력한 뒤 `board_admin` 계정으로 `board_service` 데이터베이스를 삭제합니다. 아래 `TARGET_DB_HOST`에는 Source DB IP인 `10.10.120.6`이 아니라 Target Cloud DB의 Private 도메인을 입력해야 합니다.
 
 ```bash
+TARGET_DB_HOST="db-xxxx.vpc-cdb.ntruss.com"
+
 MYSQL_PWD='BoardAdmin123!' mysql \
-  -h db-xxxx.vpc-cdb.ntruss.com \
+  -h "$TARGET_DB_HOST" \
+  -P 3306 \
+  -u board_admin \
+  -e 'DROP DATABASE IF EXISTS board_service;'
+
+MYSQL_PWD='BoardAdmin123!' mysql \
+  -h "$TARGET_DB_HOST" \
+  -P 3306 \
   -u board_admin \
   -Nse "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='board_service';"
 ```
+
+`DROP DATABASE`는 `board_service` 안의 테이블과 데이터를 모두 영구 삭제합니다. Cloud DB 서버와 `board_admin`·`board_app` 사용자는 삭제하지 않습니다. 마지막 조회에서 **아무것도 출력되지 않으면** DMS Target 준비가 완료된 것입니다. DMS가 Source의 데이터베이스와 테이블을 Target에 생성하므로 마이그레이션 시작 전에는 `board_service`를 다시 만들지 않습니다.
 
 Cloud DB for MySQL은 DB 서버 OS에 접속해서 `root@localhost`로 계정을 만드는 방식이 아닙니다. 콘솔의 `Cloud DB for MySQL > DB Server > Manage DB > Manage DB user`에서 DB User를 생성합니다.
 

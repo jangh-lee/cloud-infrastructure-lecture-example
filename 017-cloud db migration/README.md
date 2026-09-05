@@ -403,16 +403,25 @@ sudo systemctl stop board-service-post-seeder || true
 sudo systemctl stop board-service-backend
 ```
 
-Cloud DB 콘솔에서 `Cloud DB for MySQL > DB Server > board-mysql 선택 > DB 관리 > Database 관리`로 이동하여 `board_service` 행을 삭제합니다. Cloud DB 서버와 `board_admin`·`board_app` 사용자는 삭제하지 않습니다.
-
-Cloud DB 상태가 다시 `운영중`이 된 뒤 Backend 서버에서 확인합니다. 결과가 출력되지 않아야 합니다.
+Backend 서버에서 015 Cloud DB의 Private 도메인을 입력한 뒤 `board_admin` 계정으로 `board_service` 데이터베이스를 삭제합니다. `TARGET_DB_HOST`에는 Source DB IP인 `10.10.120.6`이 아니라 Target Cloud DB의 Private 도메인을 입력해야 합니다.
 
 ```bash
+TARGET_DB_HOST="db-xxxx.vpc-cdb.ntruss.com"
+
 MYSQL_PWD='BoardAdmin123!' mysql \
-  -h db-xxxx.vpc-cdb.ntruss.com \
+  -h "$TARGET_DB_HOST" \
+  -P 3306 \
+  -u board_admin \
+  -e 'DROP DATABASE IF EXISTS board_service;'
+
+MYSQL_PWD='BoardAdmin123!' mysql \
+  -h "$TARGET_DB_HOST" \
+  -P 3306 \
   -u board_admin \
   -Nse "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='board_service';"
 ```
+
+`DROP DATABASE`는 `board_service` 안의 테이블과 데이터를 모두 영구 삭제합니다. Cloud DB 서버와 `board_admin`·`board_app` 사용자는 삭제하지 않습니다. 마지막 조회에서 아무것도 출력되지 않으면 Target 초기화가 완료된 것입니다.
 
 Cloud DB for MySQL은 사용자가 DB 서버 OS에 접속해서 `root@localhost`로 계정을 만드는 방식이 아닙니다. Naver Cloud 콘솔의 `Cloud DB for MySQL > DB Server > Manage DB > Manage DB user`에서 DB User를 만들고 접근 대역을 허용합니다.
 
