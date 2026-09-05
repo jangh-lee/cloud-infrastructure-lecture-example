@@ -512,38 +512,12 @@ sudo systemctl stop board-service-backend
 Source DB에서 덤프 파일 생성:
 
 ```bash
-cd "017-cloud db migration/scripts"
+SOURCE_DB_HOST='10.10.120.6'
+TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com'
 
-SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
-SOURCE_DB_USER='board_app' \
-SOURCE_DB_PASSWORD='BoardApp123!' \
-DB_NAME='board_service' \
-DUMP_FILE='/tmp/board_service.sql' \
-./dump-source-db.sh
-```
-
-Cloud DB for MySQL에 복원:
-
-```bash
-TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
-TARGET_DB_USER='board_admin' \
-TARGET_DB_PASSWORD='BoardAdmin123!' \
-DUMP_FILE='/tmp/board_service.sql' \
-./restore-target-db.sh
-```
-
-복원 후 백엔드는 다시 켤 수 있습니다. 단, DB 전환 전이라면 기존 Source DB로 다시 쓰게 됩니다.
-
-```bash
-sudo systemctl start board-service-backend
-sudo systemctl start board-service-post-seeder || true
-```
-
-`mysqldump` 명령어를 직접 쓰면 아래와 같습니다.
-
-```bash
-MYSQL_PWD='SOURCE_PASSWORD' mysqldump \
-  -h SOURCE_DB_PRIVATE_IP \
+MYSQL_PWD='BoardApp123!' mysqldump \
+  -h "$SOURCE_DB_HOST" \
+  -P 3306 \
   -u board_app \
   --single-transaction \
   --quick \
@@ -553,161 +527,90 @@ MYSQL_PWD='SOURCE_PASSWORD' mysqldump \
   --default-character-set=utf8mb4 \
   --databases board_service \
   > /tmp/board_service.sql
+
+ls -lh /tmp/board_service.sql
 ```
 
-복원 명령어:
+`board_service.sql` 파일의 크기가 `0`보다 크면 Target Cloud DB에 복원합니다.
 
 ```bash
 MYSQL_PWD='BoardAdmin123!' mysql \
-  -h db-xxxx.vpc-cdb.ntruss.com \
+  -h "$TARGET_DB_HOST" \
+  -P 3306 \
   -u board_admin \
   < /tmp/board_service.sql
 ```
 
+복원 후 백엔드는 다시 켤 수 있습니다. 단, DB 전환 전이라면 기존 Source DB로 다시 쓰게 됩니다.
+
+```bash
+sudo systemctl start board-service-backend
+sudo systemctl start board-service-post-seeder || true
+```
+
 ## 10. 마이그레이션 검증
 
-Source DB와 Target DB의 데이터 수와 내용 지문을 비교합니다.
+Backend 서버에서 접속 정보를 설정한 뒤 Source와 Target에 같은 SQL을 직접 실행해 결과를 비교합니다.
 
 ```bash
-cd "017-cloud db migration/scripts"
-
-SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
-SOURCE_DB_USER='board_app' \
-SOURCE_DB_PASSWORD='BoardApp123!' \
-TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
-TARGET_DB_USER='board_app' \
-TARGET_DB_PASSWORD='BoardApp123!' \
-DB_NAME='board_service' \
-./compare-post-counts.sh
+SOURCE_DB_HOST='10.10.120.6'
+TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com'
+DB_PASSWORD='BoardApp123!'
 ```
 
-스크립트는 다음 항목을 함께 비교하며 하나라도 다르면 종료 코드 `2`를 반환합니다.
-
-- `posts` 컬럼 구조
-- 전체 행 수
-- 첫 번째·마지막 게시글 ID
-- 모든 게시글의 제목, 본문, 작성자, 작성 시각을 반영한 체크섬
-- 불일치가 발생한 게시글 ID와 행별 제목 길이·본문 길이·체크섬
-
-체크섬은 빠른 실습 검증을 위한 값입니다. 백업 보존이나 법적 무결성 증명에 사용하는 암호학적 해시는 아닙니다.
-
-직접 확인:
+Source DB 조회:
 
 ```bash
-mysql -h SOURCE_DB_PRIVATE_IP -u board_app -p board_service \
-  -e "SELECT COUNT(*) AS source_posts FROM posts;"
-
-mysql -h db-xxxx.vpc-cdb.ntruss.com -u board_app -p board_service \
-  -e "SELECT COUNT(*) AS target_posts FROM posts;"
-```
-
-### Source와 Target을 직접 비교하는 SQL 실습
-
-터미널 두 개를 열어 한쪽은 Source, 다른 한쪽은 Target에 접속합니다. 이후 아래 쿼리를 양쪽에서 똑같이 실행해 결과를 비교합니다.
-
-```bash
-# 터미널 1: Source
-mysql -h SOURCE_DB_PRIVATE_IP -u board_app -p board_service
-
-# 터미널 2: Target Cloud DB
-mysql -h db-xxxx.vpc-cdb.ntruss.com -u board_app -p board_service
-```
-
-먼저 테이블 컬럼 순서와 타입을 비교합니다.
-
-```sql
-SELECT
-  ORDINAL_POSITION,
-  COLUMN_NAME,
-  COLUMN_TYPE,
-  IS_NULLABLE,
-  COLUMN_KEY,
-  COLUMN_DEFAULT,
-  EXTRA,
-  COLLATION_NAME
-FROM information_schema.COLUMNS
-WHERE TABLE_SCHEMA = DATABASE()
-  AND TABLE_NAME = 'posts'
-ORDER BY ORDINAL_POSITION;
-```
-
-Source와 Target의 컬럼 개수, 타입, `NULL` 허용 여부, 기본 키, 기본값이 같아야 합니다. 다음으로 행 수와 데이터 범위를 비교합니다.
-
-```sql
-SELECT
-  COUNT(*) AS total_posts,
-  MIN(id) AS first_post_id,
-  MAX(id) AS last_post_id,
-  MIN(created_at) AS first_created_at,
-  MAX(created_at) AS last_created_at
+MYSQL_PWD="$DB_PASSWORD" mysql --table \
+  -h "$SOURCE_DB_HOST" -P 3306 -u board_app board_service <<'SQL'
+SELECT 'SOURCE DB' AS verification_target;
+SHOW COLUMNS FROM posts;
+SELECT COUNT(*) AS total_posts,
+       MIN(id) AS first_id, MAX(id) AS last_id,
+       MIN(created_at) AS first_created_at,
+       MAX(created_at) AS last_created_at
 FROM posts;
-```
-
-최종 전환 시점에는 Source와 Target의 다섯 값이 모두 같아야 합니다. DMS 실행 중이라면 Target의 `last_post_id`가 잠시 작을 수 있지만 DMS 지연이 `0`이 된 뒤에는 같아야 합니다.
-
-행 수만 같고 실제 내용이 다른 경우를 찾기 위해 전체 데이터 지문을 비교합니다.
-
-```sql
-SELECT
-  COUNT(*) AS total_posts,
-  COALESCE(SUM(CAST(row_crc AS UNSIGNED)), 0) AS checksum_sum,
-  COALESCE(BIT_XOR(row_crc), 0) AS checksum_xor
+SELECT COUNT(*) AS total_posts,
+       COALESCE(SUM(CAST(row_crc AS UNSIGNED)), 0) AS checksum_sum,
+       COALESCE(BIT_XOR(row_crc), 0) AS checksum_xor
 FROM (
-  SELECT CRC32(CONCAT_WS(
-    CHAR(31),
-    CAST(id AS CHAR),
-    title,
-    content,
-    author_name,
-    CAST(UNIX_TIMESTAMP(created_at) AS CHAR)
-  )) AS row_crc
+  SELECT CRC32(CONCAT_WS(CHAR(31), CAST(id AS CHAR), title, content, author_name,
+                        CAST(created_at AS CHAR))) AS row_crc
   FROM posts
 ) AS post_fingerprints;
+SELECT id, title, author_name, created_at
+FROM posts ORDER BY id DESC LIMIT 5;
+SQL
 ```
 
-세 값이 Source와 Target에서 모두 같아야 합니다. 체크섬이 다르면 특정 게시글을 골라 실제 값을 확인합니다. 아래 `@post_id`에는 비교 스크립트가 알려준 불일치 ID나 최신 ID를 넣습니다.
+Target Cloud DB 조회:
 
-```sql
-SET @post_id = 1;
-
-SELECT
-  id,
-  title,
-  content,
-  CHAR_LENGTH(title) AS title_length,
-  CHAR_LENGTH(content) AS content_length,
-  author_name,
-  created_at,
-  CRC32(CONCAT_WS(
-    CHAR(31),
-    CAST(id AS CHAR),
-    title,
-    content,
-    author_name,
-    CAST(UNIX_TIMESTAMP(created_at) AS CHAR)
-  )) AS row_checksum
-FROM posts
-WHERE id = @post_id;
-```
-
-제목과 본문을 눈으로 확인하고 길이, 작성자, 작성 시각, `row_checksum`을 비교합니다. 실제 데이터 자체의 이상 여부도 양쪽에서 확인합니다.
-
-```sql
-SELECT
-  COALESCE(SUM(CASE WHEN TRIM(title) = '' THEN 1 ELSE 0 END), 0) AS empty_title_count,
-  COALESCE(SUM(CASE WHEN TRIM(content) = '' THEN 1 ELSE 0 END), 0) AS empty_content_count,
-  COALESCE(SUM(CASE WHEN TRIM(author_name) = '' THEN 1 ELSE 0 END), 0) AS empty_author_count,
-  COALESCE(SUM(CASE WHEN created_at > CURRENT_TIMESTAMP THEN 1 ELSE 0 END), 0) AS future_created_at_count
+```bash
+MYSQL_PWD="$DB_PASSWORD" mysql --table \
+  -h "$TARGET_DB_HOST" -P 3306 -u board_app board_service <<'SQL'
+SELECT 'TARGET DB' AS verification_target;
+SHOW COLUMNS FROM posts;
+SELECT COUNT(*) AS total_posts,
+       MIN(id) AS first_id, MAX(id) AS last_id,
+       MIN(created_at) AS first_created_at,
+       MAX(created_at) AS last_created_at
 FROM posts;
-
-SELECT title, author_name, COUNT(*) AS duplicate_candidate_count
-FROM posts
-GROUP BY title, author_name
-HAVING COUNT(*) > 1
-ORDER BY duplicate_candidate_count DESC, title;
+SELECT COUNT(*) AS total_posts,
+       COALESCE(SUM(CAST(row_crc AS UNSIGNED)), 0) AS checksum_sum,
+       COALESCE(BIT_XOR(row_crc), 0) AS checksum_xor
+FROM (
+  SELECT CRC32(CONCAT_WS(CHAR(31), CAST(id AS CHAR), title, content, author_name,
+                        CAST(created_at AS CHAR))) AS row_crc
+  FROM posts
+) AS post_fingerprints;
+SELECT id, title, author_name, created_at
+FROM posts ORDER BY id DESC LIMIT 5;
+SQL
 ```
 
-빈 값과 미래 시각은 정상 데이터라면 모두 `0`이어야 합니다. 중복 후보는 반드시 오류라는 뜻은 아니므로 Source에도 같은 행이 있었는지 실제 본문과 작성 시각을 추가 조회해 판단합니다.
+체크섬은 실습용 빠른 비교 값이며 백업 보존이나 법적 무결성 증명용 암호학적 해시는 아닙니다.
+
+**통과 기준:** Source와 Target의 컬럼 구조, `total_posts`, ID·작성 시각 범위, `checksum_sum`, `checksum_xor`가 모두 같아야 합니다. 최신 5개 게시글도 제목·작성자·작성 시각이 같아야 합니다.
 
 | 비교 결과 | 해석과 확인 사항 |
 | --- | --- |
@@ -717,22 +620,6 @@ ORDER BY duplicate_candidate_count DESC, title;
 | 최신 ID만 Target에 없음 | 쓰기를 중지했는지, DMS 지연이 `0`인지 확인 |
 | Source와 Target 결과가 모두 같음 | 백엔드 전환 전 데이터 검증 통과 |
 
-각 DB의 스키마, ID·시간 범위, 체크섬, 빈 값·미래 시각 같은 이상 데이터, 중복 후보, 최신 10건의 실제 제목·본문과 작성자별 건수를 직접 확인하려면 동일한 SQL을 Source와 Target에 각각 실행합니다.
-
-```bash
-cd "017-cloud db migration"
-
-mysql -h SOURCE_DB_PRIVATE_IP \
-  -u board_app \
-  -p board_service \
-  < sql/migration-validation.sql
-
-mysql -h db-xxxx.vpc-cdb.ntruss.com \
-  -u board_app \
-  -p board_service \
-  < sql/migration-validation.sql
-```
-
 DMS로 변경분까지 이관하는 동안에는 Source에 쓰기가 계속 발생할 수 있으므로 일시적으로 값이 다를 수 있습니다. 최종 전환 직전에는 게시판 백엔드와 자동 게시글 생성기를 중지하고, DMS 지연이 `0`이 된 뒤 다시 검증해야 합니다. `mysqldump` 방식은 덤프를 만든 시점부터 Source 쓰기를 중지한 상태에서 비교해야 합니다.
 
 ## 11. Backend DB_HOST 전환
@@ -740,18 +627,24 @@ DMS로 변경분까지 이관하는 동안에는 Source에 쓰기가 계속 발�
 백엔드 서버에서 `.env`의 DB 접속 정보를 Cloud DB로 바꿉니다.
 
 ```bash
-cd "017-cloud db migration/scripts"
+TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com'
+SOURCE_ENV="$HOME/cloud-infrastructure-lecture-example/003-three tier web app/backend/.env"
+RUNTIME_ENV='/opt/board-service-backend/.env'
 
-sudo BACKEND_ENV_FILE='/opt/board-service-backend/.env' \
-  DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
-  DB_PORT='3306' \
-  DB_USER='board_app' \
-  DB_PASSWORD='BoardApp123!' \
-  DB_NAME='board_service' \
-  ./switch-backend-db.sh
+sudo sed -i \
+  -e "s|^DB_HOST=.*|DB_HOST=$TARGET_DB_HOST|" \
+  -e 's|^DB_PORT=.*|DB_PORT=3306|' \
+  -e 's|^DB_USER=.*|DB_USER=board_app|' \
+  -e 's|^DB_PASSWORD=.*|DB_PASSWORD=BoardApp123!|' \
+  -e 's|^DB_NAME=.*|DB_NAME=board_service|' \
+  "$SOURCE_ENV" "$RUNTIME_ENV"
+
+sudo systemctl restart board-service-backend
+sudo systemctl restart board-service-post-seeder || true
+sudo grep -E '^DB_(HOST|PORT|USER|PASSWORD|NAME)=' "$RUNTIME_ENV"
 ```
 
-스크립트는 `.env`를 수정하고 `board-service-backend` 서비스를 재시작합니다.
+원본 `.env`도 함께 수정하므로 나중에 003 설치 명령을 다시 실행해도 기존 Source DB 설정으로 돌아가지 않습니다.
 
 확인:
 

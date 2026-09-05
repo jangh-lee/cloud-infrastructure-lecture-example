@@ -314,31 +314,12 @@ sudo systemctl stop board-service-backend
 Source DB에서 덤프 파일 생성:
 
 ```bash
-cd "017-cloud db migration/scripts"
+SOURCE_DB_HOST='10.10.120.6'
+TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com'
 
-SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
-SOURCE_DB_USER='board_app' \
-SOURCE_DB_PASSWORD='BoardApp123!' \
-DB_NAME='board_service' \
-DUMP_FILE='/tmp/board_service.sql' \
-./dump-source-db.sh
-```
-
-Cloud DB for MySQL에 복원:
-
-```bash
-TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
-TARGET_DB_USER='board_admin' \
-TARGET_DB_PASSWORD='BoardAdmin123!' \
-DUMP_FILE='/tmp/board_service.sql' \
-./restore-target-db.sh
-```
-
-명령어를 직접 쓰면 아래와 같습니다.
-
-```bash
-MYSQL_PWD='SOURCE_PASSWORD' mysqldump \
-  -h SOURCE_DB_PRIVATE_IP \
+MYSQL_PWD='BoardApp123!' mysqldump \
+  -h "$SOURCE_DB_HOST" \
+  -P 3306 \
   -u board_app \
   --single-transaction \
   --quick \
@@ -348,46 +329,113 @@ MYSQL_PWD='SOURCE_PASSWORD' mysqldump \
   --default-character-set=utf8mb4 \
   --databases board_service \
   > /tmp/board_service.sql
+
+ls -lh /tmp/board_service.sql
 ```
+
+`board_service.sql` 파일의 크기가 `0`보다 크면 Target Cloud DB에 복원합니다. 위에서 설정한 `TARGET_DB_HOST`를 같은 터미널에서 사용합니다.
 
 ```bash
 MYSQL_PWD='BoardAdmin123!' mysql \
-  -h db-xxxx.vpc-cdb.ntruss.com \
+  -h "$TARGET_DB_HOST" \
+  -P 3306 \
   -u board_admin \
   < /tmp/board_service.sql
 ```
 
 ## 7. 데이터 검증
 
+Backend 서버에서 접속 정보를 먼저 설정합니다. `SOURCE_DB_HOST`는 003 Source DB의 사설 IP, `TARGET_DB_HOST`는 Cloud DB의 Private 도메인입니다.
+
 ```bash
-SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
-SOURCE_DB_USER='board_app' \
-SOURCE_DB_PASSWORD='BoardApp123!' \
-TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
-TARGET_DB_USER='board_app' \
-TARGET_DB_PASSWORD='BoardApp123!' \
-DB_NAME='board_service' \
-./compare-post-counts.sh
+SOURCE_DB_HOST='10.10.120.6'
+TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com'
+DB_PASSWORD='BoardApp123!'
 ```
+
+먼저 Source DB를 조회합니다.
+
+```bash
+MYSQL_PWD="$DB_PASSWORD" mysql --table \
+  -h "$SOURCE_DB_HOST" -P 3306 -u board_app board_service <<'SQL'
+SELECT 'SOURCE DB' AS verification_target;
+SHOW COLUMNS FROM posts;
+SELECT COUNT(*) AS total_posts,
+       MIN(id) AS first_id, MAX(id) AS last_id,
+       MIN(created_at) AS first_created_at,
+       MAX(created_at) AS last_created_at
+FROM posts;
+SELECT COUNT(*) AS total_posts,
+       COALESCE(SUM(CAST(row_crc AS UNSIGNED)), 0) AS checksum_sum,
+       COALESCE(BIT_XOR(row_crc), 0) AS checksum_xor
+FROM (
+  SELECT CRC32(CONCAT_WS(CHAR(31), CAST(id AS CHAR), title, content, author_name,
+                        CAST(created_at AS CHAR))) AS row_crc
+  FROM posts
+) AS post_fingerprints;
+SELECT id, title, author_name, created_at
+FROM posts ORDER BY id DESC LIMIT 5;
+SQL
+```
+
+같은 터미널에서 Target Cloud DB를 조회합니다.
+
+```bash
+MYSQL_PWD="$DB_PASSWORD" mysql --table \
+  -h "$TARGET_DB_HOST" -P 3306 -u board_app board_service <<'SQL'
+SELECT 'TARGET DB' AS verification_target;
+SHOW COLUMNS FROM posts;
+SELECT COUNT(*) AS total_posts,
+       MIN(id) AS first_id, MAX(id) AS last_id,
+       MIN(created_at) AS first_created_at,
+       MAX(created_at) AS last_created_at
+FROM posts;
+SELECT COUNT(*) AS total_posts,
+       COALESCE(SUM(CAST(row_crc AS UNSIGNED)), 0) AS checksum_sum,
+       COALESCE(BIT_XOR(row_crc), 0) AS checksum_xor
+FROM (
+  SELECT CRC32(CONCAT_WS(CHAR(31), CAST(id AS CHAR), title, content, author_name,
+                        CAST(created_at AS CHAR))) AS row_crc
+  FROM posts
+) AS post_fingerprints;
+SELECT id, title, author_name, created_at
+FROM posts ORDER BY id DESC LIMIT 5;
+SQL
+```
+
+**통과 기준:** Source와 Target의 컬럼 구조, `total_posts`, ID·작성 시각 범위, `checksum_sum`, `checksum_xor`가 모두 같아야 합니다. 최신 5개 게시글도 제목·작성자·작성 시각이 같아야 합니다. DMS 방식은 지연 시간이 `0`이 된 뒤 비교합니다.
 
 ## 8. 백엔드 전환
 
+원본 설정과 현재 실행 중인 설정을 모두 Cloud DB 접속 정보로 바꾼 뒤 서비스를 재시작합니다.
+
 ```bash
-sudo BACKEND_ENV_FILE='/opt/board-service-backend/.env' \
-  DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
-  DB_PORT='3306' \
-  DB_USER='board_app' \
-  DB_PASSWORD='BoardApp123!' \
-  DB_NAME='board_service' \
-  ./switch-backend-db.sh
+TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com'
+SOURCE_ENV="$HOME/cloud-infrastructure-lecture-example/003-three tier web app/backend/.env"
+RUNTIME_ENV='/opt/board-service-backend/.env'
+
+sudo sed -i \
+  -e "s|^DB_HOST=.*|DB_HOST=$TARGET_DB_HOST|" \
+  -e 's|^DB_PORT=.*|DB_PORT=3306|' \
+  -e 's|^DB_USER=.*|DB_USER=board_app|' \
+  -e 's|^DB_PASSWORD=.*|DB_PASSWORD=BoardApp123!|' \
+  -e 's|^DB_NAME=.*|DB_NAME=board_service|' \
+  "$SOURCE_ENV" "$RUNTIME_ENV"
+
+sudo systemctl restart board-service-backend
+sudo systemctl restart board-service-post-seeder || true
+sudo grep -E '^DB_(HOST|PORT|USER|PASSWORD|NAME)=' "$RUNTIME_ENV"
 ```
 
 확인:
 
 ```bash
-curl http://localhost:4000/api/health
-curl http://localhost:4000/api/posts
+sudo systemctl is-active board-service-backend
+curl -s http://localhost:4000/api/health
+curl -s http://localhost:4000/api/posts
 ```
+
+서비스가 `active`, Health 응답이 `"status":"ok"`, 게시글 목록이 JSON으로 출력되면 전환이 완료된 것입니다.
 
 ## 참고
 
