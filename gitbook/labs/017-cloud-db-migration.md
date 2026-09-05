@@ -4,8 +4,8 @@
 
 003번 게시판 DB를 Ubuntu 서버의 MariaDB/MySQL에서 Naver Cloud `Cloud DB for MySQL`로 마이그레이션합니다.
 
-!!! warning "015에서 사용 중인 DB와 분리"
-    DMS 실습의 Target에는 Source와 같은 `board_service`가 없어야 합니다. 015에서 생성해 서비스 중인 Cloud DB를 그대로 Target으로 쓰지 말고, DMS용 빈 Cloud DB Service를 새로 만들거나 015 리소스를 더 이상 사용하지 않을 때만 초기화합니다.
+!!! warning "015 Cloud DB 재사용"
+    이 실습은 추가 Cloud DB를 만들지 않고 015에서 생성한 Cloud DB를 Target으로 재사용합니다. DMS 시작 전 Backend와 자동 게시글 서비스를 중지하고 Target의 `board_service`를 삭제합니다. 015에서 Target에 작성한 데이터는 삭제되지만, 마이그레이션할 003 Source DB의 데이터는 그대로 유지됩니다.
 
 이 실습에서는 두 가지 방식을 소개합니다.
 
@@ -18,7 +18,8 @@ DMS 흐름:
 
 ```text
 Source DB 사전 설정
-  -> Cloud DB for MySQL 생성
+  -> Backend 쓰기 중지
+  -> 015 Cloud DB의 board_service 삭제
   -> DMS Endpoint 생성
   -> DMS Migration 실행
   -> 데이터 검증
@@ -61,6 +62,25 @@ erDiagram
 ## 1. Source DB 준비
 
 Naver Cloud DB for MySQL의 DB 사용자 비밀번호 조건에 맞춰 예시 비밀번호는 8자 이상, 20자 이하인 `MigratePass123!`를 사용합니다.
+
+!!! important "어느 서버에서 어떤 계정으로 실행하는가"
+    이 단계는 Backend 서버에서 DB에 원격 접속해 실행하는 작업이 아닙니다. MariaDB 설정 파일과 서비스를 변경해야 하므로 Bastion에서 **003 Source DB 서버의 Private IP로 SSH 접속**한 뒤 실행합니다.
+
+    | 구분 | 사용할 계정 | 비밀번호 | 용도 |
+    | --- | --- | --- | --- |
+    | Source DB 서버 SSH | OS `root` | 서버 관리자 비밀번호 | 설정 파일 및 MariaDB 서비스 변경 |
+    | Source MariaDB 로그인 | DB `root` | 003 DB `.env`의 `DB_ROOT_PASSWORD` | DMS 계정 생성 및 권한 부여 |
+    | Source 애플리케이션 계정 | `board_app` | `DB_PASSWORD` | Backend 전용이며 Source 준비에는 사용하지 않음 |
+    | DMS 전용 계정 | `dms_migration` | `MigratePass123!` | 생성 후 DMS Source Endpoint에 입력 |
+
+    ```bash
+    # Bastion 서버에서 실행
+    ssh root@SOURCE_DB_PRIVATE_IP
+
+    # Source DB 서버에서 MariaDB 관리자 비밀번호 위치 확인
+    cd ~/cloud-infrastructure-lecture-example/"003-three tier web app"/db
+    grep '^DB_ROOT_PASSWORD=' .env
+    ```
 
 ### 1-1. MariaDB 바이너리 로그 설정
 
@@ -121,25 +141,42 @@ SQL
 
 `log_bin=ON`, `binlog_format=ROW`, `binlog_row_image=FULL`이고 `SHOW MASTER STATUS`에 바이너리 로그 파일이 표시되어야 다음 단계로 넘어갑니다. 권한 결과에는 복제 관련 전역 권한과 `board_service` 조회 권한이 모두 보여야 합니다.
 
-## 2. Cloud DB for MySQL 생성
+## 2. 015 Cloud DB Target 초기화
 
-콘솔에서 Target DB를 생성합니다.
+015에서 Backend가 Target의 `board_service`를 계속 사용하면 데이터베이스를 삭제할 수 없고 DMS 데이터와 기존 쓰기가 섞일 수 있습니다. **Backend 서버**에서 먼저 두 서비스를 중지합니다.
 
-```text
-VPC
-  -> Cloud DB for MySQL
-  -> DB Server 생성
+```bash
+sudo systemctl stop board-service-post-seeder || true
+sudo systemctl stop board-service-backend
 ```
 
-Source DB와 같은 major version을 권장합니다.
+Cloud DB 콘솔에서 다음 순서로 `board_service` 데이터베이스만 삭제합니다. Cloud DB 서버와 DB User는 삭제하지 않습니다.
+
+```text
+Cloud DB for MySQL
+  -> DB Server
+  -> 015에서 만든 board-mysql 선택
+  -> DB 관리
+  -> Database 관리
+  -> board_service 행의 삭제
+```
+
+삭제 작업이 끝나고 Cloud DB 상태가 다시 `운영중`이 될 때까지 기다립니다. Backend 서버에서 아래 명령을 실행했을 때 결과가 출력되지 않으면 DMS Target 준비가 완료된 것입니다.
+
+```bash
+MYSQL_PWD='BoardAdmin123!' mysql \
+  -h db-xxxx.vpc-cdb.ntruss.com \
+  -u board_admin \
+  -Nse "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='board_service';"
+```
 
 Cloud DB for MySQL은 DB 서버 OS에 접속해서 `root@localhost`로 계정을 만드는 방식이 아닙니다. 콘솔의 `Cloud DB for MySQL > DB Server > Manage DB > Manage DB user`에서 DB User를 생성합니다.
 
-DMS 작업 전에는 Target에 `board_service` 데이터베이스를 만들지 않습니다. Source와 같은 이름의 데이터베이스가 이미 있으면 DMS 작업을 시작할 수 없습니다. DB User만 다음과 같이 미리 생성합니다.
+015에서 생성한 다음 DB User는 삭제하지 않고 그대로 사용합니다. 없거나 설정이 다를 때만 **DB 관리 > DB User 관리**에서 추가하거나 수정합니다.
 
 | USER_ID | HOST(IP) | DB 권한 | 암호 예시 | 용도 |
 | --- | --- | --- | --- | --- |
-| `board_admin` | 관리 서버 IP 대역 예: `10.10.10.%` | `DDL` | `BoardAdmin123!` | mysqldump 복원, 스키마 및 검증 작업 |
+| `board_admin` | Backend Subnet 예: `10.10.110.%` | `DDL` | `BoardAdmin123!` | mysqldump 복원, 스키마 및 검증 작업 |
 | `board_app` | Backend Subnet 예: `10.10.110.%` | `CRUD` | `BoardApp123!` | 마이그레이션 완료 후 Backend 연결 |
 
 두 계정 모두 **시스템 테이블은 선택하지 않습니다**. `DDL`은 `CRUD`와 `READ`를 포함하고 테이블 생성·변경·삭제가 가능하며, `CRUD`는 게시글 조회·등록·수정·삭제에 사용합니다. DMS 작업 생성 화면에서는 별도 Target DB User를 입력하지 않고 생성한 Cloud DB Service를 Target으로 선택합니다.

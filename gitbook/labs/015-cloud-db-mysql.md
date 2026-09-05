@@ -321,6 +321,9 @@ curl -fsS http://127.0.0.1:4000/api/health
 
 016 백업·복구 실습을 이어서 진행한다면 Cloud DB와 Backend를 유지합니다. 모든 DB 실습이 끝난 경우에만 DB Server의 반납 보호를 해제하고 삭제합니다. Cloud DB는 서버가 운영되는 동안 과금되며, HA를 사용하면 서버가 두 대 구성됩니다.
 
+!!! warning "017 DMS 실습에서 재사용"
+    017에서는 이 Cloud DB 서버를 그대로 Target으로 재사용하지만, DMS 시작 전에 Backend와 자동 게시글 서비스를 중지하고 Target의 `board_service` 데이터베이스를 삭제합니다. Cloud DB 서버와 `board_admin`·`board_app` 계정은 삭제하지 않습니다. 015에서 작성한 Target 데이터가 필요하면 016에서 백업·복구 실습을 먼저 완료합니다.
+
 - [016 Database 백업 및 복구](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/016-database-backup-recovery/)
 - [017 Cloud DB Migration](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/017-cloud-db-migration/)
 

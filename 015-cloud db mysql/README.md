@@ -30,3 +30,5 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/015-cloud-
 ```
 
 다음 실습은 `016-database backup recovery`, 기존 DB를 실제로 이관하는 실습은 `017-cloud db migration`입니다.
+
+017에서는 추가 Cloud DB를 만들지 않고 이 Cloud DB 서버를 Target으로 재사용합니다. DMS 시작 전에 Backend와 자동 게시글 서비스를 중지하고 Target의 `board_service` 데이터베이스를 삭제하며, Cloud DB 서버와 `board_admin`·`board_app` 계정은 유지합니다. 015의 Target 데이터가 필요하면 016 백업·복구 실습을 먼저 완료합니다.

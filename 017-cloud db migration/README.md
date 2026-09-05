@@ -2,7 +2,7 @@
 
 003번 게시판 실습에서 Ubuntu 서버에 직접 설치한 MariaDB/MySQL 데이터를 Naver Cloud `Cloud DB for MySQL`로 마이그레이션하는 실습입니다.
 
-> 015에서 생성해 현재 서비스 중인 `board_service`를 DMS Target으로 그대로 사용하지 않습니다. DMS Target에는 Source와 같은 이름의 Database가 없어야 하므로 별도의 빈 Cloud DB Service를 만들거나, 015 리소스를 더 이상 사용하지 않을 때만 초기화합니다.
+> 이 실습은 추가 Cloud DB를 만들지 않고 015 Cloud DB 서버를 Target으로 재사용합니다. DMS 시작 전에 Backend와 자동 게시글 서비스를 중지하고 Target의 `board_service`를 삭제합니다. Cloud DB 서버와 DB User는 유지합니다.
 
 실제 실습에서 재현한 MariaDB relay log 오류와 MySQL 8.0/8.4 `mysqldump` 오류의 원인, 복구, 최종 CDC 검증 결과는 [TROUBLESHOOTING-REPORT.md](./TROUBLESHOOTING-REPORT.md)에 정리했습니다.
 
@@ -39,7 +39,8 @@
 
 ```text
 Source DB 사전 설정
-  -> Cloud DB for MySQL 생성
+  -> Backend 쓰기 중지
+  -> 015 Cloud DB의 board_service 삭제
   -> ACG 접근 허용
   -> DMS Endpoint 생성
   -> DMS Migration 생성 및 실행
@@ -163,6 +164,24 @@ DMS가 Source DB를 읽으려면 보통 아래 준비가 필요합니다.
 Naver Cloud DB for MySQL의 DB 사용자 비밀번호 조건에 맞춰 예시 비밀번호는 8자 이상, 20자 이하인 `MigratePass123!`를 사용합니다.
 
 003 설치 스크립트는 `root@localhost`에 `DB_ROOT_PASSWORD`를 설정합니다. 따라서 003을 그대로 설치한 Source DB에서는 DB 서버의 `003-three tier web app/db/.env`에 기록한 비밀번호를 사용합니다.
+
+이 작업은 Backend 서버에서 실행하지 않습니다. Bastion에서 003 Source DB 서버의 Private IP로 SSH 접속한 뒤 OS `root` 권한으로 MariaDB 설정을 변경하고, MariaDB에는 DB `root`로 로그인합니다. `board_app`은 Backend 애플리케이션용 계정이므로 DMS 계정 생성과 권한 부여에 사용하지 않습니다.
+
+| 구분 | 계정 | 비밀번호 | 용도 |
+| --- | --- | --- | --- |
+| Source DB 서버 SSH | OS `root` | 서버 관리자 비밀번호 | 설정 파일과 MariaDB 서비스 변경 |
+| Source MariaDB | DB `root` | DB `.env`의 `DB_ROOT_PASSWORD` | DMS 계정 생성과 권한 부여 |
+| Source 애플리케이션 | `board_app` | DB `.env`의 `DB_PASSWORD` | Backend 전용 |
+| DMS Endpoint | `dms_migration` | `MigratePass123!` | Source 데이터 백업과 복제 |
+
+```bash
+# Bastion 서버에서 실행
+ssh root@SOURCE_DB_PRIVATE_IP
+
+# Source DB 서버에서 확인
+cd ~/cloud-infrastructure-lecture-example/"003-three tier web app"/db
+grep '^DB_ROOT_PASSWORD=' .env
+```
 
 Source DB 서버에서 MariaDB 바이너리 로그와 외부 리슨을 설정합니다.
 
@@ -340,32 +359,33 @@ sudo ufw status
 
 서로 다른 VPC라면 ACG만으로는 연결되지 않습니다. 양방향 VPC Peering과 Route Table이 필요합니다. 공인 IP 경로를 사용할 때는 Target DB 쪽 NAT Gateway IP를 Source ACG와 DB 계정 Host에 허용합니다.
 
-## 6. Cloud DB for MySQL 생성
+## 6. 015 Cloud DB Target 초기화
 
-콘솔에서 Target DB를 생성합니다.
+추가 Cloud DB를 만들지 않고 015에서 생성한 Cloud DB를 Target으로 재사용합니다. 먼저 Backend 서버에서 Target DB에 대한 쓰기를 중지합니다.
 
-```text
-Naver Cloud Console
-  -> VPC
-  -> Cloud DB for MySQL
-  -> DB Server 생성
+```bash
+sudo systemctl stop board-service-post-seeder || true
+sudo systemctl stop board-service-backend
 ```
 
-권장:
+Cloud DB 콘솔에서 `Cloud DB for MySQL > DB Server > board-mysql 선택 > DB 관리 > Database 관리`로 이동하여 `board_service` 행을 삭제합니다. Cloud DB 서버와 `board_admin`·`board_app` 사용자는 삭제하지 않습니다.
 
-- Source DB와 같은 VPC 또는 통신 가능한 VPC
-- Source DB와 같은 MySQL/MariaDB major version 권장
-- DB 포트: `3306`
-- DB User/Password는 실습용으로 명확하게 기록
-- Private domain 예: `db-xxxx.vpc-cdb.ntruss.com`
+Cloud DB 상태가 다시 `운영중`이 된 뒤 Backend 서버에서 확인합니다. 결과가 출력되지 않아야 합니다.
+
+```bash
+MYSQL_PWD='BoardAdmin123!' mysql \
+  -h db-xxxx.vpc-cdb.ntruss.com \
+  -u board_admin \
+  -Nse "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='board_service';"
+```
 
 Cloud DB for MySQL은 사용자가 DB 서버 OS에 접속해서 `root@localhost`로 계정을 만드는 방식이 아닙니다. Naver Cloud 콘솔의 `Cloud DB for MySQL > DB Server > Manage DB > Manage DB user`에서 DB User를 만들고 접근 대역을 허용합니다.
 
-DMS를 시작하기 전 Target에 `board_service`를 미리 만들지 마십시오. Target에 Source와 같은 이름의 데이터베이스가 이미 있으면 Migration 작업이 실행되지 않습니다. DB 사용자만 콘솔에서 만들고, 데이터베이스와 테이블은 DMS가 이관하도록 둡니다.
+DMS가 Source의 `board_service` 데이터베이스와 테이블을 Target에 생성하므로 마이그레이션 시작 전에는 다시 만들지 않습니다.
 
 | USER_ID | HOST(IP) | DB 권한 | 암호 예시 | 용도 |
 | --- | --- | --- | --- | --- |
-| `board_admin` | 관리 서버 IP 대역 예: `10.10.10.%` | `DDL` | `BoardAdmin123!` | mysqldump 복원, 스키마 및 검증 작업 |
+| `board_admin` | Backend Subnet 예: `10.10.110.%` | `DDL` | `BoardAdmin123!` | mysqldump 복원, 스키마 및 검증 작업 |
 | `board_app` | Backend Subnet 예: `10.10.110.%` | `CRUD` | `BoardApp123!` | 마이그레이션 완료 후 Backend 연결 |
 
 두 계정 모두 시스템 테이블은 선택하지 않습니다. `DDL`은 `CRUD`와 `READ`를 포함하고, `CRUD`는 게시글 조회·등록·수정·삭제에 필요한 권한입니다. DMS 작업은 Target DB User를 입력하는 방식이 아니라 생성한 Cloud DB Service를 Target으로 선택합니다. DB User 계정은 DMS로 이관되지 않으므로 위 두 계정은 Target에 직접 생성해야 합니다.
