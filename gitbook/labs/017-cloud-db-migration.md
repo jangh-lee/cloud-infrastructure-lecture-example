@@ -85,19 +85,19 @@ sudo systemctl is-active mariadb
 
 ### 1-2. DMS 전용 계정 생성
 
-MariaDB 관리자 비밀번호는 003 DB 서버의 `~/cloud-infrastructure-lecture-example/003-three tier web app/db/.env`에 있는 `DB_ROOT_PASSWORD`를 입력합니다. 아래 `%`는 실습 편의를 위한 값이며 실제 운영 환경에서는 DMS가 접근하는 IP 대역으로 제한합니다.
+MariaDB 관리자 비밀번호는 003 DB 서버의 `~/cloud-infrastructure-lecture-example/003-three tier web app/db/.env`에 있는 `DB_ROOT_PASSWORD`를 입력합니다. 이 실습의 Target Cloud DB Subnet이 `10.10.120.0/24`이므로 MariaDB 계정의 Host는 MySQL 대역 표기인 `10.10.120.%`를 사용합니다.
 
 ```bash
 sudo mariadb -u root -p <<'SQL'
-CREATE USER IF NOT EXISTS 'dms_migration'@'%'
+CREATE USER IF NOT EXISTS 'dms_migration'@'10.10.120.%'
   IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');
-ALTER USER 'dms_migration'@'%'
+ALTER USER 'dms_migration'@'10.10.120.%'
   IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');
 GRANT RELOAD, PROCESS, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT
-  ON *.* TO 'dms_migration'@'%';
-GRANT SELECT ON mysql.* TO 'dms_migration'@'%';
+  ON *.* TO 'dms_migration'@'10.10.120.%';
+GRANT SELECT ON mysql.* TO 'dms_migration'@'10.10.120.%';
 GRANT SELECT, SHOW VIEW, LOCK TABLES, TRIGGER
-  ON board_service.* TO 'dms_migration'@'%';
+  ON board_service.* TO 'dms_migration'@'10.10.120.%';
 FLUSH PRIVILEGES;
 SQL
 ```
@@ -114,7 +114,7 @@ WHERE Variable_name IN (
   'binlog_row_image', 'expire_logs_days', 'bind_address'
 );
 SHOW MASTER STATUS;
-SHOW GRANTS FOR 'dms_migration'@'%';
+SHOW GRANTS FOR 'dms_migration'@'10.10.120.%';
 SELECT COUNT(*) AS total_posts FROM posts;
 SQL
 ```
@@ -154,11 +154,26 @@ DMS 작업 전에는 Target에 `board_service` 데이터베이스를 만들지 �
 
 ## 3. ACG 확인
 
-Source DB inbound:
+이 실습처럼 Source DB와 Target Cloud DB가 같은 VPC에 있으면 별도의 `DMS 접근 주소`를 찾지 않습니다. DMS 마이그레이션 과정에서는 **Target Cloud DB가 Source DB의 3306 포트로 접속**하므로 Target Cloud DB가 속한 Subnet 대역을 허용합니다.
+
+콘솔의 **Cloud DB for MySQL > DB Server**에서 Target DB의 Subnet을 확인한 다음, **VPC > Subnet**에서 그 Subnet의 IP 주소 범위(CIDR)를 확인합니다. 이 실습에서는 해당 값이 `10.10.120.0/24`입니다.
+
+Source DB 서버에 적용된 ACG의 **Inbound** 규칙:
 
 | 프로토콜 | 포트 | 접근 소스 |
 | --- | --- | --- |
-| TCP | `3306` | DMS/Cloud DB에서 Source DB로 접근하는 IP 또는 NAT Gateway IP |
+| TCP | `3306` | Target Cloud DB Subnet CIDR: `10.10.120.0/24` |
+
+Target Cloud DB에 적용된 ACG의 **Outbound** 규칙:
+
+| 프로토콜 | 포트 | 목적지 |
+| --- | --- | --- |
+| TCP | `3306` | Source DB Private IP `/32` 또는 Source DB Subnet CIDR |
+
+예를 들어 Source DB Private IP가 `10.10.120.7`이면 목적지를 `10.10.120.7/32`로 입력합니다. Source DB ACG의 접근 소스, Target Cloud DB ACG의 목적지, `dms_migration` 계정 Host가 모두 맞아야 DMS의 `Test Connection`이 성공합니다.
+
+!!! note "NAT Gateway IP는 언제 사용하는가"
+    Source DB와 Target Cloud DB가 같은 VPC에서 사설 통신하는 이번 실습에는 NAT Gateway IP를 입력하지 않습니다. 서로 다른 네트워크를 공인 경로로 연결할 때만 Target 측 NAT Gateway의 공인 IP를 Source DB ACG와 DB 계정 Host에 허용합니다.
 
 Backend에서 Cloud DB로 전환할 때:
 

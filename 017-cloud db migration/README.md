@@ -181,19 +181,19 @@ sudo systemctl restart mariadb
 sudo systemctl is-active mariadb
 ```
 
-이어서 DMS 전용 계정을 생성합니다. 관리자 암호에는 003 DB 서버의 `.env`에 기록한 `DB_ROOT_PASSWORD`를 입력합니다. `%`는 수업용 기본값이며 운영 환경에서는 DMS 접근 IP 대역으로 제한합니다.
+이어서 DMS 전용 계정을 생성합니다. 관리자 암호에는 003 DB 서버의 `.env`에 기록한 `DB_ROOT_PASSWORD`를 입력합니다. 이 실습의 Target Cloud DB Subnet `10.10.120.0/24`를 MySQL Host 형식인 `10.10.120.%`로 지정합니다.
 
 ```bash
 sudo mariadb -u root -p <<'SQL'
-CREATE USER IF NOT EXISTS 'dms_migration'@'%'
+CREATE USER IF NOT EXISTS 'dms_migration'@'10.10.120.%'
   IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');
-ALTER USER 'dms_migration'@'%'
+ALTER USER 'dms_migration'@'10.10.120.%'
   IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');
 GRANT RELOAD, PROCESS, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT
-  ON *.* TO 'dms_migration'@'%';
-GRANT SELECT ON mysql.* TO 'dms_migration'@'%';
+  ON *.* TO 'dms_migration'@'10.10.120.%';
+GRANT SELECT ON mysql.* TO 'dms_migration'@'10.10.120.%';
 GRANT SELECT, SHOW VIEW, LOCK TABLES, TRIGGER
-  ON board_service.* TO 'dms_migration'@'%';
+  ON board_service.* TO 'dms_migration'@'10.10.120.%';
 FLUSH PRIVILEGES;
 SQL
 ```
@@ -220,7 +220,7 @@ WHERE Variable_name IN (
   'binlog_row_image', 'expire_logs_days', 'bind_address'
 );
 SHOW MASTER STATUS;
-SHOW GRANTS FOR 'dms_migration'@'%';
+SHOW GRANTS FOR 'dms_migration'@'10.10.120.%';
 SELECT COUNT(*) AS total_posts FROM posts;
 SQL
 ```
@@ -316,6 +316,10 @@ LIMIT 5;
 DMS 연결 테스트가 실패하면 대부분 네트워크 또는 권한 문제입니다.
 
 같은 VPC에 있는 Source DB 서버 ACG inbound:
+
+별도의 DMS 서버 IP를 허용하는 것이 아닙니다. Target Cloud DB가 Source DB에 연결하므로 Target Cloud DB가 속한 Subnet CIDR을 접근 소스로 사용합니다.
+
+콘솔의 `Cloud DB for MySQL > DB Server`에서 Target DB의 Subnet을 확인하고, `VPC > Subnet`에서 해당 Subnet의 IP 주소 범위(CIDR)를 확인합니다.
 
 | 프로토콜 | 포트 | 접근 소스 |
 | --- | --- | --- |
