@@ -73,7 +73,7 @@ run_admin_sql() {
 
 if ! run_admin_sql "SELECT 1;" >/dev/null 2>&1; then
   echo "Could not connect as MySQL admin user '${SOURCE_DB_ADMIN_USER}'." >&2
-  echo "For the 007 Ubuntu DB server, run with sudo and set SOURCE_DB_ADMIN_PASSWORD only if root requires it." >&2
+  echo "For the 003 Ubuntu DB server, run with sudo and set SOURCE_DB_ADMIN_PASSWORD only if root requires it." >&2
   exit 1
 fi
 
@@ -89,7 +89,7 @@ if [[ "${DB_VERSION}" == *MariaDB* ]]; then
   CONF_BASENAME="60-dms-source.cnf"
   SERVICE_NAME="mariadb"
   AUTH_SQL="IDENTIFIED VIA mysql_native_password USING PASSWORD('$(escape_sql_string "${MIGRATION_PASSWORD}")')"
-  EXPIRY_SETTING="expire_logs_days=5"
+  EXPIRY_SETTING="expire_logs_days=7"
   NATIVE_PASSWORD_SETTING=""
 elif systemctl list-unit-files mysql.service >/dev/null 2>&1; then
   CONF_DIR="/etc/mysql/mysql.conf.d"
@@ -97,7 +97,7 @@ elif systemctl list-unit-files mysql.service >/dev/null 2>&1; then
   CONF_BASENAME="zz-dms-source.cnf"
   SERVICE_NAME="mysql"
   AUTH_SQL="IDENTIFIED WITH mysql_native_password BY '$(escape_sql_string "${MIGRATION_PASSWORD}")'"
-  EXPIRY_SETTING="binlog_expire_logs_seconds=432000"
+  EXPIRY_SETTING="binlog_expire_logs_seconds=604800"
   NATIVE_PASSWORD_SETTING=""
   if [[ "${DB_VERSION}" == 8.4.* ]]; then
     NATIVE_PASSWORD_SETTING="mysql_native_password=ON"

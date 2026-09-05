@@ -192,13 +192,24 @@ server-id=1
 log_bin=mysql-bin
 binlog_format=ROW
 binlog_row_image=FULL
-expire_logs_days=5
+expire_logs_days=7
 bind-address=0.0.0.0
 EOF
 
 sudo systemctl restart mariadb
 sudo systemctl is-active mariadb
 ```
+
+각 설정의 의미와 확인 기준은 다음과 같습니다.
+
+| 설정 | 실습값 | 의미 | 잘못 설정했을 때 |
+| --- | --- | --- | --- |
+| `server-id` | `1` | binlog 이벤트를 만든 DB 서버의 고유 번호입니다. 복제 구성의 각 서버는 서로 다른 값을 사용합니다. | `0` 또는 중복 값은 복제 이벤트의 출처 식별을 방해합니다. |
+| `log_bin` | `mysql-bin` | `mysql-bin.000001` 형식의 binlog를 활성화합니다. DMS는 초기 백업 후 이 로그에서 변경분을 읽습니다. | 실행 값이 `OFF`면 변경분 동기화를 시작할 수 없습니다. |
+| `binlog_format` | `ROW` | SQL 문장 대신 실제로 바뀐 각 행의 값을 기록해 DMS가 결과를 확정적으로 재현하게 합니다. | `STATEMENT`는 비결정적 함수의 재실행 결과가 달라질 수 있고, `MIXED`는 형식이 섞입니다. |
+| `binlog_row_image` | `FULL` | 변경 전·후 행의 모든 컬럼을 기록해 `UPDATE`·`DELETE` 해석을 명확하게 합니다. | `MINIMAL`보다 로그는 커지지만 DMS 해석 부담을 줄입니다. |
+| `expire_logs_days` | `7` | 7일 이전 binlog를 자동 정리하며, DMS의 5일 초과 보존 권장을 따릅니다. | DMS 지연보다 보존 기간이 짧으면 필요한 로그가 삭제되어 Migration을 새로 만들어야 합니다. |
+| `bind-address` | `0.0.0.0` | MariaDB가 원격 `3306/tcp` 연결을 듣게 합니다. | `127.0.0.1`이면 DMS 접속이 거절됩니다. ACG와 DB User Host를 Target 서브넷으로 제한해야 합니다. |
 
 이어서 DMS 전용 계정을 생성합니다. 관리자 암호에는 003 DB 서버의 `.env`에 기록한 `DB_ROOT_PASSWORD`를 입력합니다. 이 실습의 Target Cloud DB Subnet `10.10.120.0/24`를 MySQL Host 형식인 `10.10.120.%`로 지정합니다.
 
@@ -217,17 +228,23 @@ FLUSH PRIVILEGES;
 SQL
 ```
 
-위 명령이 하는 일:
+계정 인증과 권한의 역할은 다음과 같습니다.
 
-- MariaDB/MySQL 설정 파일에 DMS용 바이너리 로그 설정 추가
-- `server-id=1`
-- `log_bin`
-- `binlog_format=ROW`
-- `binlog_row_image=FULL`
-- `expire_logs_days=5`
-- DMS가 요구하는 `mysql_native_password` 방식으로 마이그레이션 계정 생성
-- 마이그레이션 계정에 백업/복제 권한 부여
-- DB 서비스 재시작
+| 인증/권한 | 범위 | DMS에서의 역할 |
+| --- | --- | --- |
+| `mysql_native_password` | 계정 인증 | DMS Source Endpoint가 사용할 암호 인증 방식입니다. |
+| `RELOAD` | `*.*` | 비 GTID Source의 일관된 백업 기준점을 만들 때 필요한 `FLUSH` 계열 작업을 허용합니다. |
+| `PROCESS` | `*.*` | 백업 도구가 서버 실행 상태와 세션을 확인하는 DMS 최소 권한입니다. |
+| `SHOW DATABASES` | `*.*` | Source DB 목록을 조회해 Migration 대상을 탐색합니다. |
+| `REPLICATION SLAVE` | `*.*` | DMS가 복제 클라이언트로 접속해 binlog 이벤트를 읽게 합니다. |
+| `REPLICATION CLIENT` | `*.*` | `SHOW MASTER STATUS`와 binlog 목록을 조회합니다. MariaDB 10.5 이상에서는 `BINLOG MONITOR`로 표시될 수 있습니다. |
+| `SELECT ON mysql.*` | `mysql` 시스템 DB | 계정·권한·메타데이터를 조회하며 DMS의 `시스템 테이블 권한=Y`에 해당합니다. |
+| `SELECT` | `board_service.*` | 초기 전체 적재에서 테이블 정의와 행을 읽습니다. |
+| `SHOW VIEW` | `board_service.*` | View 정의문을 조회합니다. |
+| `LOCK TABLES` | `board_service.*` | `mysqldump` 초기 백업을 일관된 시점으로 읽는 Lock을 허용합니다. |
+| `TRIGGER` | `board_service.*` | Trigger 정의를 백업·복원 대상으로 조회합니다. |
+
+`*.*`는 서버 전체, `board_service.*`는 게시판 DB만을 대상으로 합니다. 전역 권한은 새 연결에서 확실히 적용되도록 `FLUSH PRIVILEGES`와 DMS 재접속을 기준으로 확인합니다.
 
 확인:
 
@@ -244,7 +261,23 @@ SELECT COUNT(*) AS total_posts FROM posts;
 SQL
 ```
 
-`log_bin=ON`, `binlog_format=ROW`, `binlog_row_image=FULL`이고 `SHOW MASTER STATUS`에 바이너리 로그 파일이 표시되어야 다음 단계로 넘어갑니다. `ERROR 1227 ... CREATE USER privilege`가 나오면 관리자 계정이 아니라 일반 애플리케이션 계정으로 접속한 것입니다.
+확인 결과는 다음과 같이 해석합니다.
+
+| 항목 | 통과 기준 | 의미 |
+| --- | --- | --- |
+| `server_id` | `0`이 아닌 고유값 | binlog 이벤트의 출처 Source를 식별합니다. |
+| `log_bin` | `ON` | 실제 binlog 기록이 활성화되었습니다. |
+| `binlog_format` | `ROW` | 행 변경 기반 로그입니다. |
+| `binlog_row_image` | `FULL` | 변경 전·후의 모든 컬럼을 기록합니다. |
+| `expire_logs_days` | `5`보다 큰 값 | DMS 지연을 감안한 보존 기간입니다. |
+| `bind_address` | `0.0.0.0` | DMS의 원격 TCP 접속을 받습니다. |
+| `SHOW MASTER STATUS` | 한 행 이상 | `File`은 현재 binlog, `Position`은 다음 이벤트가 기록될 바이트 위치입니다. DMS의 변경분 시작 좌표가 됩니다. |
+| `SHOW GRANTS` | 전역·`mysql.*`·`board_service.*` 권한 모두 출력 | binlog, 시스템 메타데이터, 게시판 데이터를 모두 읽을 수 있습니다. |
+| `total_posts` | 숫자 출력 | Migration 전 기준 행 수로, 완료 후 Target과 비교합니다. |
+
+`SHOW MASTER STATUS`가 빈 결과이면 다음 단계로 넘어가지 않습니다. `Binlog_Do_DB`와 `Binlog_Ignore_DB`가 빈 것은 서버 수준에서 DB를 필터링하지 않았다는 뜻이며, `board_service`는 DMS Migration 작업에서 선택합니다. `ERROR 1227 ... CREATE USER privilege`가 나오면 MariaDB `root`가 아닌 일반 앱 계정으로 접속한 것입니다.
+
+공식 기준은 [NAVER Cloud DMS Source DB 접속 설정](https://guide.ncloud-docs.com/docs/dms-connect)과 [MariaDB Binary Log Formats](https://mariadb.com/docs/server/server-management/server-monitoring-logs/binary-log/binary-log-formats)를 함께 참고합니다.
 
 Source DB의 binlog 설정, 마이그레이션 관련 전역 권한, `board_service` 스키마 권한과 현재 게시글 범위를 한 번에 확인하려면 다음 SQL을 실행합니다.
 
