@@ -1400,10 +1400,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-cloud-db-for-mysql" class="md-nav__link">
+  <a href="#2-015-cloud-db-target" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Cloud DB for MySQL 생성
+        2. 015 Cloud DB Target 초기화
       
     </span>
   </a>
@@ -1648,10 +1648,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-cloud-db-for-mysql" class="md-nav__link">
+  <a href="#2-015-cloud-db-target" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Cloud DB for MySQL 생성
+        2. 015 Cloud DB Target 초기화
       
     </span>
   </a>
@@ -1772,8 +1772,8 @@
 <h2 id="_1">목표<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <p>003번 게시판 DB를 Ubuntu 서버의 MariaDB/MySQL에서 Naver Cloud <code>Cloud DB for MySQL</code>로 마이그레이션합니다.</p>
 <div class="admonition warning">
-<p class="admonition-title">015에서 사용 중인 DB와 분리</p>
-<p>DMS 실습의 Target에는 Source와 같은 <code>board_service</code>가 없어야 합니다. 015에서 생성해 서비스 중인 Cloud DB를 그대로 Target으로 쓰지 말고, DMS용 빈 Cloud DB Service를 새로 만들거나 015 리소스를 더 이상 사용하지 않을 때만 초기화합니다.</p>
+<p class="admonition-title">015 Cloud DB 재사용</p>
+<p>이 실습은 추가 Cloud DB를 만들지 않고 015에서 생성한 Cloud DB를 Target으로 재사용합니다. DMS 시작 전 Backend와 자동 게시글 서비스를 중지하고 Target의 <code>board_service</code>를 삭제합니다. 015에서 Target에 작성한 데이터는 삭제되지만, 마이그레이션할 003 Source DB의 데이터는 그대로 유지됩니다.</p>
 </div>
 <p>이 실습에서는 두 가지 방식을 소개합니다.</p>
 <table>
@@ -1799,11 +1799,12 @@
 </table>
 <p>DMS 흐름:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Source DB 사전 설정
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  -&gt; Cloud DB for MySQL 생성
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  -&gt; DMS Endpoint 생성
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  -&gt; DMS Migration 실행
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  -&gt; 데이터 검증
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  -&gt; Backend DB_HOST 전환
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  -&gt; Backend 쓰기 중지
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  -&gt; 015 Cloud DB의 board_service 삭제
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  -&gt; DMS Endpoint 생성
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  -&gt; DMS Migration 실행
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  -&gt; 데이터 검증
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  -&gt; Backend DB_HOST 전환
 </code></pre></div>
 <p>mysqldump 흐름:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>데이터 변경 중지 또는 점검 시간 확보
@@ -1861,60 +1862,119 @@
 </table>
 <h2 id="1-source-db">1. Source DB 준비<a class="headerlink" href="#1-source-db" title="Permanent link">&para;</a></h2>
 <p>Naver Cloud DB for MySQL의 DB 사용자 비밀번호 조건에 맞춰 예시 비밀번호는 8자 이상, 20자 이하인 <code>MigratePass123!</code>를 사용합니다.</p>
+<div class="admonition important">
+<p class="admonition-title">어느 서버에서 어떤 계정으로 실행하는가</p>
+<p>이 단계는 Backend 서버에서 DB에 원격 접속해 실행하는 작업이 아닙니다. MariaDB 설정 파일과 서비스를 변경해야 하므로 Bastion에서 <strong>003 Source DB 서버의 Private IP로 SSH 접속</strong>한 뒤 실행합니다.</p>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>사용할 계정</th>
+<th>비밀번호</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source DB 서버 SSH</td>
+<td>OS <code>root</code></td>
+<td>서버 관리자 비밀번호</td>
+<td>설정 파일 및 MariaDB 서비스 변경</td>
+</tr>
+<tr>
+<td>Source MariaDB 로그인</td>
+<td>DB <code>root</code></td>
+<td>003 DB <code>.env</code>의 <code>DB_ROOT_PASSWORD</code></td>
+<td>DMS 계정 생성 및 권한 부여</td>
+</tr>
+<tr>
+<td>Source 애플리케이션 계정</td>
+<td><code>board_app</code></td>
+<td><code>DB_PASSWORD</code></td>
+<td>Backend 전용이며 Source 준비에는 사용하지 않음</td>
+</tr>
+<tr>
+<td>DMS 전용 계정</td>
+<td><code>dms_migration</code></td>
+<td><code>MigratePass123!</code></td>
+<td>생성 후 DMS Source Endpoint에 입력</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Bastion 서버에서 실행</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>ssh<span class="w"> </span>root@SOURCE_DB_PRIVATE_IP
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Source DB 서버에서 MariaDB 관리자 비밀번호 위치 확인</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example/<span class="s2">"003-three tier web app"</span>/db
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>grep<span class="w"> </span><span class="s1">'^DB_ROOT_PASSWORD='</span><span class="w"> </span>.env
+</code></pre></div>
+</div>
 <h3 id="1-1-mariadb">1-1. MariaDB 바이너리 로그 설정<a class="headerlink" href="#1-1-mariadb" title="Permanent link">&para;</a></h3>
 <p>003번 Source DB 서버에서 DMS가 초기 데이터 이후의 변경분을 읽을 수 있도록 바이너리 로그를 활성화합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/mysql/mariadb.conf.d/60-dms-source.cnf<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="s">[mysqld]</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="s">server-id=1</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="s">log_bin=mysql-bin</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="s">binlog_format=ROW</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="s">binlog_row_image=FULL</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="s">expire_logs_days=5</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="s">bind-address=0.0.0.0</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="s">EOF</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>mariadb
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>mariadb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/mysql/mariadb.conf.d/60-dms-source.cnf<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="s">[mysqld]</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="s">server-id=1</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="s">log_bin=mysql-bin</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="s">binlog_format=ROW</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="s">binlog_row_image=FULL</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="s">expire_logs_days=5</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="s">bind-address=0.0.0.0</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="s">EOF</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>mariadb
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>mariadb
 </code></pre></div>
 <p>마지막 결과가 <code>active</code>인지 확인합니다.</p>
 <h3 id="1-2-dms">1-2. DMS 전용 계정 생성<a class="headerlink" href="#1-2-dms" title="Permanent link">&para;</a></h3>
 <p>MariaDB 관리자 비밀번호는 003 DB 서버의 <code>~/cloud-infrastructure-lecture-example/003-three tier web app/db/.env</code>에 있는 <code>DB_ROOT_PASSWORD</code>를 입력합니다. 이 실습의 Target Cloud DB Subnet이 <code>10.10.120.0/24</code>이므로 MariaDB 계정의 Host는 MySQL 대역 표기인 <code>10.10.120.%</code>를 사용합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-p<span class="w"> </span><span class="s">&lt;&lt;'SQL'</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="s">CREATE USER IF NOT EXISTS 'dms_migration'@'10.10.120.%'</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="s">  IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="s">ALTER USER 'dms_migration'@'10.10.120.%'</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="s">  IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="s">GRANT RELOAD, PROCESS, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="s">  ON *.* TO 'dms_migration'@'10.10.120.%';</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="s">GRANT SELECT ON mysql.* TO 'dms_migration'@'10.10.120.%';</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="s">GRANT SELECT, SHOW VIEW, LOCK TABLES, TRIGGER</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="s">  ON board_service.* TO 'dms_migration'@'10.10.120.%';</span>
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="s">FLUSH PRIVILEGES;</span>
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="s">SQL</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-p<span class="w"> </span><span class="s">&lt;&lt;'SQL'</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="s">CREATE USER IF NOT EXISTS 'dms_migration'@'10.10.120.%'</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="s">  IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="s">ALTER USER 'dms_migration'@'10.10.120.%'</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="s">  IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="s">GRANT RELOAD, PROCESS, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="s">  ON *.* TO 'dms_migration'@'10.10.120.%';</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="s">GRANT SELECT ON mysql.* TO 'dms_migration'@'10.10.120.%';</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="s">GRANT SELECT, SHOW VIEW, LOCK TABLES, TRIGGER</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="s">  ON board_service.* TO 'dms_migration'@'10.10.120.%';</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="s">FLUSH PRIVILEGES;</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="s">SQL</span>
 </code></pre></div>
 <p><code>ERROR 1227 ... CREATE USER privilege</code>가 나오면 <code>board_app</code> 같은 일반 앱 계정으로 접속한 것입니다. 반드시 MariaDB <code>root</code> 관리자 계정으로 실행합니다.</p>
 <h3 id="1-3-source-db">1-3. Source DB 준비 상태 확인<a class="headerlink" href="#1-3-source-db" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span><span class="s">&lt;&lt;'SQL'</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="s">SHOW VARIABLES</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="s">WHERE Variable_name IN (</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="s">  'server_id', 'log_bin', 'binlog_format',</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="s">  'binlog_row_image', 'expire_logs_days', 'bind_address'</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="s">);</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="s">SHOW MASTER STATUS;</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="s">SHOW GRANTS FOR 'dms_migration'@'10.10.120.%';</span>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="s">SELECT COUNT(*) AS total_posts FROM posts;</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="s">SQL</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span><span class="s">&lt;&lt;'SQL'</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="s">SHOW VARIABLES</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="s">WHERE Variable_name IN (</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="s">  'server_id', 'log_bin', 'binlog_format',</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="s">  'binlog_row_image', 'expire_logs_days', 'bind_address'</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="s">);</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="s">SHOW MASTER STATUS;</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="s">SHOW GRANTS FOR 'dms_migration'@'10.10.120.%';</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="s">SELECT COUNT(*) AS total_posts FROM posts;</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="s">SQL</span>
 </code></pre></div>
 <p><code>log_bin=ON</code>, <code>binlog_format=ROW</code>, <code>binlog_row_image=FULL</code>이고 <code>SHOW MASTER STATUS</code>에 바이너리 로그 파일이 표시되어야 다음 단계로 넘어갑니다. 권한 결과에는 복제 관련 전역 권한과 <code>board_service</code> 조회 권한이 모두 보여야 합니다.</p>
-<h2 id="2-cloud-db-for-mysql">2. Cloud DB for MySQL 생성<a class="headerlink" href="#2-cloud-db-for-mysql" title="Permanent link">&para;</a></h2>
-<p>콘솔에서 Target DB를 생성합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>VPC
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  -&gt; Cloud DB for MySQL
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  -&gt; DB Server 생성
+<h2 id="2-015-cloud-db-target">2. 015 Cloud DB Target 초기화<a class="headerlink" href="#2-015-cloud-db-target" title="Permanent link">&para;</a></h2>
+<p>015에서 Backend가 Target의 <code>board_service</code>를 계속 사용하면 데이터베이스를 삭제할 수 없고 DMS 데이터와 기존 쓰기가 섞일 수 있습니다. <strong>Backend 서버</strong>에서 먼저 두 서비스를 중지합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>board-service-post-seeder<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>board-service-backend
 </code></pre></div>
-<p>Source DB와 같은 major version을 권장합니다.</p>
+<p>Cloud DB 콘솔에서 다음 순서로 <code>board_service</code> 데이터베이스만 삭제합니다. Cloud DB 서버와 DB User는 삭제하지 않습니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Cloud DB for MySQL
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  -&gt; DB Server
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>  -&gt; 015에서 만든 board-mysql 선택
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>  -&gt; DB 관리
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>  -&gt; Database 관리
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>  -&gt; board_service 행의 삭제
+</code></pre></div>
+<p>삭제 작업이 끝나고 Cloud DB 상태가 다시 <code>운영중</code>이 될 때까지 기다립니다. Backend 서버에서 아래 명령을 실행했을 때 결과가 출력되지 않으면 DMS Target 준비가 완료된 것입니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s1">'BoardAdmin123!'</span><span class="w"> </span>mysql<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span>-h<span class="w"> </span>db-xxxx.vpc-cdb.ntruss.com<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span>-u<span class="w"> </span>board_admin<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span>-Nse<span class="w"> </span><span class="s2">"SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='board_service';"</span>
+</code></pre></div>
 <p>Cloud DB for MySQL은 DB 서버 OS에 접속해서 <code>root@localhost</code>로 계정을 만드는 방식이 아닙니다. 콘솔의 <code>Cloud DB for MySQL &gt; DB Server &gt; Manage DB &gt; Manage DB user</code>에서 DB User를 생성합니다.</p>
-<p>DMS 작업 전에는 Target에 <code>board_service</code> 데이터베이스를 만들지 않습니다. Source와 같은 이름의 데이터베이스가 이미 있으면 DMS 작업을 시작할 수 없습니다. DB User만 다음과 같이 미리 생성합니다.</p>
+<p>015에서 생성한 다음 DB User는 삭제하지 않고 그대로 사용합니다. 없거나 설정이 다를 때만 <strong>DB 관리 &gt; DB User 관리</strong>에서 추가하거나 수정합니다.</p>
 <table>
 <thead>
 <tr>
@@ -1928,7 +1988,7 @@
 <tbody>
 <tr>
 <td><code>board_admin</code></td>
-<td>관리 서버 IP 대역 예: <code>10.10.10.%</code></td>
+<td>Backend Subnet 예: <code>10.10.110.%</code></td>
 <td><code>DDL</code></td>
 <td><code>BoardAdmin123!</code></td>
 <td>mysqldump 복원, 스키마 및 검증 작업</td>
@@ -2040,9 +2100,9 @@
 </tbody>
 </table>
 <h2 id="4-a-dms-endpoint">4. 방법 A: DMS Endpoint 생성<a class="headerlink" href="#4-a-dms-endpoint" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Database Migration Service
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  -&gt; Endpoint Management
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  -&gt; Source Endpoint 생성
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Database Migration Service
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  -&gt; Endpoint Management
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>  -&gt; Source Endpoint 생성
 </code></pre></div>
 <p>입력값:</p>
 <table>
@@ -2077,73 +2137,73 @@
 </table>
 <p><code>Test Connection</code>을 먼저 통과시킵니다.</p>
 <h2 id="5-a-migration">5. 방법 A: Migration 생성<a class="headerlink" href="#5-a-migration" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Database Migration Service
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  -&gt; Migration Management
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>  -&gt; Migration 생성
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Database Migration Service
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>  -&gt; Migration Management
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>  -&gt; Migration 생성
 </code></pre></div>
 <p>Source Endpoint와 Target Cloud DB for MySQL을 선택하고 <code>board_service</code>를 이관합니다.</p>
 <h2 id="6-b-mysqldump">6. 방법 B: mysqldump 이관<a class="headerlink" href="#6-b-mysqldump" title="Permanent link">&para;</a></h2>
 <p>정확한 이관을 위해 덤프 중에는 게시판 백엔드와 자동 게시글 생성을 잠시 멈춥니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>board-service-post-seeder<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>board-service-backend
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>board-service-post-seeder<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>board-service-backend
 </code></pre></div>
 <p>Source DB에서 덤프 파일 생성:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"017-cloud db migration/scripts"</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="nv">SOURCE_DB_HOST</span><span class="o">=</span><span class="s1">'SOURCE_DB_PRIVATE_IP'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="nv">SOURCE_DB_USER</span><span class="o">=</span><span class="s1">'board_app'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="nv">SOURCE_DB_PASSWORD</span><span class="o">=</span><span class="s1">'BoardApp123!'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="nv">DB_NAME</span><span class="o">=</span><span class="s1">'board_service'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="nv">DUMP_FILE</span><span class="o">=</span><span class="s1">'/tmp/board_service.sql'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>./dump-source-db.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"017-cloud db migration/scripts"</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="nv">SOURCE_DB_HOST</span><span class="o">=</span><span class="s1">'SOURCE_DB_PRIVATE_IP'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="nv">SOURCE_DB_USER</span><span class="o">=</span><span class="s1">'board_app'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="nv">SOURCE_DB_PASSWORD</span><span class="o">=</span><span class="s1">'BoardApp123!'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="nv">DB_NAME</span><span class="o">=</span><span class="s1">'board_service'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="nv">DUMP_FILE</span><span class="o">=</span><span class="s1">'/tmp/board_service.sql'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>./dump-source-db.sh
 </code></pre></div>
 <p>Cloud DB for MySQL에 복원:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nv">TARGET_DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nv">TARGET_DB_USER</span><span class="o">=</span><span class="s1">'board_admin'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="nv">TARGET_DB_PASSWORD</span><span class="o">=</span><span class="s1">'BoardAdmin123!'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="nv">DUMP_FILE</span><span class="o">=</span><span class="s1">'/tmp/board_service.sql'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>./restore-target-db.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nv">TARGET_DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nv">TARGET_DB_USER</span><span class="o">=</span><span class="s1">'board_admin'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="nv">TARGET_DB_PASSWORD</span><span class="o">=</span><span class="s1">'BoardAdmin123!'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="nv">DUMP_FILE</span><span class="o">=</span><span class="s1">'/tmp/board_service.sql'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>./restore-target-db.sh
 </code></pre></div>
 <p>명령어를 직접 쓰면 아래와 같습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s1">'SOURCE_PASSWORD'</span><span class="w"> </span>mysqldump<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span>-h<span class="w"> </span>SOURCE_DB_PRIVATE_IP<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span>-u<span class="w"> </span>board_app<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span>--single-transaction<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">  </span>--quick<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">  </span>--routines<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">  </span>--triggers<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">  </span>--events<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">  </span>--default-character-set<span class="o">=</span>utf8mb4<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">  </span>--databases<span class="w"> </span>board_service<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">  </span>&gt;<span class="w"> </span>/tmp/board_service.sql
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s1">'SOURCE_PASSWORD'</span><span class="w"> </span>mysqldump<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span>-h<span class="w"> </span>SOURCE_DB_PRIVATE_IP<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span>-u<span class="w"> </span>board_app<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">  </span>--single-transaction<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">  </span>--quick<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">  </span>--routines<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">  </span>--triggers<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">  </span>--events<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">  </span>--default-character-set<span class="o">=</span>utf8mb4<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">  </span>--databases<span class="w"> </span>board_service<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="w">  </span>&gt;<span class="w"> </span>/tmp/board_service.sql
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s1">'BoardAdmin123!'</span><span class="w"> </span>mysql<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span>-h<span class="w"> </span>db-xxxx.vpc-cdb.ntruss.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span>-u<span class="w"> </span>board_admin<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">  </span>&lt;<span class="w"> </span>/tmp/board_service.sql
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s1">'BoardAdmin123!'</span><span class="w"> </span>mysql<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">  </span>-h<span class="w"> </span>db-xxxx.vpc-cdb.ntruss.com<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">  </span>-u<span class="w"> </span>board_admin<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">  </span>&lt;<span class="w"> </span>/tmp/board_service.sql
 </code></pre></div>
 <h2 id="7">7. 데이터 검증<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nv">SOURCE_DB_HOST</span><span class="o">=</span><span class="s1">'SOURCE_DB_PRIVATE_IP'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nv">SOURCE_DB_USER</span><span class="o">=</span><span class="s1">'board_app'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="nv">SOURCE_DB_PASSWORD</span><span class="o">=</span><span class="s1">'BoardApp123!'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="nv">TARGET_DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="nv">TARGET_DB_USER</span><span class="o">=</span><span class="s1">'board_app'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="nv">TARGET_DB_PASSWORD</span><span class="o">=</span><span class="s1">'BoardApp123!'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="nv">DB_NAME</span><span class="o">=</span><span class="s1">'board_service'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>./compare-post-counts.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nv">SOURCE_DB_HOST</span><span class="o">=</span><span class="s1">'SOURCE_DB_PRIVATE_IP'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="nv">SOURCE_DB_USER</span><span class="o">=</span><span class="s1">'board_app'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="nv">SOURCE_DB_PASSWORD</span><span class="o">=</span><span class="s1">'BoardApp123!'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="nv">TARGET_DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="nv">TARGET_DB_USER</span><span class="o">=</span><span class="s1">'board_app'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="nv">TARGET_DB_PASSWORD</span><span class="o">=</span><span class="s1">'BoardApp123!'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="nv">DB_NAME</span><span class="o">=</span><span class="s1">'board_service'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>./compare-post-counts.sh
 </code></pre></div>
 <h2 id="8">8. 백엔드 전환<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>sudo<span class="w"> </span><span class="nv">BACKEND_ENV_FILE</span><span class="o">=</span><span class="s1">'/opt/board-service-backend/.env'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="nv">DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span><span class="nv">DB_PORT</span><span class="o">=</span><span class="s1">'3306'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">  </span><span class="nv">DB_USER</span><span class="o">=</span><span class="s1">'board_app'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">  </span><span class="nv">DB_PASSWORD</span><span class="o">=</span><span class="s1">'BoardApp123!'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">  </span><span class="nv">DB_NAME</span><span class="o">=</span><span class="s1">'board_service'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">  </span>./switch-backend-db.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>sudo<span class="w"> </span><span class="nv">BACKEND_ENV_FILE</span><span class="o">=</span><span class="s1">'/opt/board-service-backend/.env'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span><span class="nv">DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span><span class="nv">DB_PORT</span><span class="o">=</span><span class="s1">'3306'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">  </span><span class="nv">DB_USER</span><span class="o">=</span><span class="s1">'board_app'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="w">  </span><span class="nv">DB_PASSWORD</span><span class="o">=</span><span class="s1">'BoardApp123!'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="w">  </span><span class="nv">DB_NAME</span><span class="o">=</span><span class="s1">'board_service'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="w">  </span>./switch-backend-db.sh
 </code></pre></div>
 <p>확인:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>curl<span class="w"> </span>http://localhost:4000/api/health
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>curl<span class="w"> </span>http://localhost:4000/api/posts
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>curl<span class="w"> </span>http://localhost:4000/api/health
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>curl<span class="w"> </span>http://localhost:4000/api/posts
 </code></pre></div>
 <h2 id="_3">참고<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <ul>
