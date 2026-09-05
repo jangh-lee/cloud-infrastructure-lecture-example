@@ -62,33 +62,64 @@ erDiagram
 
 Naver Cloud DB for MySQL의 DB 사용자 비밀번호 조건에 맞춰 예시 비밀번호는 8자 이상, 20자 이하인 `MigratePass123!`를 사용합니다.
 
-```bash
-cd "017-cloud db migration/scripts"
-sudo MIGRATION_USER='dms_migration' \
-  MIGRATION_PASSWORD='MigratePass123!' \
-  SOURCE_DATABASE='board_service' \
-  ./prepare-source-db.sh
-```
+### 1-1. MariaDB 바이너리 로그 설정
 
-003번 Ubuntu DB 서버처럼 `root`가 `unix_socket` 인증을 쓰는 경우에는 `SOURCE_DB_ROOT_PASSWORD`를 넣지 않습니다. `sudo mysql` 또는 `sudo mariadb`로 접속되는 구조입니다.
-
-비밀번호 기반 root 접속을 쓰는 경우:
+003번 Source DB 서버에서 DMS가 초기 데이터 이후의 변경분을 읽을 수 있도록 바이너리 로그를 활성화합니다.
 
 ```bash
-sudo SOURCE_DB_ADMIN_PASSWORD='DB_ROOT_PASSWORD' \
-  MIGRATION_USER='dms_migration' \
-  MIGRATION_PASSWORD='MigratePass123!' \
-  SOURCE_DATABASE='board_service' \
-  ./prepare-source-db.sh
+sudo tee /etc/mysql/mariadb.conf.d/60-dms-source.cnf >/dev/null <<'EOF'
+[mysqld]
+server-id=1
+log_bin=mysql-bin
+binlog_format=ROW
+binlog_row_image=FULL
+expire_logs_days=5
+bind-address=0.0.0.0
+EOF
+
+sudo systemctl restart mariadb
+sudo systemctl is-active mariadb
 ```
 
-확인:
+마지막 결과가 `active`인지 확인합니다.
+
+### 1-2. DMS 전용 계정 생성
+
+MariaDB 관리자 비밀번호는 003 DB 서버의 `~/cloud-infrastructure-lecture-example/003-three tier web app/db/.env`에 있는 `DB_ROOT_PASSWORD`를 입력합니다. 아래 `%`는 실습 편의를 위한 값이며 실제 운영 환경에서는 DMS가 접근하는 IP 대역으로 제한합니다.
 
 ```bash
-sudo ./check-source-db.sh
+sudo mariadb -u root -p <<'SQL'
+CREATE USER IF NOT EXISTS 'dms_migration'@'%'
+  IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');
+ALTER USER 'dms_migration'@'%'
+  IDENTIFIED VIA mysql_native_password USING PASSWORD('MigratePass123!');
+GRANT RELOAD, PROCESS, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT
+  ON *.* TO 'dms_migration'@'%';
+GRANT SELECT ON mysql.* TO 'dms_migration'@'%';
+GRANT SELECT, SHOW VIEW, LOCK TABLES, TRIGGER
+  ON board_service.* TO 'dms_migration'@'%';
+FLUSH PRIVILEGES;
+SQL
 ```
 
-`ERROR 1227 ... CREATE USER privilege`가 나오면 관리자 계정이 아니라 일반 앱 계정으로 접속한 것입니다.
+`ERROR 1227 ... CREATE USER privilege`가 나오면 `board_app` 같은 일반 앱 계정으로 접속한 것입니다. 반드시 MariaDB `root` 관리자 계정으로 실행합니다.
+
+### 1-3. Source DB 준비 상태 확인
+
+```bash
+sudo mariadb -u root -p board_service <<'SQL'
+SHOW VARIABLES
+WHERE Variable_name IN (
+  'server_id', 'log_bin', 'binlog_format',
+  'binlog_row_image', 'expire_logs_days', 'bind_address'
+);
+SHOW MASTER STATUS;
+SHOW GRANTS FOR 'dms_migration'@'%';
+SELECT COUNT(*) AS total_posts FROM posts;
+SQL
+```
+
+`log_bin=ON`, `binlog_format=ROW`, `binlog_row_image=FULL`이고 `SHOW MASTER STATUS`에 바이너리 로그 파일이 표시되어야 다음 단계로 넘어갑니다. 권한 결과에는 복제 관련 전역 권한과 `board_service` 조회 권한이 모두 보여야 합니다.
 
 ## 2. Cloud DB for MySQL 생성
 
@@ -104,12 +135,22 @@ Source DB와 같은 major version을 권장합니다.
 
 Cloud DB for MySQL은 DB 서버 OS에 접속해서 `root@localhost`로 계정을 만드는 방식이 아닙니다. 콘솔의 `Cloud DB for MySQL > DB Server > Manage DB > Manage DB user`에서 DB User를 생성합니다.
 
+DMS 작업 전에는 Target에 `board_service` 데이터베이스를 만들지 않습니다. Source와 같은 이름의 데이터베이스가 이미 있으면 DMS 작업을 시작할 수 없습니다. DB User만 다음과 같이 미리 생성합니다.
+
+| USER_ID | HOST(IP) | DB 권한 | 암호 예시 | 용도 |
+| --- | --- | --- | --- | --- |
+| `board_admin` | 관리 서버 IP 대역 예: `10.10.10.%` | `DDL` | `BoardAdmin123!` | mysqldump 복원, 스키마 및 검증 작업 |
+| `board_app` | Backend Subnet 예: `10.10.110.%` | `CRUD` | `BoardApp123!` | 마이그레이션 완료 후 Backend 연결 |
+
+두 계정 모두 **시스템 테이블은 선택하지 않습니다**. `DDL`은 `CRUD`와 `READ`를 포함하고 테이블 생성·변경·삭제가 가능하며, `CRUD`는 게시글 조회·등록·수정·삭제에 사용합니다. DMS 작업 생성 화면에서는 별도 Target DB User를 입력하지 않고 생성한 Cloud DB Service를 Target으로 선택합니다.
+
 계정 구분:
 
 | 위치 | 계정 | 만드는 방법 |
 | --- | --- | --- |
-| Source Ubuntu DB | `dms_migration` | `prepare-source-db.sh` |
-| Target Cloud DB for MySQL | `TARGET_USER` | Console Manage DB user |
+| Source Ubuntu DB | `dms_migration` | 위 MariaDB SQL로 생성, DMS Endpoint에서 사용 |
+| Target Cloud DB for MySQL | `board_admin` | Console Manage DB user에서 `DDL`로 생성 |
+| Target Cloud DB for MySQL | `board_app` | Console Manage DB user에서 `CRUD`로 생성 |
 
 ## 3. ACG 확인
 
@@ -123,6 +164,7 @@ Backend에서 Cloud DB로 전환할 때:
 
 | 방향 | 포트 | 설명 |
 | --- | --- | --- |
+| 관리 서버 outbound / Cloud DB inbound | `3306` | `board_admin`으로 mysqldump 복원 및 검증 |
 | Backend outbound | `3306` | Cloud DB 접속 |
 | Cloud DB inbound | `3306` | Backend private IP 허용 |
 
@@ -182,8 +224,8 @@ Cloud DB for MySQL에 복원:
 
 ```bash
 TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
-TARGET_DB_USER='TARGET_USER' \
-TARGET_DB_PASSWORD='TARGET_PASSWORD' \
+TARGET_DB_USER='board_admin' \
+TARGET_DB_PASSWORD='BoardAdmin123!' \
 DUMP_FILE='/tmp/board_service.sql' \
 ./restore-target-db.sh
 ```
@@ -205,9 +247,9 @@ MYSQL_PWD='SOURCE_PASSWORD' mysqldump \
 ```
 
 ```bash
-MYSQL_PWD='TARGET_PASSWORD' mysql \
+MYSQL_PWD='BoardAdmin123!' mysql \
   -h db-xxxx.vpc-cdb.ntruss.com \
-  -u TARGET_USER \
+  -u board_admin \
   < /tmp/board_service.sql
 ```
 
@@ -218,8 +260,8 @@ SOURCE_DB_HOST='SOURCE_DB_PRIVATE_IP' \
 SOURCE_DB_USER='board_app' \
 SOURCE_DB_PASSWORD='BoardApp123!' \
 TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
-TARGET_DB_USER='TARGET_USER' \
-TARGET_DB_PASSWORD='TARGET_PASSWORD' \
+TARGET_DB_USER='board_app' \
+TARGET_DB_PASSWORD='BoardApp123!' \
 DB_NAME='board_service' \
 ./compare-post-counts.sh
 ```
@@ -230,8 +272,8 @@ DB_NAME='board_service' \
 sudo BACKEND_ENV_FILE='/opt/board-service-backend/.env' \
   DB_HOST='db-xxxx.vpc-cdb.ntruss.com' \
   DB_PORT='3306' \
-  DB_USER='TARGET_USER' \
-  DB_PASSWORD='TARGET_PASSWORD' \
+  DB_USER='board_app' \
+  DB_PASSWORD='BoardApp123!' \
   DB_NAME='board_service' \
   ./switch-backend-db.sh
 ```
