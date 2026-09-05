@@ -195,6 +195,16 @@ sudo ./install-backend.sh
 sudo ./install-backend.sh configure
 ```
 
+> **실습 메모 - Backend 설정 파일 위치**
+>
+> 사용자가 수정할 원본 설정 파일은 `~/cloud-infrastructure-lecture-example/003-three tier web app/backend/.env`입니다. 설치 스크립트는 애플리케이션과 설정을 `/opt/board-service-backend`로 복사하고, systemd는 이 배포 경로에서 서비스를 실행합니다. `/opt/board-service-backend/.env`를 직접 수정하면 다음 설치 또는 `configure` 실행 때 원본 설정으로 덮어써지므로 직접 편집하지 않습니다.
+
+```bash
+cd ~/cloud-infrastructure-lecture-example/"003-three tier web app"/backend
+vi .env
+sudo ./install-backend.sh configure
+```
+
 자동 예시 글 등록은 기본으로 활성화됩니다. 등록 간격이나 개수를 바꾸려면 백엔드 서버 `.env`에서 아래 값을 수정합니다.
 
 ```env

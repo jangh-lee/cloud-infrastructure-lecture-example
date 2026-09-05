@@ -122,6 +122,17 @@ AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
 LAB_STRESS_ENABLED=false
 ```
 
+!!! note "실습 메모: Backend 설정 파일 위치"
+    설치 작업과 설정 변경은 Git 저장소의 `~/cloud-infrastructure-lecture-example/003-three tier web app/backend`에서 진행합니다. 사용자가 수정할 원본 설정 파일은 이 경로의 `.env`입니다.
+
+    설치 스크립트는 애플리케이션과 `.env`를 `/opt/board-service-backend`로 복사하고, systemd는 이 배포 경로에서 서비스를 실행합니다. `/opt/board-service-backend/.env`를 직접 수정하면 다음 설치 또는 `configure` 실행 때 원본 설정으로 덮어써지므로 직접 편집하지 않습니다.
+
+    ```bash
+    cd ~/cloud-infrastructure-lecture-example/"003-three tier web app"/backend
+    vi .env
+    sudo ./install-backend.sh configure
+    ```
+
 | 변수 | 의미 | 입력 기준 |
 | --- | --- | --- |
 | `PORT` | Backend 애플리케이션 수신 포트 | 기본값은 `4000`이며 ACG와 Web의 `BACKEND_UPSTREAM` 포트도 같아야 합니다. |
