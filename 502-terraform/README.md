@@ -68,6 +68,8 @@ examples/ncloud-basic
 └── terraform.tfvars.example
 ```
 
+[GitHub에서 Terraform 예제 코드 전체 보기](https://github.com/jangh-lee/cloud-infrastructure-lecture-example/tree/main/502-terraform/examples/ncloud-basic)
+
 ## 빠른 실행
 
 ### Ubuntu / macOS

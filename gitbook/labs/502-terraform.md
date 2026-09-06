@@ -89,14 +89,16 @@ Private 기본 Route Table에는 다음 경로가 추가됩니다.
 └── terraform.tfvars.example
 ```
 
+[GitHub에서 Terraform 예제 코드 전체 보기](https://github.com/jangh-lee/cloud-infrastructure-lecture-example/tree/main/502-terraform/examples/ncloud-basic)
+
 | 파일 | 역할 |
 | --- | --- |
-| `network.tf` | VPC, Subnet, NAT Gateway, Route |
-| `security.tf` | Bastion, Web, Backend, DB ACG와 Rule |
-| `load-balancer.tf` | Public ALB, Target Group, Listener |
-| `init-scripts.tf` | 003 DB, Backend, Web 자동 설치 |
-| `compute.tf` | Login Key, NIC, 서버, Bastion Public IP |
-| `outputs.tf` | URL, IP, SSH, 로그 확인 명령 |
+| [`network.tf`](https://github.com/jangh-lee/cloud-infrastructure-lecture-example/blob/main/502-terraform/examples/ncloud-basic/network.tf) | VPC, Subnet, NAT Gateway, Route |
+| [`security.tf`](https://github.com/jangh-lee/cloud-infrastructure-lecture-example/blob/main/502-terraform/examples/ncloud-basic/security.tf) | Bastion, Web, Backend, DB ACG와 Rule |
+| [`load-balancer.tf`](https://github.com/jangh-lee/cloud-infrastructure-lecture-example/blob/main/502-terraform/examples/ncloud-basic/load-balancer.tf) | Public ALB, Target Group, Listener |
+| [`init-scripts.tf`](https://github.com/jangh-lee/cloud-infrastructure-lecture-example/blob/main/502-terraform/examples/ncloud-basic/init-scripts.tf) | 003 DB, Backend, Web 자동 설치 |
+| [`compute.tf`](https://github.com/jangh-lee/cloud-infrastructure-lecture-example/blob/main/502-terraform/examples/ncloud-basic/compute.tf) | Login Key, NIC, 서버, Bastion Public IP |
+| [`outputs.tf`](https://github.com/jangh-lee/cloud-infrastructure-lecture-example/blob/main/502-terraform/examples/ncloud-basic/outputs.tf) | URL, IP, SSH, 로그 확인 명령 |
 
 ## 5. Terraform 설치 확인
 
