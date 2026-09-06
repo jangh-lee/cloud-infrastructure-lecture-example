@@ -1864,7 +1864,9 @@
 <a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="nv">ACG_NAME</span><span class="o">=</span><span class="s2">"lab3-acg"</span>
 <a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="nv">LOGIN_KEY_NAME</span><span class="o">=</span><span class="s2">"key-lab3"</span>
 <a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="nv">SERVER_NAME</span><span class="o">=</span><span class="s2">"svr-lab3-web-kr1"</span>
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="nv">MY_PUBLIC_IP</span><span class="o">=</span><span class="s2">"YOUR_PUBLIC_IP/32"</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="nv">SERVER_IMAGE_NO</span><span class="o">=</span><span class="s2">"104630229"</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="nv">SERVER_SPEC_CODE</span><span class="o">=</span><span class="s2">"s2-g3a"</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="nv">MY_PUBLIC_IP</span><span class="o">=</span><span class="s2">"YOUR_PUBLIC_IP/32"</span>
 </code></pre></div>
 <p>Windows PowerShell:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nv">$REGION_CODE</span> <span class="p">=</span> <span class="s2">"KR"</span>
@@ -1878,7 +1880,9 @@
 <a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="nv">$ACG_NAME</span> <span class="p">=</span> <span class="s2">"lab3-acg"</span>
 <a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="nv">$LOGIN_KEY_NAME</span> <span class="p">=</span> <span class="s2">"key-lab3"</span>
 <a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="nv">$SERVER_NAME</span> <span class="p">=</span> <span class="s2">"svr-lab3-web-kr1"</span>
-<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="nv">$MY_PUBLIC_IP</span> <span class="p">=</span> <span class="s2">"YOUR_PUBLIC_IP/32"</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="nv">$SERVER_IMAGE_NO</span> <span class="p">=</span> <span class="s2">"104630229"</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="nv">$SERVER_SPEC_CODE</span> <span class="p">=</span> <span class="s2">"s2-g3a"</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="nv">$MY_PUBLIC_IP</span> <span class="p">=</span> <span class="s2">"YOUR_PUBLIC_IP/32"</span>
 </code></pre></div>
 <h2 id="_4">서버 이미지와 스펙 조회<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <p>G3/KVM Ubuntu 이미지는 <code>getServerImageProductList</code>가 아니라 <code>getServerImageList</code>로 조회합니다.</p>
@@ -1920,20 +1924,14 @@
 <a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.getServerSpecListResponse.serverSpecList[]</span>
 <a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="s1">    | [.serverSpecCode, .serverSpecNo, .serverSpecDescription, .generationCode, .hypervisorType.code] | @tsv'</span>
 </code></pre></div>
-<p>조회 결과에서 실제 값을 변수로 저장합니다. <code>SERVER_SPEC_CODE</code>에는 숫자인 <code>serverSpecNo</code>가 아니라 <code>s2-g3a</code>, <code>c2-g3</code> 같은 <code>serverSpecCode</code> 값을 넣습니다.</p>
+<p>공통 변수에 지정한 기본값을 확인합니다. 계정에서 해당 상품을 사용할 수 없다면 조회 결과에 맞게 값을 변경합니다. <code>SERVER_SPEC_CODE</code>에는 숫자인 <code>serverSpecNo</code>가 아니라 <code>s2-g3a</code>, <code>c2-g3</code> 같은 <code>serverSpecCode</code> 값을 넣습니다.</p>
 <p>Linux/macOS:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nv">SERVER_IMAGE_NO</span><span class="o">=</span><span class="s2">"104630229"</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nv">SERVER_SPEC_CODE</span><span class="o">=</span><span class="s2">"s2-g3a"</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$SERVER_IMAGE_NO</span><span class="s2">"</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$SERVER_SPEC_CODE</span><span class="s2">"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$SERVER_IMAGE_NO</span><span class="s2">"</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$SERVER_SPEC_CODE</span><span class="s2">"</span>
 </code></pre></div>
 <p>Windows PowerShell:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nv">$SERVER_IMAGE_NO</span> <span class="p">=</span> <span class="s2">"104630229"</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nv">$SERVER_SPEC_CODE</span> <span class="p">=</span> <span class="s2">"s2-g3a"</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="nv">$SERVER_IMAGE_NO</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="nv">$SERVER_SPEC_CODE</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nv">$SERVER_IMAGE_NO</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nv">$SERVER_SPEC_CODE</span>
 </code></pre></div>
 <h2 id="1-vpc">1. VPC 생성<a class="headerlink" href="#1-vpc" title="Permanent link">&para;</a></h2>
 <p>Linux/macOS:</p>
