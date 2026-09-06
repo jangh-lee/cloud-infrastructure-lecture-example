@@ -54,6 +54,8 @@ PRIVATE_SUBNET_CIDR="10.0.2.0/24"
 ACG_NAME="lab3-acg"
 LOGIN_KEY_NAME="key-lab3"
 SERVER_NAME="svr-lab3-web-kr1"
+SERVER_IMAGE_NO="104630229"
+SERVER_SPEC_CODE="s2-g3a"
 MY_PUBLIC_IP="YOUR_PUBLIC_IP/32"
 ```
 
@@ -71,6 +73,8 @@ $PRIVATE_SUBNET_CIDR = "10.0.2.0/24"
 $ACG_NAME = "lab3-acg"
 $LOGIN_KEY_NAME = "key-lab3"
 $SERVER_NAME = "svr-lab3-web-kr1"
+$SERVER_IMAGE_NO = "104630229"
+$SERVER_SPEC_CODE = "s2-g3a"
 $MY_PUBLIC_IP = "YOUR_PUBLIC_IP/32"
 ```
 
@@ -124,14 +128,11 @@ ncloud vserver getServerSpecList \
     | [.serverSpecCode, .serverSpecNo, .serverSpecDescription, .generationCode, .hypervisorType.code] | @tsv'
 ```
 
-조회 결과에서 실제 값을 변수로 저장합니다. `SERVER_SPEC_CODE`에는 숫자인 `serverSpecNo`가 아니라 `s2-g3a`, `c2-g3` 같은 `serverSpecCode` 값을 넣습니다.
+공통 변수에 지정한 기본값을 확인합니다. 계정에서 해당 상품을 사용할 수 없다면 조회 결과에 맞게 값을 변경합니다. `SERVER_SPEC_CODE`에는 숫자인 `serverSpecNo`가 아니라 `s2-g3a`, `c2-g3` 같은 `serverSpecCode` 값을 넣습니다.
 
 Linux/macOS:
 
 ```bash
-SERVER_IMAGE_NO="104630229"
-SERVER_SPEC_CODE="s2-g3a"
-
 echo "$SERVER_IMAGE_NO"
 echo "$SERVER_SPEC_CODE"
 ```
@@ -139,9 +140,6 @@ echo "$SERVER_SPEC_CODE"
 Windows PowerShell:
 
 ```powershell
-$SERVER_IMAGE_NO = "104630229"
-$SERVER_SPEC_CODE = "s2-g3a"
-
 $SERVER_IMAGE_NO
 $SERVER_SPEC_CODE
 ```
