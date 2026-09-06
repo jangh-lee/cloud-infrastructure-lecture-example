@@ -14,17 +14,17 @@ Naver Cloud 기반 클라우드 인프라 실습 교안입니다.
 | 서버 | 004 | Game Server 생성 실습 | `004-game server` |
 | 서버 | 005 | CLOVA Studio AI RAG 앱 | `005-ai rag studio` |
 | 서버 | 006 | Linux 기본 명령어 | `006-linux commands` |
-| 네트워크 | 007 | ACG 변경 Slack 알림 | `007-acg slack alert` |
-| CLI 및 IaC | 008 | Ncloud CLI로 서버 생성 | `008-cloud cli` |
-| CLI 및 IaC | 009 | Terraform 003 게시판 빠른 환경 구성 | `009-terraform` |
-| CLI 및 IaC | 010 | 비용 조회 Slack 자동화 | `010-cost slack alert` |
-| 스토리지 | 011 | Object Storage 정적 웹사이트 | `011-static website` |
-| Load Balancer 및 Auto Scaling | 012 | Load Balancer 분산 실습 | `012-load balancer` |
-| Load Balancer 및 Auto Scaling | 013 | 012 Target 서버 이미지 기반 Auto Scaling (1) | `013-auto scaling` |
-| Load Balancer 및 Auto Scaling | 014 | 게시판 Auto Scaling (2) | `014-auto scaling` |
-| 데이터베이스 | 015 | Cloud DB for MySQL 생성 및 게시판 연결 | `015-cloud db mysql` |
-| 데이터베이스 | 016 | Database 백업 및 특정시점 복구 | `016-database backup recovery` |
-| 데이터베이스 | 017 | Cloud DB for MySQL 마이그레이션 | `017-cloud db migration` |
+| 네트워크 | 101 | ACG 변경 Slack 알림 | `101-acg slack alert` |
+| 스토리지 | 201 | Object Storage 정적 웹사이트 | `201-static website` |
+| Load Balancer 및 Auto Scaling | 301 | Load Balancer 분산 실습 | `301-load balancer` |
+| Load Balancer 및 Auto Scaling | 302 | 301 Target 서버 이미지 기반 Auto Scaling (1) | `302-auto scaling` |
+| Load Balancer 및 Auto Scaling | 303 | 게시판 Auto Scaling (2) | `303-auto scaling` |
+| 데이터베이스 | 401 | Cloud DB for MySQL 생성 및 게시판 연결 | `401-cloud db mysql` |
+| 데이터베이스 | 402 | Database 백업 및 특정시점 복구 | `402-database backup recovery` |
+| 데이터베이스 | 403 | Cloud DB for MySQL 마이그레이션 | `403-cloud db migration` |
+| CLI 및 IaC | 501 | Ncloud CLI로 서버 생성 | `501-cloud cli` |
+| CLI 및 IaC | 502 | Terraform 003 게시판 빠른 환경 구성 | `502-terraform` |
+| CLI 및 IaC | 503 | 비용 조회 Slack 자동화 | `503-cost slack alert` |
 
 ## 웹 교안 열람
 

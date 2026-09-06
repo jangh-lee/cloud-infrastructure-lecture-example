@@ -1,0 +1,235 @@
+# 301 Load Balancer
+
+Ubuntu 서버에서 `nginx` 기반으로 아주 단순한 백엔드 노드를 띄우기 위한 실습용 예제입니다.
+
+로드밸런서 뒤에 여러 대를 붙여두고 새로고침하거나 트래픽을 분산시키면, 어떤 백엔드가 응답했는지 바로 확인할 수 있습니다.
+
+## 화면에 표시되는 정보
+
+| 항목 | 값 |
+| --- | --- |
+| User Input | Init Script에 전달한 자유로운 표시 문구 |
+| Hostname | 서버마다 자동으로 부여된 호스트명 |
+| Primary IP (NIC) | 서버 NIC의 기본 IP이며 일반적으로 사설 IP |
+| All IPs | 서버 인터페이스에서 확인한 전체 IP |
+| Date, Time | 서버가 응답한 현재 날짜와 시간 |
+
+여러 서버에 같은 User Input을 사용해도 Hostname과 IP가 다르므로 어떤 백엔드가 응답했는지 구분할 수 있습니다.
+
+## 헬스체크 경로
+
+- `GET /healthz`
+
+## 구성 파일
+
+- `init.sh`: 신규 서버와 기존 서버가 공통으로 실행하는 통합 Init Script
+- `install.sh`: Nginx와 Auto Scaling 부하 도구를 함께 설치하는 Ubuntu 스크립트
+- `stress_server.py`: LB 요청으로 서버당 하나의 제한된 CPU 부하를 실행하는 API
+- `update_status.sh`: 상태 JSON 갱신 스크립트
+- `templates/index.html.template`: 정적 HTML 템플릿
+
+## 통합 Init Script
+
+신규 서버의 Naver Cloud Init Script와 이미 생성한 서버의 터미널에서 **같은 코드 박스 하나만 사용**합니다. `userinput`에는 `강의장 LB 실습`, `내 웹 서버`처럼 원하는 표시 문구 하나를 입력합니다.
+
+아래 코드에서 기본 문구만 원하는 글자로 바꾼 뒤 전체를 실행합니다. Naver Cloud가 `userinput`을 전달하면 해당 값이 우선 사용됩니다.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+userinput="${userinput:-내가 넣고 싶은 글자}"
+INIT_FILE="/tmp/lb-demo-init.sh"
+INIT_URL="https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/301-load%20balancer/init.sh"
+
+if command -v curl >/dev/null 2>&1; then
+  curl -fsSL --retry 5 "${INIT_URL}" -o "${INIT_FILE}"
+else
+  wget -q "${INIT_URL}" -O "${INIT_FILE}"
+fi
+
+chmod +x "${INIT_FILE}"
+userinput="${userinput}" "${INIT_FILE}"
+```
+
+통합 스크립트는 저장소를 clone하지 않습니다. 매번 최신 설치 파일을 `/opt/lb-demo-installer`에 내려받아 신규 서버를 설치하거나 기존 설치를 동일한 상태로 갱신합니다. 일반 사용자로 실행하면 내부에서 한 번만 `sudo`로 전환합니다.
+
+## 설치 후 확인
+
+```bash
+curl http://localhost/healthz
+curl http://localhost/status.json
+curl -fsS -H 'X-Lab-Token: asg-lab' http://localhost/stress-status
+sudo systemctl is-active lb-demo-stress.service
+stress-ng --version
+htop --version
+```
+
+`status.json`에서는 다음 키를 확인합니다.
+
+```json
+{
+  "serverName": "내가 넣고 싶은 글자",
+  "hostname": "서버별-호스트명",
+  "primaryIp": "10.x.x.x",
+  "allIps": "10.x.x.x"
+}
+```
+
+`stress-ng`는 302 Auto Scaling 실습에서 CPU 임계값을 넘기기 위한 도구이고, `htop`은 서버에 직접 접속해 문제를 확인할 때 사용할 수 있는 선택 도구입니다. 두 패키지는 통합 Init Script가 Nginx와 함께 설치되며, 기본 부하 실습에는 SSH를 사용하지 않습니다.
+
+통합 설치기는 `lb-demo-stress.service`도 설치합니다. 이 서비스는 `127.0.0.1:8081`에서만 동작하며 Nginx의 `/stress`와 실습 토큰을 통해 호출됩니다. `www-data`가 임시 파일을 만들 수 있도록 작업 디렉터리는 `/tmp`를 사용합니다. 요청이 반복되어도 서버마다 `stress-ng` 프로세스는 하나만 실행되고 20초 뒤 자동 종료됩니다. `/stress-status`에서는 요청을 처리한 Hostname, 부하 실행 여부, 프로세스 ID, 종료 코드와 1분 Load Average를 확인할 수 있습니다.
+
+`stressRunning`이 바로 `false`가 되거나 `exitCode`가 `0`이 아니면 서비스 로그에서 원인을 확인합니다.
+
+```bash
+sudo journalctl -u lb-demo-stress.service -n 30 --no-pager
+```
+
+301 실습이 끝나도 Load Balancer, Target Group, Target 서버 한 대는 삭제하지 않습니다. 302 Step 1에서 이 Target 서버를 선택해 내 서버 이미지를 만듭니다. 이미지에는 HTTP Stress API와 `stress-ng`가 함께 포함됩니다.
+
+## 503 확인
+
+먼저 Load Balancer가 아니라 각 Target 서버에서 확인합니다.
+
+```bash
+sudo systemctl is-active nginx
+curl -i http://127.0.0.1/healthz
+curl -s http://127.0.0.1/status.json
+sudo ss -lntp | grep ':80'
+```
+
+`nginx`가 `active`, `/healthz`가 HTTP `200`, 응답 본문이 `ok`이면 서버 설치는 정상입니다. 이 상태에서 Load Balancer만 503이면 다음 값을 수정합니다.
+
+- Target Group 프로토콜과 포트: `HTTP`, `80`
+- Health Check 프로토콜과 포트: `HTTP`, `80`
+- Health Check URL Path: `/healthz`
+- 웹 서버 ACG 인바운드: Load Balancer Subnet CIDR에서 웹 서버 `80/tcp` 허용
+- Target 상태: `Healthy`가 된 뒤 Load Balancer URL 재접속
+
+브라우저에서는 아래 주소로 접속합니다.
+
+```text
+http://SERVER_IP/
+```
+
+## 로드밸런서 100회 호출 테스트
+
+로드밸런서가 어떤 백엔드로 얼마나 분산했는지 `hostname` 기준으로 집계합니다. 먼저 Target Group의 Sticky Session을 끈 상태에서 사용하는 터미널에 맞는 명령 하나를 실행합니다.
+
+### Sticky Session OFF
+
+#### Linux 또는 macOS 터미널
+
+먼저 실제 Load Balancer 주소를 입력해 한 번 실행합니다.
+
+```bash
+LB_URL="http://YOUR_LOAD_BALANCER_URL"
+```
+
+그다음 아래 박스만 복사해 100회 호출합니다.
+
+```bash
+for i in $(seq 1 100); do
+  curl -s "$LB_URL/status.json" | sed -n 's/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
+done | sort | uniq -c
+```
+
+#### Windows Terminal PowerShell
+
+먼저 실제 Load Balancer 주소를 입력해 한 번 실행합니다.
+
+```powershell
+$LB_URL = "http://YOUR_LOAD_BALANCER_URL"
+```
+
+그다음 아래 박스만 복사해 100회 호출합니다.
+
+```powershell
+$results = 1..100 | ForEach-Object {
+  (Invoke-RestMethod -Uri "$LB_URL/status.json" -Method Get).hostname
+}
+
+$results |
+  Group-Object |
+  Sort-Object Count -Descending |
+  Select-Object Count, Name
+```
+
+정상적으로 분산되면 두 환경 모두 다음처럼 Hostname별 호출 횟수가 표시됩니다.
+
+```text
+Count Name
+----- ----
+   52 lb-node-001
+   48 lb-node-002
+```
+
+호출 횟수의 합이 `100`인지 확인합니다. Sticky Session이 꺼져 있는데 Hostname이 하나만 나오면 Target Group에 Healthy 서버가 한 대만 연결되어 있는지 확인합니다.
+
+### Sticky Session ON
+
+[Naver Cloud Target Group 공식 가이드](https://guide.ncloud-docs.com/docs/loadbalancer-targetgroup-vpc)는 Sticky Session을 서버 고유 ID를 헤더에 추가해 다음 요청도 같은 서버로 전달하는 기능으로 설명합니다. 따라서 100회 요청에서도 **같은 세션 정보를 계속 재사용**해야 합니다.
+
+기존 명령처럼 매번 새 `curl` 또는 새 PowerShell 요청을 만들면 세션이 유지되지 않아 Sticky Session을 켜도 여러 서버로 분산될 수 있습니다.
+
+#### Linux 또는 macOS 터미널
+
+먼저 실제 Load Balancer 주소를 입력해 한 번 실행합니다.
+
+```bash
+LB_URL="http://YOUR_LOAD_BALANCER_URL"
+```
+
+그다음 아래 박스를 복사합니다. 임시 쿠키 파일 생성부터 삭제까지 한 번에 실행됩니다.
+
+```bash
+COOKIE_JAR="$(mktemp)"
+
+for i in $(seq 1 100); do
+  curl -s -c "$COOKIE_JAR" -b "$COOKIE_JAR" "$LB_URL/status.json" |
+    sed -n 's/.*"hostname"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
+done | sort | uniq -c
+
+rm -f "$COOKIE_JAR"
+```
+
+#### Windows Terminal PowerShell
+
+먼저 실제 Load Balancer 주소를 입력해 한 번 실행합니다.
+
+```powershell
+$LB_URL = "http://YOUR_LOAD_BALANCER_URL"
+```
+
+그다음 아래 박스를 복사합니다. 같은 PowerShell Web Session으로 100회 호출합니다.
+
+```powershell
+$session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+
+$results = 1..100 | ForEach-Object {
+  (Invoke-RestMethod -Uri "$LB_URL/status.json" -WebSession $session).hostname
+}
+
+$results |
+  Group-Object |
+  Sort-Object Count -Descending |
+  Select-Object Count, Name
+```
+
+Sticky Session이 정상이라면 다음처럼 Hostname 하나에 100회가 집계됩니다.
+
+```text
+Count Name
+----- ----
+  100 lb-node-001
+```
+
+새 쿠키 파일, 새 PowerShell 세션, 시크릿 브라우저는 새로운 세션이므로 처음 선택되는 서버가 달라질 수 있습니다. 고정된 Target이 Unhealthy 상태가 되어 제외되어도 다른 서버로 전환될 수 있습니다.
+
+## 동작 방식
+
+- `nginx`가 `/var/www/lb-demo`의 정적 파일을 서비스합니다.
+- `systemd timer`가 1분마다 `status.json`을 갱신합니다.
+- 메인 페이지는 `/status.json`을 읽어 날짜, 시간, User Input, 호스트명, NIC IP 정보를 표시합니다.
+- IPv6를 지원하지 않는 Ubuntu 환경에서도 설치되도록, 패키지 설치 중 기본 `nginx` 자동 시작은 막고 사용자 설정으로 다시 기동합니다.

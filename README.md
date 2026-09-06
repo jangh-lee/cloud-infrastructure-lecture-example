@@ -25,34 +25,34 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 
 | Folder | Topic |
 | --- | --- |
-| [`007-acg slack alert`](./007-acg%20slack%20alert/) | Cloud Activity Tracer로 ACG 규칙 변경을 감지하고 Slack으로 보안 알림을 보내는 예제입니다. |
+| [`101-acg slack alert`](./101-acg%20slack%20alert/) | Cloud Activity Tracer로 ACG 규칙 변경을 감지하고 Slack으로 보안 알림을 보내는 예제입니다. |
 
-### 3. CLI 및 IaC 실습
-
-| Folder | Topic |
-| --- | --- |
-| [`008-cloud cli`](./008-cloud%20cli/) | Ncloud CLI를 설치하고 인증한 뒤 VPC 리소스를 조회하고 서버를 생성하는 예제입니다. |
-| [`009-terraform`](./009-terraform/) | Terraform으로 `lab7-vpc`, Subnet, NAT Gateway, ACG, Bastion, Public ALB와 003 게시판 3-tier 서버를 한 번에 생성하는 예제입니다. |
-| [`010-cost slack alert`](./010-cost%20slack%20alert/) | Cloud Functions에서 Naver Cloud 비용을 조회하고 Slack으로 알림을 보내는 자동화 예제입니다. |
-
-### 4. 스토리지 실습
+### 3. 스토리지 실습
 
 | Folder | Topic |
 | --- | --- |
-| [`011-static website`](./011-static%20website/) | Object Storage에서 정적 웹사이트를 퍼블리싱하는 예제입니다. |
+| [`201-static website`](./201-static%20website/) | Object Storage에서 정적 웹사이트를 퍼블리싱하는 예제입니다. |
 
-### 5. Load Balancer 및 Auto Scaling 실습
-
-| Folder | Topic |
-| --- | --- |
-| [`012-load balancer`](./012-load%20balancer/) | 여러 Ubuntu 웹 노드의 분산을 확인하고 Target 서버에 `stress-ng`를 함께 설치합니다. |
-| [`013-auto scaling`](./013-auto%20scaling/) | 012번 Target 서버로 이미지를 만들고 기존 Load Balancer와 Target Group을 사용해 기본 Auto Scaling을 확인합니다. |
-| [`014-auto scaling`](./014-auto%20scaling/) | 003번 게시판 Web 이미지를 사용해 Public ALB 뒤에서 Web Auto Scaling과 데이터 유지를 확인합니다. |
-
-### 6. 데이터베이스 실습
+### 4. Load Balancer 및 Auto Scaling 실습
 
 | Folder | Topic |
 | --- | --- |
-| [`015-cloud db mysql`](./015-cloud%20db%20mysql/) | Cloud DB for MySQL을 생성하고 `board_service` DB와 `board_app` 계정으로 003 게시판 Backend를 연결합니다. |
-| [`016-database backup recovery`](./016-database%20backup%20recovery/) | Cloud DB에 테스트 데이터를 기록하며 데이터베이스 백업, 복구, 특정시점 복구(PITR)를 실습합니다. |
-| [`017-cloud db migration`](./017-cloud%20db%20migration/) | 기존 게시판 DB를 Cloud DB for MySQL로 마이그레이션하고 정합성과 Backend 연결을 검증합니다. |
+| [`301-load balancer`](./301-load%20balancer/) | 여러 Ubuntu 웹 노드의 분산을 확인하고 Target 서버에 `stress-ng`를 함께 설치합니다. |
+| [`302-auto scaling`](./302-auto%20scaling/) | 301번 Target 서버로 이미지를 만들고 기존 Load Balancer와 Target Group을 사용해 기본 Auto Scaling을 확인합니다. |
+| [`303-auto scaling`](./303-auto%20scaling/) | 003번 게시판 Web 이미지를 사용해 Public ALB 뒤에서 Web Auto Scaling과 데이터 유지를 확인합니다. |
+
+### 5. 데이터베이스 실습
+
+| Folder | Topic |
+| --- | --- |
+| [`401-cloud db mysql`](./401-cloud%20db%20mysql/) | Cloud DB for MySQL을 생성하고 `board_service` DB와 `board_app` 계정으로 003 게시판 Backend를 연결합니다. |
+| [`402-database backup recovery`](./402-database%20backup%20recovery/) | Cloud DB에 테스트 데이터를 기록하며 데이터베이스 백업, 복구, 특정시점 복구(PITR)를 실습합니다. |
+| [`403-cloud db migration`](./403-cloud%20db%20migration/) | 기존 게시판 DB를 Cloud DB for MySQL로 마이그레이션하고 정합성과 Backend 연결을 검증합니다. |
+
+### 6. CLI 및 IaC 실습
+
+| Folder | Topic |
+| --- | --- |
+| [`501-cloud cli`](./501-cloud%20cli/) | Ncloud CLI를 설치하고 인증한 뒤 VPC 리소스를 조회하고 서버를 생성하는 예제입니다. |
+| [`502-terraform`](./502-terraform/) | Terraform으로 `lab7-vpc`, Subnet, NAT Gateway, ACG, Bastion, Public ALB와 003 게시판 3-tier 서버를 한 번에 생성하는 예제입니다. |
+| [`503-cost slack alert`](./503-cost%20slack%20alert/) | Cloud Functions에서 Naver Cloud 비용을 조회하고 Slack으로 알림을 보내는 자동화 예제입니다. |

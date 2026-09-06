@@ -9,19 +9,19 @@
   * [005 AI RAG Studio](<005-ai rag studio/README.md>)
   * [006 Linux Commands](<006-linux commands/README.md>)
 * 네트워크 실습
-  * [007 ACG Slack Alert](<007-acg slack alert/README.md>)
-* CLI 및 IaC 실습
-  * [008 Cloud CLI](<008-cloud cli/README.md>)
-  * [009 Terraform](009-terraform/README.md)
-  * [010 Cost Slack Alert](<010-cost slack alert/README.md>)
+  * [101 ACG Slack Alert](<101-acg slack alert/README.md>)
 * 스토리지 실습
-  * [011 Static Website](<011-static website/README.md>)
+  * [201 Static Website](<201-static website/README.md>)
 * Load Balancer 및 Auto Scaling 실습
-  * [012 Load Balancer](<012-load balancer/README.md>)
-  * [013 Auto Scaling Hands-on (1)](<013-auto scaling/README.md>)
-  * [014 Auto Scaling Hands-on (2)](<014-auto scaling/README.md>)
+  * [301 Load Balancer](<301-load balancer/README.md>)
+  * [302 Auto Scaling Hands-on (1)](<302-auto scaling/README.md>)
+  * [303 Auto Scaling Hands-on (2)](<303-auto scaling/README.md>)
 * 데이터베이스 실습
-  * [015 Cloud DB for MySQL](<015-cloud db mysql/README.md>)
-  * [016 Database Backup Recovery](<016-database backup recovery/README.md>)
-  * [017 Cloud DB Migration](<017-cloud db migration/README.md>)
+  * [401 Cloud DB for MySQL](<401-cloud db mysql/README.md>)
+  * [402 Database Backup Recovery](<402-database backup recovery/README.md>)
+  * [403 Cloud DB Migration](<403-cloud db migration/README.md>)
+* CLI 및 IaC 실습
+  * [501 Cloud CLI](<501-cloud cli/README.md>)
+  * [502 Terraform](502-terraform/README.md)
+  * [503 Cost Slack Alert](<503-cost slack alert/README.md>)
 * [Web Lecture Notes](gitbook/README.md)

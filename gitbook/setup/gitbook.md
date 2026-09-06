@@ -11,10 +11,18 @@
 ```text
 cloud-infrastructure-lecture-example
 ├── 001-api server
-├── ...
-├── 015-cloud db mysql
-├── 016-database backup recovery
-├── 017-cloud db migration
+├── 006-linux commands
+├── 101-acg slack alert
+├── 201-static website
+├── 301-load balancer
+├── 302-auto scaling
+├── 303-auto scaling
+├── 401-cloud db mysql
+├── 402-database backup recovery
+├── 403-cloud db migration
+├── 501-cloud cli
+├── 502-terraform
+├── 503-cost slack alert
 └── gitbook
     ├── README.md
     ├── SUMMARY.md
