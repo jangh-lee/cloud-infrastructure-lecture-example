@@ -129,6 +129,9 @@ sudo ls -ld /home/ftpstudent /home/ftpstudent/upload
 
 아래 첫 줄에 서버의 실제 Public IP를 입력합니다. `pasv_address`가 잘못되면 로그인 후 디렉터리 목록 조회에서 연결이 멈춥니다.
 
+!!! warning "서버에서 조회한 외부 IP를 넣지 않습니다"
+    `FTP_PUBLIC_IP`에는 Naver Cloud 콘솔의 **Server > Public IP**에서 해당 서버에 할당된 주소를 입력합니다. 서버에서 `curl ifconfig.me`로 확인한 외부 통신 IP는 NAT 구성에 따라 할당 Public IP와 다를 수 있으므로 `pasv_address`로 사용하지 않습니다.
+
 ```bash
 FTP_PUBLIC_IP="YOUR_SERVER_PUBLIC_IP"
 
@@ -184,6 +187,7 @@ sudo systemctl restart vsftpd
 ```bash
 sudo systemctl is-active vsftpd
 sudo ss -lntp | grep ':21'
+sudo grep -E '^pasv_(address|min_port|max_port)=' /etc/vsftpd.conf
 sudo openssl x509 -in /etc/ssl/certs/vsftpd.crt \
   -noout -subject -fingerprint -sha256
 ```
@@ -198,7 +202,7 @@ sudo ufw allow 30000:30010/tcp
 
 UFW가 `inactive`라면 두 `allow` 명령은 생략할 수 있습니다.
 
-**확인 기준:** 서비스가 `active`이고 `0.0.0.0:21` 리슨과 인증서 SHA-256 지문이 출력되어야 합니다.
+**확인 기준:** 서비스가 `active`이고 `0.0.0.0:21` 리슨과 인증서 SHA-256 지문이 출력되어야 합니다. `pasv_address`는 Naver Cloud 콘솔에 표시된 서버 Public IP와 정확히 같아야 합니다.
 
 ## 7. Step 4: 서버 테스트 파일 준비
 
@@ -323,11 +327,26 @@ FileZilla에서 `/`에 새 파일을 만들면 권한 오류가 나고 `/upload`
 | --- | --- |
 | `Connection timed out` | Public IP, ACG `21/TCP`, 접속 장소의 공인 IP |
 | `ECONNREFUSED` | `systemctl status vsftpd`, `ss -lntp | grep ':21'` |
-| 로그인 후 폴더 목록에서 멈춤 | ACG `30000-30010`, `pasv_address`, FileZilla Passive Mode |
+| 로그인 후 폴더 목록에서 멈춤 | ACG `30000-30010`, 서버 Public IP와 `pasv_address` 일치 여부, FileZilla Passive Mode |
 | `530 Login incorrect` | 사용자명, 암호, `/etc/shells`의 `/usr/sbin/nologin` 등록 |
 | TLS 인증서 경고 | Public IP와 인증서 CN, SHA-256 지문 확인 |
 | `/upload` 업로드 실패 | 폴더 소유자와 권한, `chown ftpstudent:ftpstudent` 확인 |
 | 일반 FTP로 연결됨 | FileZilla 암호화를 `Require explicit FTP over TLS`로 변경 |
+
+FileZilla 로그의 `227 Entering Passive Mode`에 서버 Public IP가 아닌 다른 IP가 표시되면 다음 명령으로 바로 수정합니다.
+
+```bash
+FTP_PUBLIC_IP="YOUR_SERVER_PUBLIC_IP"
+
+sudo sed -i '/^pasv_address=/d' /etc/vsftpd.conf
+echo "pasv_address=$FTP_PUBLIC_IP" | sudo tee -a /etc/vsftpd.conf
+sudo systemctl restart vsftpd
+
+sudo grep -E '^pasv_(address|min_port|max_port)=' /etc/vsftpd.conf
+sudo systemctl is-active vsftpd
+```
+
+재접속 후 PASV 응답의 IP가 서버 Public IP와 같고 디렉터리 목록이 표시되면 정상입니다. `21/TCP`는 로그인과 명령용이고, 목록·업로드·다운로드에는 ACG의 `30000-30010/TCP` 허용도 반드시 필요합니다.
 
 상세 로그를 실시간으로 확인합니다.
 
