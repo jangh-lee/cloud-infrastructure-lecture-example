@@ -8,6 +8,7 @@
   * [004 Game Server](<004-game server/README.md>)
   * [005 AI RAG Studio](<005-ai rag studio/README.md>)
   * [006 Linux Commands](<006-linux commands/README.md>)
+  * [007 FTP/FTPS 파일 서버](<007-file server/README.md>)
 * 네트워크 실습
   * [101 ACG Slack Alert](<101-acg slack alert/README.md>)
 * 스토리지 실습

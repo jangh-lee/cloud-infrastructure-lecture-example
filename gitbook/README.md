@@ -14,6 +14,7 @@ Naver Cloud 기반 클라우드 인프라 실습 교안입니다.
 | 서버 | 004 | Game Server 생성 실습 | `004-game server` |
 | 서버 | 005 | CLOVA Studio AI RAG 앱 | `005-ai rag studio` |
 | 서버 | 006 | Linux 기본 명령어 | `006-linux commands` |
+| 서버 | 007 | FTP/FTPS 파일 서버와 FileZilla | `007-file server` |
 | 네트워크 | 101 | ACG 변경 Slack 알림 | `101-acg slack alert` |
 | 스토리지 | 201 | Object Storage 정적 웹사이트 | `201-static website` |
 | Load Balancer 및 Auto Scaling | 301 | Load Balancer 분산 실습 | `301-load balancer` |

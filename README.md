@@ -20,6 +20,7 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 | [`004-game server`](./004-game%20server/) | Ubuntu 서버에서 SuperTuxKart 게임 서버를 실행하며 서버 생성, ACG, UDP 포트, 공인 IP 접속을 실습하는 예제입니다. |
 | [`005-ai rag studio`](./005-ai%20rag%20studio/) | CLOVA Studio API와 로컬 RAG 문서 관리 화면을 사용해 AI 애플리케이션 구성을 실습하는 예제입니다. |
 | [`006-linux commands`](./006-linux%20commands/) | 클라우드 엔지니어가 Ubuntu 서버에서 자주 사용하는 리눅스 기본 명령어를 점검 순서대로 익히는 예제입니다. |
+| [`007-file server`](./007-file%20server/) | Ubuntu `vsftpd`와 Explicit FTPS를 구성하고 Windows·macOS FileZilla로 파일을 전송하는 예제입니다. |
 
 ### 2. 네트워크 실습
 

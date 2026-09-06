@@ -12,6 +12,7 @@
 cloud-infrastructure-lecture-example
 ├── 001-api server
 ├── 006-linux commands
+├── 007-file server
 ├── 101-acg slack alert
 ├── 201-static website
 ├── 301-load balancer

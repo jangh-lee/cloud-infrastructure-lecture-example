@@ -10,6 +10,7 @@
   * [004 Game Server 생성 실습](labs/004-game-server.md)
   * [005 AI RAG Studio](labs/005-ai-rag-studio.md)
   * [006 Linux Commands](labs/006-linux-commands.md)
+  * [007 FTP/FTPS 파일 서버](labs/007-file-server.md)
 * 네트워크 실습
   * [101 ACG Slack Alert](labs/101-acg-slack-alert.md)
 * 스토리지 실습
