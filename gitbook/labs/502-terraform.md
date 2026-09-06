@@ -91,6 +91,8 @@ Private 기본 Route Table에는 다음 경로가 추가됩니다.
 
 [GitHub에서 Terraform 예제 코드 전체 보기](https://github.com/jangh-lee/cloud-infrastructure-lecture-example/tree/main/502-terraform/examples/ncloud-basic)
 
+[Naver Cloud Terraform Provider 공식 문서](https://registry.terraform.io/providers/NaverCloudPlatform/ncloud/latest/docs)
+
 | 파일 | 역할 |
 | --- | --- |
 | [`network.tf`](https://github.com/jangh-lee/cloud-infrastructure-lecture-example/blob/main/502-terraform/examples/ncloud-basic/network.tf) | VPC, Subnet, NAT Gateway, Route |
