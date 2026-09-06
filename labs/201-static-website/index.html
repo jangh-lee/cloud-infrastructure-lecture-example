@@ -10,29 +10,31 @@
       
       
       
-        <link rel="canonical" href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/SUMMARY/">
+        <link rel="canonical" href="https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/201-static-website/">
       
       
-        <link rel="prev" href="../labs/503-cost-slack-alert/">
+        <link rel="prev" href="../101-acg-slack-alert/">
       
+      
+        <link rel="next" href="../301-load-balancer/">
       
       
         
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>GitBook 목차 - 클라우드 인프라 실습</title>
+        <title>201 Object Storage 정적 웹사이트 - 클라우드 인프라 실습</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -51,7 +53,7 @@
       
     
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#summary" class="md-skip">
+        <a href="#201-object-storage" class="md-skip">
           콘텐츠로 이동
         </a>
       
@@ -92,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="상단/헤더">
-    <a href=".." title="클라우드 인프라 실습" class="md-header__button md-logo" aria-label="클라우드 인프라 실습" data-md-component="logo">
+    <a href="../.." title="클라우드 인프라 실습" class="md-header__button md-logo" aria-label="클라우드 인프라 실습" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -112,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              GitBook 목차
+              201 Object Storage 정적 웹사이트
             
           </span>
         </div>
@@ -233,7 +235,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="네비게이션" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="클라우드 인프라 실습" class="md-nav__button md-logo" aria-label="클라우드 인프라 실습" data-md-component="logo">
+    <a href="../.." title="클라우드 인프라 실습" class="md-nav__button md-logo" aria-label="클라우드 인프라 실습" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -263,7 +265,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -344,7 +346,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/github-pages/" class="md-nav__link">
+      <a href="../../setup/github-pages/" class="md-nav__link">
         
   
   
@@ -372,7 +374,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/gitbook/" class="md-nav__link">
+      <a href="../../setup/gitbook/" class="md-nav__link">
         
   
   
@@ -404,8 +406,10 @@
       
   
   
+    
   
   
+  
     
     
     
@@ -416,13 +420,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
@@ -443,7 +445,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -512,7 +514,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/001-api-server/" class="md-nav__link">
+      <a href="../001-api-server/" class="md-nav__link">
         
   
   
@@ -540,7 +542,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/002-init-script/" class="md-nav__link">
+      <a href="../002-init-script/" class="md-nav__link">
         
   
   
@@ -568,7 +570,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/003-three-tier-web-app/" class="md-nav__link">
+      <a href="../003-three-tier-web-app/" class="md-nav__link">
         
   
   
@@ -596,7 +598,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/004-game-server/" class="md-nav__link">
+      <a href="../004-game-server/" class="md-nav__link">
         
   
   
@@ -624,7 +626,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/005-ai-rag-studio/" class="md-nav__link">
+      <a href="../005-ai-rag-studio/" class="md-nav__link">
         
   
   
@@ -652,7 +654,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/006-linux-commands/" class="md-nav__link">
+      <a href="../006-linux-commands/" class="md-nav__link">
         
   
   
@@ -739,7 +741,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/101-acg-slack-alert/" class="md-nav__link">
+      <a href="../101-acg-slack-alert/" class="md-nav__link">
         
   
   
@@ -772,6 +774,8 @@
                 
   
   
+    
+  
   
   
     
@@ -781,13 +785,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" checked>
         
           
           <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
@@ -808,7 +810,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -823,10 +825,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../labs/201-static-website/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    201 Object Storage 정적 웹사이트
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -842,6 +871,81 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="목차">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      목차
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        목표
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        업로드 전 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#naver-cloud-object-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Naver Cloud Object Storage 업로드
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        업로드 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        정적 웹사이트 호스팅 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -913,7 +1017,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/301-load-balancer/" class="md-nav__link">
+      <a href="../301-load-balancer/" class="md-nav__link">
         
   
   
@@ -941,7 +1045,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/302-auto-scaling/" class="md-nav__link">
+      <a href="../302-auto-scaling/" class="md-nav__link">
         
   
   
@@ -969,7 +1073,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/303-auto-scaling/" class="md-nav__link">
+      <a href="../303-auto-scaling/" class="md-nav__link">
         
   
   
@@ -1056,7 +1160,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/401-cloud-db-mysql/" class="md-nav__link">
+      <a href="../401-cloud-db-mysql/" class="md-nav__link">
         
   
   
@@ -1084,7 +1188,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/402-database-backup-recovery/" class="md-nav__link">
+      <a href="../402-database-backup-recovery/" class="md-nav__link">
         
   
   
@@ -1112,7 +1216,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/403-cloud-db-migration/" class="md-nav__link">
+      <a href="../403-cloud-db-migration/" class="md-nav__link">
         
   
   
@@ -1199,7 +1303,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/501-cloud-cli/" class="md-nav__link">
+      <a href="../501-cloud-cli/" class="md-nav__link">
         
   
   
@@ -1227,7 +1331,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/502-terraform/" class="md-nav__link">
+      <a href="../502-terraform/" class="md-nav__link">
         
   
   
@@ -1255,7 +1359,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../labs/503-cost-slack-alert/" class="md-nav__link">
+      <a href="../503-cost-slack-alert/" class="md-nav__link">
         
   
   
@@ -1295,19 +1399,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../SUMMARY/" class="md-nav__link">
         
   
   
@@ -1323,7 +1418,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1348,6 +1442,69 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      목차
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        목표
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        업로드 전 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#naver-cloud-object-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Naver Cloud Object Storage 업로드
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        업로드 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        정적 웹사이트 호스팅 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1363,7 +1520,7 @@
 
 
   
-    <a href="https://github.com/jangh-lee/cloud-infrastructure-lecture-example/edit/main/gitbook/SUMMARY.md" title="이 페이지를 편집" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/jangh-lee/cloud-infrastructure-lecture-example/edit/main/gitbook/labs/201-static-website.md" title="이 페이지를 편집" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1372,41 +1529,45 @@
     
       
     
-    <a href="https://github.com/jangh-lee/cloud-infrastructure-lecture-example/raw/main/gitbook/SUMMARY.md" title="페이지소스 보기" class="md-content__button md-icon">
+    <a href="https://github.com/jangh-lee/cloud-infrastructure-lecture-example/raw/main/gitbook/labs/201-static-website.md" title="페이지소스 보기" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
     </a>
   
 
 
-<h1 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h1>
+<h1 id="201-object-storage">201 Object Storage 정적 웹사이트<a class="headerlink" href="#201-object-storage" title="Permanent link">&para;</a></h1>
+<h2 id="_1">목표<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>Object Storage 계열 서비스에 정적 웹사이트 파일을 업로드하고, 브라우저에서 웹 페이지가 열리는지 확인합니다.</p>
+<p>실습 폴더:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>201-static website
+</code></pre></div>
+<h2 id="_2">업로드 전 확인<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ls<span class="w"> </span><span class="s2">"201-static website"</span>
+</code></pre></div>
+<p>정적 웹사이트는 서버 코드 없이 HTML, CSS, JavaScript, 이미지, 영상 파일만으로 동작해야 합니다.</p>
+<h2 id="naver-cloud-object-storage">Naver Cloud Object Storage 업로드<a class="headerlink" href="#naver-cloud-object-storage" title="Permanent link">&para;</a></h2>
+<p>폴더 이름에 공백이 있으므로 경로 전체를 따옴표로 감쌉니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>s3<span class="w"> </span>sync<span class="w"> </span><span class="s2">"201-static website/"</span><span class="w"> </span>s3://YOUR_BUCKET_NAME/
+</code></pre></div>
+<p>예시:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>s3<span class="w"> </span>sync<span class="w"> </span><span class="s2">"201-static website/"</span><span class="w"> </span>s3://lab-bucket-james-260816/
+</code></pre></div>
+<h2 id="_3">업로드 확인<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>aws<span class="w"> </span>--endpoint-url<span class="o">=</span>https://kr.object.ncloudstorage.com<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span>s3<span class="w"> </span>ls<span class="w"> </span>s3://YOUR_BUCKET_NAME/
+</code></pre></div>
+<h2 id="_4">정적 웹사이트 호스팅 확인<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p>Object Storage에서 정적 웹사이트 호스팅을 켠 뒤, index document를 아래처럼 설정합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Index document: index.html
+</code></pre></div>
+<p>단순히 <code>index.html</code> 객체 URL을 직접 여는 것과 정적 웹사이트 호스팅 endpoint를 여는 것은 다릅니다.</p>
 <ul>
-<li><a href="../">강의 소개</a></li>
-<li><a href="../setup/github-pages/">GitHub Pages 배포</a></li>
-<li><a href="../setup/gitbook/">GitBook 운영 준비</a></li>
-<li>서버 실습</li>
-<li><a href="../labs/001-api-server/">001 API Server</a></li>
-<li><a href="../labs/002-init-script/">002 Init Script</a></li>
-<li><a href="../labs/003-three-tier-web-app/">003 Three Tier Web App</a></li>
-<li><a href="../labs/004-game-server/">004 Game Server 생성 실습</a></li>
-<li><a href="../labs/005-ai-rag-studio/">005 AI RAG Studio</a></li>
-<li><a href="../labs/006-linux-commands/">006 Linux Commands</a></li>
-<li>네트워크 실습</li>
-<li><a href="../labs/101-acg-slack-alert/">101 ACG Slack Alert</a></li>
-<li>스토리지 실습</li>
-<li><a href="../labs/201-static-website/">201 Object Storage 정적 웹사이트</a></li>
-<li>Load Balancer 및 Auto Scaling 실습</li>
-<li><a href="../labs/301-load-balancer/">301 Load Balancer</a></li>
-<li><a href="../labs/302-auto-scaling/">302 Auto Scaling Hands-on (1)</a></li>
-<li><a href="../labs/303-auto-scaling/">303 Auto Scaling Hands-on (2)</a></li>
-<li>데이터베이스 실습</li>
-<li><a href="../labs/401-cloud-db-mysql/">401 Cloud DB for MySQL 생성 및 연결</a></li>
-<li><a href="../labs/402-database-backup-recovery/">402 Database 백업 및 복구</a></li>
-<li><a href="../labs/403-cloud-db-migration/">403 Cloud DB Migration</a></li>
-<li>CLI 및 IaC 실습</li>
-<li><a href="../labs/501-cloud-cli/">501 Cloud CLI</a></li>
-<li><a href="../labs/502-terraform/">502 Terraform</a></li>
-<li><a href="../labs/503-cost-slack-alert/">503 Cost Slack Alert</a></li>
+<li>객체 URL: 특정 객체 하나를 직접 다운로드/조회</li>
+<li>정적 웹사이트 endpoint: <code>/</code> 요청을 <code>index.html</code>로 매핑하고 웹사이트처럼 응답</li>
 </ul>
 
 
@@ -1463,10 +1624,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "content.code.copy", "content.code.select", "content.action.edit", "content.action.view", "search.highlight", "search.share"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\ud074\ub9bd\ubcf4\ub4dc\uc5d0 \ubcf5\uc0ac\ub428", "clipboard.copy": "\ud074\ub9bd\ubcf4\ub4dc\ub85c \ubcf5\uc0ac", "search.result.more.one": "\uc774 \ubb38\uc11c\uc5d0\uc11c 1\uac1c\uc758 \uac80\uc0c9 \uacb0\uacfc \ub354 \ubcf4\uae30", "search.result.more.other": "\uc774 \ubb38\uc11c\uc5d0\uc11c #\uac1c\uc758 \uac80\uc0c9 \uacb0\uacfc \ub354 \ubcf4\uae30", "search.result.none": "\uac80\uc0c9\uc5b4\uc640 \uc77c\uce58\ud558\ub294 \ubb38\uc11c\uac00 \uc5c6\uc2b5\ub2c8\ub2e4", "search.result.one": "1\uac1c\uc758 \uc77c\uce58\ud558\ub294 \ubb38\uc11c", "search.result.other": "#\uac1c\uc758 \uc77c\uce58\ud558\ub294 \ubb38\uc11c", "search.result.placeholder": "\uac80\uc0c9\uc5b4\ub97c \uc785\ub825\ud558\uc138\uc694", "search.result.term.missing": "\ud3ec\ud568\ub418\uc9c0 \uc54a\uc740 \uac80\uc0c9\uc5b4", "select.version": "\ubc84\uc804 \uc120\ud0dd"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "content.code.copy", "content.code.select", "content.action.edit", "content.action.view", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\ud074\ub9bd\ubcf4\ub4dc\uc5d0 \ubcf5\uc0ac\ub428", "clipboard.copy": "\ud074\ub9bd\ubcf4\ub4dc\ub85c \ubcf5\uc0ac", "search.result.more.one": "\uc774 \ubb38\uc11c\uc5d0\uc11c 1\uac1c\uc758 \uac80\uc0c9 \uacb0\uacfc \ub354 \ubcf4\uae30", "search.result.more.other": "\uc774 \ubb38\uc11c\uc5d0\uc11c #\uac1c\uc758 \uac80\uc0c9 \uacb0\uacfc \ub354 \ubcf4\uae30", "search.result.none": "\uac80\uc0c9\uc5b4\uc640 \uc77c\uce58\ud558\ub294 \ubb38\uc11c\uac00 \uc5c6\uc2b5\ub2c8\ub2e4", "search.result.one": "1\uac1c\uc758 \uc77c\uce58\ud558\ub294 \ubb38\uc11c", "search.result.other": "#\uac1c\uc758 \uc77c\uce58\ud558\ub294 \ubb38\uc11c", "search.result.placeholder": "\uac80\uc0c9\uc5b4\ub97c \uc785\ub825\ud558\uc138\uc694", "search.result.term.missing": "\ud3ec\ud568\ub418\uc9c0 \uc54a\uc740 \uac80\uc0c9\uc5b4", "select.version": "\ubc84\uc804 \uc120\ud0dd"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>
