@@ -100,6 +100,29 @@ Private 기본 Route Table에는 다음 경로가 추가됩니다.
 
 ## 5. Terraform 설치 확인
 
+자신의 실습 PC 운영체제에 맞는 터미널에서 진행합니다. Windows는 **PowerShell**, macOS와 Ubuntu는 **Terminal**을 사용합니다.
+
+### Windows PowerShell
+
+PowerShell을 **관리자 권한**으로 열고 Git과 Terraform을 설치합니다.
+
+```powershell
+winget install --exact --id Git.Git
+winget install --exact --id Hashicorp.Terraform
+```
+
+설치가 끝나면 PowerShell을 닫았다가 다시 열고 버전을 확인합니다.
+
+```powershell
+git --version
+terraform version
+ssh -V
+```
+
+`git version`, `Terraform v...`, `OpenSSH_for_Windows...`가 각각 표시되면 통과입니다. `ssh`를 찾을 수 없다면 Windows 설정의 **시스템 > 선택적 기능**에서 `OpenSSH 클라이언트`를 설치합니다.
+
+### Ubuntu
+
 ```bash
 terraform version
 ```
@@ -117,7 +140,7 @@ sudo apt-get update
 sudo apt-get install -y terraform
 ```
 
-macOS:
+### macOS
 
 ```bash
 brew tap hashicorp/tap
@@ -125,6 +148,8 @@ brew install hashicorp/tap/terraform
 ```
 
 ## 6. 예제 준비
+
+### Ubuntu / macOS
 
 ```bash
 git clone https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git || true
@@ -141,7 +166,31 @@ cp terraform.tfvars.example terraform.tfvars
 curl -4 https://ifconfig.me
 ```
 
-`terraform.tfvars`를 열어 다음 값을 수정합니다.
+### Windows PowerShell
+
+```powershell
+git clone https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git
+Set-Location ".\cloud-infrastructure-lecture-example\502-terraform\examples\ncloud-basic"
+Copy-Item .\terraform.tfvars.example .\terraform.tfvars
+
+(Invoke-RestMethod -Uri "https://ifconfig.me/ip").Trim()
+notepad .\terraform.tfvars
+```
+
+이미 저장소를 내려받았다면 `git clone` 대신 다음 명령으로 최신 코드를 받습니다.
+
+```powershell
+Set-Location ".\cloud-infrastructure-lecture-example"
+git pull --ff-only origin main
+Set-Location ".\502-terraform\examples\ncloud-basic"
+if (-not (Test-Path .\terraform.tfvars)) { Copy-Item .\terraform.tfvars.example .\terraform.tfvars }
+notepad .\terraform.tfvars
+```
+
+!!! tip "Windows 경로 확인"
+    `Get-Location`의 마지막 경로가 `502-terraform\examples\ncloud-basic`이고 `Test-Path .\main.tf` 결과가 `True`이면 올바른 폴더입니다.
+
+운영체제와 관계없이 `terraform.tfvars`에 다음 값을 입력합니다.
 
 ```hcl
 access_key   = "YOUR_ACCESS_KEY"
@@ -169,7 +218,7 @@ board_db_password = "ChangeBoardPass123!"
 
 초기화, 포맷, 검증, 계획 확인, 생성을 순서대로 실행합니다.
 
-```bash
+```console
 terraform init
 terraform fmt
 terraform validate
@@ -178,6 +227,9 @@ terraform apply tfplan
 ```
 
 `Apply complete!`가 표시되면 클라우드 리소스 생성은 완료된 것입니다. 각 서버의 Init Script는 서버 내부에서 계속 실행될 수 있으므로 게시판이 열리기까지 약 3~10분 정도 기다립니다.
+
+!!! note "Windows에서도 명령은 같습니다"
+    위 다섯 줄은 PowerShell에 그대로 복사해 실행합니다. `tfplan`은 실행 파일이 아니라 Terraform이 생성한 실행 계획 파일입니다.
 
 ## 8. 접속 정보 Output
 
@@ -221,12 +273,28 @@ Naver Cloud의 `lab7-key.pem`은 SSH 개인키가 아니라 관리자 비밀번�
 
 ALB를 통한 전체 경로를 확인합니다.
 
+### Ubuntu / macOS
+
 ```bash
 BOARD_URL=$(terraform output -raw board_url)
 
 curl -i "${BOARD_URL}healthz"
 curl -i "${BOARD_URL}api/health"
 curl -s "${BOARD_URL}api/posts"
+```
+
+### Windows PowerShell
+
+PowerShell의 `curl` 별칭 대신 실제 curl 프로그램인 `curl.exe`를 사용합니다.
+
+```powershell
+$BOARD_URL = terraform output -raw board_url
+
+curl.exe -i "${BOARD_URL}healthz"
+curl.exe -i "${BOARD_URL}api/health"
+curl.exe -s "${BOARD_URL}api/posts"
+
+Start-Process $BOARD_URL
 ```
 
 브라우저에서는 `terraform output -raw board_url`로 출력된 주소를 엽니다. 게시글 조회, 작성, 삭제가 모두 되면 다음 경로가 검증된 것입니다.
@@ -239,6 +307,8 @@ Public ALB -> Web -> Backend -> MariaDB
 
 명령을 출력한 뒤 그대로 복사해 실행합니다.
 
+### Ubuntu / macOS
+
 ```bash
 terraform output -raw ssh_bastion_command
 terraform output -raw ssh_web_via_bastion_command
@@ -247,6 +317,24 @@ terraform output -raw ssh_db_via_bastion_command
 ```
 
 `-J`는 내 PC에서 Bastion을 거쳐 Private 서버에 접속하는 SSH ProxyJump 옵션입니다.
+
+### Windows PowerShell
+
+Windows 10/11의 OpenSSH 클라이언트를 사용하면 별도 SSH 프로그램 없이 같은 ProxyJump 접속이 가능합니다.
+
+```powershell
+$BASTION_IP = terraform output -raw bastion_public_ip
+$WEB_IP = terraform output -raw web_private_ip
+$BACKEND_IP = terraform output -raw backend_private_ip
+$DB_IP = terraform output -raw db_private_ip
+
+ssh "root@$BASTION_IP"
+ssh -J "root@$BASTION_IP" "root@$WEB_IP"
+ssh -J "root@$BASTION_IP" "root@$BACKEND_IP"
+ssh -J "root@$BASTION_IP" "root@$DB_IP"
+```
+
+처음 연결할 때 `Are you sure you want to continue connecting`이 나오면 서버 주소를 확인하고 `yes`를 입력합니다. 이후 `terraform output admin_passwords`에 표시된 해당 서버의 관리자 비밀번호를 입력합니다. Private 서버의 프롬프트가 나타나면 ProxyJump 통과입니다.
 
 ## 11. 초기화 상태 확인
 
@@ -301,7 +389,7 @@ terraform apply -auto-approve
 
 NAT Gateway, Public IP, ALB와 서버는 비용이 발생할 수 있으므로 실습이 끝나면 삭제합니다.
 
-```bash
+```console
 terraform destroy
 terraform state list
 ```
@@ -314,3 +402,5 @@ terraform state list
 - [Ncloud Subnet Resource](https://registry.terraform.io/providers/NaverCloudPlatform/ncloud/latest/docs/resources/subnet)
 - [Ncloud Application Load Balancer](https://guide.ncloud-docs.com/docs/loadbalancer-application-vpc)
 - [Ncloud ACG](https://guide.ncloud-docs.com/docs/server-acg-vpc)
+- [HashiCorp Terraform 설치](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+- [Microsoft OpenSSH for Windows](https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse)

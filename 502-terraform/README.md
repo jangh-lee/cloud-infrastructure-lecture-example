@@ -70,10 +70,34 @@ examples/ncloud-basic
 
 ## 빠른 실행
 
+### Ubuntu / macOS
+
 ```bash
 cd "502-terraform/examples/ncloud-basic"
 cp terraform.tfvars.example terraform.tfvars
 ```
+
+### Windows PowerShell
+
+Git과 Terraform이 없다면 관리자 PowerShell에서 설치한 뒤 PowerShell을 다시 엽니다.
+
+```powershell
+winget install --exact --id Git.Git
+winget install --exact --id Hashicorp.Terraform
+```
+
+저장소를 내려받고 Windows용 명령으로 설정 파일을 준비합니다.
+
+```powershell
+git clone https://github.com/jangh-lee/cloud-infrastructure-lecture-example.git
+Set-Location ".\cloud-infrastructure-lecture-example\502-terraform\examples\ncloud-basic"
+Copy-Item .\terraform.tfvars.example .\terraform.tfvars
+
+(Invoke-RestMethod -Uri "https://ifconfig.me/ip").Trim()
+notepad .\terraform.tfvars
+```
+
+`Get-Location`의 마지막 경로가 `502-terraform\examples\ncloud-basic`이고 `Test-Path .\main.tf`가 `True`이면 준비가 완료된 것입니다.
 
 `terraform.tfvars`에서 인증키, 관리자 Public IP, 서버 이미지 번호와 비밀번호를 수정합니다.
 
@@ -96,7 +120,7 @@ board_db_password = "ChangeBoardPass123!"
 
 DB 비밀번호와 Login Key는 Terraform state에 저장됩니다. `terraform.tfstate`, `terraform.tfvars`, `lab7-key.pem`을 외부에 공유하지 않습니다.
 
-```bash
+```console
 terraform init
 terraform fmt
 terraform validate
@@ -132,12 +156,25 @@ terraform output next_steps
 
 ## 게시판 확인
 
+Ubuntu / macOS:
+
 ```bash
 BOARD_URL=$(terraform output -raw board_url)
 
 curl -i "${BOARD_URL}healthz"
 curl -i "${BOARD_URL}api/health"
 curl -s "${BOARD_URL}api/posts"
+```
+
+Windows PowerShell:
+
+```powershell
+$BOARD_URL = terraform output -raw board_url
+
+curl.exe -i "${BOARD_URL}healthz"
+curl.exe -i "${BOARD_URL}api/health"
+curl.exe -s "${BOARD_URL}api/posts"
+Start-Process $BOARD_URL
 ```
 
 브라우저에서 `board_url`을 열고 게시글 조회, 작성, 삭제가 모두 되면 `Public ALB -> Web -> Backend -> MariaDB` 경로가 검증된 것입니다.
@@ -152,7 +189,7 @@ terraform output verification_commands
 
 NAT Gateway, Public IP, ALB와 서버는 비용이 발생할 수 있으므로 실습이 끝나면 삭제합니다.
 
-```bash
+```console
 terraform destroy
 terraform state list
 ```
@@ -163,3 +200,5 @@ terraform state list
 - [Ncloud Subnet Resource](https://registry.terraform.io/providers/NaverCloudPlatform/ncloud/latest/docs/resources/subnet)
 - [Ncloud Application Load Balancer](https://guide.ncloud-docs.com/docs/loadbalancer-application-vpc)
 - [Ncloud ACG](https://guide.ncloud-docs.com/docs/server-acg-vpc)
+- [HashiCorp Terraform 설치](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+- [Microsoft OpenSSH for Windows](https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse)
