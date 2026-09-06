@@ -2179,26 +2179,105 @@
 <p><strong>확인 기준:</strong> 서버가 <code>운영중</code>이고 Public IP가 할당되어 있으며 ACG에 <code>22</code>, <code>21</code>, <code>30000-30010</code> 규칙이 있어야 다음 단계로 넘어갑니다.</p>
 <h2 id="5-step-2-vsftpd">5. Step 2: vsftpd와 실습 계정 설치<a class="headerlink" href="#5-step-2-vsftpd" title="Permanent link">&para;</a></h2>
 <p>SSH로 Ubuntu 서버에 접속한 뒤 패키지와 실습 계정을 준비합니다. 예시 암호는 수업용이므로 실제 운영 환경에서는 변경합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>vsftpd<span class="w"> </span>openssl
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>sudo<span class="w"> </span>useradd<span class="w"> </span>--create-home<span class="w"> </span>--shell<span class="w"> </span>/usr/sbin/nologin<span class="w"> </span>ftpstudent
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="nb">echo</span><span class="w"> </span><span class="s1">'ftpstudent:FileLab123!'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>chpasswd
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>grep<span class="w"> </span>-qxF<span class="w"> </span><span class="s1">'/usr/sbin/nologin'</span><span class="w"> </span>/etc/shells<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s1">'/usr/sbin/nologin'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/shells
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/home/ftpstudent/upload
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>sudo<span class="w"> </span>chown<span class="w"> </span>root:root<span class="w"> </span>/home/ftpstudent
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">755</span><span class="w"> </span>/home/ftpstudent
-<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>sudo<span class="w"> </span>chown<span class="w"> </span>ftpstudent:ftpstudent<span class="w"> </span>/home/ftpstudent/upload
-<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">750</span><span class="w"> </span>/home/ftpstudent/upload
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Ubuntu 패키지 목록을 갱신하고 FTP 서버와 인증서 도구를 설치합니다.</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>vsftpd<span class="w"> </span>openssl
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1"># SSH 로그인이 차단된 파일 전송 전용 계정을 만들고 비밀번호를 설정합니다.</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>sudo<span class="w"> </span>useradd<span class="w"> </span>--create-home<span class="w"> </span>--shell<span class="w"> </span>/usr/sbin/nologin<span class="w"> </span>ftpstudent
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="nb">echo</span><span class="w"> </span><span class="s1">'ftpstudent:FileLab123!'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>chpasswd
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="c1"># vsftpd가 nologin 셸을 사용하는 계정도 인증할 수 있도록 허용 셸 목록에 추가합니다.</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>grep<span class="w"> </span>-qxF<span class="w"> </span><span class="s1">'/usr/sbin/nologin'</span><span class="w"> </span>/etc/shells<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s1">'/usr/sbin/nologin'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/shells
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="c1"># 홈은 root가 보호하고, 실제 파일을 저장할 upload 폴더만 ftpstudent에게 허용합니다.</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/home/ftpstudent/upload
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>sudo<span class="w"> </span>chown<span class="w"> </span>root:root<span class="w"> </span>/home/ftpstudent
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">755</span><span class="w"> </span>/home/ftpstudent
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>sudo<span class="w"> </span>chown<span class="w"> </span>ftpstudent:ftpstudent<span class="w"> </span>/home/ftpstudent/upload
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">750</span><span class="w"> </span>/home/ftpstudent/upload
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>명령</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>apt-get update</code></td>
+<td>Ubuntu가 참조하는 패키지 목록을 최신 상태로 갱신합니다. 프로그램 자체를 업그레이드하는 명령은 아닙니다.</td>
+</tr>
+<tr>
+<td><code>apt-get install -y vsftpd openssl</code></td>
+<td>FTP 서버인 <code>vsftpd</code>와 TLS 인증서를 만드는 <code>openssl</code>을 설치합니다. <code>-y</code>는 설치 확인 질문에 자동으로 동의합니다.</td>
+</tr>
+<tr>
+<td><code>useradd --create-home</code></td>
+<td><code>ftpstudent</code> 계정을 만들고 <code>/home/ftpstudent</code> 홈 디렉터리도 함께 생성합니다.</td>
+</tr>
+<tr>
+<td><code>--shell /usr/sbin/nologin</code></td>
+<td>이 계정으로 SSH 터미널에 로그인하지 못하게 하고 파일 전송 용도로만 사용합니다.</td>
+</tr>
+<tr>
+<td><code>chpasswd</code></td>
+<td><code>사용자명:비밀번호</code> 형식의 값을 받아 계정 비밀번호를 설정합니다.</td>
+</tr>
+<tr>
+<td><code>grep ... || tee -a /etc/shells</code></td>
+<td><code>/usr/sbin/nologin</code>이 허용 셸 목록에 없을 때만 추가합니다. <code>||</code> 뒤 명령은 앞의 검색이 실패했을 때 실행됩니다.</td>
+</tr>
+<tr>
+<td><code>mkdir -p</code></td>
+<td>업로드 전용 폴더를 만듭니다. <code>-p</code>는 상위 폴더가 있으면 오류를 내지 않습니다.</td>
+</tr>
+<tr>
+<td><code>chown root:root /home/ftpstudent</code></td>
+<td>FTPS 최상위 홈의 소유자와 그룹을 <code>root</code>로 지정해 사용자가 루트 구조를 바꾸지 못하게 합니다.</td>
+</tr>
+<tr>
+<td><code>chmod 755 /home/ftpstudent</code></td>
+<td>소유자는 읽기·쓰기·진입, 나머지는 읽기·진입만 허용합니다.</td>
+</tr>
+<tr>
+<td><code>chown ftpstudent:ftpstudent .../upload</code></td>
+<td>실제 업로드 폴더는 <code>ftpstudent</code>가 파일을 만들 수 있도록 소유권을 넘깁니다.</td>
+</tr>
+<tr>
+<td><code>chmod 750 .../upload</code></td>
+<td>소유자는 모든 권한, 그룹은 읽기·진입, 그 밖의 사용자는 접근할 수 없게 합니다.</td>
+</tr>
+</tbody>
+</table>
 <p><code>ftpstudent</code>는 SSH 셸에 로그인할 수 없고 <code>/upload</code> 폴더에만 파일을 기록합니다. 홈 디렉터리는 <code>root</code> 소유로 유지해 사용자가 FTPS 루트 설정을 변경하지 못하게 합니다.</p>
 <p>권한을 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>getent<span class="w"> </span>passwd<span class="w"> </span>ftpstudent
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>sudo<span class="w"> </span>ls<span class="w"> </span>-ld<span class="w"> </span>/home/ftpstudent<span class="w"> </span>/home/ftpstudent/upload
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 계정의 홈 디렉터리와 로그인 셸을 확인합니다.</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>getent<span class="w"> </span>passwd<span class="w"> </span>ftpstudent
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># 홈과 upload 폴더의 소유자 및 숫자 권한 적용 결과를 확인합니다.</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>sudo<span class="w"> </span>ls<span class="w"> </span>-ld<span class="w"> </span>/home/ftpstudent<span class="w"> </span>/home/ftpstudent/upload
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>명령</th>
+<th>확인 내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getent passwd ftpstudent</code></td>
+<td>계정, UID, 홈 디렉터리, 로그인 셸 정보를 조회합니다.</td>
+</tr>
+<tr>
+<td><code>ls -ld</code></td>
+<td>폴더 안의 파일이 아니라 폴더 자체의 권한과 소유자를 자세히 표시합니다.</td>
+</tr>
+</tbody>
+</table>
 <p><strong>확인 기준:</strong> 계정 셸이 <code>/usr/sbin/nologin</code>, 홈 디렉터리 소유자가 <code>root</code>, <code>upload</code> 소유자가 <code>ftpstudent</code>로 출력되어야 합니다.</p>
 <h2 id="6-step-3-tls-passive-mode">6. Step 3: TLS 인증서와 Passive Mode 설정<a class="headerlink" href="#6-step-3-tls-passive-mode" title="Permanent link">&para;</a></h2>
 <p>아래 첫 줄에 서버의 실제 Public IP를 입력합니다. <code>pasv_address</code>가 잘못되면 로그인 후 디렉터리 목록 조회에서 연결이 멈춥니다.</p>
@@ -2206,86 +2285,339 @@
 <p class="admonition-title">서버에서 조회한 외부 IP를 넣지 않습니다</p>
 <p><code>FTP_PUBLIC_IP</code>에는 Naver Cloud 콘솔의 <strong>Server &gt; Public IP</strong>에서 해당 서버에 할당된 주소를 입력합니다. 서버에서 <code>curl ifconfig.me</code>로 확인한 외부 통신 IP는 NAT 구성에 따라 할당 Public IP와 다를 수 있으므로 <code>pasv_address</code>로 사용하지 않습니다.</p>
 </div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">FTP_PUBLIC_IP</span><span class="o">=</span><span class="s2">"YOUR_SERVER_PUBLIC_IP"</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>sudo<span class="w"> </span>openssl<span class="w"> </span>req<span class="w"> </span>-x509<span class="w"> </span>-nodes<span class="w"> </span>-days<span class="w"> </span><span class="m">365</span><span class="w"> </span>-newkey<span class="w"> </span>rsa:2048<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span>-keyout<span class="w"> </span>/etc/ssl/private/vsftpd.key<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span>-out<span class="w"> </span>/etc/ssl/certs/vsftpd.crt<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span>-subj<span class="w"> </span><span class="s2">"/C=KR/O=CloudLab/CN=</span><span class="nv">$FTP_PUBLIC_IP</span><span class="s2">"</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/etc/ssl/private/vsftpd.key
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>sudo<span class="w"> </span>cp<span class="w"> </span>/etc/vsftpd.conf<span class="w"> </span>/etc/vsftpd.conf.backup
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/vsftpd.conf<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt;EOF</span>
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="s">listen=YES</span>
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="s">listen_ipv6=NO</span>
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="s">anonymous_enable=NO</span>
-<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="s">local_enable=YES</span>
-<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="s">write_enable=YES</span>
-<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="s">local_umask=022</span>
-<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="s">dirmessage_enable=YES</span>
-<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="s">use_localtime=YES</span>
-<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="s">xferlog_enable=YES</span>
-<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="s">xferlog_std_format=NO</span>
-<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="s">log_ftp_protocol=YES</span>
-<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="s">connect_from_port_20=YES</span>
-<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="s">chroot_local_user=YES</span>
-<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="s">allow_writeable_chroot=NO</span>
-<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="s">user_sub_token=\$USER</span>
-<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="s">local_root=/home/\$USER</span>
-<a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="s">secure_chroot_dir=/var/run/vsftpd/empty</span>
-<a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a><span class="s">pam_service_name=vsftpd</span>
-<a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a><span class="s">pasv_enable=YES</span>
-<a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a><span class="s">pasv_min_port=30000</span>
-<a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a><span class="s">pasv_max_port=30010</span>
-<a id="__codelineno-6-33" name="__codelineno-6-33" href="#__codelineno-6-33"></a><span class="s">pasv_address=$FTP_PUBLIC_IP</span>
-<a id="__codelineno-6-34" name="__codelineno-6-34" href="#__codelineno-6-34"></a><span class="s">ssl_enable=YES</span>
-<a id="__codelineno-6-35" name="__codelineno-6-35" href="#__codelineno-6-35"></a><span class="s">allow_anon_ssl=NO</span>
-<a id="__codelineno-6-36" name="__codelineno-6-36" href="#__codelineno-6-36"></a><span class="s">force_local_logins_ssl=YES</span>
-<a id="__codelineno-6-37" name="__codelineno-6-37" href="#__codelineno-6-37"></a><span class="s">force_local_data_ssl=YES</span>
-<a id="__codelineno-6-38" name="__codelineno-6-38" href="#__codelineno-6-38"></a><span class="s">ssl_tlsv1=YES</span>
-<a id="__codelineno-6-39" name="__codelineno-6-39" href="#__codelineno-6-39"></a><span class="s">ssl_sslv2=NO</span>
-<a id="__codelineno-6-40" name="__codelineno-6-40" href="#__codelineno-6-40"></a><span class="s">ssl_sslv3=NO</span>
-<a id="__codelineno-6-41" name="__codelineno-6-41" href="#__codelineno-6-41"></a><span class="s">require_ssl_reuse=NO</span>
-<a id="__codelineno-6-42" name="__codelineno-6-42" href="#__codelineno-6-42"></a><span class="s">rsa_cert_file=/etc/ssl/certs/vsftpd.crt</span>
-<a id="__codelineno-6-43" name="__codelineno-6-43" href="#__codelineno-6-43"></a><span class="s">rsa_private_key_file=/etc/ssl/private/vsftpd.key</span>
-<a id="__codelineno-6-44" name="__codelineno-6-44" href="#__codelineno-6-44"></a><span class="s">EOF</span>
-<a id="__codelineno-6-45" name="__codelineno-6-45" href="#__codelineno-6-45"></a>
-<a id="__codelineno-6-46" name="__codelineno-6-46" href="#__codelineno-6-46"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>vsftpd
-<a id="__codelineno-6-47" name="__codelineno-6-47" href="#__codelineno-6-47"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>vsftpd
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 반드시 Naver Cloud 콘솔에서 서버에 할당된 Public IP를 입력합니다.</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nv">FTP_PUBLIC_IP</span><span class="o">=</span><span class="s2">"YOUR_SERVER_PUBLIC_IP"</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Public IP를 CN으로 사용하는 1년짜리 실습용 자체 서명 인증서를 생성합니다.</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>sudo<span class="w"> </span>openssl<span class="w"> </span>req<span class="w"> </span>-x509<span class="w"> </span>-nodes<span class="w"> </span>-days<span class="w"> </span><span class="m">365</span><span class="w"> </span>-newkey<span class="w"> </span>rsa:2048<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span>-keyout<span class="w"> </span>/etc/ssl/private/vsftpd.key<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span>-out<span class="w"> </span>/etc/ssl/certs/vsftpd.crt<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">  </span>-subj<span class="w"> </span><span class="s2">"/C=KR/O=CloudLab/CN=</span><span class="nv">$FTP_PUBLIC_IP</span><span class="s2">"</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="c1"># 개인키는 root만 읽게 하고 기존 설정 파일은 복구용으로 백업합니다.</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/etc/ssl/private/vsftpd.key
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>sudo<span class="w"> </span>cp<span class="w"> </span>/etc/vsftpd.conf<span class="w"> </span>/etc/vsftpd.conf.backup
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="c1"># 아래 내용을 새로운 vsftpd 설정 파일로 저장합니다.</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/vsftpd.conf<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt;EOF</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="s"># IPv4로 FTP 요청을 받으며 익명 접속은 차단합니다.</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="s">listen=YES</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="s">listen_ipv6=NO</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="s">anonymous_enable=NO</span>
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="s"># Ubuntu 로컬 계정의 로그인과 파일 쓰기를 허용합니다.</span>
+<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="s">local_enable=YES</span>
+<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="s">write_enable=YES</span>
+<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="s">local_umask=022</span>
+<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="s">dirmessage_enable=YES</span>
+<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="s">use_localtime=YES</span>
+<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a>
+<a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="s"># 로그인과 파일 전송 과정을 로그로 기록합니다.</span>
+<a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a><span class="s">xferlog_enable=YES</span>
+<a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a><span class="s">xferlog_std_format=NO</span>
+<a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a><span class="s">log_ftp_protocol=YES</span>
+<a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a><span class="s">connect_from_port_20=YES</span>
+<a id="__codelineno-6-33" name="__codelineno-6-33" href="#__codelineno-6-33"></a>
+<a id="__codelineno-6-34" name="__codelineno-6-34" href="#__codelineno-6-34"></a><span class="s"># 사용자를 자신의 홈 디렉터리 안에 격리합니다.</span>
+<a id="__codelineno-6-35" name="__codelineno-6-35" href="#__codelineno-6-35"></a><span class="s">chroot_local_user=YES</span>
+<a id="__codelineno-6-36" name="__codelineno-6-36" href="#__codelineno-6-36"></a><span class="s">allow_writeable_chroot=NO</span>
+<a id="__codelineno-6-37" name="__codelineno-6-37" href="#__codelineno-6-37"></a><span class="s">user_sub_token=\$USER</span>
+<a id="__codelineno-6-38" name="__codelineno-6-38" href="#__codelineno-6-38"></a><span class="s">local_root=/home/\$USER</span>
+<a id="__codelineno-6-39" name="__codelineno-6-39" href="#__codelineno-6-39"></a><span class="s">secure_chroot_dir=/var/run/vsftpd/empty</span>
+<a id="__codelineno-6-40" name="__codelineno-6-40" href="#__codelineno-6-40"></a><span class="s">pam_service_name=vsftpd</span>
+<a id="__codelineno-6-41" name="__codelineno-6-41" href="#__codelineno-6-41"></a>
+<a id="__codelineno-6-42" name="__codelineno-6-42" href="#__codelineno-6-42"></a><span class="s"># Passive Mode 데이터 포트를 30000-30010으로 고정하고 Public IP를 알립니다.</span>
+<a id="__codelineno-6-43" name="__codelineno-6-43" href="#__codelineno-6-43"></a><span class="s">pasv_enable=YES</span>
+<a id="__codelineno-6-44" name="__codelineno-6-44" href="#__codelineno-6-44"></a><span class="s">pasv_min_port=30000</span>
+<a id="__codelineno-6-45" name="__codelineno-6-45" href="#__codelineno-6-45"></a><span class="s">pasv_max_port=30010</span>
+<a id="__codelineno-6-46" name="__codelineno-6-46" href="#__codelineno-6-46"></a><span class="s">pasv_address=$FTP_PUBLIC_IP</span>
+<a id="__codelineno-6-47" name="__codelineno-6-47" href="#__codelineno-6-47"></a>
+<a id="__codelineno-6-48" name="__codelineno-6-48" href="#__codelineno-6-48"></a><span class="s"># 로그인 채널과 파일 전송 채널 모두 TLS를 강제합니다.</span>
+<a id="__codelineno-6-49" name="__codelineno-6-49" href="#__codelineno-6-49"></a><span class="s">ssl_enable=YES</span>
+<a id="__codelineno-6-50" name="__codelineno-6-50" href="#__codelineno-6-50"></a><span class="s">allow_anon_ssl=NO</span>
+<a id="__codelineno-6-51" name="__codelineno-6-51" href="#__codelineno-6-51"></a><span class="s">force_local_logins_ssl=YES</span>
+<a id="__codelineno-6-52" name="__codelineno-6-52" href="#__codelineno-6-52"></a><span class="s">force_local_data_ssl=YES</span>
+<a id="__codelineno-6-53" name="__codelineno-6-53" href="#__codelineno-6-53"></a><span class="s">ssl_tlsv1=YES</span>
+<a id="__codelineno-6-54" name="__codelineno-6-54" href="#__codelineno-6-54"></a><span class="s">ssl_sslv2=NO</span>
+<a id="__codelineno-6-55" name="__codelineno-6-55" href="#__codelineno-6-55"></a><span class="s">ssl_sslv3=NO</span>
+<a id="__codelineno-6-56" name="__codelineno-6-56" href="#__codelineno-6-56"></a><span class="s">require_ssl_reuse=NO</span>
+<a id="__codelineno-6-57" name="__codelineno-6-57" href="#__codelineno-6-57"></a><span class="s">rsa_cert_file=/etc/ssl/certs/vsftpd.crt</span>
+<a id="__codelineno-6-58" name="__codelineno-6-58" href="#__codelineno-6-58"></a><span class="s">rsa_private_key_file=/etc/ssl/private/vsftpd.key</span>
+<a id="__codelineno-6-59" name="__codelineno-6-59" href="#__codelineno-6-59"></a><span class="s">EOF</span>
+<a id="__codelineno-6-60" name="__codelineno-6-60" href="#__codelineno-6-60"></a>
+<a id="__codelineno-6-61" name="__codelineno-6-61" href="#__codelineno-6-61"></a><span class="c1"># 부팅 시 자동 시작을 등록하고 새 설정으로 서비스를 재시작합니다.</span>
+<a id="__codelineno-6-62" name="__codelineno-6-62" href="#__codelineno-6-62"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>vsftpd
+<a id="__codelineno-6-63" name="__codelineno-6-63" href="#__codelineno-6-63"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>vsftpd
 </code></pre></div>
+<p>인증서와 설정 파일을 만드는 명령의 의미는 다음과 같습니다.</p>
+<table>
+<thead>
+<tr>
+<th>명령·옵션</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FTP_PUBLIC_IP=...</code></td>
+<td>이후 명령에서 반복해서 사용할 서버 Public IP를 셸 변수에 저장합니다.</td>
+</tr>
+<tr>
+<td><code>openssl req -x509</code></td>
+<td>별도 인증기관 없이 실습용 자체 서명 X.509 인증서를 생성합니다.</td>
+</tr>
+<tr>
+<td><code>-nodes</code></td>
+<td>서비스 재시작 시 암호 입력을 요구하지 않도록 개인키 자체에는 암호를 걸지 않습니다.</td>
+</tr>
+<tr>
+<td><code>-days 365</code></td>
+<td>인증서 유효기간을 365일로 지정합니다.</td>
+</tr>
+<tr>
+<td><code>-newkey rsa:2048</code></td>
+<td>2,048비트 RSA 개인키를 새로 생성합니다.</td>
+</tr>
+<tr>
+<td><code>-keyout</code>, <code>-out</code></td>
+<td>개인키와 인증서를 저장할 경로를 각각 지정합니다.</td>
+</tr>
+<tr>
+<td><code>-subj</code></td>
+<td>대화형 질문 없이 인증서 국가, 조직, 서버 주소를 입력합니다. <code>CN</code>에는 서버 Public IP가 들어갑니다.</td>
+</tr>
+<tr>
+<td><code>chmod 600</code></td>
+<td>인증서 개인키를 <code>root</code>만 읽고 쓸 수 있게 보호합니다.</td>
+</tr>
+<tr>
+<td><code>cp ...backup</code></td>
+<td>설정을 잘못했을 때 되돌릴 수 있도록 원본 <code>vsftpd.conf</code>를 백업합니다.</td>
+</tr>
+<tr>
+<td><code>tee ... &lt;&lt;EOF</code></td>
+<td><code>EOF</code> 사이의 여러 줄을 <code>/etc/vsftpd.conf</code>에 새 내용으로 기록합니다.</td>
+</tr>
+<tr>
+<td><code>systemctl enable --now</code></td>
+<td>부팅 시 자동 시작을 등록하고 현재 서비스도 즉시 시작합니다.</td>
+</tr>
+<tr>
+<td><code>systemctl restart</code></td>
+<td>변경된 설정 파일을 다시 읽도록 서비스를 재시작합니다.</td>
+</tr>
+</tbody>
+</table>
+<p><code>vsftpd.conf</code>의 주요 설정도 함께 확인합니다.</p>
+<table>
+<thead>
+<tr>
+<th>설정</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>listen=YES</code>, <code>listen_ipv6=NO</code></td>
+<td>IPv4 주소에서 독립 실행형 FTP 서버로 요청을 받습니다.</td>
+</tr>
+<tr>
+<td><code>anonymous_enable=NO</code></td>
+<td>계정 없는 익명 접속을 차단합니다.</td>
+</tr>
+<tr>
+<td><code>local_enable=YES</code></td>
+<td>Ubuntu에 생성된 로컬 계정의 로그인을 허용합니다.</td>
+</tr>
+<tr>
+<td><code>write_enable=YES</code></td>
+<td>업로드, 삭제 등 파일 쓰기 명령을 허용합니다.</td>
+</tr>
+<tr>
+<td><code>local_umask=022</code></td>
+<td>새 파일에서 그룹·기타 사용자의 쓰기 권한을 제거합니다. 일반적으로 파일은 <code>644</code> 형태가 됩니다.</td>
+</tr>
+<tr>
+<td><code>dirmessage_enable=YES</code>, <code>use_localtime=YES</code></td>
+<td>디렉터리 안내 메시지와 서버 현지 시간을 사용합니다.</td>
+</tr>
+<tr>
+<td><code>xferlog_enable=YES</code></td>
+<td>파일 전송 기록을 남깁니다.</td>
+</tr>
+<tr>
+<td><code>xferlog_std_format=NO</code>, <code>log_ftp_protocol=YES</code></td>
+<td>표준 요약 형식 대신 FTP 요청과 응답을 자세히 기록합니다.</td>
+</tr>
+<tr>
+<td><code>connect_from_port_20=YES</code></td>
+<td>Active Mode 데이터 연결에 전통적인 FTP 데이터 포트 20을 사용하도록 허용합니다. 이번 실습 클라이언트는 Passive Mode를 사용합니다.</td>
+</tr>
+<tr>
+<td><code>chroot_local_user=YES</code></td>
+<td>로그인 사용자가 자신의 홈 디렉터리 밖으로 이동하지 못하게 격리합니다.</td>
+</tr>
+<tr>
+<td><code>allow_writeable_chroot=NO</code></td>
+<td>격리 기준인 홈 자체가 쓰기 가능한 위험한 구성을 거부합니다. 그래서 홈은 <code>root</code>, <code>/upload</code>는 사용자 소유로 나눴습니다.</td>
+</tr>
+<tr>
+<td><code>user_sub_token=$USER</code></td>
+<td>설정의 <code>$USER</code>를 로그인한 사용자명으로 치환합니다.</td>
+</tr>
+<tr>
+<td><code>local_root=/home/$USER</code></td>
+<td>사용자에게 보이는 FTPS 최상위 경로를 자신의 홈으로 지정합니다.</td>
+</tr>
+<tr>
+<td><code>secure_chroot_dir=...</code></td>
+<td>vsftpd가 권한을 낮춘 뒤 사용할 비어 있는 안전 디렉터리를 지정합니다.</td>
+</tr>
+<tr>
+<td><code>pam_service_name=vsftpd</code></td>
+<td>Ubuntu PAM의 <code>vsftpd</code> 인증 정책으로 사용자와 비밀번호를 확인합니다.</td>
+</tr>
+<tr>
+<td><code>pasv_enable=YES</code></td>
+<td>클라이언트가 서버 쪽 데이터 포트로 접속하는 Passive Mode를 활성화합니다.</td>
+</tr>
+<tr>
+<td><code>pasv_min_port</code>, <code>pasv_max_port</code></td>
+<td>데이터 연결용 포트를 <code>30000-30010</code>으로 제한해 ACG 범위와 일치시킵니다.</td>
+</tr>
+<tr>
+<td><code>pasv_address</code></td>
+<td>PASV 응답에서 클라이언트에게 알려줄 실제 서버 Public IP입니다.</td>
+</tr>
+<tr>
+<td><code>ssl_enable=YES</code></td>
+<td>FTP 연결에 TLS를 사용할 수 있게 합니다.</td>
+</tr>
+<tr>
+<td><code>allow_anon_ssl=NO</code></td>
+<td>익명 사용자의 TLS 접속도 허용하지 않습니다.</td>
+</tr>
+<tr>
+<td><code>force_local_logins_ssl=YES</code></td>
+<td>사용자명과 비밀번호가 오가는 로그인 채널에 TLS를 강제합니다.</td>
+</tr>
+<tr>
+<td><code>force_local_data_ssl=YES</code></td>
+<td>목록과 파일이 오가는 데이터 채널에도 TLS를 강제합니다.</td>
+</tr>
+<tr>
+<td><code>ssl_tlsv1=YES</code>, <code>ssl_sslv2=NO</code>, <code>ssl_sslv3=NO</code></td>
+<td>TLS는 허용하고 오래되어 안전하지 않은 SSLv2·SSLv3는 차단합니다.</td>
+</tr>
+<tr>
+<td><code>require_ssl_reuse=NO</code></td>
+<td>TLS 세션 재사용을 요구하지 않아 FileZilla 등 다양한 클라이언트와의 호환성을 높입니다.</td>
+</tr>
+<tr>
+<td><code>rsa_cert_file</code>, <code>rsa_private_key_file</code></td>
+<td>앞에서 생성한 서버 인증서와 개인키 경로를 지정합니다.</td>
+</tr>
+</tbody>
+</table>
 <p>서버 상태, 제어 포트, 인증서 지문을 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>vsftpd
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>sudo<span class="w"> </span>ss<span class="w"> </span>-lntp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':21'</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>sudo<span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'^pasv_(address|min_port|max_port)='</span><span class="w"> </span>/etc/vsftpd.conf
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>sudo<span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>/etc/ssl/certs/vsftpd.crt<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span>-noout<span class="w"> </span>-subject<span class="w"> </span>-fingerprint<span class="w"> </span>-sha256
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 서비스가 실행 중인지 확인합니다.</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>vsftpd
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># vsftpd가 제어 포트 21에서 요청을 기다리는지 확인합니다.</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>sudo<span class="w"> </span>ss<span class="w"> </span>-lntp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':21'</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1"># Passive Mode의 Public IP와 데이터 포트 범위를 확인합니다.</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>sudo<span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'^pasv_(address|min_port|max_port)='</span><span class="w"> </span>/etc/vsftpd.conf
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="c1"># FileZilla 인증서 경고창과 비교할 주체 및 SHA-256 지문을 확인합니다.</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>sudo<span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>/etc/ssl/certs/vsftpd.crt<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">  </span>-noout<span class="w"> </span>-subject<span class="w"> </span>-fingerprint<span class="w"> </span>-sha256
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>명령</th>
+<th>확인 내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>systemctl is-active</code></td>
+<td>서비스가 실행 중이면 <code>active</code>를 출력합니다.</td>
+</tr>
+<tr>
+<td><code>ss -lntp</code></td>
+<td>TCP 포트를 수신 중인 프로세스를 표시하며 <code>grep</code>으로 21번만 찾습니다.</td>
+</tr>
+<tr>
+<td><code>grep -E</code></td>
+<td>설정 파일에서 Passive IP와 포트 범위만 골라 표시합니다.</td>
+</tr>
+<tr>
+<td><code>openssl x509 -noout</code></td>
+<td>인증서 원문 전체 대신 주체와 SHA-256 지문만 출력해 FileZilla 경고창과 비교합니다.</td>
+</tr>
+</tbody>
+</table>
 <p>UFW가 활성 상태일 때만 OS 방화벽에도 같은 포트를 허용합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>status
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">21</span>/tcp
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">30000</span>:30010/tcp
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># UFW가 active인지 먼저 확인합니다.</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>status
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># UFW가 active일 때 제어 포트와 Passive 데이터 포트를 허용합니다.</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">21</span>/tcp
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">30000</span>:30010/tcp
 </code></pre></div>
+<p><code>ufw status</code>는 OS 방화벽 활성 여부를 확인하고, 두 <code>allow</code> 명령은 제어 포트 21과 Passive 데이터 포트 범위를 허용합니다. Naver Cloud ACG와 UFW가 모두 활성화된 경우 양쪽에서 같은 포트를 열어야 합니다.</p>
 <p>UFW가 <code>inactive</code>라면 두 <code>allow</code> 명령은 생략할 수 있습니다.</p>
 <p><strong>확인 기준:</strong> 서비스가 <code>active</code>이고 <code>0.0.0.0:21</code> 리슨과 인증서 SHA-256 지문이 출력되어야 합니다. <code>pasv_address</code>는 Naver Cloud 콘솔에 표시된 서버 Public IP와 정확히 같아야 합니다.</p>
 <h2 id="7-step-4">7. Step 4: 서버 테스트 파일 준비<a class="headerlink" href="#7-step-4" title="Permanent link">&para;</a></h2>
 <p>FileZilla에서 내려받을 파일을 서버에 하나 만듭니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>-u<span class="w"> </span>ftpstudent<span class="w"> </span>tee<span class="w"> </span>/home/ftpstudent/upload/server-guide.txt<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="s">Naver Cloud FTPS file server</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="s">This file was created on the server.</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="s">EOF</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>sudo<span class="w"> </span>ls<span class="w"> </span>-l<span class="w"> </span>/home/ftpstudent/upload
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>sudo<span class="w"> </span>cat<span class="w"> </span>/home/ftpstudent/upload/server-guide.txt
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># 실제 FTP 사용자 권한으로 다운로드 테스트 파일을 생성합니다.</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>sudo<span class="w"> </span>-u<span class="w"> </span>ftpstudent<span class="w"> </span>tee<span class="w"> </span>/home/ftpstudent/upload/server-guide.txt<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="s">Naver Cloud FTPS file server</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="s">This file was created on the server.</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="s">EOF</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c1"># 생성된 파일의 소유자와 내용을 확인합니다.</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>sudo<span class="w"> </span>ls<span class="w"> </span>-l<span class="w"> </span>/home/ftpstudent/upload
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>sudo<span class="w"> </span>cat<span class="w"> </span>/home/ftpstudent/upload/server-guide.txt
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>명령</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sudo -u ftpstudent</code></td>
+<td>명령을 <code>root</code>가 아니라 실제 FTP 사용자 권한으로 실행해 쓰기 권한도 함께 검증합니다.</td>
+</tr>
+<tr>
+<td><code>tee ... &lt;&lt;'EOF'</code></td>
+<td>두 줄의 테스트 내용을 파일로 저장합니다. 따옴표가 있는 <code>'EOF'</code>는 내용 안의 변수를 셸이 해석하지 않게 합니다.</td>
+</tr>
+<tr>
+<td><code>ls -l</code></td>
+<td>파일의 권한, 소유자, 크기, 수정 시간을 확인합니다.</td>
+</tr>
+<tr>
+<td><code>cat</code></td>
+<td>파일 내용을 터미널에 출력해 정상 생성 여부를 확인합니다.</td>
+</tr>
+</tbody>
+</table>
 <p><strong>확인 기준:</strong> <code>server-guide.txt</code>의 소유자가 <code>ftpstudent</code>이고 두 줄의 내용이 출력되어야 합니다.</p>
 <h2 id="8-step-5-windows-filezilla">8. Step 5: Windows FileZilla 접속<a class="headerlink" href="#8-step-5-windows-filezilla" title="Permanent link">&para;</a></h2>
 <h3 id="8-1">8-1. 설치와 로컬 파일 생성<a class="headerlink" href="#8-1" title="Permanent link">&para;</a></h3>
 <p><a href="https://filezilla-project.org/download.php?type=client">FileZilla Client 공식 다운로드</a>에서 Windows용 <strong>FileZilla Client</strong>를 설치합니다. FileZilla Server를 설치하지 않습니다.</p>
 <p>PowerShell에서 업로드할 파일을 만듭니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="s2">"Uploaded from Windows FileZilla"</span> <span class="p">|</span> <span class="nb">Set-Content</span> <span class="p">`</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  <span class="s2">"$HOME\Desktop\ftps-test-windows.txt"</span> <span class="n">-Encoding</span> <span class="n">utf8</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c"># Windows Desktop에 FileZilla 업로드용 테스트 파일을 만듭니다.</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="s2">"Uploaded from Windows FileZilla"</span> <span class="p">|</span> <span class="nb">Set-Content</span> <span class="p">`</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="s2">"$HOME\Desktop\ftps-test-windows.txt"</span> <span class="n">-Encoding</span> <span class="n">utf8</span>
 </code></pre></div>
+<p><code>Set-Content</code>는 문자열을 파일로 저장합니다. <code>$HOME</code>은 현재 Windows 사용자의 홈 폴더이며, <code>`</code>은 PowerShell 명령이 다음 줄까지 이어진다는 뜻입니다.</p>
 <h3 id="8-2">8-2. 사이트 관리자 설정<a class="headerlink" href="#8-2" title="Permanent link">&para;</a></h3>
 <p>FileZilla에서 <strong>파일 &gt; 사이트 관리자 &gt; 새 사이트</strong>를 선택하고 다음 값을 입력합니다.</p>
 <table>
@@ -2340,8 +2672,10 @@
 <h3 id="9-1">9-1. 설치와 로컬 파일 생성<a class="headerlink" href="#9-1" title="Permanent link">&para;</a></h3>
 <p><a href="https://filezilla-project.org/download.php?type=client">FileZilla Client 공식 다운로드</a>에서 macOS용 <strong>FileZilla Client</strong>를 설치합니다.</p>
 <p>Terminal에서 업로드할 파일을 만듭니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nb">printf</span><span class="w"> </span><span class="s1">'Uploaded from macOS FileZilla\n'</span><span class="w"> </span>&gt;<span class="w"> </span>~/Desktop/ftps-test-macos.txt
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># macOS Desktop에 FileZilla 업로드용 테스트 파일을 만듭니다.</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nb">printf</span><span class="w"> </span><span class="s1">'Uploaded from macOS FileZilla\n'</span><span class="w"> </span>&gt;<span class="w"> </span>~/Desktop/ftps-test-macos.txt
 </code></pre></div>
+<p><code>printf</code>는 테스트 문장을 출력하고 <code>&gt;</code>는 그 출력을 Desktop의 파일에 새로 저장합니다. <code>~</code>는 현재 macOS 사용자의 홈 디렉터리입니다.</p>
 <h3 id="9-2">9-2. 사이트 관리자 설정<a class="headerlink" href="#9-2" title="Permanent link">&para;</a></h3>
 <p>FileZilla에서 <strong>File &gt; Site Manager &gt; New site</strong>를 선택합니다.</p>
 <table>
@@ -2394,13 +2728,45 @@
 <p><strong>확인 기준:</strong> 오른쪽 <code>/upload</code>에 macOS 파일이 보이고 Desktop에 <code>server-guide.txt</code>가 내려받아져야 합니다.</p>
 <h2 id="10-step-7">10. Step 7: 서버에서 전송 결과와 로그 확인<a class="headerlink" href="#10-step-7" title="Permanent link">&para;</a></h2>
 <p>Windows와 macOS 파일이 실제 서버 디스크에 저장됐는지 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>sudo<span class="w"> </span>find<span class="w"> </span>/home/ftpstudent/upload<span class="w"> </span>-maxdepth<span class="w"> </span><span class="m">1</span><span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span>-printf<span class="w"> </span><span class="s1">'%f | %u:%g | %s bytes | %TY-%Tm-%Td %TH:%TM:%TS\n'</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>sudo<span class="w"> </span>du<span class="w"> </span>-sh<span class="w"> </span>/home/ftpstudent/upload
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span><span class="w"> </span>/var/log/vsftpd.log
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>vsftpd<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span><span class="w"> </span>--no-pager
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># 업로드된 파일의 이름, 소유자, 크기, 수정 시간을 확인합니다.</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>sudo<span class="w"> </span>find<span class="w"> </span>/home/ftpstudent/upload<span class="w"> </span>-maxdepth<span class="w"> </span><span class="m">1</span><span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span>-printf<span class="w"> </span><span class="s1">'%f | %u:%g | %s bytes | %TY-%Tm-%Td %TH:%TM:%TS\n'</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="c1"># 업로드 폴더 용량과 FTP 전송 로그를 확인합니다.</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>sudo<span class="w"> </span>du<span class="w"> </span>-sh<span class="w"> </span>/home/ftpstudent/upload
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span><span class="w"> </span>/var/log/vsftpd.log
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>vsftpd<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span><span class="w"> </span>--no-pager
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>명령·옵션</th>
+<th>확인 내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>find ... -maxdepth 1 -type f</code></td>
+<td>하위 폴더로 내려가지 않고 업로드 폴더 바로 아래의 일반 파일만 찾습니다.</td>
+</tr>
+<tr>
+<td><code>-printf</code></td>
+<td>파일명, 소유자·그룹, 크기, 수정 시간을 지정한 형식으로 출력합니다.</td>
+</tr>
+<tr>
+<td><code>du -sh</code></td>
+<td>업로드 폴더가 실제로 사용하는 전체 디스크 용량을 읽기 쉬운 단위로 표시합니다.</td>
+</tr>
+<tr>
+<td><code>tail -n 50</code></td>
+<td>vsftpd 로그의 마지막 50줄에서 로그인과 파일 전송 기록을 확인합니다.</td>
+</tr>
+<tr>
+<td><code>journalctl -u vsftpd</code></td>
+<td>systemd가 수집한 vsftpd 서비스 로그 50줄을 페이지 구분 없이 출력합니다.</td>
+</tr>
+</tbody>
+</table>
 <p>FileZilla에서 <code>/</code>에 새 파일을 만들면 권한 오류가 나고 <code>/upload</code>에서는 성공해야 합니다. 이는 FTP 계정이 필요한 폴더에만 쓰도록 제한됐다는 뜻입니다.</p>
 <h3 id="_2">최종 통과 기준<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
 <ul>
@@ -2451,26 +2817,67 @@
 </tbody>
 </table>
 <p>FileZilla 로그의 <code>227 Entering Passive Mode</code>에 서버 Public IP가 아닌 다른 IP가 표시되면 다음 명령으로 바로 수정합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nv">FTP_PUBLIC_IP</span><span class="o">=</span><span class="s2">"YOUR_SERVER_PUBLIC_IP"</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>sudo<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">'/^pasv_address=/d'</span><span class="w"> </span>/etc/vsftpd.conf
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"pasv_address=</span><span class="nv">$FTP_PUBLIC_IP</span><span class="s2">"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/vsftpd.conf
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>vsftpd
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>sudo<span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'^pasv_(address|min_port|max_port)='</span><span class="w"> </span>/etc/vsftpd.conf
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>vsftpd
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Naver Cloud 콘솔에서 확인한 실제 서버 Public IP를 입력합니다.</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="nv">FTP_PUBLIC_IP</span><span class="o">=</span><span class="s2">"YOUR_SERVER_PUBLIC_IP"</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># 잘못된 기존 설정을 제거하고 올바른 Public IP를 다시 추가합니다.</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>sudo<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">'/^pasv_address=/d'</span><span class="w"> </span>/etc/vsftpd.conf
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"pasv_address=</span><span class="nv">$FTP_PUBLIC_IP</span><span class="s2">"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/vsftpd.conf
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="c1"># 설정 적용을 위해 서비스를 재시작합니다.</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>vsftpd
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="c1"># Passive 설정과 서비스 상태를 다시 확인합니다.</span>
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>sudo<span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'^pasv_(address|min_port|max_port)='</span><span class="w"> </span>/etc/vsftpd.conf
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>vsftpd
 </code></pre></div>
+<p><code>sed -i</code>는 기존 <code>pasv_address</code> 줄을 삭제하고, <code>tee -a</code>는 올바른 Public IP 설정을 파일 끝에 추가합니다. 이후 서비스를 재시작하고 <code>grep</code>과 <code>is-active</code>로 적용 결과를 확인합니다.</p>
 <p>재접속 후 PASV 응답의 IP가 서버 Public IP와 같고 디렉터리 목록이 표시되면 정상입니다. <code>21/TCP</code>는 로그인과 명령용이고, 목록·업로드·다운로드에는 ACG의 <code>30000-30010/TCP</code> 허용도 반드시 필요합니다.</p>
 <p>상세 로그를 실시간으로 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>vsftpd<span class="w"> </span>-f
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># 새 로그를 실시간으로 계속 출력합니다. 종료는 Ctrl+C입니다.</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>vsftpd<span class="w"> </span>-f
 </code></pre></div>
+<p><code>-f</code>는 새 로그가 발생할 때마다 화면에 이어서 출력합니다. 확인을 끝낼 때는 <code>Ctrl+C</code>를 누릅니다.</p>
 <h2 id="12">12. 실습 정리<a class="headerlink" href="#12" title="Permanent link">&para;</a></h2>
 <p>실습 서버를 계속 사용하지 않는다면 Public IP와 서버를 반납합니다. 서버 안의 구성만 제거하려면 다음 명령을 사용합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>vsftpd
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>remove<span class="w"> </span>--purge<span class="w"> </span>-y<span class="w"> </span>vsftpd
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>sudo<span class="w"> </span>userdel<span class="w"> </span>-r<span class="w"> </span>ftpstudent
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/etc/ssl/private/vsftpd.key<span class="w"> </span>/etc/ssl/certs/vsftpd.crt
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># vsftpd의 자동 시작을 해제하고 현재 서비스도 중지합니다.</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>vsftpd
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="c1"># vsftpd 패키지와 패키지 설정을 제거합니다.</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>remove<span class="w"> </span>--purge<span class="w"> </span>-y<span class="w"> </span>vsftpd
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="c1"># 실습 계정과 홈 디렉터리를 함께 삭제합니다.</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>sudo<span class="w"> </span>userdel<span class="w"> </span>-r<span class="w"> </span>ftpstudent
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="c1"># 실습용 TLS 개인키와 인증서를 삭제합니다.</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/etc/ssl/private/vsftpd.key<span class="w"> </span>/etc/ssl/certs/vsftpd.crt
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>명령</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>systemctl disable --now</code></td>
+<td>자동 시작을 해제하면서 현재 vsftpd 서비스도 즉시 중지합니다.</td>
+</tr>
+<tr>
+<td><code>apt-get remove --purge</code></td>
+<td>vsftpd 패키지와 패키지가 관리하는 설정 파일을 제거합니다.</td>
+</tr>
+<tr>
+<td><code>userdel -r</code></td>
+<td><code>ftpstudent</code> 계정과 홈 디렉터리의 실습 파일을 함께 삭제합니다.</td>
+</tr>
+<tr>
+<td><code>rm -f</code></td>
+<td>실습에서 만든 TLS 개인키와 인증서를 삭제합니다. <code>-f</code>는 파일이 없어도 오류를 내지 않습니다.</td>
+</tr>
+</tbody>
+</table>
 <p>Naver Cloud 콘솔에서 사용하지 않는 Public IP도 별도로 반납해야 과금이 중지됩니다.</p>
 <h2 id="_3">참고<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <ul>
