@@ -2202,6 +2202,10 @@
 <p><strong>확인 기준:</strong> 계정 셸이 <code>/usr/sbin/nologin</code>, 홈 디렉터리 소유자가 <code>root</code>, <code>upload</code> 소유자가 <code>ftpstudent</code>로 출력되어야 합니다.</p>
 <h2 id="6-step-3-tls-passive-mode">6. Step 3: TLS 인증서와 Passive Mode 설정<a class="headerlink" href="#6-step-3-tls-passive-mode" title="Permanent link">&para;</a></h2>
 <p>아래 첫 줄에 서버의 실제 Public IP를 입력합니다. <code>pasv_address</code>가 잘못되면 로그인 후 디렉터리 목록 조회에서 연결이 멈춥니다.</p>
+<div class="admonition warning">
+<p class="admonition-title">서버에서 조회한 외부 IP를 넣지 않습니다</p>
+<p><code>FTP_PUBLIC_IP</code>에는 Naver Cloud 콘솔의 <strong>Server &gt; Public IP</strong>에서 해당 서버에 할당된 주소를 입력합니다. 서버에서 <code>curl ifconfig.me</code>로 확인한 외부 통신 IP는 NAT 구성에 따라 할당 Public IP와 다를 수 있으므로 <code>pasv_address</code>로 사용하지 않습니다.</p>
+</div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">FTP_PUBLIC_IP</span><span class="o">=</span><span class="s2">"YOUR_SERVER_PUBLIC_IP"</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>sudo<span class="w"> </span>openssl<span class="w"> </span>req<span class="w"> </span>-x509<span class="w"> </span>-nodes<span class="w"> </span>-days<span class="w"> </span><span class="m">365</span><span class="w"> </span>-newkey<span class="w"> </span>rsa:2048<span class="w"> </span><span class="se">\</span>
@@ -2253,8 +2257,9 @@
 <p>서버 상태, 제어 포트, 인증서 지문을 확인합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>vsftpd
 <a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>sudo<span class="w"> </span>ss<span class="w"> </span>-lntp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">':21'</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>sudo<span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>/etc/ssl/certs/vsftpd.crt<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span>-noout<span class="w"> </span>-subject<span class="w"> </span>-fingerprint<span class="w"> </span>-sha256
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>sudo<span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'^pasv_(address|min_port|max_port)='</span><span class="w"> </span>/etc/vsftpd.conf
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>sudo<span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>/etc/ssl/certs/vsftpd.crt<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span>-noout<span class="w"> </span>-subject<span class="w"> </span>-fingerprint<span class="w"> </span>-sha256
 </code></pre></div>
 <p>UFW가 활성 상태일 때만 OS 방화벽에도 같은 포트를 허용합니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>status
@@ -2262,7 +2267,7 @@
 <a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">30000</span>:30010/tcp
 </code></pre></div>
 <p>UFW가 <code>inactive</code>라면 두 <code>allow</code> 명령은 생략할 수 있습니다.</p>
-<p><strong>확인 기준:</strong> 서비스가 <code>active</code>이고 <code>0.0.0.0:21</code> 리슨과 인증서 SHA-256 지문이 출력되어야 합니다.</p>
+<p><strong>확인 기준:</strong> 서비스가 <code>active</code>이고 <code>0.0.0.0:21</code> 리슨과 인증서 SHA-256 지문이 출력되어야 합니다. <code>pasv_address</code>는 Naver Cloud 콘솔에 표시된 서버 Public IP와 정확히 같아야 합니다.</p>
 <h2 id="7-step-4">7. Step 4: 서버 테스트 파일 준비<a class="headerlink" href="#7-step-4" title="Permanent link">&para;</a></h2>
 <p>FileZilla에서 내려받을 파일을 서버에 하나 만듭니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>-u<span class="w"> </span>ftpstudent<span class="w"> </span>tee<span class="w"> </span>/home/ftpstudent/upload/server-guide.txt<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
@@ -2425,7 +2430,7 @@
 </tr>
 <tr>
 <td>로그인 후 폴더 목록에서 멈춤</td>
-<td>ACG <code>30000-30010</code>, <code>pasv_address</code>, FileZilla Passive Mode</td>
+<td>ACG <code>30000-30010</code>, 서버 Public IP와 <code>pasv_address</code> 일치 여부, FileZilla Passive Mode</td>
 </tr>
 <tr>
 <td><code>530 Login incorrect</code></td>
@@ -2445,15 +2450,26 @@
 </tr>
 </tbody>
 </table>
+<p>FileZilla 로그의 <code>227 Entering Passive Mode</code>에 서버 Public IP가 아닌 다른 IP가 표시되면 다음 명령으로 바로 수정합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nv">FTP_PUBLIC_IP</span><span class="o">=</span><span class="s2">"YOUR_SERVER_PUBLIC_IP"</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>sudo<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">'/^pasv_address=/d'</span><span class="w"> </span>/etc/vsftpd.conf
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"pasv_address=</span><span class="nv">$FTP_PUBLIC_IP</span><span class="s2">"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/vsftpd.conf
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>vsftpd
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>sudo<span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'^pasv_(address|min_port|max_port)='</span><span class="w"> </span>/etc/vsftpd.conf
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>vsftpd
+</code></pre></div>
+<p>재접속 후 PASV 응답의 IP가 서버 Public IP와 같고 디렉터리 목록이 표시되면 정상입니다. <code>21/TCP</code>는 로그인과 명령용이고, 목록·업로드·다운로드에는 ACG의 <code>30000-30010/TCP</code> 허용도 반드시 필요합니다.</p>
 <p>상세 로그를 실시간으로 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>vsftpd<span class="w"> </span>-f
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>vsftpd<span class="w"> </span>-f
 </code></pre></div>
 <h2 id="12">12. 실습 정리<a class="headerlink" href="#12" title="Permanent link">&para;</a></h2>
 <p>실습 서버를 계속 사용하지 않는다면 Public IP와 서버를 반납합니다. 서버 안의 구성만 제거하려면 다음 명령을 사용합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>vsftpd
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>remove<span class="w"> </span>--purge<span class="w"> </span>-y<span class="w"> </span>vsftpd
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>sudo<span class="w"> </span>userdel<span class="w"> </span>-r<span class="w"> </span>ftpstudent
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/etc/ssl/private/vsftpd.key<span class="w"> </span>/etc/ssl/certs/vsftpd.crt
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>vsftpd
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>remove<span class="w"> </span>--purge<span class="w"> </span>-y<span class="w"> </span>vsftpd
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>sudo<span class="w"> </span>userdel<span class="w"> </span>-r<span class="w"> </span>ftpstudent
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/etc/ssl/private/vsftpd.key<span class="w"> </span>/etc/ssl/certs/vsftpd.crt
 </code></pre></div>
 <p>Naver Cloud 콘솔에서 사용하지 않는 Public IP도 별도로 반납해야 과금이 중지됩니다.</p>
 <h2 id="_3">참고<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
