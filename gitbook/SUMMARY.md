@@ -21,8 +21,8 @@
   * [303 Auto Scaling Hands-on (2)](labs/303-auto-scaling.md)
 * 데이터베이스 실습
   * [401 Cloud DB for MySQL 생성 및 연결](labs/401-cloud-db-mysql.md)
-  * [402 Database 백업 및 복구](labs/402-database-backup-recovery.md)
-  * [403 Cloud DB Migration](labs/403-cloud-db-migration.md)
+  * [402 Cloud DB Migration](labs/402-cloud-db-migration.md)
+  * [403 Database 백업 및 복구](labs/403-database-backup-recovery.md)
 * CLI 및 IaC 실습
   * [501 Cloud CLI](labs/501-cloud-cli.md)
   * [502 Terraform](labs/502-terraform.md)

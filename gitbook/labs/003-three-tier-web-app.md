@@ -4,7 +4,7 @@
 
 Web, Backend, DB 서버를 분리해 3계층 게시판을 구성하고 서버 간 사설 통신과 ACG를 확인합니다. 303에서는 Public ALB 뒤에서 Web 서버를 Auto Scaling하고 Backend와 DB는 고정 서버로 유지합니다.
 
-게시판 서비스의 기본 Database는 `board_service`, Backend 전용 DB 계정은 `board_app`입니다. `003`은 강의 순서일 뿐 서비스 역할이 아니므로 DB와 계정 이름에 챕터 번호를 넣지 않습니다. 401 Cloud DB 생성과 403 마이그레이션에서도 같은 값을 사용합니다.
+게시판 서비스의 기본 Database는 `board_service`, Backend 전용 DB 계정은 `board_app`입니다. `003`은 강의 순서일 뿐 서비스 역할이 아니므로 DB와 계정 이름에 챕터 번호를 넣지 않습니다. 401 Cloud DB 생성과 402 마이그레이션에서도 같은 값을 사용합니다.
 
 ## 2. 실제 요청 구조
 

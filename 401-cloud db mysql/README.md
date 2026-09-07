@@ -2,7 +2,7 @@
 
 003 게시판의 Backend가 직접 설치한 Ubuntu MariaDB 대신 Naver Cloud `Cloud DB for MySQL`을 사용하도록 전환하는 실습입니다. 새 Backend 서버를 사용하는 경우에도 교안 안의 명령으로 애플리케이션을 설치할 수 있습니다.
 
-이 실습은 빈 관리형 DB 생성과 애플리케이션 연결에 집중합니다. 기존 DB의 데이터를 옮기는 마이그레이션은 `403-cloud db migration`에서 진행합니다.
+이 실습은 빈 관리형 DB 생성과 애플리케이션 연결에 집중합니다. 기존 DB의 데이터를 옮기는 마이그레이션은 `402-cloud db migration`에서 진행합니다.
 
 ## 실습 표준 이름
 
@@ -31,6 +31,6 @@
 https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/401-cloud-db-mysql/
 ```
 
-다음 실습은 `402-database backup recovery`, 기존 DB를 실제로 이관하는 실습은 `403-cloud db migration`입니다.
+다음은 `402-cloud db migration`에서 기존 Ubuntu DB의 게시글을 이관하고, `403-database backup recovery`에서 이관된 Cloud DB의 백업·복구를 실습합니다.
 
-403에서는 추가 Cloud DB를 만들지 않고 이 Cloud DB 서버를 Target으로 재사용합니다. DMS 시작 전에 Backend와 자동 게시글 서비스를 중지하고 Target의 `board_service` 데이터베이스를 삭제하며, Cloud DB 서버와 `board_admin`·`board_app` 계정은 유지합니다. 401의 Target 데이터가 필요하면 402 백업·복구 실습을 먼저 완료합니다.
+402에서는 추가 Cloud DB를 만들지 않고 이 Cloud DB 서버를 Target으로 재사용합니다. DMS 시작 전에 Backend와 자동 게시글 서비스를 중지하고 Target의 `board_service` 데이터베이스를 삭제하며, Cloud DB 서버와 `board_admin`·`board_app` 계정은 유지합니다. 401에서 작성한 Target 데이터가 필요하면 삭제 전에 별도로 내보내거나 백업을 확보합니다. 이관할 원본은 003 Ubuntu DB이므로 검증이 끝날 때까지 원본 서버도 유지합니다.

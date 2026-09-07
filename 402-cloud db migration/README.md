@@ -1,8 +1,10 @@
-# 403 Cloud DB for MySQL Migration
+# 402 Cloud DB for MySQL Migration
 
 003번 게시판 실습에서 Ubuntu 서버에 직접 설치한 MariaDB/MySQL 데이터를 Naver Cloud `Cloud DB for MySQL`로 마이그레이션하는 실습입니다.
 
-> 이 실습은 추가 Cloud DB를 만들지 않고 401 Cloud DB 서버를 Target으로 재사용합니다. DMS 시작 전에 Backend와 자동 게시글 서비스를 중지하고 Target의 `board_service`를 삭제합니다. Cloud DB 서버와 DB User는 유지합니다.
+강의는 **401 생성·연결 → 402 마이그레이션 → 403 백업·복구** 순서입니다. 이관 후 같은 Cloud DB의 `board_service`를 백업·복구 대상으로 사용합니다.
+
+> 이 실습은 추가 Cloud DB를 만들지 않고 401 Cloud DB 서버를 Target으로 재사용합니다. DMS 시작 전에 Backend와 자동 게시글 서비스를 중지하고 Target의 `board_service`를 삭제합니다. 401에서 작성한 Target 데이터가 필요하면 삭제 전에 내보내거나 백업을 확보합니다. Cloud DB 서버와 DB User, 003 Source의 원본 데이터는 유지합니다.
 
 실습 기준으로 Source Ubuntu DB는 `lab7-sub-pri-kr2` (`10.10.120.0/24`), Target Cloud DB는 `lab7-sub-pri-kr1` (`10.10.110.0/24`)에 있습니다. 따라서 Source의 DMS 계정 Host는 Target에서 접속할 수 있도록 `10.10.110.%`를 사용합니다.
 
@@ -185,7 +187,13 @@ cd ~/cloud-infrastructure-lecture-example/"003-three tier web app"/db
 grep '^DB_ROOT_PASSWORD=' .env
 ```
 
-Source DB 서버에서 MariaDB 바이너리 로그와 외부 리슨을 설정합니다.
+이 단계는 **DMS 방식의 변경분 복제에 필요한 Source 설정**입니다. [NAVER Cloud 공식 문서 — Source DB 및 Target DB 접속 설정](https://guide.ncloud-docs.com/docs/dms-connect)의 **「마이그레이션을 위해 필요한 MySQL 설정」** 절은 `log_bin=ON`과 `server_id` 지정을 필수로 명시하고, 바이너리 로그 보관 기간은 **5일 이상**을 권고합니다.
+
+아래의 파일명, `server-id=1`, 로그 접두어 `mysql-bin`, 보관 기간 `7일`은 실습 예시입니다. `ROW`·`FULL`은 행 변경과 전체 컬럼 값을 기록하도록 선택한 설정이며, 해당 NCP 문서의 일반 필수 목록과 구분합니다. 이미 조건을 충족하면 설정 파일 변경과 재시작만 생략하고 아래 DMS 전용 계정 생성부터 진행합니다. 계정 준비까지 마친 뒤 확인 명령에서 실제 값을 확인합니다.
+
+DMS에서 초기 백업 도구로 `mysqldump`를 선택해도 이후 복제를 위해 binlog가 필요합니다. 이 교안의 **독립적인 mysqldump 파일 덤프·복원 방식**은 변경분 복제를 사용하지 않으므로 binlog 활성화가 필수가 아닙니다.
+
+Source DB 서버의 MariaDB 설정이 필요한 경우 아래 바이너리 로그와 외부 리슨 설정을 적용합니다.
 
 ```bash
 sudo tee /etc/mysql/mariadb.conf.d/60-dms-source.cnf >/dev/null <<'EOF'
@@ -202,16 +210,16 @@ sudo systemctl restart mariadb
 sudo systemctl is-active mariadb
 ```
 
-각 설정의 의미와 확인 기준은 다음과 같습니다.
+| 설정 | 실습값 | 기준과 역할 |
+| --- | --- | --- |
+| `server-id` | `1` | **공식 필수:** `server_id` 지정. `1`은 예시이며 복제 구성 안에서 `0`이 아닌 고유값을 사용합니다. |
+| `log_bin` | `mysql-bin` | **공식 필수:** 실행 값 `ON`. 설정 파일의 `mysql-bin`은 로그 파일 접두어이며, 초기 적재 이후 변경분을 DMS가 읽게 합니다. |
+| `binlog_format` | `ROW` | **실습 선택:** SQL 문장 대신 변경된 행 값을 기록합니다. NCP 문서에서 `ROW`를 명시한 별도 조건은 AWS Aurora/RDS에 대한 안내입니다. |
+| `binlog_row_image` | `FULL` | **실습 선택:** `ROW` 이벤트의 해당 변경 전·후 이미지에 모든 컬럼 값을 기록합니다. `MINIMAL`보다 로그 용량이 커질 수 있습니다. |
+| `expire_logs_days` | `7` | **공식 권고는 5일 이상:** 이 실습은 7일로 설정합니다. 복제에 필요한 로그가 먼저 삭제되면 마이그레이션을 다시 구성해야 할 수 있습니다. |
+| `bind-address` | `0.0.0.0` | **원격 접속을 위한 실습값:** 모든 인터페이스에서 연결을 받습니다. Source의 사설 IP에 바인딩해도 됩니다. ACG와 DB User Host는 Target 서브넷으로 제한합니다. |
 
-| 설정 | 실습값 | 의미 | 잘못 설정했을 때 |
-| --- | --- | --- | --- |
-| `server-id` | `1` | binlog 이벤트를 만든 DB 서버의 고유 번호입니다. 복제 구성의 각 서버는 서로 다른 값을 사용합니다. | `0` 또는 중복 값은 복제 이벤트의 출처 식별을 방해합니다. |
-| `log_bin` | `mysql-bin` | `mysql-bin.000001` 형식의 binlog를 활성화합니다. DMS는 초기 백업 후 이 로그에서 변경분을 읽습니다. | 실행 값이 `OFF`면 변경분 동기화를 시작할 수 없습니다. |
-| `binlog_format` | `ROW` | SQL 문장 대신 실제로 바뀐 각 행의 값을 기록해 DMS가 결과를 확정적으로 재현하게 합니다. | `STATEMENT`는 비결정적 함수의 재실행 결과가 달라질 수 있고, `MIXED`는 형식이 섞입니다. |
-| `binlog_row_image` | `FULL` | 변경 전·후 행의 모든 컬럼을 기록해 `UPDATE`·`DELETE` 해석을 명확하게 합니다. | `MINIMAL`보다 로그는 커지지만 DMS 해석 부담을 줄입니다. |
-| `expire_logs_days` | `7` | 7일 이전 binlog를 자동 정리하며, DMS의 5일 초과 보존 권장을 따릅니다. | DMS 지연보다 보존 기간이 짧으면 필요한 로그가 삭제되어 Migration을 새로 만들어야 합니다. |
-| `bind-address` | `0.0.0.0` | MariaDB가 원격 `3306/tcp` 연결을 듣게 합니다. | `127.0.0.1`이면 DMS 접속이 거절됩니다. ACG와 DB User Host를 Target 서브넷으로 제한해야 합니다. |
+`ROW`와 `FULL`의 동작은 [MariaDB 공식 바이너리 로그 형식 설명](https://mariadb.com/docs/server/server-management/server-monitoring-logs/binary-log/binary-log-formats)을 참고합니다.
 
 이어서 DMS 전용 계정을 생성합니다. 관리자 암호에는 003 DB 서버의 `.env`에 기록한 `DB_ROOT_PASSWORD`를 입력합니다. 이 실습의 Target Cloud DB Subnet `10.10.110.0/24`를 MySQL Host 형식인 `10.10.110.%`로 지정합니다.
 
@@ -269,10 +277,10 @@ SQL
 | --- | --- | --- |
 | `server_id` | `0`이 아닌 고유값 | binlog 이벤트의 출처 Source를 식별합니다. |
 | `log_bin` | `ON` | 실제 binlog 기록이 활성화되었습니다. |
-| `binlog_format` | `ROW` | 행 변경 기반 로그입니다. |
+| `binlog_format` | `ROW` | 이 실습에서 선택한 행 변경 기반 로그입니다. |
 | `binlog_row_image` | `FULL` | 변경 전·후의 모든 컬럼을 기록합니다. |
-| `expire_logs_days` | `5`보다 큰 값 | DMS 지연을 감안한 보존 기간입니다. |
-| `bind_address` | `0.0.0.0` | DMS의 원격 TCP 접속을 받습니다. |
+| `expire_logs_days` | `5` 이상 (일) | DMS 지연을 감안한 보존 기간입니다. |
+| `bind_address` | `0.0.0.0` 또는 DMS에서 접근할 Source 사설 IP | DMS의 원격 TCP 접속을 받습니다. |
 | `SHOW MASTER STATUS` | 한 행 이상 | `File`은 현재 binlog, `Position`은 다음 이벤트가 기록될 바이트 위치입니다. DMS의 변경분 시작 좌표가 됩니다. |
 | `SHOW GRANTS` | 전역·`mysql.*`·`board_service.*` 권한 모두 출력 | binlog, 시스템 메타데이터, 게시판 데이터를 모두 읽을 수 있습니다. |
 | `total_posts` | 숫자 출력 | Migration 전 기준 행 수로, 완료 후 Target과 비교합니다. |
@@ -284,7 +292,7 @@ SQL
 Source DB의 binlog 설정, 마이그레이션 관련 전역 권한, `board_service` 스키마 권한과 현재 게시글 범위를 한 번에 확인하려면 다음 SQL을 실행합니다.
 
 ```bash
-cd "403-cloud db migration"
+cd "402-cloud db migration"
 sudo mariadb -u root \
   -p board_service \
   < sql/source-readiness.sql
@@ -624,6 +632,8 @@ DMS로 변경분까지 이관하는 동안에는 Source에 쓰기가 계속 발�
 
 ## 11. Backend DB_HOST 전환
 
+DMS 방식은 Source 쓰기를 중지한 상태에서 복제 지연 `0`과 10번 검증 결과를 확인한 뒤, **Migration Management > 해당 작업 > [Complete]**를 실행합니다. Target이 정상 운영 상태가 된 다음 Backend를 연결합니다. [공식 Migration 관리 문서](https://guide.ncloud-docs.com/docs/dms-migrationmanagement)를 참고합니다.
+
 백엔드 서버에서 `.env`의 DB 접속 정보를 Cloud DB로 바꿉니다.
 
 ```bash
@@ -692,7 +702,7 @@ Slave_SQL_Running: No
 수업 서버를 재설치해도 되는 경우에는 Source 데이터를 백업한 뒤 Ubuntu 공식 MySQL 8.0으로 변환하고 DMS 작업을 새로 생성할 수 있습니다. 다음 스크립트는 `board_service`를 덤프하고 MariaDB 데이터·설정을 별도 백업 디렉터리로 이동한 후 MySQL을 설치하므로 운영 서버에서는 스냅샷을 먼저 생성해야 합니다.
 
 ```bash
-cd "/root/cloud-infrastructure-lecture-example/403-cloud db migration/scripts"
+cd "/root/cloud-infrastructure-lecture-example/402-cloud db migration/scripts"
 sudo CONFIRM_CONVERSION=YES ./convert-mariadb-source-to-mysql.sh
 ```
 
@@ -716,7 +726,7 @@ You have an error in your SQL syntax ... near 'LOG STATUS' at line 1 (1064)
 `SHOW BINARY LOG STATUS`는 MySQL 8.4 명령이며 MySQL 8.0은 `SHOW MASTER STATUS`를 사용합니다. 네트워크나 DMS 계정 권한 문제가 아니므로 재시작만 반복해도 해결되지 않습니다. 이 실습처럼 Target 버전을 바꿀 수 없다면 Source를 같은 MySQL 8.4 LTS로 업그레이드한 뒤 실패 작업을 삭제하고 새 작업을 생성합니다.
 
 ```bash
-cd "/root/cloud-infrastructure-lecture-example/403-cloud db migration/scripts"
+cd "/root/cloud-infrastructure-lecture-example/402-cloud db migration/scripts"
 sudo CONFIRM_UPGRADE=YES ./upgrade-mysql-source-to-84.sh
 sudo SOURCE_DB_ADMIN_PASSWORD='...' ./check-source-db.sh
 ```
@@ -744,3 +754,9 @@ MySQL 8.4는 `mysql_native_password` 인증 플러그인을 기본 비활성화�
 - Naver Cloud DMS Migration 관리: <https://guide.ncloud-docs.com/docs/dms-migrationmanagement>
 - Naver Cloud DMS 지원 사양: <https://guide.ncloud-docs.com/docs/dms-spec>
 - Naver Cloud DMS 접속 문제 해결: <https://guide.ncloud-docs.com/docs/dms-troubleshot-access>
+
+## 14. 다음 실습: 이관한 DB 백업·복구
+
+[403 Database 백업 및 복구](../403-database%20backup%20recovery/README.md)에서 지금 이관한 Cloud DB의 Private 도메인과 `board_service`, `board_admin`·`board_app`을 이어서 사용합니다. Cloud DB와 Backend를 유지하고, 복구 실험은 `posts`와 별도인 `recovery_events` 테이블로 진행합니다.
+
+DMS를 사용했다면 [Complete]와 Target 정상 운영 상태를 확인합니다. 401 기본값인 단일 서버는 백업 파일 복원까지만 지원하므로, PITR까지 진행할 때는 403의 고가용성 전환·백업 준비 절차를 먼저 수행합니다. Source DB는 이관 검증과 필요한 백업 확보 후 정리합니다.

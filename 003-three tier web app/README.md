@@ -102,7 +102,7 @@ Naver Cloud DB for MySQL 콘솔에서 같은 값을 재사용할 수 있도록 �
 | DB User | `board_app` | Backend 전용 애플리케이션 계정 |
 | Backend Service | `board-service-backend` | 상태 API에 표시되는 서비스 이름 |
 
-`003`은 강의 순서이므로 운영 리소스 이름에 넣지 않습니다. 이후 401 Cloud DB 생성과 403 마이그레이션에서도 같은 이름을 사용합니다.
+`003`은 강의 순서이므로 운영 리소스 이름에 넣지 않습니다. 이후 401 Cloud DB 생성과 402 마이그레이션에서도 같은 이름을 사용합니다.
 
 ### DB 서버 `.env` 예시
 

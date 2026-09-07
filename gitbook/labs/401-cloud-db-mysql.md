@@ -12,7 +12,7 @@ Public ALB
 ```
 
 !!! note "이번 실습은 마이그레이션이 아닙니다"
-    빈 Cloud DB에 게시판 스키마를 새로 만들고 Backend 연결을 변경합니다. 기존 Ubuntu DB의 게시글을 옮기는 작업은 [403 Cloud DB Migration](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/403-cloud-db-migration/)에서 진행합니다. 검증이 끝날 때까지 기존 DB 서버를 삭제하지 않습니다.
+    빈 Cloud DB에 게시판 스키마를 새로 만들고 Backend 연결을 변경합니다. 기존 Ubuntu DB의 게시글을 옮기는 작업은 [402 Cloud DB Migration](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/402-cloud-db-migration/)에서 진행합니다. 검증이 끝날 때까지 기존 DB 서버를 삭제하지 않습니다.
 
 ## 1. 운영형 이름과 계정 분리
 
@@ -73,6 +73,8 @@ Naver Cloud Console에서 **Services > Database > Cloud DB for MySQL > DB Server
 | Private Sub Domain | `board-db` |
 
 고가용성을 켜면 Master와 Standby Master가 함께 만들어져 비용이 증가합니다. 운영 환경에서는 장애 복구 요구사항에 따라 HA와 Multi Zone을 검토하지만 이번 연결 실습에서는 단일 서버를 사용합니다.
+
+403에서 **특정시점 복구(PITR)**까지 진행할 경우에는 고가용성이 필요합니다. 그때 기존 서버의 고가용성 설정을 변경하는 절차를 403에서 수행합니다. 단일 서버 상태로는 백업 파일 복원까지만 실습할 수 있습니다. [공식 Backup 안내](https://guide.ncloud-docs.com/docs/database-database-5-4)
 
 ### DB 설정
 
@@ -320,13 +322,13 @@ curl -fsS http://127.0.0.1:4000/api/health
 
 ## 12. 실습 종료와 다음 단계
 
-402 백업·복구 실습을 이어서 진행한다면 Cloud DB와 Backend를 유지합니다. 모든 DB 실습이 끝난 경우에만 DB Server의 반납 보호를 해제하고 삭제합니다. Cloud DB는 서버가 운영되는 동안 과금되며, HA를 사용하면 서버가 두 대 구성됩니다.
+다음은 **402 마이그레이션 → 403 백업·복구** 순서입니다. 003 Ubuntu DB의 게시글을 이 Cloud DB로 이관한 뒤, 이관된 DB에서 백업과 특정시점 복구를 확인합니다. 두 실습을 이어서 진행하므로 Cloud DB와 Backend, 003 원본 DB를 유지합니다. 모든 DB 실습이 끝난 경우에만 DB Server의 반납 보호를 해제하고 삭제합니다. Cloud DB는 서버가 운영되는 동안 과금되며, HA를 사용하면 서버가 두 대 구성됩니다.
 
-!!! warning "403 DMS 실습에서 재사용"
-    403에서는 이 Cloud DB 서버를 그대로 Target으로 재사용하지만, DMS 시작 전에 Backend와 자동 게시글 서비스를 중지하고 Target의 `board_service` 데이터베이스를 삭제합니다. Cloud DB 서버와 `board_admin`·`board_app` 계정은 삭제하지 않습니다. 401에서 작성한 Target 데이터가 필요하면 402에서 백업·복구 실습을 먼저 완료합니다.
+!!! warning "402 DMS 실습에서 재사용"
+    402에서는 이 Cloud DB 서버를 그대로 Target으로 재사용하지만, DMS 시작 전에 Backend와 자동 게시글 서비스를 중지하고 Target의 `board_service` 데이터베이스를 삭제합니다. Cloud DB 서버와 `board_admin`·`board_app` 계정은 삭제하지 않습니다. 401에서 작성한 Target 데이터가 필요하면 삭제 전에 별도로 내보내거나 백업을 확보합니다. 003 Source DB의 원본 데이터는 유지합니다.
 
-- [402 Database 백업 및 복구](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/402-database-backup-recovery/)
-- [403 Cloud DB Migration](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/403-cloud-db-migration/)
+- [402 Cloud DB Migration](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/402-cloud-db-migration/)
+- [403 Database 백업 및 복구](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/403-database-backup-recovery/)
 
 ## 공식 문서
 

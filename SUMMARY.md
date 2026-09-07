@@ -19,8 +19,8 @@
   * [303 Auto Scaling Hands-on (2)](<303-auto scaling/README.md>)
 * 데이터베이스 실습
   * [401 Cloud DB for MySQL](<401-cloud db mysql/README.md>)
-  * [402 Database Backup Recovery](<402-database backup recovery/README.md>)
-  * [403 Cloud DB Migration](<403-cloud db migration/README.md>)
+  * [402 Cloud DB Migration](<402-cloud db migration/README.md>)
+  * [403 Database Backup Recovery](<403-database backup recovery/README.md>)
 * CLI 및 IaC 실습
   * [501 Cloud CLI](<501-cloud cli/README.md>)
   * [502 Terraform](502-terraform/README.md)

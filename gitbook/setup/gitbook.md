@@ -19,8 +19,8 @@ cloud-infrastructure-lecture-example
 ├── 302-auto scaling
 ├── 303-auto scaling
 ├── 401-cloud db mysql
-├── 402-database backup recovery
-├── 403-cloud db migration
+├── 402-cloud db migration
+├── 403-database backup recovery
 ├── 501-cloud cli
 ├── 502-terraform
 ├── 503-cost slack alert
