@@ -25,6 +25,8 @@
 
 공지 내용은 Web 서버 파일에 저장하므로 Source DB, Target DB, Backend가 중단되어도 표시됩니다. 003 또는 502의 최신 Web 설치 스크립트를 적용하면 `board-notice` 명령을 사용할 수 있습니다. 공지는 접속 중인 브라우저에도 최대 5초 후 반영됩니다.
 
+최신 003 예제를 Source에 적용해 세 테이블과 관리자 계정을 준비합니다. 관리자 화면에서 공지 이력을 남기려면 아래 제목과 `NOTICE` 사이의 본문을 **공지 관리 → 사전 공지**에 복사합니다. **점검 시작**까지 Web에 반영된 것을 확인한 뒤 Backend를 중지하면 회원 가입·관리자 공지를 포함한 애플리케이션 쓰기가 멈춥니다.
+
 ### 0-1. 복사해서 사용할 사전 공지
 
 아래 전체를 **Web 서버에서** 복사해 실행합니다. 502의 SSH 설정을 마쳤다면 Bastion에서 `ssh web`으로 이동합니다. 이 공지는 상단 배너로 표시되며 게시판 이용은 계속 가능합니다.
@@ -57,7 +59,7 @@ NOTICE
 sudo board-notice status
 ```
 
-점검 모드는 공개 `/api/` 요청을 HTTP 503으로 차단하고 모든 게시판 경로에 점검 화면을 표시합니다. ALB 확인 경로 `/healthz`는 HTTP 200을 유지합니다. **Backend 내부에서 실행되는 자동 작성기는 Web을 거치지 않으므로 아래처럼 별도로 중지해야 합니다.**
+점검 모드는 일반 공개 `/api/` 요청을 HTTP 503으로 차단하고 모든 게시판 경로에 점검 화면을 표시합니다. ALB 확인 경로 `/healthz`는 HTTP 200을 유지합니다. `/api/auth/`·`/api/admin/`는 복구용으로 Backend에 전달되므로 **Backend 중지 전에는 회원 가입·관리자 쓰기도 가능합니다.** **Backend 내부에서 실행되는 자동 작성기는 Web을 거치지 않으므로 아래처럼 별도로 중지해야 합니다.**
 
 ```bash
 # Backend 서버에서 실행
@@ -135,7 +137,7 @@ Source DB 데이터 변경 중지 또는 점검 시간 확보
 
 ## 2. 게시판 ERD
 
-현재 게시판 예제는 로그인/회원 기능 없이 게시글만 저장합니다. 따라서 핵심 테이블은 `posts` 하나입니다.
+현재 게시판은 `posts`, `users`, `notices` 세 테이블을 사용합니다. 게시글은 기존처럼 독립적으로 유지하고 관리자 공지만 작성자 계정을 참조합니다.
 
 ```text
 posts
@@ -151,6 +153,21 @@ Mermaid ERD:
 
 ```mermaid
 erDiagram
+  USERS ||--o{ NOTICES : creates
+  USERS {
+    BIGINT id PK
+    VARCHAR username UK
+    VARCHAR password_hash
+    ENUM role "member 또는 admin"
+  }
+  NOTICES {
+    BIGINT id PK
+    BIGINT created_by FK
+    ENUM mode "announce / maintenance / normal"
+    VARCHAR title
+    TEXT message
+    TIMESTAMP created_at
+  }
   POSTS {
     BIGINT id PK "AUTO_INCREMENT"
     VARCHAR title "게시글 제목"
@@ -159,6 +176,15 @@ erDiagram
     TIMESTAMP created_at "생성 시각"
   }
 ```
+
+
+| 이관 테이블 | 내용 | 확인 사항 |
+| --- | --- | --- |
+| `posts` | 기존 게시글 | ID·제목·본문·작성자 유지 |
+| `users` | 회원·관리자 계정 | `role`, `password_hash`, `session_version` 포함 |
+| `notices` | 관리자 공지 이력 | `created_by → users.id` 외래 키 유지 |
+
+회원·관리자는 `users.role`로 구분합니다. 이 계정은 애플리케이션 데이터이므로 DMS로 이관됩니다. MySQL 접속 계정인 `board_admin`·`board_app`은 별도로 Target에 설정합니다. Web 공지 캐시와 Backend 세션 서명 파일은 서버 파일이므로 DMS 대상이 아닙니다.
 
 ## 3. 데이터 사전
 
@@ -174,7 +200,7 @@ board_service
 | --- | --- |
 | `posts` | 게시판 글 목록을 저장합니다. |
 
-컬럼:
+`posts` 컬럼:
 
 | 컬럼 | 타입 | Null | Key | 기본값 | 설명 |
 | --- | --- | --- | --- | --- | --- |
@@ -543,7 +569,7 @@ Naver Cloud Console
 | --- | --- |
 | Source Endpoint | `src-board-db` |
 | Target DB | 생성한 Cloud DB for MySQL |
-| Migration 대상 DB | `board_service` |
+| Migration 대상 DB | `board_service` 전체 (`posts`, `users`, `notices`) |
 | Backup type | 작은 실습 DB는 `mysqldump` |
 
 작업 생성 화면의 `Test Connection`이 성공하면 Source/Target DB 버전과 GTID 상태가 자동으로 표시됩니다. 마이그레이션은 Exporting, Importing, Replication 순서로 진행됩니다. Replication 완료 상태에서도 Source 변경분은 계속 동기화되며, 최종 검증과 쓰기 중지 후 콘솔의 [Complete]를 눌러야 Target이 정상 운영 상태로 전환됩니다.
@@ -672,6 +698,32 @@ SQL
 
 DMS로 변경분까지 이관하는 동안에는 Source에 쓰기가 계속 발생할 수 있으므로 일시적으로 값이 다를 수 있습니다. 최종 전환 직전에는 게시판 백엔드와 자동 게시글 생성기를 중지하고, DMS 지연이 `0`이 된 뒤 다시 검증해야 합니다. `mysqldump` 방식은 덤프를 만든 시점부터 Source 쓰기를 중지한 상태에서 비교해야 합니다.
 
+
+### 회원·관리자·공지 추가 검증
+
+Source 쓰기를 중지하고 DMS 복제 지연이 `0`인 상태에서 양쪽 `board_service`에 동일하게 실행합니다. 아래 집계 값이 모두 같고 `orphan_notices`가 `0`이어야 합니다. 해시는 그대로 이관하므로 비밀번호를 재설정하지 않습니다.
+
+```sql
+SELECT 'posts' AS table_name, COUNT(*) AS rows_count FROM posts
+UNION ALL SELECT 'users', COUNT(*) FROM users
+UNION ALL SELECT 'notices', COUNT(*) FROM notices;
+SELECT role, COUNT(*) AS accounts FROM users GROUP BY role ORDER BY role;
+SELECT COUNT(*) AS orphan_notices FROM notices n
+LEFT JOIN users u ON u.id = n.created_by WHERE u.id IS NULL;
+SELECT COUNT(*) AS rows_count,
+  COALESCE(SUM(CRC32(CONCAT_WS(CHAR(31), id, username, display_name,
+    password_hash, role, session_version, UNIX_TIMESTAMP(created_at)))), 0) AS checksum_sum
+FROM users;
+SELECT COUNT(*) AS rows_count,
+  COALESCE(SUM(CRC32(CONCAT_WS(CHAR(31), id, created_by, mode, title,
+    message, UNIX_TIMESTAMP(created_at)))), 0) AS checksum_sum
+FROM notices;
+SHOW CREATE TABLE users;
+SHOW CREATE TABLE notices;
+```
+
+컬럼·기본 키·아이디 유일 키·공지 외래 키도 비교합니다. 전체 검증 SQL은 `402-cloud db migration/sql/migration-validation.sql`에 있습니다. 기존 `compare-post-counts.sh`는 게시글만 비교하므로 위 검증도 함께 수행합니다.
+
 ## 11. Backend DB_HOST 전환
 
 DMS 방식은 Source 쓰기를 중지한 상태에서 복제 지연 `0`과 10번 검증 결과를 확인한 뒤, **Migration Management > 해당 작업 > [Complete]**를 실행합니다. Target이 정상 운영 상태가 된 다음 Backend를 연결합니다. [공식 Migration 관리 문서](https://guide.ncloud-docs.com/docs/dms-migrationmanagement)를 참고합니다.
@@ -715,6 +767,8 @@ sudo systemctl status board-service-backend --no-pager
 # Web 서버
 sudo board-notice clear
 ```
+
+또는 기존 관리자 계정으로 로그인해 공지 이력이 유지됐는지 확인하고 **공지 종료 / 점검 해제**를 반영합니다. 일반 회원도 기존 비밀번호로 로그인되는지 확인합니다. 새 공지 등록은 DMS **[Complete] 이후** Target으로 연결된 Backend에서만 수행합니다.
 
 브라우저에서 게시글 조회·작성·삭제를 확인한 뒤, 자동 작성 실습을 이어갈 경우에만 Backend 서버에서 `sudo systemctl start board-service-post-seeder`를 실행합니다.
 

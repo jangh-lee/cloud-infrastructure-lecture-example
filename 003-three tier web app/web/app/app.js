@@ -53,6 +53,7 @@ const state = {
 
 let toastTimer;
 let serviceCheck;
+window.addEventListener("board-notice-updated", () => refreshService());
 
 async function request(url, options = {}) {
   const controller = new AbortController();

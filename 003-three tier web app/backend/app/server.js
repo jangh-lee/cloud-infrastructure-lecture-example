@@ -29,7 +29,8 @@ const unavailableCodes = new Set([
   "ER_CON_COUNT_ERROR", "ER_SERVER_SHUTDOWN", "ER_ACCESS_DENIED_ERROR", "ER_BAD_DB_ERROR"
 ]);
 
-app.use(express.json());
+app.use(express.json({ limit: "64kb" }));
+app.use((req, res, next) => { res.set("Cache-Control", "no-store"); next(); });
 app.use((req, res, next) => {
   const startedAt = process.hrtime.bigint();
   const forwardedFor = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
@@ -42,6 +43,8 @@ app.use((req, res, next) => {
   });
   next();
 });
+
+require("./accounts")(app, pool);
 
 app.get("/api/instance", (req, res) => {
   res.json({ instance: instanceName, service: "board-service-backend" });
@@ -136,6 +139,9 @@ app.delete("/api/posts/:id", async (req, res, next) => {
 });
 
 app.use((error, req, res, next) => {
+  if (error.type === "entity.parse.failed" || error.type === "entity.too.large") {
+    return res.status(error.status).json({ message: "요청 형식 또는 크기를 확인해 주세요." });
+  }
   console.error(error);
   if (unavailableCodes.has(error.code)) {
     return res.status(503).json({ code: "DB_UNAVAILABLE", message: "Database temporarily unavailable" });

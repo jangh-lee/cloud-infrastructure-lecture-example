@@ -119,7 +119,13 @@ db_allowed_host_sql="$(escape_sql_string "${DB_ALLOWED_HOST}")"
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y mariadb-server
+apt-get install -y mariadb-server curl
+
+mkdir -p "${SCRIPT_DIR}/migrations"
+if [[ ! -f "${SCRIPT_DIR}/migrations/002-members-notices.sql" ]]; then
+  curl -fsSL 'https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/db/migrations/002-members-notices.sql' \
+    -o "${SCRIPT_DIR}/migrations/002-members-notices.sql"
+fi
 
 sed -i "s/^bind-address.*/bind-address = ${DB_BIND_ADDRESS}/" "${MARIADB_CONF}"
 
@@ -152,6 +158,8 @@ WHERE NOT EXISTS (
   SELECT 1 FROM posts WHERE title = '환영합니다'
 );
 "
+
+run_mariadb_root "USE \`${db_name_sql}\`; $(cat "${SCRIPT_DIR}/migrations/002-members-notices.sql")"
 
 systemctl restart mariadb
 

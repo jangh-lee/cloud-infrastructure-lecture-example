@@ -343,6 +343,41 @@ BACKEND_UPSTREAM=http://BACKEND_SERVER_PRIVATE_IP:4000
 
 브라우저 진입 주소는 Web 서버 Public IP에서 Public ALB 주소로 바뀝니다. Backend와 DB의 IP는 바뀌지 않습니다.
 
+## 회원과 관리자
+
+우측 상단 **로그인 → 회원 가입**으로 일반 회원을 생성합니다. **관리자 로그인**으로 접속하면 **공지 관리**에서 사전 공지, 점검 시작, 점검 해제를 선택할 수 있습니다. 게시글은 기존 실습처럼 비가입 작성·삭제를 허용하며 `posts.author_name`은 로그인 계정과 연결하지 않습니다.
+
+`board_service` 안에 `posts`, `users`, `notices`를 함께 저장합니다. `users.role`의 `member` / `admin`으로 권한을 구분하며 별도 관리자 DB는 만들지 않습니다. 비밀번호는 scrypt 해시로 저장합니다. `notices.created_by`는 `users.id`를 참조하고 공지 변경 이력을 남깁니다.
+
+### 관리자 계정 생성
+
+최신 DB 설치 스크립트는 세 테이블을 생성합니다. 기존 Source DB를 업데이트할 때는 DB 서버에서 아래 추가 SQL만 실행합니다. 기존 게시글은 유지됩니다. **DMS Target에는 미리 실행하지 않습니다.**
+
+```bash
+curl -fsSL 'https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/db/migrations/002-members-notices.sql' -o /tmp/002-members-notices.sql
+sudo mariadb -u root -p board_service < /tmp/002-members-notices.sql
+```
+
+Backend와 Web에도 최신 설치 스크립트의 `configure`를 적용한 뒤 **Backend 서버에서** 관리자 계정을 한 번 생성합니다.
+
+```bash
+sudo node /opt/board-service-backend/manage-admin.js admin
+sudo cat /var/lib/board-service-backend/initial-admin.txt
+```
+
+출력된 아이디와 임의 생성 비밀번호로 로그인합니다. 계정이 이미 있으면 덮어쓰지 않습니다. 비밀번호 파일은 root만 읽을 수 있으며 Git에 올리지 않습니다. 로그인은 2시간 동안 유지되고 로그아웃하면 해당 계정의 기존 세션을 만료시킵니다. 실습의 HTTP 주소에서는 일반 쿠키를 사용하며, HTTPS를 구성했다면 Backend `.env`에 `COOKIE_SECURE=true`를 설정합니다.
+
+### 관리자 공지 반영
+
+1. 우측 상단 **관리자 로그인 → 공지 관리**로 이동합니다.
+2. **사전 공지**와 제목·본문을 입력하고 **공지 반영**을 누릅니다.
+3. 점검 직전에 **점검 시작**으로 반영하고, 완료 메시지와 실제 점검 화면을 확인합니다.
+4. 마이그레이션을 마치고 Backend가 정상 연결되면 **공지 종료 / 점검 해제**를 반영합니다.
+
+관리자 공지는 DB에 저장한 뒤 Web의 `board-service-notice-sync`가 약 2초마다 표시용 파일로 복사합니다. 브라우저 반영까지 보통 10초 이내이며 **저장만 되고 화면 반영이 확인되지 않았다면 DB 작업을 시작하지 않습니다.** DB/Backend 중단 중에도 마지막 공지는 유지되지만 로그인·공지 작성은 사용할 수 없습니다. 이때는 아래 Web CLI로 공지를 변경하거나 해제합니다. CLI 변경은 DB 이력에 저장되지 않으며, 이후 새로운 관리자 공지가 등록될 때까지 유지됩니다.
+
+Web이 여러 대면 각 서버에 sync 서비스를 설치하고 모든 서버의 `/notice.json` 반영을 확인합니다. Backend가 여러 대면 `/var/lib/board-service-backend/session-secret`을 동일하게 배포해야 합니다.
+
 ## 공지 및 점검 화면 {#notice-maintenance}
 
 Web 서버의 `board-notice` 명령으로 공지를 관리합니다. 공지와 점검 상태는 `/var/lib/board-service-notice`에 저장되며 DB 연결 없이 Nginx가 제공합니다. 설치·재설정 시 기존 공지와 점검 상태를 유지합니다.
@@ -365,7 +400,7 @@ NOTICE
 sudo board-notice status
 ```
 
-공지 설정은 접속 중인 브라우저에도 최대 5초 후 반영됩니다. `announce`는 상단 배너, `maintenance`는 모든 게시판 경로의 점검 화면입니다. 점검 중 `/api/`는 HTTP 503, ALB의 `/healthz`는 HTTP 200을 반환합니다. Web이 여러 대라면 각 Web 서버에 같은 공지와 점검 상태를 적용합니다.
+공지 설정은 접속 중인 브라우저에도 최대 5초 후 반영됩니다. `announce`는 상단 배너, `maintenance`는 모든 게시판 경로의 점검 화면입니다. 점검 중 일반 `/api/` 요청은 HTTP 503이며, 관리자 복구를 위한 `/api/auth/`·`/api/admin/`는 Backend로 전달합니다. ALB의 `/healthz`는 HTTP 200을 반환합니다. Web이 여러 대라면 각 Web 서버에 같은 공지와 점검 상태를 적용합니다.
 
 **마이그레이션 전에는 Backend 서버에서도 자동 작성기와 API 서비스를 중지합니다.** 자동 작성기는 Web을 거치지 않고 Backend에 직접 요청하므로 Web의 점검 모드만으로는 중지되지 않습니다.
 

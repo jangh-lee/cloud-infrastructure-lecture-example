@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Manage the lab's DB-independent notice on the Web server."""
 import argparse
+from contextlib import contextmanager
 from datetime import datetime, timezone
+import fcntl
 import json
 import os
 from pathlib import Path
@@ -9,6 +11,34 @@ import sys
 import tempfile
 
 STATE_DIR = Path('/var/lib/board-service-notice')
+
+
+@contextmanager
+def state_lock():
+    STATE_DIR.mkdir(parents=True, exist_ok=True, mode=0o755)
+    with (STATE_DIR / '.lock').open('a') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        yield
+
+
+def publish(payload):
+    """Caller holds state_lock. Publish a complete snapshot for nginx."""
+    if payload['mode'] == 'maintenance':
+        (STATE_DIR / 'maintenance').touch(mode=0o644)
+    fd, temp_path = tempfile.mkstemp(prefix='.notice-', dir=STATE_DIR)
+    try:
+        with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            json.dump(payload, f, ensure_ascii=False)
+            f.write('\n')
+            f.flush()
+            os.fsync(f.fileno())
+        os.chmod(temp_path, 0o644)
+        os.replace(temp_path, STATE_DIR / 'notice.json')
+    finally:
+        if os.path.exists(temp_path):
+            os.unlink(temp_path)
+    if payload['mode'] != 'maintenance':
+        (STATE_DIR / 'maintenance').unlink(missing_ok=True)
 
 
 def main():
@@ -23,8 +53,6 @@ def main():
         return
     if os.geteuid() != 0:
         parser.error('sudo board-notice 명령으로 실행하세요.')
-    if args.mode == 'announce' and (STATE_DIR / 'maintenance').exists():
-        parser.error('점검 해제는 Backend 정상 동작 확인 후 clear로 실행하세요.')
     if args.mode == 'clear':
         if args.title or args.message_file:
             parser.error('clear에는 제목과 본문을 지정하지 않습니다.')
@@ -40,24 +68,10 @@ def main():
     payload = dict(mode='normal' if args.mode == 'clear' else args.mode,
                    title=title, message=message,
                    updatedAt=datetime.now(timezone.utc).isoformat())
-    STATE_DIR.mkdir(parents=True, exist_ok=True, mode=0o755)
-    # Close public API access before publishing maintenance state.
-    if args.mode == 'maintenance':
-        (STATE_DIR / 'maintenance').touch(mode=0o644)
-    fd, temp_path = tempfile.mkstemp(prefix='.notice-', dir=STATE_DIR)
-    try:
-        with os.fdopen(fd, 'w', encoding='utf-8') as f:
-            json.dump(payload, f, ensure_ascii=False)
-            f.write('\n')
-            f.flush()
-            os.fsync(f.fileno())
-        os.chmod(temp_path, 0o644)
-        os.replace(temp_path, notice_path)
-    finally:
-        if os.path.exists(temp_path):
-            os.unlink(temp_path)
-    if args.mode == 'clear':
-        (STATE_DIR / 'maintenance').unlink(missing_ok=True)
+    with state_lock():
+        if args.mode == 'announce' and (STATE_DIR / 'maintenance').exists():
+            parser.error('점검 해제는 Backend 정상 동작 확인 후 clear로 실행하세요.')
+        publish(payload)
     print('공지 상태: ' + payload['mode'])
     if args.mode == 'maintenance':
         print('공개 API 접근을 차단했습니다. Backend의 자동 게시글 생성과 API 서비스도 중지하세요:')

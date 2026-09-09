@@ -7,6 +7,7 @@ SELECT
   VERSION() AS database_version;
 
 SELECT
+  TABLE_NAME,
   ORDINAL_POSITION,
   COLUMN_NAME,
   COLUMN_TYPE,
@@ -18,8 +19,8 @@ SELECT
   COLLATION_NAME
 FROM information_schema.COLUMNS
 WHERE TABLE_SCHEMA = DATABASE()
-  AND TABLE_NAME = 'posts'
-ORDER BY ORDINAL_POSITION;
+  AND TABLE_NAME IN ('posts', 'users', 'notices')
+ORDER BY TABLE_NAME, ORDINAL_POSITION;
 
 SHOW CREATE TABLE posts;
 
@@ -89,3 +90,21 @@ SELECT
 FROM posts
 GROUP BY author_name
 ORDER BY post_count DESC, author_name;
+
+-- 회원·관리자·공지: 위 게시글 비교와 함께 실행합니다.
+SELECT 'posts' AS table_name, COUNT(*) AS rows_count FROM posts
+UNION ALL SELECT 'users', COUNT(*) FROM users
+UNION ALL SELECT 'notices', COUNT(*) FROM notices;
+SELECT role, COUNT(*) AS accounts FROM users GROUP BY role ORDER BY role;
+SELECT COUNT(*) AS orphan_notices FROM notices n
+LEFT JOIN users u ON u.id = n.created_by WHERE u.id IS NULL;
+SELECT COUNT(*) AS rows_count,
+  COALESCE(SUM(CRC32(CONCAT_WS(CHAR(31), id, username, display_name,
+    password_hash, role, session_version, UNIX_TIMESTAMP(created_at)))), 0) AS checksum_sum
+FROM users;
+SELECT COUNT(*) AS rows_count,
+  COALESCE(SUM(CRC32(CONCAT_WS(CHAR(31), id, created_by, mode, title,
+    message, UNIX_TIMESTAMP(created_at)))), 0) AS checksum_sum
+FROM notices;
+SHOW CREATE TABLE users;
+SHOW CREATE TABLE notices;

@@ -133,12 +133,31 @@ esac
 
 mkdir -p "${APP_DIR}" "${WEB_ROOT}"
 
-if [[ -f "${SCRIPT_DIR}/board-notice.py" ]]; then
-  install -m 0755 "${SCRIPT_DIR}/board-notice.py" /usr/local/bin/board-notice
-else
-  curl -fsSL "${RAW_BASE%/app}/board-notice.py" -o "${APP_DIR}/board-notice.py"
-  install -m 0755 "${APP_DIR}/board-notice.py" /usr/local/bin/board-notice
-fi
+for notice_script in board-notice.py notice-sync.py; do
+  if [[ -f "${SCRIPT_DIR}/${notice_script}" ]]; then
+    cp "${SCRIPT_DIR}/${notice_script}" "${APP_DIR}/${notice_script}"
+  else
+    curl -fsSL "${RAW_BASE%/app}/${notice_script}" -o "${APP_DIR}/${notice_script}"
+  fi
+done
+install -m 0755 "${APP_DIR}/board-notice.py" /usr/local/bin/board-notice
+printf 'BACKEND_UPSTREAM=%s\n' "${BACKEND_UPSTREAM}" > "${APP_DIR}/notice-sync.env"
+cat > /etc/systemd/system/board-service-notice-sync.service <<EOF
+[Unit]
+Description=Board notice snapshot sync
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=${APP_DIR}/notice-sync.env
+ExecStart=/usr/bin/python3 ${APP_DIR}/notice-sync.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+EOF
 install -d -m 0755 /var/lib/board-service-notice
 # Reconfiguration must preserve the current notice and maintenance state.
 if [[ ! -f /var/lib/board-service-notice/notice.json ]]; then
@@ -148,10 +167,12 @@ fi
 copy_or_fetch_file "${SCRIPT_DIR}/app/index.html" "${APP_DIR}/index.html" "index.html"
 copy_or_fetch_file "${SCRIPT_DIR}/app/styles.css" "${APP_DIR}/styles.css" "styles.css"
 copy_or_fetch_file "${SCRIPT_DIR}/app/app.js" "${APP_DIR}/app.js" "app.js"
+copy_or_fetch_file "${SCRIPT_DIR}/app/admin.js" "${APP_DIR}/admin.js" "admin.js"
 
 cp "${APP_DIR}/index.html" "${WEB_ROOT}/index.html"
 cp "${APP_DIR}/styles.css" "${WEB_ROOT}/styles.css"
 cp "${APP_DIR}/app.js" "${WEB_ROOT}/app.js"
+cp "${APP_DIR}/admin.js" "${WEB_ROOT}/admin.js"
 
 cat > "${WEB_ROOT}/config.js" <<EOF
 window.BOARD_SERVICE_CONFIG = {
@@ -185,6 +206,18 @@ server {
         default_type application/json;
     }
 
+    # Operators can manage notices during Web maintenance while Backend is up.
+    location ~ ^/api/(auth|admin)/ {
+        proxy_pass ${BACKEND_UPSTREAM};
+        proxy_http_version 1.1;
+        proxy_set_header Host \$proxy_host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 10s;
+    }
+
     location /api/ {
         default_type application/json;
         if (-f /var/lib/board-service-notice/maintenance) {
@@ -212,6 +245,9 @@ ln -sf "${NGINX_CONF}" "${NGINX_LINK}"
 nginx -t
 
 if command -v systemctl >/dev/null 2>&1 && [[ -d /run/systemd/system ]]; then
+  systemctl daemon-reload
+  systemctl enable --now board-service-notice-sync
+  systemctl restart board-service-notice-sync
   systemctl enable nginx
   systemctl restart nginx
 else

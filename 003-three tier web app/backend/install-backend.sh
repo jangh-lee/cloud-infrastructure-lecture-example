@@ -110,6 +110,9 @@ sync_app_files() {
   copy_or_fetch_file "${SCRIPT_DIR}/app/package.json" "${APP_DIR}/package.json" "package.json"
   copy_or_fetch_file "${SCRIPT_DIR}/app/package-lock.json" "${APP_DIR}/package-lock.json" "package-lock.json"
   copy_or_fetch_file "${SCRIPT_DIR}/app/server.js" "${APP_DIR}/server.js" "server.js"
+  for account_file in auth.js accounts.js manage-admin.js; do
+    copy_or_fetch_file "${SCRIPT_DIR}/app/${account_file}" "${APP_DIR}/${account_file}" "${account_file}"
+  done
   copy_or_fetch_file "${SCRIPT_DIR}/app/seed-worker.js" "${APP_DIR}/seed-worker.js" "seed-worker.js"
   cp "${SCRIPT_DIR}/.env" "${APP_DIR}/.env"
 }
@@ -209,5 +212,6 @@ echo
 echo "Backend installation complete."
 echo "API health : http://SERVER_PRIVATE_OR_PUBLIC_IP:4000/api/health"
 echo "Posts API  : http://SERVER_PRIVATE_OR_PUBLIC_IP:4000/api/posts"
+echo "Admin setup: sudo node ${APP_DIR}/manage-admin.js admin"
 echo "Auto posts : enabled by default; set AUTO_POST_ENABLED=false in ${SCRIPT_DIR}/.env to disable"
 echo "Lab stress : keep LAB_STRESS_ENABLED=false unless running an isolated load test"
