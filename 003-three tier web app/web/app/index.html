@@ -24,12 +24,6 @@
   </header>
 
   <main class="shell main-content">
-    <aside id="noticeBanner" class="notice-banner" role="status" hidden>
-      <span class="notice-label">공지사항</span>
-      <strong id="noticeTitle"></strong>
-      <p id="noticeMessage"></p>
-    </aside>
-
     <section id="serviceView" class="service-view" aria-labelledby="serviceTitle" hidden>
       <span id="serviceLabel" class="notice-label">서비스 안내</span>
       <h1 id="serviceTitle"></h1>
@@ -65,6 +59,15 @@
           <span>작성자</span>
           <span>등록일시</span>
         </div>
+        <button id="noticeRow" class="board-row post-row notice-row" type="button" data-route="/notice" hidden>
+          <span class="notice-badge">공지</span>
+          <span class="post-title">
+            <strong id="noticeTitle"></strong>
+            <small id="noticeMeta"></small>
+          </span>
+          <span class="post-author">관리자</span>
+          <time id="noticeDate" class="post-date"></time>
+        </button>
         <div id="postList" class="post-list"></div>
         <div id="emptyState" class="empty-state" hidden>
           <strong>게시글이 없습니다.</strong>
@@ -79,6 +82,7 @@
       <button class="back-button" type="button" data-route="/">목록으로</button>
       <article class="post-detail">
         <header class="detail-header">
+          <span id="detailNoticeLabel" class="notice-badge detail-notice-label" hidden>공지</span>
           <h1 id="detailTitle"></h1>
           <div class="detail-meta">
             <span id="detailAuthor"></span>
@@ -163,7 +167,7 @@
     <form id="noticeForm" class="account-form">
       <label for="noticeModeInput">표시 방식</label>
       <select id="noticeModeInput">
-        <option value="announce">사전 공지 · 게시판 상단 배너</option>
+        <option value="announce">사전 공지 · 게시글 최상단 고정</option>
         <option value="maintenance">점검 시작 · 게시판 이용 중단</option>
         <option value="normal">공지 종료 / 점검 해제</option>
       </select>

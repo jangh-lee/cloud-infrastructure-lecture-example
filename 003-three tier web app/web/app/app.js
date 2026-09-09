@@ -3,9 +3,10 @@ const siteTitle = config.SITE_TITLE || "DevForum";
 const pageSize = 15;
 
 const elements = {
-  noticeBanner: document.getElementById("noticeBanner"),
+  noticeRow: document.getElementById("noticeRow"),
   noticeTitle: document.getElementById("noticeTitle"),
-  noticeMessage: document.getElementById("noticeMessage"),
+  noticeMeta: document.getElementById("noticeMeta"),
+  noticeDate: document.getElementById("noticeDate"),
   serviceView: document.getElementById("serviceView"),
   serviceLabel: document.getElementById("serviceLabel"),
   serviceTitle: document.getElementById("serviceTitle"),
@@ -26,6 +27,7 @@ const elements = {
   searchInput: document.getElementById("searchInput"),
   refreshButton: document.getElementById("refreshButton"),
   detailTitle: document.getElementById("detailTitle"),
+  detailNoticeLabel: document.getElementById("detailNoticeLabel"),
   detailAuthor: document.getElementById("detailAuthor"),
   detailDate: document.getElementById("detailDate"),
   detailContent: document.getElementById("detailContent"),
@@ -70,9 +72,11 @@ function serviceBlocked() {
 }
 
 function renderNotice() {
-  elements.noticeBanner.hidden = state.notice.mode !== "announce";
+  elements.noticeRow.hidden = state.notice.mode !== "announce";
   elements.noticeTitle.textContent = state.notice.title;
-  elements.noticeMessage.textContent = state.notice.message;
+  const date = state.notice.updatedAt ? formatDate(state.notice.updatedAt, true) : "";
+  elements.noticeMeta.textContent = date ? `관리자 · ${date}` : "관리자";
+  elements.noticeDate.textContent = date;
   elements.serviceView.hidden = !serviceBlocked();
   if (!serviceBlocked()) return;
   const planned = state.notice.mode === "maintenance";
@@ -88,7 +92,7 @@ async function readNotice() {
     if (!response.ok) return;
     const notice = await response.json();
     if (["normal", "announce", "maintenance"].includes(notice.mode)) {
-      state.notice = { mode: notice.mode, title: String(notice.title || "서비스 점검 안내"), message: String(notice.message || "") };
+      state.notice = { mode: notice.mode, title: String(notice.title || "서비스 점검 안내"), message: String(notice.message || ""), updatedAt: notice.updatedAt || "" };
     }
   } catch {
     // Preserve the last known notice when a status request fails.
@@ -115,6 +119,8 @@ async function refreshService() {
       renderRoute();
     } else if (wasBlocked || !state.postsLoaded) {
       await loadPosts();
+    } else if (getRoute().name === "notice") {
+      renderRoute();
     }
   })();
   try {
@@ -193,6 +199,9 @@ function navigate(path) {
 }
 
 function getRoute() {
+  if (window.location.pathname === "/notice" || window.location.pathname === "/notice/") {
+    return { name: "notice" };
+  }
   const detailMatch = window.location.pathname.match(/^\/posts\/(\d+)\/?$/);
   if (detailMatch) {
     return { name: "detail", postId: detailMatch[1] };
@@ -273,26 +282,30 @@ function renderPostList() {
   renderPagination(state.isLoading ? 1 : totalPages);
 }
 
-function renderDetail(postId) {
-  const post = state.posts.find((item) => String(item.id) === String(postId));
+function renderDetail(postId, isNotice = false) {
+  const post = isNotice
+    ? state.notice.mode === "announce" && { title: state.notice.title, content: state.notice.message, authorName: "관리자", createdAt: state.notice.updatedAt }
+    : state.posts.find((item) => String(item.id) === String(postId));
   setVisibleView("detail");
+  state.selectedPostId = null;
+  elements.detailNoticeLabel.hidden = !isNotice || !post;
 
   if (!post) {
-    elements.detailTitle.textContent = state.isLoading ? "게시글을 불러오는 중입니다" : "게시글을 찾을 수 없습니다";
+    elements.detailTitle.textContent = isNotice ? "공지가 종료되었습니다" : state.isLoading ? "게시글을 불러오는 중입니다" : "게시글을 찾을 수 없습니다";
     elements.detailAuthor.textContent = "";
     elements.detailDate.textContent = "";
-    elements.detailContent.textContent = state.isLoading ? "" : "삭제되었거나 존재하지 않는 게시글입니다.";
+    elements.detailContent.textContent = isNotice ? "현재 게시 중인 공지가 없습니다. 목록에서 다른 게시글을 확인해 주세요." : state.isLoading ? "" : "삭제되었거나 존재하지 않는 게시글입니다.";
     elements.deleteButton.hidden = true;
     document.title = `게시글 · ${siteTitle}`;
     return;
   }
 
-  state.selectedPostId = String(post.id);
+  state.selectedPostId = isNotice ? null : String(post.id);
   elements.detailTitle.textContent = post.title;
   elements.detailAuthor.textContent = post.authorName || "비가입 유저";
-  elements.detailDate.textContent = formatDate(post.createdAt, true);
+  elements.detailDate.textContent = post.createdAt ? formatDate(post.createdAt, true) : "";
   elements.detailContent.textContent = post.content;
-  elements.deleteButton.hidden = false;
+  elements.deleteButton.hidden = isNotice;
   document.title = `${post.title} · ${siteTitle}`;
 }
 
@@ -304,6 +317,10 @@ function renderRoute() {
     return;
   }
   const route = getRoute();
+  if (route.name === "notice") {
+    renderDetail(null, true);
+    return;
+  }
   if (route.name === "detail") {
     renderDetail(route.postId);
     return;

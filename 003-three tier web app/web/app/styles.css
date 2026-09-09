@@ -802,13 +802,30 @@ textarea:focus-visible {
   }
 }
 /* Notices are served by Web independently of the database. */
-.notice-banner {
-  margin-bottom: 28px;
-  padding: 22px 24px;
-  border: 1px solid #c7d8ef;
-  border-radius: 12px;
-  background: #f2f7ff;
-  color: #1b3555;
+.notice-row {
+  background: #fff8f7;
+}
+.notice-row:hover {
+  background: var(--danger-soft);
+}
+.notice-row .post-title strong {
+  color: var(--danger);
+  font-weight: 650;
+}
+.notice-badge {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 4px;
+  color: var(--danger);
+  background: #ffe4e0;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.detail-notice-label {
+  margin-bottom: 12px;
 }
 .notice-label {
   display: block;
@@ -817,9 +834,7 @@ textarea:focus-visible {
   font-size: 13px;
   font-weight: 700;
 }
-.notice-banner strong { font-size: 18px; }
-.notice-banner p, .service-view > p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; }
-.notice-banner p { margin: 10px 0 0; }
+.service-view > p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; }
 .service-view { padding: 72px 24px; text-align: center; }
 .service-view h1 { margin: 12px 0 20px; font-size: clamp(26px, 5vw, 36px); }
 .service-view > p { max-width: 640px; margin: 0 auto 28px; }
@@ -853,6 +868,7 @@ textarea:focus-visible {
 .notice-history li span { font-size: 12px; color: var(--muted); margin-top: 6px; }
 .notice-history li p { white-space: pre-wrap; font-size: 13px; line-height: 1.6; max-height: 160px; overflow: auto; }
 @media (max-width: 720px) {
+  .notice-row { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 12px; }
   .header-inner { height: auto; min-height: 64px; flex-wrap: wrap; padding-block: 12px; gap: 10px; }
   .account-actions { margin-left: auto; gap: 12px; }
   .account-actions .button { min-height: 36px; padding: 8px 10px; font-size: 13px; }
