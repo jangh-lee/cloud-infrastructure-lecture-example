@@ -2747,33 +2747,33 @@
 <p>컬럼·기본 키·아이디 및 샘플 식별자의 유일 키·게시글과 공지의 외래 키도 비교합니다. 자동 작성기를 재개했을 때 기존 회원이 재사용되고 같은 샘플 번호의 글이 중복되지 않는지 확인합니다. 전체 검증 SQL은 <code>402-cloud db migration/sql/migration-validation.sql</code>에 있습니다. 기존 <code>compare-post-counts.sh</code>는 게시글만 비교하므로 위 검증도 함께 수행합니다.</p>
 <h2 id="8">8. 백엔드 전환<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
 <p>DMS 방식은 Source 쓰기를 중지한 상태에서 복제 지연 <code>0</code>과 7번 검증 결과를 확인한 뒤, <strong>Migration Management &gt; 해당 작업 &gt; [Complete]</strong>를 실행합니다. Target이 정상 운영 상태가 된 다음 Backend를 연결합니다. 절차 근거는 <a href="https://guide.ncloud-docs.com/docs/dms-migrationmanagement">공식 Migration 관리 문서</a>를 참고합니다.</p>
-<p>원본 설정과 현재 실행 중인 설정을 모두 Cloud DB 접속 정보로 바꾼 뒤 서비스를 재시작합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="nv">TARGET_DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span>
-<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="nv">SOURCE_ENV</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/cloud-infrastructure-lecture-example/003-three tier web app/backend/.env"</span>
-<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="c1"># 502 Terraform 기본 구성의 설치 경로</span>
-<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-f<span class="w"> </span>/opt/lab7-setup/backend/.env<span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="w">  </span><span class="nv">SOURCE_ENV</span><span class="o">=</span>/opt/lab7-setup/backend/.env
-<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a><span class="k">fi</span>
-<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="nv">RUNTIME_ENV</span><span class="o">=</span><span class="s1">'/opt/board-service-backend/.env'</span>
-<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>
-<a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a>sudo<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"s|^DB_HOST=.*|DB_HOST=</span><span class="nv">$TARGET_DB_HOST</span><span class="s2">|"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a><span class="w">  </span>-e<span class="w"> </span><span class="s1">'s|^DB_PORT=.*|DB_PORT=3306|'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-25-12" name="__codelineno-25-12" href="#__codelineno-25-12"></a><span class="w">  </span>-e<span class="w"> </span><span class="s1">'s|^DB_USER=.*|DB_USER=board_app|'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-25-13" name="__codelineno-25-13" href="#__codelineno-25-13"></a><span class="w">  </span>-e<span class="w"> </span><span class="s1">'s|^DB_PASSWORD=.*|DB_PASSWORD=BoardApp123!|'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-25-14" name="__codelineno-25-14" href="#__codelineno-25-14"></a><span class="w">  </span>-e<span class="w"> </span><span class="s1">'s|^DB_NAME=.*|DB_NAME=board_service|'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-25-15" name="__codelineno-25-15" href="#__codelineno-25-15"></a><span class="w">  </span><span class="s2">"</span><span class="nv">$SOURCE_ENV</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$RUNTIME_ENV</span><span class="s2">"</span>
-<a id="__codelineno-25-16" name="__codelineno-25-16" href="#__codelineno-25-16"></a>
-<a id="__codelineno-25-17" name="__codelineno-25-17" href="#__codelineno-25-17"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>board-service-backend
-<a id="__codelineno-25-18" name="__codelineno-25-18" href="#__codelineno-25-18"></a>sudo<span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'^DB_(HOST|PORT|USER|NAME)='</span><span class="w"> </span><span class="s2">"</span><span class="nv">$RUNTIME_ENV</span><span class="s2">"</span>
+<p>Backend 서버에서 <strong>설치 폴더의 원본 <code>.env</code>를 열어 <code>DB_HOST</code> 한 줄만 수정한 뒤 설치 스크립트를 다시 실행</strong>합니다. Source와 Target의 DB 이름·포트·<code>board_app</code> 계정·비밀번호는 동일하게 맞춘 상태를 기준으로 합니다.</p>
+<p><strong>1. 원본 <code>.env</code> 열기</strong></p>
+<p>502 Terraform 기본 구성으로 설치했다면 다음 경로에서 실행합니다. <code>name_prefix</code>를 바꿨다면 경로의 <code>lab7</code>도 바꿉니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="nb">cd</span><span class="w"> </span>/opt/lab7-setup/backend
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>sudo<span class="w"> </span>vi<span class="w"> </span>.env
 </code></pre></div>
-<p>확인:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>board-service-backend
-<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://localhost:4000/api/health
-<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://localhost:4000/api/posts
+<p>003에서 저장소를 clone하여 직접 설치했다면 위 명령 대신 다음 경로에서 엽니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/cloud-infrastructure-lecture-example/003-three tier web app/backend"</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>sudo<span class="w"> </span>vi<span class="w"> </span>.env
 </code></pre></div>
-<p>서비스가 <code>active</code>, Health 응답이 <code>"status":"ok"</code>, 게시글 목록이 JSON으로 출력되면 전환이 완료된 것입니다.</p>
-<p>검증 중에는 자동 작성기를 중지한 상태로 유지합니다. Web의 점검 모드에서는 공개 <code>/api/health</code>도 503을 반환하므로 위 검증은 <strong>Backend의 localhost:4000</strong>에서 실행합니다.</p>
+<p>두 경로 중 실제 설치한 폴더 한 곳에서 진행합니다. <code>.env</code>의 <code>DB_HOST</code>를 Target Cloud DB의 <strong>Private 도메인</strong>으로 바꾸고 저장합니다. <code>db-xxxx.vpc-cdb.ntruss.com</code>은 실제 Target 도메인으로 바꿉니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>DB_HOST=db-xxxx.vpc-cdb.ntruss.com
+</code></pre></div>
+<p><code>vi</code>에서는 <code>i</code>로 편집하고, 수정 후 <code>Esc</code> → <code>:wq</code> → <code>Enter</code>로 저장합니다.</p>
+<p><strong>2. 설치 스크립트 다시 실행</strong></p>
+<p><code>.env</code>를 수정한 같은 폴더에서 실행합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>sudo<span class="w"> </span>./install-backend.sh
+</code></pre></div>
+<p>설치 스크립트가 원본 <code>.env</code>를 <code>/opt/board-service-backend/.env</code>로 복사하고 Backend를 재시작합니다. 따라서 <code>/opt/board-service-backend/.env</code>를 별도로 편집할 필요가 없습니다. <code>AUTO_POST_ENABLED=true</code>이면 자동 작성기도 함께 시작되므로 DMS <strong>[Complete]와 Target 정상 운영 상태를 확인한 뒤</strong> 실행합니다.</p>
+<p><strong>3. 적용 확인</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>sudo<span class="w"> </span>grep<span class="w"> </span><span class="s1">'^DB_HOST='</span><span class="w"> </span>/opt/board-service-backend/.env
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>board-service-backend
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://localhost:4000/api/health
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://localhost:4000/api/posts
+</code></pre></div>
+<p><code>DB_HOST</code>가 Target Private 도메인이고, 서비스가 <code>active</code>, Health 응답이 <code>"status":"ok"</code>, 게시글 목록이 JSON으로 출력되면 전환이 완료된 것입니다. 자동 작성기를 사용하는 경우 새 글이 Target에 추가될 수 있습니다.</p>
+<p>Web의 점검 모드는 유지한 채 <strong>Backend의 localhost:4000</strong>에서 확인합니다. Web의 점검 모드에서는 공개 <code>/api/health</code>도 503을 반환합니다.</p>
 <p>검증을 마친 뒤 <strong>게시판 관리자 화면에서</strong> 점검을 해제합니다.</p>
 <ol>
 <li>게시판 우측 상단 <strong>관리자 로그인</strong>에서 아이디와 비밀번호 모두 <code>admin</code>을 입력해 로그인합니다. 이미 로그인했다면 <strong>공지 관리</strong>를 엽니다.</li>
@@ -2782,9 +2782,7 @@
 <li><strong>공지 반영이 완료되었습니다.</strong>라는 메시지를 확인하고 관리 창을 닫아 게시판이 다시 열리는지 확인합니다.</li>
 </ol>
 <p>일반 회원도 기존 비밀번호로 로그인되는지 확인합니다. 공지 변경을 포함한 Target의 쓰기는 DMS <strong>[Complete] 이후</strong>, Target으로 연결된 Backend에서만 수행합니다.</p>
-<p>브라우저에서 게시글 조회·작성·삭제가 정상인지 확인합니다. 자동 게시글 생성 실습을 이어갈 경우에만 <strong>Backend 서버에서</strong> 다시 시작합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>board-service-post-seeder
-</code></pre></div>
+<p>브라우저에서 게시글 조회·작성·삭제가 정상인지 확인합니다. 자동 작성기를 사용하도록 설정했다면 Target DB에 새 게시글이 저장되는지도 확인합니다.</p>
 <p>점검을 해제해도 Backend나 DB가 정상화되지 않았다면 자동 장애 안내가 표시됩니다. 이 경우 Backend와 DB의 연결 설정과 로그를 확인합니다.</p>
 <h2 id="9-db">9. 다음 실습: 이관한 DB 백업·복구<a class="headerlink" href="#9-db" title="Permanent link">&para;</a></h2>
 <p><a href="../403-database-backup-recovery/">403 Database 백업 및 복구</a>에서 <strong>지금 이관한 Cloud DB</strong>를 그대로 사용합니다. Cloud DB의 Private 도메인, <code>board_service</code>, <code>board_admin</code>·<code>board_app</code> 접속 정보를 이어서 사용하고, 복구용 데이터는 별도 <code>recovery_events</code> 테이블에 기록합니다.</p>
