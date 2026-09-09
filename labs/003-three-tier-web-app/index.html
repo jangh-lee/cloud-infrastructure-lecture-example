@@ -844,7 +844,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        관리자 계정 생성
+        자동 게시글의 회원 등록
       
     </span>
   </a>
@@ -853,6 +853,17 @@
         
           <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        관리자 계정 생성
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
         관리자 공지 반영
@@ -1885,7 +1896,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        관리자 계정 생성
+        자동 게시글의 회원 등록
       
     </span>
   </a>
@@ -1894,6 +1905,17 @@
         
           <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        관리자 계정 생성
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
         관리자 공지 반영
@@ -2105,7 +2127,7 @@
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>AUTO_POST_ENABLED=true
 <a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>AUTO_POST_INTERVAL_SECONDS=60
 <a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>AUTO_POST_TOTAL=300
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>AUTO_POST_API_URL=http://127.0.0.1:4000/api/internal/sample-posts
 <a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>LAB_STRESS_ENABLED=false
 </code></pre></div>
 <div class="admonition note">
@@ -2174,7 +2196,7 @@
 <tr>
 <td><code>AUTO_POST_API_URL</code></td>
 <td>자동 등록 기능이 호출할 게시글 API</td>
-<td>같은 Backend를 호출하므로 기본값 <code>http://127.0.0.1:4000/api/posts</code>를 사용합니다.</td>
+<td>같은 Backend를 호출하므로 기본값 <code>http://127.0.0.1:4000/api/internal/sample-posts</code>를 사용합니다.</td>
 </tr>
 <tr>
 <td><code>LAB_STRESS_ENABLED</code></td>
@@ -2386,19 +2408,31 @@
 </code></pre></div>
 <p>브라우저 진입 주소는 Web 서버 Public IP에서 Public ALB 주소로 바뀝니다. Backend와 DB의 IP는 바뀌지 않습니다.</p>
 <h2 id="_1">회원과 관리자<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>우측 상단 <strong>로그인 → 회원 가입</strong>으로 일반 회원을 생성합니다. <strong>관리자 로그인</strong>으로 접속하면 <strong>공지 관리</strong>에서 사전 공지, 점검 시작, 점검 해제를 선택할 수 있습니다. 게시글은 기존 실습처럼 비가입 작성·삭제를 허용하며 <code>posts.author_name</code>은 로그인 계정과 연결하지 않습니다.</p>
+<p>우측 상단 <strong>로그인 → 회원 가입</strong>으로 일반 회원을 생성합니다. <strong>관리자 로그인</strong>으로 접속하면 <strong>공지 관리</strong>에서 사전 공지, 점검 시작, 점검 해제를 선택할 수 있습니다. 게시글은 기존 실습처럼 비가입 작성·삭제를 허용합니다. 자동 게시글은 <code>posts.author_id</code>로 회원을 참조하고 비가입 글은 이 값이 <code>NULL</code>입니다.</p>
 <p><code>board_service</code> 안에 <code>posts</code>, <code>users</code>, <code>notices</code>를 함께 저장합니다. <code>users.role</code>의 <code>member</code> / <code>admin</code>으로 권한을 구분하며 별도 관리자 DB는 만들지 않습니다. 비밀번호는 scrypt 해시로 저장합니다. <code>notices.created_by</code>는 <code>users.id</code>를 참조하고 공지 변경 이력을 남깁니다.</p>
-<h3 id="_2">관리자 계정 생성<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<h3 id="_2">자동 게시글의 회원 등록<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p>자동 작성기는 무작위 샘플을 고른 뒤 Backend의 <code>POST /api/internal/sample-posts</code>를 호출합니다. 해당 작성자의 회원이 없으면 <code>users</code>에 <code>role=member</code>로 생성하고, 같은 작성자의 다음 글에는 기존 회원을 재사용합니다. 작성자는 20명이며, <code>users.seed_author</code>로 구분합니다. 표시 이름이 같은 일반 회원을 가져다 쓰지는 않습니다.</p>
+<p><code>posts.author_id → users.id</code>로 작성자를 연결합니다. 회원 등록과 글 저장은 한 트랜잭션으로 처리하며, <code>posts.seed_index</code>의 유일 키로 재시도 시 같은 샘플 글이 중복 저장되는 것을 방지합니다. 자동 계정에는 임의 비밀번호의 해시만 저장하므로 로그인 실습에는 직접 가입한 회원 계정을 사용합니다.</p>
+<p>이 API는 Backend의 localhost에서만 호출할 수 있습니다. 기존 <code>.env</code>의 <code>AUTO_POST_API_URL</code>이 <code>/api/posts</code>로 끝나면 새 경로로 자동 변환하므로 설정을 그대로 재사용할 수 있습니다. 등록 간격·총 개수·진행 상태 파일도 유지합니다.</p>
+<p>기존 환경을 업데이트할 때는 아래 DB 추가 SQL과 최신 Backend 코드를 먼저 적용한 뒤 <strong>Backend 서버에서</strong> 실행합니다. 기존 자동 작성기의 제목·본문·작성자 형식이 모두 일치하는 글만 회원과 연결하며 원래 글 번호와 내용은 보존합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>board-service-post-seeder
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>sudo<span class="w"> </span>node<span class="w"> </span>/opt/board-service-backend/backfill-sample-members.js
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="c1"># 자동 등록 실습을 계속할 때 다시 시작</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>board-service-post-seeder
+</code></pre></div>
+<h3 id="_3">관리자 계정 생성<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <p>최신 DB 설치 스크립트는 세 테이블을 생성합니다. 기존 Source DB를 업데이트할 때는 DB 서버에서 아래 추가 SQL만 실행합니다. 기존 게시글은 유지됩니다. <strong>DMS Target에는 미리 실행하지 않습니다.</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="s1">'https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/db/migrations/002-members-notices.sql'</span><span class="w"> </span>-o<span class="w"> </span>/tmp/002-members-notices.sql
-<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span>&lt;<span class="w"> </span>/tmp/002-members-notices.sql
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="s1">'https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/db/migrations/002-members-notices.sql'</span><span class="w"> </span>-o<span class="w"> </span>/tmp/002-members-notices.sql
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span>&lt;<span class="w"> </span>/tmp/002-members-notices.sql
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="s1">'https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/db/migrations/003-sample-members.sql'</span><span class="w"> </span>-o<span class="w"> </span>/tmp/003-sample-members.sql
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span>&lt;<span class="w"> </span>/tmp/003-sample-members.sql
 </code></pre></div>
 <p>Backend와 Web에도 최신 설치 스크립트의 <code>configure</code>를 적용한 뒤 <strong>Backend 서버에서</strong> 관리자 계정을 한 번 생성합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>sudo<span class="w"> </span>node<span class="w"> </span>/opt/board-service-backend/manage-admin.js<span class="w"> </span>admin
-<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>sudo<span class="w"> </span>cat<span class="w"> </span>/var/lib/board-service-backend/initial-admin.txt
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>sudo<span class="w"> </span>node<span class="w"> </span>/opt/board-service-backend/manage-admin.js<span class="w"> </span>admin
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>sudo<span class="w"> </span>cat<span class="w"> </span>/var/lib/board-service-backend/initial-admin.txt
 </code></pre></div>
 <p>출력된 아이디와 임의 생성 비밀번호로 로그인합니다. 계정이 이미 있으면 덮어쓰지 않습니다. 비밀번호 파일은 root만 읽을 수 있으며 Git에 올리지 않습니다. 로그인은 2시간 동안 유지되고 로그아웃하면 해당 계정의 기존 세션을 만료시킵니다. 실습의 HTTP 주소에서는 일반 쿠키를 사용하며, HTTPS를 구성했다면 Backend <code>.env</code>에 <code>COOKIE_SECURE=true</code>를 설정합니다.</p>
-<h3 id="_3">관리자 공지 반영<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<h3 id="_4">관리자 공지 반영<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <ol>
 <li>우측 상단 <strong>관리자 로그인 → 공지 관리</strong>로 이동합니다.</li>
 <li><strong>사전 공지</strong>와 제목·본문을 입력하고 <strong>공지 반영</strong>을 누릅니다.</li>
@@ -2409,30 +2443,30 @@
 <p>Web이 여러 대면 각 서버에 sync 서비스를 설치하고 모든 서버의 <code>/notice.json</code> 반영을 확인합니다. Backend가 여러 대면 <code>/var/lib/board-service-backend/session-secret</code>을 동일하게 배포해야 합니다.</p>
 <h2 id="notice-maintenance">공지 및 점검 화면<a class="headerlink" href="#notice-maintenance" title="Permanent link">&para;</a></h2>
 <p>Web 서버의 <code>board-notice</code> 명령으로 공지를 관리합니다. 공지와 점검 상태는 <code>/var/lib/board-service-notice</code>에 저장되며 DB 연결 없이 Nginx가 제공합니다. 설치·재설정 시 기존 공지와 점검 상태를 유지합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># Web 서버: 사전 공지 배너 (게시판 정상 이용)</span>
-<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>sudo<span class="w"> </span>board-notice<span class="w"> </span>announce<span class="w"> </span>--title<span class="w"> </span><span class="s1">'서비스 작업 안내'</span><span class="w"> </span>--message-file<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'NOTICE'</span>
-<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="s">잠시 후 데이터베이스 이전 작업을 진행합니다.</span>
-<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="s">작업 중에는 게시글 조회·작성·삭제가 일시 중단됩니다.</span>
-<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="s">작성 중인 내용은 미리 보관해 주세요.</span>
-<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="s">NOTICE</span>
-<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>
-<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="c1"># Web 서버: 점검 화면 전환 및 공개 API 차단</span>
-<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>sudo<span class="w"> </span>board-notice<span class="w"> </span>maintenance<span class="w"> </span>--title<span class="w"> </span><span class="s1">'서비스 점검 중입니다'</span><span class="w"> </span>--message-file<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'NOTICE'</span>
-<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a><span class="s">현재 데이터베이스 이전 작업을 진행하고 있습니다.</span>
-<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a><span class="s">데이터 확인을 마친 뒤 서비스를 다시 열겠습니다.</span>
-<a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a><span class="s">이용에 불편을 드려 죄송합니다.</span>
-<a id="__codelineno-24-13" name="__codelineno-24-13" href="#__codelineno-24-13"></a><span class="s">NOTICE</span>
-<a id="__codelineno-24-14" name="__codelineno-24-14" href="#__codelineno-24-14"></a>
-<a id="__codelineno-24-15" name="__codelineno-24-15" href="#__codelineno-24-15"></a>sudo<span class="w"> </span>board-notice<span class="w"> </span>status
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># Web 서버: 사전 공지 배너 (게시판 정상 이용)</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>sudo<span class="w"> </span>board-notice<span class="w"> </span>announce<span class="w"> </span>--title<span class="w"> </span><span class="s1">'서비스 작업 안내'</span><span class="w"> </span>--message-file<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'NOTICE'</span>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="s">잠시 후 데이터베이스 이전 작업을 진행합니다.</span>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="s">작업 중에는 게시글 조회·작성·삭제가 일시 중단됩니다.</span>
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="s">작성 중인 내용은 미리 보관해 주세요.</span>
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a><span class="s">NOTICE</span>
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a><span class="c1"># Web 서버: 점검 화면 전환 및 공개 API 차단</span>
+<a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a>sudo<span class="w"> </span>board-notice<span class="w"> </span>maintenance<span class="w"> </span>--title<span class="w"> </span><span class="s1">'서비스 점검 중입니다'</span><span class="w"> </span>--message-file<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'NOTICE'</span>
+<a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a><span class="s">현재 데이터베이스 이전 작업을 진행하고 있습니다.</span>
+<a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a><span class="s">데이터 확인을 마친 뒤 서비스를 다시 열겠습니다.</span>
+<a id="__codelineno-25-12" name="__codelineno-25-12" href="#__codelineno-25-12"></a><span class="s">이용에 불편을 드려 죄송합니다.</span>
+<a id="__codelineno-25-13" name="__codelineno-25-13" href="#__codelineno-25-13"></a><span class="s">NOTICE</span>
+<a id="__codelineno-25-14" name="__codelineno-25-14" href="#__codelineno-25-14"></a>
+<a id="__codelineno-25-15" name="__codelineno-25-15" href="#__codelineno-25-15"></a>sudo<span class="w"> </span>board-notice<span class="w"> </span>status
 </code></pre></div>
 <p>공지 설정은 접속 중인 브라우저에도 최대 5초 후 반영됩니다. <code>announce</code>는 상단 배너, <code>maintenance</code>는 모든 게시판 경로의 점검 화면입니다. 점검 중 일반 <code>/api/</code> 요청은 HTTP 503이며, 관리자 복구를 위한 <code>/api/auth/</code>·<code>/api/admin/</code>는 Backend로 전달합니다. ALB의 <code>/healthz</code>는 HTTP 200을 반환합니다. Web이 여러 대라면 각 Web 서버에 같은 공지와 점검 상태를 적용합니다.</p>
 <p><strong>마이그레이션 전에는 Backend 서버에서도 자동 작성기와 API 서비스를 중지합니다.</strong> 자동 작성기는 Web을 거치지 않고 Backend에 직접 요청하므로 Web의 점검 모드만으로는 중지되지 않습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># Backend 서버</span>
-<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>board-service-post-seeder<span class="w"> </span>board-service-backend
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># Backend 서버</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>board-service-post-seeder<span class="w"> </span>board-service-backend
 </code></pre></div>
 <p>작업 완료 후 Backend를 먼저 시작하고 <code>http://localhost:4000/api/health</code>와 <code>/api/posts</code>를 확인합니다. Web 서버에서 아래 명령으로 점검을 해제하고, 필요할 때 Backend의 자동 작성기를 다시 시작합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># Web 서버: 검증을 마친 뒤 점검과 공지 해제</span>
-<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>sudo<span class="w"> </span>board-notice<span class="w"> </span>clear
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="c1"># Web 서버: 검증을 마친 뒤 점검과 공지 해제</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>sudo<span class="w"> </span>board-notice<span class="w"> </span>clear
 </code></pre></div>
 <p>계획된 점검은 관리자가 해제할 때까지 유지됩니다. 점검 모드를 켜지 않은 상태에서 DB/Backend 연결 장애가 발생하면 일시적 장애 안내가 자동 표시되고, 연결이 회복되면 게시판으로 돌아갑니다. 작성 중인 본문은 같은 브라우저 창을 유지하면 보존되며, 실패한 글쓰기·삭제 요청을 자동 재전송하지 않습니다.</p>
 
