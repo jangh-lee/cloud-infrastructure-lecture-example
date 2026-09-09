@@ -2421,17 +2421,17 @@
 <a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>board-service-post-seeder
 </code></pre></div>
 <h3 id="_3">관리자 계정 생성<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p>실습 관리자 로그인은 <strong>아이디 <code>admin</code> / 비밀번호 <code>admin</code></strong>입니다.</p>
 <p>최신 DB 설치 스크립트는 세 테이블을 생성합니다. 기존 Source DB를 업데이트할 때는 DB 서버에서 아래 추가 SQL만 실행합니다. 기존 게시글은 유지됩니다. <strong>DMS Target에는 미리 실행하지 않습니다.</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="s1">'https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/db/migrations/002-members-notices.sql'</span><span class="w"> </span>-o<span class="w"> </span>/tmp/002-members-notices.sql
 <a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span>&lt;<span class="w"> </span>/tmp/002-members-notices.sql
 <a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="s1">'https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/db/migrations/003-sample-members.sql'</span><span class="w"> </span>-o<span class="w"> </span>/tmp/003-sample-members.sql
 <a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span>&lt;<span class="w"> </span>/tmp/003-sample-members.sql
 </code></pre></div>
-<p>Backend와 Web에도 최신 설치 스크립트의 <code>configure</code>를 적용한 뒤 <strong>Backend 서버에서</strong> 관리자 계정을 한 번 생성합니다.</p>
+<p>Backend와 Web에도 최신 설치 스크립트의 <code>configure</code>를 적용한 뒤 <strong>Backend 서버에서</strong> 아래 명령으로 실습 관리자 계정을 준비합니다. 기존 관리자 계정도 같은 비밀번호로 변경됩니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>sudo<span class="w"> </span>node<span class="w"> </span>/opt/board-service-backend/manage-admin.js<span class="w"> </span>admin
-<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>sudo<span class="w"> </span>cat<span class="w"> </span>/var/lib/board-service-backend/initial-admin.txt
 </code></pre></div>
-<p>출력된 아이디와 임의 생성 비밀번호로 로그인합니다. 계정이 이미 있으면 덮어쓰지 않습니다. 비밀번호 파일은 root만 읽을 수 있으며 Git에 올리지 않습니다. 로그인은 2시간 동안 유지되고 로그아웃하면 해당 계정의 기존 세션을 만료시킵니다. 실습의 HTTP 주소에서는 일반 쿠키를 사용하며, HTTPS를 구성했다면 Backend <code>.env</code>에 <code>COOKIE_SECURE=true</code>를 설정합니다.</p>
+<p>게시판의 <strong>관리자 로그인</strong>에서 아이디와 비밀번호 모두 <code>admin</code>을 입력합니다. 비밀번호는 DB에 해시로 저장하며, 기존 계정의 ID와 공지 이력은 유지합니다. 비밀번호가 변경되면 기존 로그인 세션은 만료됩니다. 로그인은 2시간 동안 유지되고 로그아웃하면 해당 계정의 기존 세션을 만료시킵니다. 실습의 HTTP 주소에서는 일반 쿠키를 사용하며, HTTPS를 구성했다면 Backend <code>.env</code>에 <code>COOKIE_SECURE=true</code>를 설정합니다.</p>
 <h3 id="_4">관리자 공지 반영<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <ol>
 <li>우측 상단 <strong>관리자 로그인 → 공지 관리</strong>로 이동합니다.</li>

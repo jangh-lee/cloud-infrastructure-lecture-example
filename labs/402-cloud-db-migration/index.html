@@ -2102,12 +2102,12 @@
 </table>
 <h2 id="0">0. 시작 전 공지와 점검 화면 준비<a class="headerlink" href="#0" title="Permanent link">&para;</a></h2>
 <p>502 기본 구성에서 설치 설정 파일은 <code>/opt/lab7-setup/web/.env</code>, <code>/opt/lab7-setup/backend/.env</code>, <code>/opt/lab7-setup/db/.env</code>에 있습니다. <code>name_prefix</code>를 바꿨다면 경로의 <code>lab7</code>도 바꿉니다.</p>
-<p>최신 003 예제에서 생성한 관리자 계정 <code>admin</code>을 준비합니다. 이번 실습의 사전 공지와 점검 안내는 <strong>게시판의 관리자 화면</strong>에서 작성합니다. 공지 이력은 DB에 저장되고 표시용 공지는 Web 서버에 보관되므로 DB나 Backend가 중단되어도 마지막 안내가 표시됩니다.</p>
+<p>실습 관리자 계정은 <strong>아이디 <code>admin</code> / 비밀번호 <code>admin</code></strong>입니다. 이번 실습의 사전 공지와 점검 안내는 <strong>게시판의 관리자 화면</strong>에서 작성합니다. 공지 이력은 DB에 저장되고 표시용 공지는 Web 서버에 보관되므로 DB나 Backend가 중단되어도 마지막 안내가 표시됩니다.</p>
 <p>DB 또는 Backend를 중지하면 관리자 로그인과 공지 작성도 사용할 수 없습니다. 반드시 작업을 시작하기 전에 아래 공지를 등록하고 <strong>화면 반영 완료</strong>까지 확인합니다.</p>
 <h3 id="0-1">0-1. 복사해서 사용할 사전 공지<a class="headerlink" href="#0-1" title="Permanent link">&para;</a></h3>
 <ol>
 <li>브라우저에서 게시판의 Web 또는 ALB 주소를 엽니다.</li>
-<li>우측 상단 <strong>관리자 로그인</strong>을 누르고 아이디에 <code>admin</code>, 비밀번호에 003 실습에서 생성한 관리자 비밀번호를 입력한 뒤 <strong>로그인</strong>합니다.</li>
+<li>우측 상단 <strong>관리자 로그인</strong>을 누르고 아이디와 비밀번호에 모두 <code>admin</code>을 입력한 뒤 <strong>로그인</strong>합니다.</li>
 <li><strong>공지 관리</strong> 화면에서 표시 방식을 <strong>사전 공지 · 게시판 상단 배너</strong>로 선택합니다. 이미 로그인했다면 우측 상단 <strong>공지 관리</strong>를 누릅니다.</li>
 <li>아래 제목과 본문을 각각 <strong>공지 제목</strong>, <strong>공지 내용</strong>에 복사해 넣습니다.</li>
 </ol>
@@ -2747,7 +2747,7 @@
 <p>검증 중에는 자동 작성기를 중지한 상태로 유지합니다. Web의 점검 모드에서는 공개 <code>/api/health</code>도 503을 반환하므로 위 검증은 <strong>Backend의 localhost:4000</strong>에서 실행합니다.</p>
 <p>검증을 마친 뒤 <strong>게시판 관리자 화면에서</strong> 점검을 해제합니다.</p>
 <ol>
-<li>게시판 우측 상단 <strong>관리자 로그인</strong>에서 기존 <code>admin</code> 계정으로 로그인합니다. 이미 로그인했다면 <strong>공지 관리</strong>를 엽니다.</li>
+<li>게시판 우측 상단 <strong>관리자 로그인</strong>에서 아이디와 비밀번호 모두 <code>admin</code>을 입력해 로그인합니다. 이미 로그인했다면 <strong>공지 관리</strong>를 엽니다.</li>
 <li><strong>최근 공지 이력</strong>에 이관 전에 작성한 사전 공지와 점검 안내가 남아 있는지 확인합니다.</li>
 <li>표시 방식을 <strong>공지 종료 / 점검 해제</strong>로 선택하고, 같은 이름의 버튼을 누른 뒤 확인 창에서 <strong>확인</strong>을 선택합니다.</li>
 <li><strong>공지 반영이 완료되었습니다.</strong>라는 메시지를 확인하고 관리 창을 닫아 게시판이 다시 열리는지 확인합니다.</li>
