@@ -357,6 +357,13 @@ cd "003-three tier web app"
 sudo mariadb -u root -p < db/queries/database-accounts.sql
 ```
 
+502 Terraform으로 생성한 DB 서버에서는 저장소를 clone하지 않고 `/opt/lab7-setup/db`에 설치합니다. 조회 SQL은 다음 경로에서 실행합니다. `name_prefix`를 바꿨다면 경로의 `lab7`도 바꿉니다.
+
+```bash
+sudo mariadb -u root -p board_service < /opt/lab7-setup/db/queries/board-data.sql
+sudo mariadb -u root -p < /opt/lab7-setup/db/queries/database-accounts.sql
+```
+
 #### SQL 직접 조회 실습
 
 SQL 파일만 실행하고 넘어가지 말고, 아래처럼 DB에 접속해서 쿼리를 하나씩 입력해 봅니다.

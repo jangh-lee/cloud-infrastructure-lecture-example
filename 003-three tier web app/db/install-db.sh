@@ -121,11 +121,12 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y mariadb-server curl
 
-mkdir -p "${SCRIPT_DIR}/migrations"
-for migration in 002-members-notices.sql 003-sample-members.sql; do
-  if [[ ! -f "${SCRIPT_DIR}/migrations/${migration}" ]]; then
-    curl -fsSL "https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/db/migrations/${migration}" \
-      -o "${SCRIPT_DIR}/migrations/${migration}"
+mkdir -p "${SCRIPT_DIR}/migrations" "${SCRIPT_DIR}/queries"
+for sql_file in migrations/002-members-notices.sql migrations/003-sample-members.sql \
+  queries/board-data.sql queries/database-accounts.sql; do
+  if [[ ! -f "${SCRIPT_DIR}/${sql_file}" ]]; then
+    curl -fsSL "https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/db/${sql_file}" \
+      -o "${SCRIPT_DIR}/${sql_file}"
   fi
 done
 

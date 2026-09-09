@@ -253,6 +253,13 @@ MariaDB 시작·종료, 인증과 연결 오류는 서비스 로그에서 확인
 sudo journalctl -u mariadb -f
 ```
 
+502 Terraform으로 생성한 DB 서버의 조회 SQL은 `/opt/lab7-setup/db/queries`에 있습니다. 테이블·게시글 상태와 DB 계정·권한을 확인하려면 아래 명령을 실행합니다. `name_prefix`를 바꿨다면 경로의 `lab7`도 바꿉니다.
+
+```bash
+sudo mariadb -u root -p board_service < /opt/lab7-setup/db/queries/board-data.sql
+sudo mariadb -u root -p < /opt/lab7-setup/db/queries/database-accounts.sql
+```
+
 실제 `SELECT`, `INSERT`, `DELETE` 쿼리를 관찰할 때만 General Log를 잠시 켭니다. 쿼리 내용이 기록되고 부하가 증가하므로 실습 후 반드시 끕니다.
 
 ```bash
