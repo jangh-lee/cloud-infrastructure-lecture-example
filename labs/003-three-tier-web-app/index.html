@@ -2435,7 +2435,7 @@
 <h3 id="_4">관리자 공지 반영<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <ol>
 <li>우측 상단 <strong>관리자 로그인 → 공지 관리</strong>로 이동합니다.</li>
-<li><strong>사전 공지</strong>와 제목·본문을 입력하고 <strong>공지 반영</strong>을 누릅니다.</li>
+<li><strong>사전 공지</strong>와 제목·본문을 입력하고 <strong>공지 반영</strong>을 누릅니다. 게시글 목록 첫 줄에 빨간색 <strong>공지</strong> 표시로 고정되며 제목을 누르면 본문이 열립니다. 검색과 페이지 이동 중에도 맨 위에 표시됩니다.</li>
 <li>점검 직전에 <strong>점검 시작</strong>으로 반영하고, 완료 메시지와 실제 점검 화면을 확인합니다.</li>
 <li>마이그레이션을 마치고 Backend가 정상 연결되면 <strong>공지 종료 / 점검 해제</strong>를 반영합니다.</li>
 </ol>
@@ -2443,7 +2443,7 @@
 <p>Web이 여러 대면 각 서버에 sync 서비스를 설치하고 모든 서버의 <code>/notice.json</code> 반영을 확인합니다. Backend가 여러 대면 <code>/var/lib/board-service-backend/session-secret</code>을 동일하게 배포해야 합니다.</p>
 <h2 id="notice-maintenance">공지 및 점검 화면<a class="headerlink" href="#notice-maintenance" title="Permanent link">&para;</a></h2>
 <p>Web 서버의 <code>board-notice</code> 명령으로 공지를 관리합니다. 공지와 점검 상태는 <code>/var/lib/board-service-notice</code>에 저장되며 DB 연결 없이 Nginx가 제공합니다. 설치·재설정 시 기존 공지와 점검 상태를 유지합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># Web 서버: 사전 공지 배너 (게시판 정상 이용)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># Web 서버: 게시글 최상단 고정 공지 (게시판 정상 이용)</span>
 <a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>sudo<span class="w"> </span>board-notice<span class="w"> </span>announce<span class="w"> </span>--title<span class="w"> </span><span class="s1">'서비스 작업 안내'</span><span class="w"> </span>--message-file<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'NOTICE'</span>
 <a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="s">잠시 후 데이터베이스 이전 작업을 진행합니다.</span>
 <a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="s">작업 중에는 게시글 조회·작성·삭제가 일시 중단됩니다.</span>
@@ -2459,7 +2459,7 @@
 <a id="__codelineno-25-14" name="__codelineno-25-14" href="#__codelineno-25-14"></a>
 <a id="__codelineno-25-15" name="__codelineno-25-15" href="#__codelineno-25-15"></a>sudo<span class="w"> </span>board-notice<span class="w"> </span>status
 </code></pre></div>
-<p>공지 설정은 접속 중인 브라우저에도 최대 5초 후 반영됩니다. <code>announce</code>는 상단 배너, <code>maintenance</code>는 모든 게시판 경로의 점검 화면입니다. 점검 중 일반 <code>/api/</code> 요청은 HTTP 503이며, 관리자 복구를 위한 <code>/api/auth/</code>·<code>/api/admin/</code>는 Backend로 전달합니다. ALB의 <code>/healthz</code>는 HTTP 200을 반환합니다. Web이 여러 대라면 각 Web 서버에 같은 공지와 점검 상태를 적용합니다.</p>
+<p>공지 설정은 접속 중인 브라우저에도 최대 5초 후 반영됩니다. <code>announce</code>는 게시글 목록의 최상단 고정 공지, <code>maintenance</code>는 모든 게시판 경로의 점검 화면입니다. 점검 중 일반 <code>/api/</code> 요청은 HTTP 503이며, 관리자 복구를 위한 <code>/api/auth/</code>·<code>/api/admin/</code>는 Backend로 전달합니다. ALB의 <code>/healthz</code>는 HTTP 200을 반환합니다. Web이 여러 대라면 각 Web 서버에 같은 공지와 점검 상태를 적용합니다.</p>
 <p><strong>마이그레이션 전에는 Backend 서버에서도 자동 작성기와 API 서비스를 중지합니다.</strong> 자동 작성기는 Web을 거치지 않고 Backend에 직접 요청하므로 Web의 점검 모드만으로는 중지되지 않습니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># Backend 서버</span>
 <a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>board-service-post-seeder<span class="w"> </span>board-service-backend
