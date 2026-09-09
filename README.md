@@ -48,7 +48,7 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 | --- | --- |
 | [`401-cloud db mysql`](./401-cloud%20db%20mysql/) | Cloud DB for MySQL을 생성하고 `board_service` DB와 `board_app` 계정으로 003 게시판 Backend를 연결합니다. |
 | [`402-cloud db migration`](./402-cloud%20db%20migration/) | 기존 게시판 DB를 Cloud DB for MySQL로 마이그레이션하고 정합성과 Backend 연결을 검증합니다. |
-| [`403-database backup recovery`](./403-database%20backup%20recovery/) | 402에서 이관한 Cloud DB에 복구용 테스트 데이터를 기록하고 백업 파일 복원과 특정시점 복구(PITR)를 확인합니다. |
+| [`403-database backup recovery`](./403-database%20backup%20recovery/) | 402에서 이관한 게시판의 실습 글을 삭제하고, Cloud DB 특정 시점 복구(PITR)로 데이터를 되돌린 뒤 Backend를 전환합니다. |
 
 ### 6. CLI 및 IaC 실습
 

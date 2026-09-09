@@ -4,7 +4,7 @@
 
 003번 게시판 DB를 Ubuntu 서버의 MariaDB/MySQL에서 Naver Cloud `Cloud DB for MySQL`로 마이그레이션합니다.
 
-**401 생성·연결 → 402 마이그레이션 → 403 백업·복구** 순서로 진행합니다. 이관이 끝나면 같은 Cloud DB의 `board_service`를 403에서 백업·복구 대상으로 사용합니다.
+**401 생성·연결 → 402 마이그레이션 → 403 특정 시점 복구(PITR)** 순서로 진행합니다. 이관이 끝나면 같은 Cloud DB의 `board_service`로 403 복구 실습을 진행합니다.
 
 !!! warning "401 Cloud DB 재사용"
     이 실습은 추가 Cloud DB를 만들지 않고 401에서 생성한 Cloud DB를 Target으로 재사용합니다. DMS 시작 전 Backend와 자동 게시글 서비스를 중지하고 Target의 `board_service`를 삭제합니다. 401에서 Target에 작성한 데이터가 필요하면 삭제 전에 내보내거나 백업을 확보합니다. 마이그레이션할 003 Source DB의 데이터는 그대로 유지됩니다.
@@ -657,13 +657,13 @@ Web의 점검 모드는 유지한 채 **Backend의 localhost:4000**에서 확인
 
 점검을 해제해도 Backend나 DB가 정상화되지 않았다면 자동 장애 안내가 표시됩니다. 이 경우 Backend와 DB의 연결 설정과 로그를 확인합니다.
 
-## 9. 다음 실습: 이관한 DB 백업·복구
+## 9. 다음 실습: Cloud DB 특정 시점 복구(PITR)
 
-[403 Database 백업 및 복구](403-database-backup-recovery.md)에서 **지금 이관한 Cloud DB**를 그대로 사용합니다. Cloud DB의 Private 도메인, `board_service`, `board_admin`·`board_app` 접속 정보를 이어서 사용하고, 복구용 데이터는 별도 `recovery_events` 테이블에 기록합니다.
+[403 Cloud DB 특정 시점 복구(PITR)](403-database-backup-recovery.md)에서 **지금 이관한 Cloud DB**를 그대로 사용합니다. 게시판에 실습용 글 3개를 추가하고 삭제한 뒤, 삭제 전 시점으로 새 Cloud DB를 복구합니다. 데이터를 검증하고 Backend의 `.env`에서 `DB_HOST`를 바꿔 설치 스크립트를 다시 실행합니다.
 
 - Cloud DB·Backend를 유지하고, Source DB는 이관 검증과 필요한 백업 확보 후 정리합니다.
 - DMS 방식은 [Complete]와 Target 정상 운영 상태를 확인한 뒤 403으로 이동합니다.
-- 401 기본값인 단일 서버는 백업 파일 복원까지만 지원합니다. **PITR까지 진행하려면 403의 고가용성 전환·백업 준비 절차**를 먼저 수행합니다.
+- 403에서는 **HA, 완료된 백업, 실제 복구 가능한 시간 범위**를 먼저 확인합니다. 단일 서버라면 HA로 전환한 뒤 진행합니다.
 
 ## 참고
 
