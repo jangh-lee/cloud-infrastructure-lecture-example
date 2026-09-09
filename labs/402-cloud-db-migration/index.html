@@ -2649,12 +2649,16 @@
 </code></pre></div>
 <h2 id="7">7. 데이터 검증<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
 <p>Backend 서버에서 접속 정보를 먼저 설정합니다. <code>SOURCE_DB_HOST</code>는 003 Source DB의 사설 IP, <code>TARGET_DB_HOST</code>는 Cloud DB의 Private 도메인입니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nv">SOURCE_DB_HOST</span><span class="o">=</span><span class="s1">'10.10.120.6'</span>
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="nv">TARGET_DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span>
-<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="nv">DB_PASSWORD</span><span class="o">=</span><span class="s1">'BoardApp123!'</span>
+<p>아래 설정은 Backend의 <code>DB_HOST</code>를 Target으로 바꾸기 전에 root 셸에서 실행합니다. Source 비밀번호는 Backend가 실제 사용하는 <code>.env</code>에서 읽습니다. Terraform으로 설치했다면 교안의 예시 비밀번호와 다를 수 있습니다. Target 비밀번호는 Cloud DB에서 <code>board_app</code> 계정을 만들 때 지정한 값으로 맞춥니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nb">source</span><span class="w"> </span>/opt/board-service-backend/.env
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="nv">SOURCE_DB_HOST</span><span class="o">=</span><span class="s1">'10.10.120.6'</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="nv">SOURCE_DB_PASSWORD</span><span class="o">=</span><span class="s2">"</span><span class="nv">$DB_PASSWORD</span><span class="s2">"</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="nv">TARGET_DB_HOST</span><span class="o">=</span><span class="s1">'db-xxxx.vpc-cdb.ntruss.com'</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="nv">TARGET_DB_PASSWORD</span><span class="o">=</span><span class="s1">'BoardApp123!'</span>
 </code></pre></div>
+<p>접속 변수는 현재 터미널에서만 유지됩니다. 새로 SSH 접속했다면 위 설정부터 다시 실행합니다. 이미 Backend를 Target으로 전환했다면 <code>SOURCE_DB_PASSWORD</code>에 기존 Source의 비밀번호를 지정합니다.</p>
 <p>먼저 Source DB를 조회합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s2">"</span><span class="nv">$DB_PASSWORD</span><span class="s2">"</span><span class="w"> </span>mysql<span class="w"> </span>--table<span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s2">"</span><span class="nv">$SOURCE_DB_PASSWORD</span><span class="s2">"</span><span class="w"> </span>mysql<span class="w"> </span>--table<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">  </span>-h<span class="w"> </span><span class="s2">"</span><span class="nv">$SOURCE_DB_HOST</span><span class="s2">"</span><span class="w"> </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span>-u<span class="w"> </span>board_app<span class="w"> </span>board_service<span class="w"> </span><span class="s">&lt;&lt;'SQL'</span>
 <a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="s">SELECT 'SOURCE DB' AS verification_target;</span>
 <a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="s">SHOW COLUMNS FROM posts;</span>
@@ -2677,7 +2681,7 @@
 <a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a><span class="s">SQL</span>
 </code></pre></div>
 <p>같은 터미널에서 Target Cloud DB를 조회합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s2">"</span><span class="nv">$DB_PASSWORD</span><span class="s2">"</span><span class="w"> </span>mysql<span class="w"> </span>--table<span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="nv">MYSQL_PWD</span><span class="o">=</span><span class="s2">"</span><span class="nv">$TARGET_DB_PASSWORD</span><span class="s2">"</span><span class="w"> </span>mysql<span class="w"> </span>--table<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">  </span>-h<span class="w"> </span><span class="s2">"</span><span class="nv">$TARGET_DB_HOST</span><span class="s2">"</span><span class="w"> </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span>-u<span class="w"> </span>board_app<span class="w"> </span>board_service<span class="w"> </span><span class="s">&lt;&lt;'SQL'</span>
 <a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="s">SELECT 'TARGET DB' AS verification_target;</span>
 <a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="s">SHOW COLUMNS FROM posts;</span>
