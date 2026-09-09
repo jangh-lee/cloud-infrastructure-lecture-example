@@ -746,9 +746,14 @@ DMS로 변경분까지 이관하는 동안에는 Source에 쓰기가 계속 발�
 
 ### 회원·관리자·공지 추가 검증
 
-Source 쓰기를 중지하고 DMS 복제 지연이 `0`인 상태에서 양쪽 `board_service`에 동일하게 실행합니다. 아래 집계 값이 모두 같고 `orphan_notices`와 `orphan_posts`가 모두 `0`이어야 합니다. 해시는 그대로 이관하므로 비밀번호를 재설정하지 않습니다.
+Source 쓰기를 중지하고 DMS 복제 지연이 `0`인 상태에서 Source와 Target의 `board_service`에 같은 검증 SQL을 실행합니다. 아래 집계 값이 모두 같고 `orphan_notices`와 `orphan_posts`가 모두 `0`이어야 합니다. 해시는 그대로 이관하므로 비밀번호를 재설정하지 않습니다.
 
-```sql
+아래 명령은 모두 **Backend 서버의 Bash 프롬프트(`root@lab7-backend:~#`)**에서 실행합니다. `SELECT`·`SHOW`만 Bash에 붙여 넣으면 `command not found` 또는 `syntax error`가 발생합니다.
+
+**1. 검증 SQL 파일 저장:** `cat`부터 마지막 `SQL`까지 블록 전체를 복사합니다. 이 단계는 파일만 저장합니다.
+
+```bash
+cat > /tmp/board-members-notices-check.sql <<'SQL'
 SELECT 'posts' AS table_name, COUNT(*) AS rows_count FROM posts
 UNION ALL SELECT 'users', COUNT(*) FROM users
 UNION ALL SELECT 'notices', COUNT(*) FROM notices;
@@ -770,7 +775,27 @@ SELECT COUNT(*) AS rows_count,
 FROM notices;
 SHOW CREATE TABLE users;
 SHOW CREATE TABLE notices;
+SQL
 ```
+
+**2. Source DB 조회:** `Enter password:`가 나오면 Source의 `board_app` 비밀번호를 입력합니다. 입력한 비밀번호는 화면에 표시되지 않습니다. 실습 IP를 바꿨다면 `SOURCE_DB_HOST`도 실제 Source 사설 IP로 바꿉니다.
+
+```bash
+SOURCE_DB_HOST='10.10.120.6'
+mysql --protocol=TCP --table \
+  -h "$SOURCE_DB_HOST" -P 3306 -u board_app -p board_service \
+  < /tmp/board-members-notices-check.sql
+```
+
+**3. Target DB 조회:** `TARGET_DB_HOST`에 앞에서 확인한 Cloud DB Private 도메인이 설정된 같은 터미널에서 실행합니다. 이번에는 Target의 `board_app` 비밀번호를 입력합니다. `ERROR 1045`가 나오면 해당 DB의 계정·비밀번호를 먼저 확인합니다.
+
+```bash
+mysql --protocol=TCP --table \
+  -h "${TARGET_DB_HOST:?TARGET_DB_HOST에 Cloud DB Private 도메인을 먼저 설정하세요}" \
+  -P 3306 -u board_app -p board_service \
+  < /tmp/board-members-notices-check.sql
+```
+
 
 컬럼·기본 키·아이디 및 샘플 식별자의 유일 키·게시글과 공지의 외래 키도 비교합니다. 자동 작성기를 재개했을 때 기존 회원이 재사용되고 같은 샘플 번호의 글이 중복되지 않는지 확인합니다. 전체 검증 SQL은 `402-cloud db migration/sql/migration-validation.sql`에 있습니다. 기존 `compare-post-counts.sh`는 게시글만 비교하므로 위 검증도 함께 수행합니다.
 
