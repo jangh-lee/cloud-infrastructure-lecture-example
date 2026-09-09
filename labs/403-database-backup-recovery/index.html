@@ -27,7 +27,7 @@
     
     
       
-        <title>403 Database 백업 및 복구 - 클라우드 인프라 실습</title>
+        <title>403 Cloud DB 특정 시점 복구(PITR) - 클라우드 인프라 실습</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#403-database" class="md-skip">
+        <a href="#403-cloud-db-pitr" class="md-skip">
           콘텐츠로 이동
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              403 Database 백업 및 복구
+              403 Cloud DB 특정 시점 복구(PITR)
             
           </span>
         </div>
@@ -1158,7 +1158,7 @@
   <span class="md-ellipsis">
     
   
-    403 Database 백업 및 복구
+    403 Cloud DB 특정 시점 복구(PITR)
   
 
     
@@ -1176,7 +1176,7 @@
   <span class="md-ellipsis">
     
   
-    403 Database 백업 및 복구
+    403 Cloud DB 특정 시점 복구(PITR)
   
 
     
@@ -1202,10 +1202,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#1-pitr" class="md-nav__link">
     <span class="md-ellipsis">
       
-        목표와 이어지는 환경
+        1. PITR 준비 상태 확인
       
     </span>
   </a>
@@ -1213,38 +1213,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-ha" class="md-nav__link">
+  <a href="#2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. 복원 방식과 HA 선행 조건
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="1. 복원 방식과 HA 선행 조건">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#pitr-db-ha" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        PITR 선택 시: 기존 DB를 HA로 전환
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-db" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. 설치와 원본 DB 확인
+        2. 점검 안내와 쓰기 중지
       
     </span>
   </a>
@@ -1252,10 +1224,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-board_admin" class="md-nav__link">
+  <a href="#3-sql-3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. board_admin으로 시험 테이블만 생성
+        3. 실습 SQL 준비와 글 3개 등록
       
     </span>
   </a>
@@ -1263,10 +1235,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-writer-insert" class="md-nav__link">
+  <a href="#4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. writer 설정과 실제 INSERT 검증
+        4. 삭제 전 복구 시각 확보
       
     </span>
   </a>
@@ -1277,7 +1249,7 @@
   <a href="#5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. 주기적 기록과 삭제 전 기준값
+        5. 실습 글 삭제로 장애 재현
       
     </span>
   </a>
@@ -1285,10 +1257,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#6" class="md-nav__link">
+  <a href="#6-cloud-db" class="md-nav__link">
     <span class="md-ellipsis">
       
-        6. 기준값 이후 자동 백업 완료 확인
+        6. 지정 시점으로 새 Cloud DB 복구
       
     </span>
   </a>
@@ -1296,49 +1268,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#7-pitr" class="md-nav__link">
+  <a href="#7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        7. PITR 시각 확보와 시험 행 삭제
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="7. PITR 시각 확보와 시험 행 삭제">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#b-pitr" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        B. PITR 선택 시에만
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ab" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        A·B 공통: 자신의 시험 행만 삭제
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#8-recovery" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        8. 별도의 Recovery 생성
+        7. 삭제 전 데이터가 돌아왔는지 검증
       
     </span>
   </a>
@@ -1346,10 +1279,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#9-recovery" class="md-nav__link">
+  <a href="#8-backend-db" class="md-nav__link">
     <span class="md-ellipsis">
       
-        9. 원본과 Recovery 대조
+        8. Backend를 복구 DB로 전환
       
     </span>
   </a>
@@ -1357,10 +1290,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#10" class="md-nav__link">
+  <a href="#9" class="md-nav__link">
     <span class="md-ellipsis">
       
-        10. 정리와 문제 해결
+        9. 게시판 재개와 완료 확인
       
     </span>
   </a>
@@ -1588,10 +1521,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#1-pitr" class="md-nav__link">
     <span class="md-ellipsis">
       
-        목표와 이어지는 환경
+        1. PITR 준비 상태 확인
       
     </span>
   </a>
@@ -1599,38 +1532,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-ha" class="md-nav__link">
+  <a href="#2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. 복원 방식과 HA 선행 조건
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="1. 복원 방식과 HA 선행 조건">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#pitr-db-ha" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        PITR 선택 시: 기존 DB를 HA로 전환
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-db" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. 설치와 원본 DB 확인
+        2. 점검 안내와 쓰기 중지
       
     </span>
   </a>
@@ -1638,10 +1543,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-board_admin" class="md-nav__link">
+  <a href="#3-sql-3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. board_admin으로 시험 테이블만 생성
+        3. 실습 SQL 준비와 글 3개 등록
       
     </span>
   </a>
@@ -1649,10 +1554,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-writer-insert" class="md-nav__link">
+  <a href="#4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. writer 설정과 실제 INSERT 검증
+        4. 삭제 전 복구 시각 확보
       
     </span>
   </a>
@@ -1663,7 +1568,7 @@
   <a href="#5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. 주기적 기록과 삭제 전 기준값
+        5. 실습 글 삭제로 장애 재현
       
     </span>
   </a>
@@ -1671,10 +1576,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#6" class="md-nav__link">
+  <a href="#6-cloud-db" class="md-nav__link">
     <span class="md-ellipsis">
       
-        6. 기준값 이후 자동 백업 완료 확인
+        6. 지정 시점으로 새 Cloud DB 복구
       
     </span>
   </a>
@@ -1682,49 +1587,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#7-pitr" class="md-nav__link">
+  <a href="#7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        7. PITR 시각 확보와 시험 행 삭제
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="7. PITR 시각 확보와 시험 행 삭제">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#b-pitr" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        B. PITR 선택 시에만
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ab" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        A·B 공통: 자신의 시험 행만 삭제
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#8-recovery" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        8. 별도의 Recovery 생성
+        7. 삭제 전 데이터가 돌아왔는지 검증
       
     </span>
   </a>
@@ -1732,10 +1598,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#9-recovery" class="md-nav__link">
+  <a href="#8-backend-db" class="md-nav__link">
     <span class="md-ellipsis">
       
-        9. 원본과 Recovery 대조
+        8. Backend를 복구 DB로 전환
       
     </span>
   </a>
@@ -1743,10 +1609,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#10" class="md-nav__link">
+  <a href="#9" class="md-nav__link">
     <span class="md-ellipsis">
       
-        10. 정리와 문제 해결
+        9. 게시판 재개와 완료 확인
       
     </span>
   </a>
@@ -1786,351 +1652,261 @@
   
 
 
-<h1 id="403-database">403 Database 백업 및 복구<a class="headerlink" href="#403-database" title="Permanent link">&para;</a></h1>
-<h2 id="_1">목표와 이어지는 환경<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>401에서 생성하고 402에서 기존 게시판 데이터를 이관한 <strong>같은 Cloud DB의 <code>board_service</code></strong>를 사용합니다. <code>recovery_events</code>에 30초마다 시험 데이터를 기록한 뒤 삭제하고, 별도의 복원 서버에서 삭제 전 상태를 확인합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>401 생성·연결 → 402 board_service 이관·Backend 전환 → 403 백업·복원
+<h1 id="403-cloud-db-pitr">403 Cloud DB 특정 시점 복구(PITR)<a class="headerlink" href="#403-cloud-db-pitr" title="Permanent link">&para;</a></h1>
+<p>402에서 이관한 Cloud DB의 게시판에 실습용 글 3개를 추가합니다. 정상 시각을 기록한 뒤 그 글만 삭제하고, <strong>삭제 전 시각으로 새 DB를 복구</strong>합니다. 데이터를 대조한 뒤 Backend를 복구한 DB로 전환합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>정상 데이터 준비 → 복구 시각 확보 → 실습 글 삭제
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                               ↓
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                  지정 시점으로 새 Cloud DB 복구
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>                               ↓
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                  데이터 검증 → DB_HOST 변경 → 게시판 재개
 </code></pre></div>
-<p><code>posts</code>나 <code>board_service</code>를 삭제하거나 게시판 초기 스키마를 다시 실행하지 않습니다. 장애 재현은 <strong><code>recovery_events</code>의 <code>source_id='403-pitr'</code> 행만 삭제</strong>합니다. 콘솔 복원은 DB 서버 단위이므로 Recovery에는 <code>posts</code>도 선택한 시점의 상태로 존재합니다.</p>
 <table>
 <thead>
 <tr>
-<th>대상</th>
-<th>실습 값</th>
+<th>구분</th>
+<th>이번 실습에서 사용할 대상</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Ubuntu 작업 서버</td>
-<td>402에서 Cloud DB로 연결을 전환한 Backend</td>
+<td>작업 서버</td>
+<td>402를 마친 Backend 서버</td>
 </tr>
 <tr>
-<td>원본 Cloud DB</td>
-<td>401에서 생성한 <code>board-service</code></td>
+<td>원본 DB</td>
+<td>402의 Target이었던 Cloud DB <code>board-service</code></td>
 </tr>
 <tr>
-<td>Database</td>
-<td><code>board_service</code></td>
+<td>데이터</td>
+<td><code>board_service</code>의 <code>posts</code>, <code>users</code>, <code>notices</code></td>
 </tr>
 <tr>
-<td>테이블 생성 / 기록 계정</td>
-<td><code>board_admin</code> / <code>board_app</code></td>
+<td>삭제 대상</td>
+<td>작성자가 <code>403-pitr</code>인 이번 실습용 글 3개</td>
 </tr>
 <tr>
-<td>시험 테이블 / Source ID</td>
-<td><code>recovery_events</code> / <code>403-pitr</code></td>
+<td>복구 결과</td>
+<td>별도 Cloud DB 서비스 <code>board-pitr</code></td>
 </tr>
 </tbody>
 </table>
-<h2 id="1-ha">1. 복원 방식과 HA 선행 조건<a class="headerlink" href="#1-ha" title="Permanent link">&para;</a></h2>
-<p>401의 기본값은 고가용성을 사용하지 않는 <strong>Stand Alone</strong>입니다.</p>
+<p><strong>모든 명령은 Backend의 Bash 프롬프트(<code>root@lab7-backend:~#</code>)에서 실행합니다.</strong> SQL은 파일로 받아 <code>mysql</code>에 전달합니다. 비밀번호 입력 요청에는 해당 DB의 <code>board_app</code> 비밀번호를 입력합니다.</p>
+<h2 id="1-pitr">1. PITR 준비 상태 확인<a class="headerlink" href="#1-pitr" title="Permanent link">&para;</a></h2>
+<p>네이버 클라우드 콘솔의 <strong>VPC &gt; Cloud DB for MySQL</strong>에서 원본 <code>board-service</code>를 확인합니다.</p>
+<ul>
+<li>402의 DMS 작업이 <strong>[Complete]</strong>로 종료됐고 DB가 <code>운영중</code>이어야 합니다.</li>
+<li>Master와 Standby Master로 구성된 <strong>고가용성(HA)</strong>이어야 합니다. Stand Alone이면 <strong>DB 관리 &gt; 고가용성 설정 변경</strong>에서 HA를 켜고 구성이 끝날 때까지 기다립니다.</li>
+<li><strong>Backup &gt; 해당 서비스 상세내역</strong>에 완료된 백업이 있어야 합니다.</li>
+<li><strong>시점 복원</strong> 창에서 현재 <strong>DB 복원 가능한 시간</strong>을 확인한 뒤 창을 닫습니다.</li>
+</ul>
+<p>PITR은 복구 가능한 범위 안에서 <strong>분 단위</strong>로 시각을 지정합니다. 백업 보관일을 7일로 설정했다고 해서 모든 과거 7일이 복구 가능한 것은 아닙니다. 실습할 때 표시되는 시간 범위를 기준으로 진행합니다. <a href="https://guide.ncloud-docs.com/docs/database-database-5-4">공식 시점 복원 안내</a></p>
+<h2 id="2">2. 점검 안내와 쓰기 중지<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<p>게시판 우측 상단 <strong>관리자 로그인 → 공지 관리</strong>에서 아래 내용을 등록하고 표시 방식을 <strong>점검 시작 · 게시판 이용 중단</strong>으로 선택합니다. 공지 반영 완료 메시지와 점검 화면을 확인합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>제목: 데이터 복구 실습에 따른 서비스 점검 안내
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>안정적인 서비스 운영을 위한 데이터 복구 실습을 진행합니다.
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>점검 중에는 게시글 조회·작성과 회원 로그인이 일시 중단됩니다.
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>- 점검 일시 : 2026년 00월 00일 18:00 ~ 19:00 (1시간)
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>- 점검 내용 : Cloud DB 특정 시점 복구(PITR) 실습
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>- 고객센터 : 02-1234-1234
+</code></pre></div>
+<p>날짜와 시간은 실제 일정으로 수정합니다. 공지가 반영된 다음 Backend에서 두 서비스를 중지합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>board-service-post-seeder<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>board-service-backend
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>board-service-backend<span class="w"> </span>board-service-post-seeder
+</code></pre></div>
+<p>둘 다 <code>inactive</code>인지 확인합니다. 기준값을 기록한 이후에는 복구 DB 검증이 끝날 때까지 서비스를 다시 시작하거나 다른 터미널에서 게시판 데이터를 수정하지 않습니다.</p>
+<h2 id="3-sql-3">3. 실습 SQL 준비와 글 3개 등록<a class="headerlink" href="#3-sql-3" title="Permanent link">&para;</a></h2>
+<p>현재 Backend 설정에서 원본 DB 주소를 가져옵니다. 이후 명령도 같은 터미널에서 실행합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">source</span><span class="w"> </span>/opt/board-service-backend/.env
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">ORIGINAL_DB_HOST</span><span class="o">=</span><span class="s2">"</span><span class="nv">$DB_HOST</span><span class="s2">"</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nb">printf</span><span class="w"> </span><span class="s1">'원본 Cloud DB: %s\n'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$ORIGINAL_DB_HOST</span><span class="s2">"</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>mysql<span class="w"> </span>--version
+</code></pre></div>
+<p>출력된 주소가 <strong>402에서 연결한 Cloud DB의 Private 도메인</strong>인지 확인합니다. <code>mysql</code> 명령이 없다면 <code>sudo apt-get update &amp;&amp; sudo apt-get install -y mysql-client</code>로 클라이언트를 설치합니다.</p>
+<p>실습용 SQL 파일 3개를 받습니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/tmp/403-pitr
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nv">SQL_BASE</span><span class="o">=</span><span class="s1">'https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/403-database%20backup%20recovery/sql'</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">for</span><span class="w"> </span>name<span class="w"> </span><span class="k">in</span><span class="w"> </span>pitr-prepare<span class="w"> </span>pitr-verify<span class="w"> </span>pitr-delete<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span>!<span class="w"> </span>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="s2">"</span><span class="nv">$SQL_BASE</span><span class="s2">/</span><span class="nv">$name</span><span class="s2">.sql"</span><span class="w"> </span>-o<span class="w"> </span><span class="s2">"/tmp/403-pitr/</span><span class="nv">$name</span><span class="s2">.sql.download"</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="nb">printf</span><span class="w"> </span><span class="s1">'다운로드 실패: %s.sql — 다시 실행한 뒤 다음 단계로 진행하세요.\n'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$name</span><span class="s2">"</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="k">break</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="k">fi</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span>mv<span class="w"> </span><span class="s2">"/tmp/403-pitr/</span><span class="nv">$name</span><span class="s2">.sql.download"</span><span class="w"> </span><span class="s2">"/tmp/403-pitr/</span><span class="nv">$name</span><span class="s2">.sql"</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">  </span><span class="nb">printf</span><span class="w"> </span><span class="s1">'준비 완료: %s.sql\n'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$name</span><span class="s2">"</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="k">done</span>
+</code></pre></div>
+<p>3개 모두 <code>준비 완료</code>가 출력됐으면 원본 DB에 실습용 글을 추가합니다. 같은 실습 글이 이미 있으면 중복 추가하지 않습니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mysql<span class="w"> </span>--protocol<span class="o">=</span>TCP<span class="w"> </span>--default-character-set<span class="o">=</span>utf8mb4<span class="w"> </span>--table<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span>-h<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">ORIGINAL_DB_HOST</span><span class="p">:?3단계에서 원본 DB 주소를 먼저 설정하세요</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span>-u<span class="w"> </span>board_app<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span>&lt;<span class="w"> </span>/tmp/403-pitr/pitr-prepare.sql
+</code></pre></div>
+<p><code>[403 PITR] 복구 실습 1</code>, <code>2</code>, <code>3</code>이 조회되는지 확인합니다. 이어서 삭제 전 기준값을 파일에 저장합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">set</span><span class="w"> </span>-o<span class="w"> </span>pipefail
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>mysql<span class="w"> </span>--protocol<span class="o">=</span>TCP<span class="w"> </span>--default-character-set<span class="o">=</span>utf8mb4<span class="w"> </span>--table<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span>-h<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">ORIGINAL_DB_HOST</span><span class="p">:?원본 DB 주소를 설정하세요</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span>-u<span class="w"> </span>board_app<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span>&lt;<span class="w"> </span>/tmp/403-pitr/pitr-verify.sql<span class="w"> </span><span class="p">|</span><span class="w"> </span>tee<span class="w"> </span>/tmp/403-pitr/before.txt
+</code></pre></div>
+<p><strong>기준값:</strong> <code>test_posts=3</code>, 시험 글의 ID·제목·내용·작성 시각, <code>posts/users/notices</code> 행 수, 회원·관리자 수, 게시글 체크섬을 보관합니다.</p>
+<h2 id="4">4. 삭제 전 복구 시각 확보<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
+<p>아래 명령은 현재보다 뒤에 있는 <strong>분 경계(초=00)</strong>를 복구 목표 시각으로 저장합니다. 서비스가 중지돼 있으므로 그 시각에도 방금 기록한 데이터가 유지됩니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>mysql<span class="w"> </span>--protocol<span class="o">=</span>TCP<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span>-h<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">ORIGINAL_DB_HOST</span><span class="p">:?원본 DB 주소를 설정하세요</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span>-u<span class="w"> </span>board_app<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span>-N<span class="w"> </span>-B<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"SET SESSION time_zone='+09:00'; SELECT DATE_FORMAT(NOW() + INTERVAL 2 MINUTE, '%Y-%m-%d %H:%i:00');"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span>&gt;<span class="w"> </span>/tmp/403-pitr/restore-time.txt
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>cat<span class="w"> </span>/tmp/403-pitr/restore-time.txt
+</code></pre></div>
+<p>예를 들어 <code>2026-09-09 18:44:00</code>이 출력되면 <strong>18:44가 복구 목표</strong>, <strong>18:45 이후가 삭제 가능 시각</strong>입니다. 위 예시 대신 자신의 출력값을 사용합니다. 출력 시각은 한국시간(KST)입니다.</p>
+<ol>
+<li>목표 시각에서 1분이 지날 때까지 기다립니다.</li>
+<li>콘솔 <strong>Backup &gt; 원본 상세내역 &gt; 시점 복원</strong>을 열어, 목표 시각이 <strong>DB 복원 가능한 시간</strong>에 포함되는지 확인합니다.</li>
+<li>아직 포함되지 않으면 기다렸다가 새로 확인합니다. 콘솔의 시간대도 출력한 한국시간과 맞춥니다.</li>
+<li>목표 시각이 범위에 들어온 것을 확인한 뒤 팝업을 닫습니다. 복원은 삭제 이후에 실행합니다.</li>
+</ol>
+<h2 id="5">5. 실습 글 삭제로 장애 재현<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<p>다음 명령은 작성자·내용·제목이 모두 일치하는 <strong>이번 실습용 글 3개만 삭제</strong>합니다. 원본 DB에서 실행하는 단계입니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">PITR_TIME</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>cat<span class="w"> </span>/tmp/403-pitr/restore-time.txt<span class="k">)</span><span class="s2">"</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>mysql<span class="w"> </span>--protocol<span class="o">=</span>TCP<span class="w"> </span>--default-character-set<span class="o">=</span>utf8mb4<span class="w"> </span>--table<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span>-h<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">ORIGINAL_DB_HOST</span><span class="p">:?원본 DB 주소를 설정하세요</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span>-u<span class="w"> </span>board_app<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span>--init-command<span class="o">=</span><span class="s2">"SET @pitr_time = '</span><span class="nv">$PITR_TIME</span><span class="s2">'"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span>&lt;<span class="w"> </span>/tmp/403-pitr/pitr-delete.sql
+</code></pre></div>
 <table>
 <thead>
 <tr>
-<th>방식</th>
-<th>필요한 조건</th>
-<th>복원 기준</th>
+<th>출력</th>
+<th>기대값</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>A. Backup 파일 복원</td>
-<td>Stand Alone 또는 HA, 완료된 자동 백업 파일</td>
-<td>백업 파일의 상태</td>
+<td><code>can_delete</code></td>
+<td><code>1</code></td>
 </tr>
 <tr>
-<td>B. PITR</td>
-<td>HA, 백업 완료, 실제 복원 가능 범위</td>
-<td>범위 내 분 단위 시각</td>
+<td><code>deleted_test_posts</code></td>
+<td><code>3</code></td>
+</tr>
+<tr>
+<td><code>remaining_test_posts</code></td>
+<td><code>0</code></td>
 </tr>
 </tbody>
 </table>
-<p>원본에 덮어쓰지 않고 <strong>새 Recovery 서버를 생성</strong>합니다. Recovery는 읽기 전용이며 SELECT로 검증합니다. 애플리케이션과 writer의 DB_HOST는 원본으로 유지합니다. 쓰기 가능한 서버로 쓰려면 별도의 <strong>신규 DB 서비스 생성</strong> 작업이 필요합니다. <a href="https://guide.ncloud-docs.com/docs/database-database-5-4">공식 Backup 안내</a>, <a href="https://guide.ncloud-docs.com/docs/database-database-5-2">공식 DB Server 안내</a></p>
-<h3 id="pitr-db-ha">PITR 선택 시: 기존 DB를 HA로 전환<a class="headerlink" href="#pitr-db-ha" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>VPC &gt; Cloud DB for MySQL &gt; DB Server</strong>에서 원본 <code>board-service</code> 서버를 선택합니다.</li>
-<li><strong>DB 관리 &gt; 고가용성 설정 변경</strong>을 엽니다.</li>
-<li>고가용성 <code>N</code>을 <code>Y</code>로 변경합니다. 이번 실습에서 Multi Zone은 사용하지 않아도 됩니다.</li>
-<li><strong>예</strong>를 누르고 Master·Standby Master 구성이 <code>운영중</code>이 될 때까지 기다립니다.</li>
-<li>Backend에서 원본 DB 접속을 다시 확인합니다.</li>
-</ol>
-<p>같은 DB Service를 전환하며 Standby 서버 비용이 추가됩니다. 전환 후 실제 백업 완료와 PITR의 <strong>DB 복원 가능한 시간</strong>을 확인해야 합니다. HA 전환만으로 모든 과거 시각이 복원 가능해지는 것은 아닙니다. <a href="https://guide.ncloud-docs.com/docs/database-database-5-2">공식 고가용성 설정 변경</a></p>
-<div class="admonition note">
-<p class="admonition-title">Manual Backup은 별도 기능입니다</p>
-<p>이 교안은 자동 Backup 파일 복원 또는 PITR을 사용합니다. Manual Backup은 HA 전용 스냅샷이며 새 DB 서비스로 복원합니다. Manual Backup 완료만으로 PITR 가능 범위를 추정하지 않습니다. <a href="https://guide.ncloud-docs.com/docs/database-database-5-4">공식 Manual Backup 안내</a></p>
-</div>
-<h2 id="2-db">2. 설치와 원본 DB 확인<a class="headerlink" href="#2-db" title="Permanent link">&para;</a></h2>
-<p>Backend 서버에서 실행합니다. <code>ORIGINAL_DB_HOST</code>는 <strong>402의 Target Cloud DB Private 도메인</strong>입니다. 003 Source DB IP나 이후 생성할 Recovery 도메인을 입력하지 않습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span>~/cloud-infrastructure-lecture-example
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>git<span class="w"> </span>pull<span class="w"> </span>--ff-only
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"403-database backup recovery"</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>chmod<span class="w"> </span>+x<span class="w"> </span>scripts/db-writer.sh
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>sudo<span class="w"> </span>./scripts/db-writer.sh<span class="w"> </span>install
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>-p<span class="w"> </span><span class="s1">'원본 Cloud DB Private 도메인: '</span><span class="w"> </span>ORIGINAL_DB_HOST
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>mysql<span class="w"> </span>--protocol<span class="o">=</span>TCP<span class="w"> </span>-h<span class="w"> </span><span class="s2">"</span><span class="nv">$ORIGINAL_DB_HOST</span><span class="s2">"</span><span class="w"> </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span>-u<span class="w"> </span>board_app<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span>-e<span class="w"> </span><span class="s1">'SELECT DATABASE(), CURRENT_USER(); SELECT COUNT(*) AS posts_rows FROM posts;'</span>
-</code></pre></div>
-<p><strong>통과 기준:</strong> <code>DATABASE()</code>는 <code>board_service</code>, 접속 계정은 <code>board_app</code>이고 이관한 <code>posts</code>가 조회됩니다. 설치는 MySQL 클라이언트, Python venv, <code>/opt/ncp-db-writer</code>, systemd 서비스를 준비합니다.</p>
-<h2 id="3-board_admin">3. board_admin으로 시험 테이블만 생성<a class="headerlink" href="#3-board_admin" title="Permanent link">&para;</a></h2>
-<p>같은 터미널에서 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>mysql<span class="w"> </span>--protocol<span class="o">=</span>TCP<span class="w"> </span>-h<span class="w"> </span><span class="s2">"</span><span class="nv">$ORIGINAL_DB_HOST</span><span class="s2">"</span><span class="w"> </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>-u<span class="w"> </span>board_admin<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span>&lt;<span class="w"> </span>sql/table_only.sql
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>mysql<span class="w"> </span>--protocol<span class="o">=</span>TCP<span class="w"> </span>-h<span class="w"> </span><span class="s2">"</span><span class="nv">$ORIGINAL_DB_HOST</span><span class="s2">"</span><span class="w"> </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span>-u<span class="w"> </span>board_app<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span>-e<span class="w"> </span><span class="s1">'SHOW TABLES; SHOW COLUMNS FROM recovery_events; SHOW GRANTS FOR CURRENT_USER();'</span>
-</code></pre></div>
-<p><strong>통과 기준:</strong> <code>posts</code>와 <code>recovery_events</code>가 함께 보입니다. 시험 테이블의 <code>id</code>, <code>source_id</code>, <code>event_message</code>, <code>metric_value</code>, <code>created_at</code>을 확인합니다.</p>
-<div class="admonition warning">
-<p class="admonition-title">앱 계정으로 init-schema를 실행하지 않습니다</p>
-<p><code>board_app</code>은 CRUD 계정입니다. <code>init-schema</code>는 CREATE DATABASE와 CREATE TABLE을 실행하므로 권한 오류가 날 수 있습니다. 이번에는 <code>board_admin</code>이 <code>table_only.sql</code>을 실행하고 writer는 <code>board_app</code>으로 기록합니다. 별도 DB·사용자를 만드는 <code>sql/mysql_schema.sql</code>도 실행하지 않습니다.</p>
-</div>
-<h2 id="4-writer-insert">4. writer 설정과 실제 INSERT 검증<a class="headerlink" href="#4-writer-insert" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>./scripts/db-writer.sh<span class="w"> </span>configure
-</code></pre></div>
-<p>대괄호 기본값이 나와도 사용자와 DB 이름은 아래 값으로 <strong>직접 덮어써 입력</strong>합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>DB host: 원본 Cloud DB Private 도메인
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>DB port [3306]: 3306
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>DB user [lecture_writer]: board_app
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>DB password: board_app의 실제 암호
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>DB name [lecture_recovery_lab]: board_service
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>DB table [recovery_events]: recovery_events
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>Source ID [서버호스트명]: 403-pitr
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>Write interval seconds [30]: 30
-</code></pre></div>
-<p>설정 파일 <code>/etc/ncp-db-writer.env</code>는 암호를 포함하므로 <code>0600</code>으로 저장됩니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>./scripts/db-writer.sh<span class="w"> </span>show-config
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>sudo<span class="w"> </span>./scripts/db-writer.sh<span class="w"> </span>check
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>sudo<span class="w"> </span>./scripts/db-writer.sh<span class="w"> </span>send-once
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>sudo<span class="w"> </span>./scripts/db-writer.sh<span class="w"> </span>db-shell
-</code></pre></div>
-<p>MySQL 콘솔에서 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">source_id</span><span class="p">,</span><span class="w"> </span><span class="n">event_message</span><span class="p">,</span><span class="w"> </span><span class="n">metric_value</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">FROM</span><span class="w"> </span><span class="n">recovery_events</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">source_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'403-pitr'</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">DESC</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">exit</span>
-</code></pre></div>
-<p><strong>통과 기준:</strong> 서버 로그인·DB 접근·테이블 조회가 각각 성공하고, <code>send-once</code>가 출력한 ID의 행이 DB에도 있습니다.</p>
-<h2 id="5">5. 주기적 기록과 삭제 전 기준값<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>./scripts/db-writer.sh<span class="w"> </span>start
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>sudo<span class="w"> </span>./scripts/db-writer.sh<span class="w"> </span>status
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>sudo<span class="w"> </span>./scripts/db-writer.sh<span class="w"> </span>logs
-</code></pre></div>
-<p>2~3분 동안 INSERT ID가 증가하는지 확인합니다. 로그의 <code>Ctrl+C</code>는 서비스를 중지하지 않습니다. 아래 명령으로 실제 서비스를 중지합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo<span class="w"> </span>./scripts/db-writer.sh<span class="w"> </span>stop
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>ncp-db-writer
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>sudo<span class="w"> </span>./scripts/db-writer.sh<span class="w"> </span>db-shell
-</code></pre></div>
-<p><code>is-active</code>의 기대값은 <code>inactive</code>입니다. 복원 대조가 끝날 때까지 writer를 다시 시작하지 않습니다. MySQL 콘솔에서 시간대를 맞추고 기준 행을 넣습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">SET</span><span class="w"> </span><span class="k">SESSION</span><span class="w"> </span><span class="n">time_zone</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'+09:00'</span><span class="p">;</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">NOW</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">db_now_kst</span><span class="p">,</span><span class="w"> </span><span class="n">UTC_TIMESTAMP</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">db_now_utc</span><span class="p">,</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">       </span><span class="o">@@</span><span class="k">session</span><span class="p">.</span><span class="n">time_zone</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">session_tz</span><span class="p">,</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">       </span><span class="o">@@</span><span class="k">global</span><span class="p">.</span><span class="n">time_zone</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">global_tz</span><span class="p">,</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">       </span><span class="o">@@</span><span class="n">system_time_zone</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">system_tz</span><span class="p">;</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">recovery_events</span><span class="w"> </span><span class="p">(</span><span class="n">source_id</span><span class="p">,</span><span class="w"> </span><span class="n">event_message</span><span class="p">,</span><span class="w"> </span><span class="n">metric_value</span><span class="p">)</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">'403-pitr'</span><span class="p">,</span><span class="w"> </span><span class="s1">'BEFORE_DELETE_MARKER'</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">baseline_rows</span><span class="p">,</span><span class="w"> </span><span class="k">MIN</span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_id</span><span class="p">,</span><span class="w"> </span><span class="k">MAX</span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">last_id</span><span class="p">,</span>
-<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">       </span><span class="k">MIN</span><span class="p">(</span><span class="n">created_at</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_created_at</span><span class="p">,</span>
-<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">       </span><span class="k">MAX</span><span class="p">(</span><span class="n">created_at</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">last_created_at</span>
-<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="k">FROM</span><span class="w"> </span><span class="n">recovery_events</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">source_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'403-pitr'</span><span class="p">;</span>
-<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>
-<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">source_id</span><span class="p">,</span><span class="w"> </span><span class="n">event_message</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span>
-<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="k">FROM</span><span class="w"> </span><span class="n">recovery_events</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">source_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'403-pitr'</span>
-<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">DESC</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
-<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">NOW</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">baseline_recorded_kst</span><span class="p">;</span>
-<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="n">exit</span>
-</code></pre></div>
-<p><strong>행 수·최소/최대 ID·최초/최종 시각·기준 행 ID·기준값 기록 시각</strong>을 저장합니다. heartbeat 메시지 안의 시각은 Python이 넣은 UTC 문자열입니다. 복원 기준은 시간대를 맞춘 DB 시각으로 판단합니다.</p>
-<h2 id="6">6. 기준값 이후 자동 백업 완료 확인<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
-<ol>
-<li><strong>Cloud DB for MySQL &gt; Backup &gt; 원본 서비스 &gt; 상세내역</strong>으로 이동합니다.</li>
-<li>기준값 기록 <strong>이후에 시작하여 완료된 자동 백업 파일</strong>을 확인합니다.</li>
-<li>백업 날짜, 시작·완료 시간, 크기를 기록합니다.</li>
-<li>해당 파일이 없다면 <strong>DB Server &gt; DB 관리 &gt; DB Server 상세보기 &gt; Backup 설정 관리</strong>에서 가까운 미래의 백업 시간을 지정하고 실제 완료를 기다립니다.</li>
-</ol>
-<p>writer가 중지된 상태에서 백업하므로 선택한 파일의 시험 행 수와 ID를 기준값과 정확히 비교할 수 있습니다. <code>recovery_events</code> 생성·기준 행 추가 이전의 파일이나 아직 완료되지 않은 백업으로 삭제 단계에 진입하지 않습니다.</p>
-<p>자동 백업은 하루 한 번 수행됩니다. 지정 시각은 즉시 완료 시각이 아니므로 실제 시작·완료를 확인합니다. 보관 기간 <code>7일</code> 설정이 현재 시각까지 PITR 가능하다는 뜻도 아닙니다. <a href="https://guide.ncloud-docs.com/docs/database-database-5-4">공식 백업 수행 규칙</a></p>
-<h2 id="7-pitr">7. PITR 시각 확보와 시험 행 삭제<a class="headerlink" href="#7-pitr" title="Permanent link">&para;</a></h2>
-<h3 id="b-pitr">B. PITR 선택 시에만<a class="headerlink" href="#b-pitr" title="Permanent link">&para;</a></h3>
-<p>원본 DB에 다시 접속해 아래부터 삭제까지 <strong>같은 MySQL 세션</strong>을 유지합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>sudo<span class="w"> </span>./scripts/db-writer.sh<span class="w"> </span>db-shell
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">SET</span><span class="w"> </span><span class="k">SESSION</span><span class="w"> </span><span class="n">time_zone</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'+09:00'</span><span class="p">;</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="k">SET</span><span class="w"> </span><span class="o">@</span><span class="n">pitr_kst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">TIMESTAMP</span><span class="p">(</span><span class="n">DATE_FORMAT</span><span class="p">(</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="n">NOW</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="k">MINUTE</span><span class="p">,</span><span class="w"> </span><span class="s1">'%Y-%m-%d %H:%i:00'</span><span class="p">));</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">NOW</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">db_now_kst</span><span class="p">,</span><span class="w"> </span><span class="n">UTC_TIMESTAMP</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">db_now_utc</span><span class="p">,</span>
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">       </span><span class="o">@@</span><span class="k">session</span><span class="p">.</span><span class="n">time_zone</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">session_tz</span><span class="p">,</span>
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">       </span><span class="o">@</span><span class="n">pitr_kst</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">restore_target_kst</span><span class="p">,</span>
-<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">       </span><span class="o">@</span><span class="n">pitr_kst</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="mi">9</span><span class="w"> </span><span class="n">HOUR</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">restore_target_utc</span><span class="p">;</span>
-</code></pre></div>
-<p>출력된 목표 시각을 기록합니다. 이는 현재보다 뒤에 있는 <code>초=00</code> 시각이며 writer가 멈춰 있어 기준 행이 유지됩니다. 목표가 <code>14:05:00 KST</code>라면 적어도 <code>14:06:00 KST</code> 이후 삭제합니다.</p>
-<ol>
-<li>아래 조회를 다시 실행해 <code>can_delete=1</code>인지 확인합니다.</li>
-<li>콘솔 <strong>Backup &gt; 상세내역 &gt; 시점 복원</strong>에서 목표가 <strong>DB 복원 가능한 시간</strong>에 포함되는지 확인합니다.</li>
-<li>콘솔 표시 시간대와 KST/UTC를 대조하여 목표를 맞춥니다.</li>
-<li>범위에 아직 포함되지 않으면 기다린 뒤 확인합니다. 팝업을 취소하고 삭제 단계로 돌아옵니다.</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">NOW</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">db_now_kst</span><span class="p">,</span><span class="w"> </span><span class="o">@</span><span class="n">pitr_kst</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">restore_target_kst</span><span class="p">,</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">       </span><span class="n">NOW</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">@</span><span class="n">pitr_kst</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">MINUTE</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">can_delete</span><span class="p">;</span>
-</code></pre></div>
-<p>PITR 콘솔은 <strong>분 단위까지</strong> 지정합니다. <code>binlog_expire_logs_seconds</code> 설정과 실제 사용 가능한 로그 범위를 확인해야 하며 “삭제 직전 몇 초”를 지정하는 방식에 의존하지 않습니다. <a href="https://guide.ncloud-docs.com/docs/database-database-5-4">공식 시점 복원</a></p>
-<h3 id="ab">A·B 공통: 자신의 시험 행만 삭제<a class="headerlink" href="#ab" title="Permanent link">&para;</a></h3>
-<p>Backup 파일 복원만 선택했다면 <code>db-shell</code>로 접속해 실행합니다. PITR은 위의 같은 세션에서 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">SET</span><span class="w"> </span><span class="k">SESSION</span><span class="w"> </span><span class="n">time_zone</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'+09:00'</span><span class="p">;</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">before_delete_rows</span><span class="p">,</span><span class="w"> </span><span class="k">MIN</span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_id</span><span class="p">,</span><span class="w"> </span><span class="k">MAX</span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">last_id</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="k">FROM</span><span class="w"> </span><span class="n">recovery_events</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">source_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'403-pitr'</span><span class="p">;</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">recovery_events</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">source_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'403-pitr'</span><span class="p">;</span>
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">ROW_COUNT</span><span class="p">()</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">deleted_rows</span><span class="p">,</span><span class="w"> </span><span class="n">NOW</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">deleted_at_kst</span><span class="p">,</span>
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">       </span><span class="n">UTC_TIMESTAMP</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">deleted_at_utc</span><span class="p">;</span>
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>
-<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">remaining_rows</span>
-<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="k">FROM</span><span class="w"> </span><span class="n">recovery_events</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">source_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'403-pitr'</span><span class="p">;</span>
-<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">posts_rows</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">posts</span><span class="p">;</span>
-<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="n">exit</span>
-</code></pre></div>
-<p><strong>통과 기준:</strong> 삭제 전 행 수와 <code>deleted_rows</code>가 기준 행 수와 같고 원본의 <code>remaining_rows=0</code>입니다. <code>posts</code>와 다른 <code>source_id</code>는 삭제 대상이 아닙니다. 게시판 자동 입력이 실행 중이면 <code>posts_rows</code>는 늘 수 있습니다.</p>
-<h2 id="8-recovery">8. 별도의 Recovery 생성<a class="headerlink" href="#8-recovery" title="Permanent link">&para;</a></h2>
-<p>A·B 중 준비한 방식 하나로 진행합니다.</p>
+<p><code>can_delete=0</code>이면 <code>restore_time_kst</code>가 4단계의 목표 시각인지 확인하고, 목표 시각에서 1분이 지난 뒤 다시 실행합니다. 목표 시각이 비어 있거나 잘못됐다면 4단계부터 다시 진행합니다. 이미 삭제했다면 재실행 시 <code>deleted_test_posts=0</code>이므로 처음 삭제했을 때의 결과를 보관합니다.</p>
+<h2 id="6-cloud-db">6. 지정 시점으로 새 Cloud DB 복구<a class="headerlink" href="#6-cloud-db" title="Permanent link">&para;</a></h2>
+<p>콘솔 <strong>Cloud DB for MySQL &gt; Backup &gt; 원본 <code>board-service</code> 상세내역 &gt; 시점 복원</strong>에서 진행합니다.</p>
 <table>
 <thead>
 <tr>
-<th>방식</th>
-<th>콘솔 경로·선택값</th>
+<th>설정</th>
+<th>입력·선택</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>A. Backup 파일 복원</td>
-<td>Backup &gt; 원본 상세내역 &gt; 6단계 파일 &gt; <strong>Backup 파일 복원</strong>. 이름 예: <code>board-backup</code></td>
+<td>DB 복원 시간</td>
+<td><code>/tmp/403-pitr/restore-time.txt</code>에 저장한 시각</td>
 </tr>
 <tr>
-<td>B. PITR</td>
-<td>Backup &gt; 원본 상세내역 &gt; <strong>시점 복원</strong>. 7단계 목표 시각 선택. 이름 예: <code>board-pitr</code></td>
+<td>신규 DB 서비스로 생성</td>
+<td>선택</td>
 </tr>
 <tr>
-<td>공통</td>
-<td>같은 VPC의 접근 가능한 Subnet과 실습용 서버 타입 확인</td>
+<td>DB 서비스 이름</td>
+<td>예: <code>board-pitr</code></td>
 </tr>
 <tr>
-<td>결과 형태</td>
-<td><strong>신규 DB 서비스로 생성</strong>은 선택하지 않고 <code>Recovery</code>로 생성</td>
+<td>DB Server 이름</td>
+<td>예: <code>board-pitr</code></td>
+</tr>
+<tr>
+<td>VPC·Subnet</td>
+<td>Backend에서 접근 가능한 같은 VPC의 DB 서브넷</td>
+</tr>
+<tr>
+<td>고가용성</td>
+<td>사용</td>
 </tr>
 </tbody>
 </table>
-<p>DB Server 목록에서 새 서버의 Role이 <code>Recovery</code>, 상태가 <code>운영중</code>인지 확인합니다. <strong>새 서버의 Private 도메인</strong>을 복사합니다. 적용된 ACG가 Backend의 TCP <code>3306</code>을 허용하고 복원된 계정의 HOST 조건이 Backend IP를 허용하는지도 확인합니다. <a href="https://guide.ncloud-docs.com/docs/database-database-5-4">공식 콘솔 복원 절차</a></p>
-<h2 id="9-recovery">9. 원본과 Recovery 대조<a class="headerlink" href="#9-recovery" title="Permanent link">&para;</a></h2>
-<p>Backend의 같은 터미널에서 실행합니다. writer의 <code>configure</code>는 다시 실행하지 않습니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>-p<span class="w"> </span><span class="s1">'새 Recovery Private 도메인: '</span><span class="w"> </span>RECOVERY_DB_HOST
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>mysql<span class="w"> </span>--protocol<span class="o">=</span>TCP<span class="w"> </span>-h<span class="w"> </span><span class="s2">"</span><span class="nv">$ORIGINAL_DB_HOST</span><span class="s2">"</span><span class="w"> </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">  </span>-u<span class="w"> </span>board_app<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">  </span>-e<span class="w"> </span><span class="s2">"SELECT COUNT(*) AS original_remaining FROM recovery_events WHERE source_id='403-pitr';"</span>
-<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>mysql<span class="w"> </span>--protocol<span class="o">=</span>TCP<span class="w"> </span>-h<span class="w"> </span><span class="s2">"</span><span class="nv">$RECOVERY_DB_HOST</span><span class="s2">"</span><span class="w"> </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">  </span>-u<span class="w"> </span>board_app<span class="w"> </span>-p<span class="w"> </span>board_service
+<p>시점이 맞는지 확인하고 <strong>복원하기/생성</strong>을 실행합니다. 새 서비스가 <code>운영중</code>이 되면 <strong>복구한 DB의 Private 도메인</strong>을 기록합니다. 복구 서버 비용이 추가되므로 실습 후 유지할 서비스를 정리합니다. <a href="https://guide.ncloud-docs.com/docs/database-database-5-4">공식 복원 절차</a></p>
+<p>복구 DB의 ACG Inbound에 Backend 사설 IP의 TCP <code>3306</code>을 허용하고, Backend Outbound에서도 복구 DB의 TCP <code>3306</code> 접근을 확인합니다. 복구 DB의 <strong>DB User 관리</strong>에서 <code>board_app</code>의 HOST·CRUD 권한과 비밀번호를 원본과 동일하게 맞춥니다.</p>
+<p><code>신규 DB 서비스로 생성</code>을 선택하지 않아 읽기 전용 <code>Recovery</code>로 만들었다면, 해당 서버의 <strong>DB 관리 &gt; 신규 DB 서비스 생성</strong>으로 전환한 뒤 다음 단계를 진행합니다. Backend를 쓰기 가능한 DB에 연결해야 합니다.</p>
+<h2 id="7">7. 삭제 전 데이터가 돌아왔는지 검증<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<p>Backend에서 복구 DB의 실제 Private 도메인을 입력합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>-p<span class="w"> </span><span class="s1">'복구한 Cloud DB Private 도메인: '</span><span class="w"> </span>RECOVERED_DB_HOST
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>mysql<span class="w"> </span>--protocol<span class="o">=</span>TCP<span class="w"> </span>--default-character-set<span class="o">=</span>utf8mb4<span class="w"> </span>--table<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span>-h<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">RECOVERED_DB_HOST</span><span class="p">:?복구 DB 주소를 입력하세요</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span>-P<span class="w"> </span><span class="m">3306</span><span class="w"> </span>-u<span class="w"> </span>board_app<span class="w"> </span>-p<span class="w"> </span>board_service<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span>&lt;<span class="w"> </span>/tmp/403-pitr/pitr-verify.sql<span class="w"> </span><span class="p">|</span><span class="w"> </span>tee<span class="w"> </span>/tmp/403-pitr/restored.txt
 </code></pre></div>
-<p>Recovery에 연결한 MySQL 콘솔에서 실행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">SET</span><span class="w"> </span><span class="k">SESSION</span><span class="w"> </span><span class="n">time_zone</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'+09:00'</span><span class="p">;</span>
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">@@</span><span class="n">hostname</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">connected_server</span><span class="p">,</span><span class="w"> </span><span class="k">DATABASE</span><span class="p">(),</span><span class="w"> </span><span class="k">CURRENT_USER</span><span class="p">(),</span><span class="w"> </span><span class="o">@@</span><span class="n">read_only</span><span class="p">;</span>
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">restored_rows</span><span class="p">,</span><span class="w"> </span><span class="k">MIN</span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_id</span><span class="p">,</span><span class="w"> </span><span class="k">MAX</span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">last_id</span><span class="p">,</span>
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">       </span><span class="k">MIN</span><span class="p">(</span><span class="n">created_at</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_created_at</span><span class="p">,</span>
-<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">       </span><span class="k">MAX</span><span class="p">(</span><span class="n">created_at</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">last_created_at</span>
-<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="k">FROM</span><span class="w"> </span><span class="n">recovery_events</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">source_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'403-pitr'</span><span class="p">;</span>
-<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>
-<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">source_id</span><span class="p">,</span><span class="w"> </span><span class="n">event_message</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span>
-<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="k">FROM</span><span class="w"> </span><span class="n">recovery_events</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">source_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'403-pitr'</span>
-<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">DESC</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
-<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">restored_posts_rows</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">posts</span><span class="p">;</span>
-<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="n">exit</span>
+<p>삭제 전 기록과 복구 DB의 출력값을 대조합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>cat<span class="w"> </span>/tmp/403-pitr/before.txt
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>cat<span class="w"> </span>/tmp/403-pitr/restored.txt
 </code></pre></div>
 <table>
 <thead>
 <tr>
-<th>증거</th>
+<th>확인 항목</th>
 <th>통과 기준</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>원본</td>
-<td><code>original_remaining=0</code></td>
-</tr>
-<tr>
 <td>접속 대상</td>
-<td>새 Recovery 도메인·서버 이름이며 읽기 전용 상태</td>
+<td><code>connected_server</code>가 원본과 다른 복구 서버</td>
 </tr>
 <tr>
-<td>복원 행</td>
-<td>행 수와 최소·최대 ID가 기준값과 같음</td>
+<td>쓰기 가능 상태</td>
+<td><code>read_only=0</code></td>
 </tr>
 <tr>
-<td>시각·기준 행</td>
-<td>최초·최종 시각이 같고 같은 ID의 <code>BEFORE_DELETE_MARKER</code> 존재</td>
+<td>시험 글</td>
+<td><code>test_posts=3</code>, 3개 글의 ID·내용·작성 시각이 삭제 전과 같음</td>
 </tr>
 <tr>
-<td>이관 데이터</td>
-<td>Recovery에서도 <code>posts</code> 조회 가능</td>
+<td>게시글 전체</td>
+<td>행 수, <code>checksum_sum</code>, <code>checksum_xor</code>가 삭제 전과 같음</td>
+</tr>
+<tr>
+<td>회원·관리자·공지</td>
+<td><code>users/notices</code> 행 수와 역할별 계정 수가 삭제 전과 같음</td>
 </tr>
 </tbody>
 </table>
-<p>행 수만 보지 않고 ID·시각·기준 행까지 대조합니다. Recovery의 <code>posts</code>는 선택한 시점의 데이터이므로 이후 계속 쓰기가 일어난 현재 원본과 행 수가 다를 수 있습니다. Recovery에서 INSERT하거나 writer를 시작하지 않습니다.</p>
-<h2 id="10">10. 정리와 문제 해결<a class="headerlink" href="#10" title="Permanent link">&para;</a></h2>
-<p>재부팅 후 writer가 다시 켜지지 않도록 중지와 자동 시작 해제를 함께 수행합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>sudo<span class="w"> </span>./scripts/db-writer.sh<span class="w"> </span>stop
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>disable<span class="w"> </span>ncp-db-writer
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-active<span class="w"> </span>ncp-db-writer
-<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>is-enabled<span class="w"> </span>ncp-db-writer
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>sudo<span class="w"> </span>./scripts/db-writer.sh<span class="w"> </span>show-config
+<p>복구한 DB를 삭제 이후의 원본 DB와 비교하면 시험 글 3개 차이가 나는 것이 정상입니다. <strong>삭제 전 <code>before.txt</code>가 복구 검증 기준</strong>입니다. 결과가 다르면 Backend 전환 전에 복구 시각·접속 도메인을 확인합니다.</p>
+<h2 id="8-backend-db">8. Backend를 복구 DB로 전환<a class="headerlink" href="#8-backend-db" title="Permanent link">&para;</a></h2>
+<p>검증이 끝나면 402와 같은 방식으로 <strong>원본 <code>.env</code>에서 <code>DB_HOST</code>만 바꾸고 설치 스크립트를 다시 실행</strong>합니다.</p>
+<p>502 Terraform 기본 설치 경로:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nb">cd</span><span class="w"> </span>/opt/lab7-setup/backend
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>sudo<span class="w"> </span>vi<span class="w"> </span>.env
 </code></pre></div>
-<p>기대값은 <code>inactive</code>, <code>disabled</code>입니다. writer의 DB_HOST와 Backend 연결은 원본에 유지합니다. 증거를 저장한 뒤 이번에 만든 <strong>Recovery 서버만</strong> 이름을 대조해 삭제합니다. 원본 Cloud DB와 이관 데이터 삭제는 모든 게시판 실습이 끝난 뒤 별도 정리합니다. HA를 켰다면 Standby 비용과 유지 여부도 확인합니다.</p>
-<table>
-<thead>
-<tr>
-<th>증상</th>
-<th>확인과 조치</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>CREATE 권한 오류</td>
-<td><code>board_admin</code>으로 <code>table_only.sql</code> 실행. 앱 계정의 <code>init-schema</code> 사용 금지</td>
-</tr>
-<tr>
-<td>DB 접근 실패</td>
-<td><code>board_app</code> 암호·HOST·<code>board_service</code> 권한 확인. 로그인 성공과 DB 접근 성공 구분</td>
-</tr>
-<tr>
-<td>연결 시간 초과</td>
-<td>Private 도메인, VPC 경로, Backend → DB ACG TCP 3306 확인</td>
-</tr>
-<tr>
-<td>active지만 새 행 없음</td>
-<td><code>logs</code>의 <code>insert failed</code>, <code>send-once</code> 결과와 실제 SQL 행 대조</td>
-</tr>
-<tr>
-<td>PITR 메뉴·시각 선택 불가</td>
-<td>Stand Alone 여부, HA·백업 완료, 실제 복원 범위 확인</td>
-</tr>
-<tr>
-<td>복원 결과에 테이블·행 없음</td>
-<td>백업·목표 시각이 테이블 생성·기준 행 추가 이후인지 확인</td>
-</tr>
-<tr>
-<td>행 수 불일치</td>
-<td>writer 중지 여부, source_id, 접속 도메인, 시간대·목표 시각 확인</td>
-</tr>
-<tr>
-<td>Recovery 쓰기 실패</td>
-<td>읽기 전용 서버이므로 SELECT로 검증</td>
-</tr>
-</tbody>
-</table>
-<p>완료 기준은 <strong>원본의 삭제와 별도 Recovery의 삭제 전 행을 함께 확인하는 것</strong>입니다. 복원 버튼의 완료 메시지만으로 데이터 복구를 판정하지 않습니다.</p>
+<p>003에서 직접 설치했다면 해당 설치 폴더에서 엽니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/cloud-infrastructure-lecture-example/003-three tier web app/backend"</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>sudo<span class="w"> </span>vi<span class="w"> </span>.env
+</code></pre></div>
+<p>둘 중 실제 설치한 폴더 한 곳에서 <code>DB_HOST</code>를 7단계의 <strong>복구 DB Private 도메인</strong>으로 변경하고 저장합니다. 그 폴더에서 다음 명령을 실행합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>sudo<span class="w"> </span>./install-backend.sh
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>sudo<span class="w"> </span>grep<span class="w"> </span><span class="s1">'^DB_HOST='</span><span class="w"> </span>/opt/board-service-backend/.env
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>http://localhost:4000/api/health
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>curl<span class="w"> </span>-fsS<span class="w"> </span>http://localhost:4000/api/posts
+</code></pre></div>
+<p><code>DB_HOST</code>가 복구 DB이고, Health가 <code>status: ok</code>, 게시글 API에 실습 글 3개가 보이면 Backend 연결이 확인된 것입니다. 설치 완료 메시지만으로 DB 연결 성공을 판단하지 않습니다. <code>AUTO_POST_ENABLED=true</code>이면 자동 작성기도 함께 시작되어 이때부터 복구 DB의 글 수가 늘 수 있습니다.</p>
+<h2 id="9">9. 게시판 재개와 완료 확인<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
+<ol>
+<li>게시판의 <strong>관리자 로그인 → 공지 관리</strong>를 엽니다.</li>
+<li>이관된 기존 관리자 계정으로 로그인하고, <strong>공지 종료 / 점검 해제</strong>를 적용합니다.</li>
+<li>게시판에 <code>[403 PITR] 복구 실습 1~3</code>이 다시 보이는지 확인합니다.</li>
+<li>일반 회원 로그인과 새 글 등록도 확인합니다.</li>
+</ol>
+<p><strong>완료 기준:</strong> 삭제됐던 글이 같은 ID로 복원됐고, Backend가 새 DB에서 게시글을 읽고 쓸 수 있어야 합니다. 원본과 복구 DB는 서로 다른 서비스이며, 전환 후 새 데이터는 복구 DB에 쌓입니다.</p>
+<p>원본 DB의 정리는 복구 결과와 필요한 백업을 확인한 뒤 진행합니다. 실습 파일은 <code>/tmp/403-pitr</code>에 있으며, 서버를 재부팅하면 없어질 수 있으므로 <code>before.txt</code>, <code>restored.txt</code>, <code>restore-time.txt</code>를 실습 기록으로 보관합니다.</p>
 
 
 
