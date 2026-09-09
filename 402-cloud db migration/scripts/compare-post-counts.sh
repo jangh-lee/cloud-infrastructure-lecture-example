@@ -57,6 +57,8 @@ FROM (
       title,
       content,
       author_name,
+      COALESCE(CAST(author_id AS CHAR), '<NULL>'),
+      COALESCE(CAST(seed_index AS CHAR), '<NULL>'),
       CAST(UNIX_TIMESTAMP(created_at) AS CHAR)
     )) AS row_crc
   FROM posts
@@ -74,6 +76,8 @@ SELECT
     title,
     content,
     author_name,
+    COALESCE(CAST(author_id AS CHAR), '<NULL>'),
+    COALESCE(CAST(seed_index AS CHAR), '<NULL>'),
     CAST(UNIX_TIMESTAMP(created_at) AS CHAR)
   ))
 FROM posts

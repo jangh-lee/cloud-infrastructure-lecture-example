@@ -88,7 +88,7 @@ DB_PASSWORD=${var.board_db_password}
 AUTO_POST_ENABLED=true
 AUTO_POST_INTERVAL_SECONDS=60
 AUTO_POST_TOTAL=300
-AUTO_POST_API_URL=http://127.0.0.1:${local.backend_port}/api/posts
+AUTO_POST_API_URL=http://127.0.0.1:${local.backend_port}/api/internal/sample-posts
 LAB_STRESS_ENABLED=false
 EOF
 

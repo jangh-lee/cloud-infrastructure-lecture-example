@@ -163,7 +163,7 @@ DB_PASSWORD="BoardApp123!"
 AUTO_POST_ENABLED="true"
 AUTO_POST_INTERVAL_SECONDS="60"
 AUTO_POST_TOTAL="300"
-AUTO_POST_API_URL="http://127.0.0.1:4000/api/posts"
+AUTO_POST_API_URL="http://127.0.0.1:4000/api/internal/sample-posts"
 LAB_STRESS_ENABLED="false"
 ```
 
@@ -178,7 +178,7 @@ LAB_STRESS_ENABLED="false"
 | `AUTO_POST_ENABLED` | 실습용 게시글 자동 등록 기능 사용 여부 | 기본값은 `true`이며 자동 등록을 중지할 때만 `false`로 설정합니다. |
 | `AUTO_POST_INTERVAL_SECONDS` | 자동 게시글 등록 간격 | `AUTO_POST_ENABLED=true`일 때 적용되는 초 단위 값입니다. |
 | `AUTO_POST_TOTAL` | 자동 등록할 게시글의 최대 개수 | 필요한 실습 데이터 수를 정수로 입력합니다. |
-| `AUTO_POST_API_URL` | 자동 등록 기능이 호출할 게시글 API | 같은 Backend를 호출하므로 기본값 `http://127.0.0.1:4000/api/posts`를 사용합니다. |
+| `AUTO_POST_API_URL` | 자동 등록 기능이 호출할 게시글 API | 같은 Backend를 호출하므로 기본값 `http://127.0.0.1:4000/api/internal/sample-posts`를 사용합니다. |
 | `LAB_STRESS_ENABLED` | Backend 부하 발생용 실습 API 사용 여부 | 003과 Web Auto Scaling을 다루는 303에서는 `false`를 유지합니다. |
 
 ### 백엔드 서버
@@ -211,7 +211,7 @@ sudo ./install-backend.sh configure
 AUTO_POST_ENABLED=true
 AUTO_POST_INTERVAL_SECONDS=60
 AUTO_POST_TOTAL=300
-AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
+AUTO_POST_API_URL=http://127.0.0.1:4000/api/internal/sample-posts
 ```
 
 `.env`만 바꾼 경우에는 패키지 설치를 반복할 필요가 없으므로 아래 명령으로 설정만 반영합니다.
@@ -220,7 +220,7 @@ AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
 sudo ./install-backend.sh configure
 ```
 
-이 기능은 백엔드 서버 안에서 별도 systemd 서비스가 1분에 한 번씩 자기 API에 `POST /api/posts`를 호출하는 방식입니다. 작성자는 여러 명처럼 보이도록 샘플 이름을 섞고, 제목과 본문은 실습 주제 조합으로 300개까지 생성합니다. 샘플은 매번 랜덤으로 선택하며, 이미 사용한 샘플 번호는 상태 파일에 저장해서 중복 등록하지 않습니다.
+별도 systemd 서비스가 1분에 한 번씩 무작위 샘플을 고릅니다. 작성자 회원을 생성·재사용하고 제목과 본문은 실습 주제 조합으로 300개까지 생성합니다. 자세한 연결 구조는 아래 **자동 게시글의 회원 등록**을 참고합니다.
 
 `LAB_STRESS_ENABLED`는 별도의 CPU 부하 검증이 필요할 때만 `true`로 설정합니다. 활성화하면 수업용 `GET /api/stress`가 열리므로 인터넷에 공개된 운영 환경에서는 사용하지 않습니다. 303번 게시판 Auto Scaling 실습에서는 사용하지 않으므로 `false`를 유지합니다. `GET /api/instance`와 응답 헤더 `X-Backend-Instance`로 요청을 처리한 백엔드 호스트를 확인할 수 있습니다.
 
@@ -423,7 +423,7 @@ FROM posts
 WHERE id = @post_id;
 ```
 
-작성자와 날짜별로 데이터가 어떤 분포로 쌓였는지 집계합니다. `author_name`은 로그인 계정과 연결하지 않는 게시글 표시 이름입니다.
+작성자와 날짜별로 데이터가 어떤 분포로 쌓였는지 집계합니다. `author_name`은 작성자 표시 이름이며, 자동 게시글의 회원 계정은 `author_id`로 연결합니다.
 
 ```sql
 SELECT author_name, COUNT(*) AS post_count
@@ -501,9 +501,26 @@ http://WEB_SERVER_PUBLIC_IP/
 
 ## 회원과 관리자
 
-우측 상단 **로그인 → 회원 가입**으로 일반 회원을 생성합니다. **관리자 로그인**으로 접속하면 **공지 관리**에서 사전 공지, 점검 시작, 점검 해제를 선택할 수 있습니다. 게시글은 기존 실습처럼 비가입 작성·삭제를 허용하며 `posts.author_name`은 로그인 계정과 연결하지 않습니다.
+우측 상단 **로그인 → 회원 가입**으로 일반 회원을 생성합니다. **관리자 로그인**으로 접속하면 **공지 관리**에서 사전 공지, 점검 시작, 점검 해제를 선택할 수 있습니다. 게시글은 기존 실습처럼 비가입 작성·삭제를 허용합니다. 자동 게시글은 `posts.author_id`로 회원을 참조하고 비가입 글은 이 값이 `NULL`입니다.
 
 `board_service` 안에 `posts`, `users`, `notices`를 함께 저장합니다. `users.role`의 `member` / `admin`으로 권한을 구분하며 별도 관리자 DB는 만들지 않습니다. 비밀번호는 scrypt 해시로 저장합니다. `notices.created_by`는 `users.id`를 참조하고 공지 변경 이력을 남깁니다.
+
+### 자동 게시글의 회원 등록
+
+자동 작성기는 무작위 샘플을 고른 뒤 Backend의 `POST /api/internal/sample-posts`를 호출합니다. 해당 작성자의 회원이 없으면 `users`에 `role=member`로 생성하고, 같은 작성자의 다음 글에는 기존 회원을 재사용합니다. 작성자는 20명이며, `users.seed_author`로 구분합니다. 표시 이름이 같은 일반 회원을 가져다 쓰지는 않습니다.
+
+`posts.author_id → users.id`로 작성자를 연결합니다. 회원 등록과 글 저장은 한 트랜잭션으로 처리하며, `posts.seed_index`의 유일 키로 재시도 시 같은 샘플 글이 중복 저장되는 것을 방지합니다. 자동 계정에는 임의 비밀번호의 해시만 저장하므로 로그인 실습에는 직접 가입한 회원 계정을 사용합니다.
+
+이 API는 Backend의 localhost에서만 호출할 수 있습니다. 기존 `.env`의 `AUTO_POST_API_URL`이 `/api/posts`로 끝나면 새 경로로 자동 변환하므로 설정을 그대로 재사용할 수 있습니다. 등록 간격·총 개수·진행 상태 파일도 유지합니다.
+
+기존 환경을 업데이트할 때는 아래 DB 추가 SQL과 최신 Backend 코드를 먼저 적용한 뒤 **Backend 서버에서** 실행합니다. 기존 자동 작성기의 제목·본문·작성자 형식이 모두 일치하는 글만 회원과 연결하며 원래 글 번호와 내용은 보존합니다.
+
+```bash
+sudo systemctl stop board-service-post-seeder
+sudo node /opt/board-service-backend/backfill-sample-members.js
+# 자동 등록 실습을 계속할 때 다시 시작
+sudo systemctl start board-service-post-seeder
+```
 
 ### 관리자 계정 생성
 
@@ -512,6 +529,8 @@ http://WEB_SERVER_PUBLIC_IP/
 ```bash
 curl -fsSL 'https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/db/migrations/002-members-notices.sql' -o /tmp/002-members-notices.sql
 sudo mariadb -u root -p board_service < /tmp/002-members-notices.sql
+curl -fsSL 'https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/db/migrations/003-sample-members.sql' -o /tmp/003-sample-members.sql
+sudo mariadb -u root -p board_service < /tmp/003-sample-members.sql
 ```
 
 Backend와 Web에도 최신 설치 스크립트의 `configure`를 적용한 뒤 **Backend 서버에서** 관리자 계정을 한 번 생성합니다.

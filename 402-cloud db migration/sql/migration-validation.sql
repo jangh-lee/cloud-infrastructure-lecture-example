@@ -43,6 +43,8 @@ FROM (
     title,
     content,
     author_name,
+    COALESCE(CAST(author_id AS CHAR), '<NULL>'),
+    COALESCE(CAST(seed_index AS CHAR), '<NULL>'),
     CAST(UNIX_TIMESTAMP(created_at) AS CHAR)
   )) AS row_crc
   FROM posts
@@ -69,6 +71,8 @@ SELECT
     title,
     content,
     author_name,
+    COALESCE(CAST(author_id AS CHAR), '<NULL>'),
+    COALESCE(CAST(seed_index AS CHAR), '<NULL>'),
     CAST(UNIX_TIMESTAMP(created_at) AS CHAR)
   )) AS row_checksum
 FROM posts
@@ -96,11 +100,16 @@ SELECT 'posts' AS table_name, COUNT(*) AS rows_count FROM posts
 UNION ALL SELECT 'users', COUNT(*) FROM users
 UNION ALL SELECT 'notices', COUNT(*) FROM notices;
 SELECT role, COUNT(*) AS accounts FROM users GROUP BY role ORDER BY role;
+SELECT COUNT(*) AS orphan_posts FROM posts p
+LEFT JOIN users u ON u.id = p.author_id
+WHERE p.author_id IS NOT NULL AND u.id IS NULL;
+SELECT COUNT(*) AS sample_members FROM users WHERE seed_author IS NOT NULL;
+SELECT COUNT(*) AS sample_posts FROM posts WHERE seed_index IS NOT NULL;
 SELECT COUNT(*) AS orphan_notices FROM notices n
 LEFT JOIN users u ON u.id = n.created_by WHERE u.id IS NULL;
 SELECT COUNT(*) AS rows_count,
   COALESCE(SUM(CRC32(CONCAT_WS(CHAR(31), id, username, display_name,
-    password_hash, role, session_version, UNIX_TIMESTAMP(created_at)))), 0) AS checksum_sum
+    password_hash, role, session_version, COALESCE(CAST(seed_author AS CHAR), '<NULL>'), UNIX_TIMESTAMP(created_at)))), 0) AS checksum_sum
 FROM users;
 SELECT COUNT(*) AS rows_count,
   COALESCE(SUM(CRC32(CONCAT_WS(CHAR(31), id, created_by, mode, title,

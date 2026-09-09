@@ -122,10 +122,12 @@ apt-get update
 apt-get install -y mariadb-server curl
 
 mkdir -p "${SCRIPT_DIR}/migrations"
-if [[ ! -f "${SCRIPT_DIR}/migrations/002-members-notices.sql" ]]; then
-  curl -fsSL 'https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/db/migrations/002-members-notices.sql' \
-    -o "${SCRIPT_DIR}/migrations/002-members-notices.sql"
-fi
+for migration in 002-members-notices.sql 003-sample-members.sql; do
+  if [[ ! -f "${SCRIPT_DIR}/migrations/${migration}" ]]; then
+    curl -fsSL "https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/db/migrations/${migration}" \
+      -o "${SCRIPT_DIR}/migrations/${migration}"
+  fi
+done
 
 sed -i "s/^bind-address.*/bind-address = ${DB_BIND_ADDRESS}/" "${MARIADB_CONF}"
 
@@ -160,6 +162,7 @@ WHERE NOT EXISTS (
 "
 
 run_mariadb_root "USE \`${db_name_sql}\`; $(cat "${SCRIPT_DIR}/migrations/002-members-notices.sql")"
+run_mariadb_root "USE \`${db_name_sql}\`; $(cat "${SCRIPT_DIR}/migrations/003-sample-members.sql")"
 
 systemctl restart mariadb
 

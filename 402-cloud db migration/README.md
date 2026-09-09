@@ -137,7 +137,7 @@ Source DB 데이터 변경 중지 또는 점검 시간 확보
 
 ## 2. 게시판 ERD
 
-현재 게시판은 `posts`, `users`, `notices` 세 테이블을 사용합니다. 게시글은 기존처럼 독립적으로 유지하고 관리자 공지만 작성자 계정을 참조합니다.
+현재 게시판은 `posts`, `users`, `notices` 세 테이블을 사용합니다. 자동 게시글과 관리자 공지가 각각 작성자 계정을 참조합니다. 비가입 게시글의 `author_id`는 `NULL`입니다.
 
 ```text
 posts
@@ -146,6 +146,8 @@ id PK
 title
 content
 author_name
+author_id FK -> users.id
+seed_index UNIQUE
 created_at
 ```
 
@@ -154,9 +156,11 @@ Mermaid ERD:
 ```mermaid
 erDiagram
   USERS ||--o{ NOTICES : creates
+  USERS o|--o{ POSTS : writes
   USERS {
     BIGINT id PK
     VARCHAR username UK
+    TINYINT seed_author UK "자동 작성자 식별자, 일반 회원 NULL"
     VARCHAR password_hash
     ENUM role "member 또는 admin"
   }
@@ -170,6 +174,8 @@ erDiagram
   }
   POSTS {
     BIGINT id PK "AUTO_INCREMENT"
+    BIGINT author_id FK "비가입 글 NULL"
+    INT seed_index UK "자동 샘플 번호, 일반 글 NULL"
     VARCHAR title "게시글 제목"
     TEXT content "게시글 본문"
     VARCHAR author_name "작성자 표시 이름"
@@ -180,11 +186,11 @@ erDiagram
 
 | 이관 테이블 | 내용 | 확인 사항 |
 | --- | --- | --- |
-| `posts` | 기존 게시글 | ID·제목·본문·작성자 유지 |
-| `users` | 회원·관리자 계정 | `role`, `password_hash`, `session_version` 포함 |
+| `posts` | 기존 게시글 | `author_id → users.id`, `seed_index` 포함 |
+| `users` | 회원·관리자 계정 | `role`, `password_hash`, `session_version`, `seed_author` 포함 |
 | `notices` | 관리자 공지 이력 | `created_by → users.id` 외래 키 유지 |
 
-회원·관리자는 `users.role`로 구분합니다. 이 계정은 애플리케이션 데이터이므로 DMS로 이관됩니다. MySQL 접속 계정인 `board_admin`·`board_app`은 별도로 Target에 설정합니다. Web 공지 캐시와 Backend 세션 서명 파일은 서버 파일이므로 DMS 대상이 아닙니다.
+회원·관리자는 `users.role`로 구분합니다. 이 계정은 애플리케이션 데이터이므로 DMS로 이관됩니다. MySQL 접속 계정인 `board_admin`·`board_app`은 별도로 Target에 설정합니다. Web 공지 캐시와 Backend 세션 서명 파일·자동 작성 진행 파일은 서버 파일이므로 DMS 대상이 아닙니다. 자동 생성 회원과 게시글의 연결·중복 방지 키는 세 테이블과 함께 이관합니다.
 
 ## 3. 데이터 사전
 
@@ -210,7 +216,7 @@ board_service
 | `author_name` | `VARCHAR(100)` | `NO` |  | `비가입 유저` | 작성자 표시 이름 |
 | `created_at` | `TIMESTAMP` | `NO` |  | `CURRENT_TIMESTAMP` | 게시글 생성 시각 |
 
-DDL:
+기본 게시글 DDL (회원·공지 및 작성자 연결 스키마는 003의 `db/migrations/002-members-notices.sql`, `003-sample-members.sql`을 함께 적용):
 
 ```sql
 CREATE DATABASE IF NOT EXISTS `board_service`
@@ -651,6 +657,7 @@ SELECT COUNT(*) AS total_posts,
        COALESCE(BIT_XOR(row_crc), 0) AS checksum_xor
 FROM (
   SELECT CRC32(CONCAT_WS(CHAR(31), CAST(id AS CHAR), title, content, author_name,
+    COALESCE(CAST(author_id AS CHAR), '<NULL>'), COALESCE(CAST(seed_index AS CHAR), '<NULL>'),
                         CAST(created_at AS CHAR))) AS row_crc
   FROM posts
 ) AS post_fingerprints;
@@ -676,6 +683,7 @@ SELECT COUNT(*) AS total_posts,
        COALESCE(BIT_XOR(row_crc), 0) AS checksum_xor
 FROM (
   SELECT CRC32(CONCAT_WS(CHAR(31), CAST(id AS CHAR), title, content, author_name,
+    COALESCE(CAST(author_id AS CHAR), '<NULL>'), COALESCE(CAST(seed_index AS CHAR), '<NULL>'),
                         CAST(created_at AS CHAR))) AS row_crc
   FROM posts
 ) AS post_fingerprints;
@@ -701,18 +709,23 @@ DMS로 변경분까지 이관하는 동안에는 Source에 쓰기가 계속 발�
 
 ### 회원·관리자·공지 추가 검증
 
-Source 쓰기를 중지하고 DMS 복제 지연이 `0`인 상태에서 양쪽 `board_service`에 동일하게 실행합니다. 아래 집계 값이 모두 같고 `orphan_notices`가 `0`이어야 합니다. 해시는 그대로 이관하므로 비밀번호를 재설정하지 않습니다.
+Source 쓰기를 중지하고 DMS 복제 지연이 `0`인 상태에서 양쪽 `board_service`에 동일하게 실행합니다. 아래 집계 값이 모두 같고 `orphan_notices`와 `orphan_posts`가 모두 `0`이어야 합니다. 해시는 그대로 이관하므로 비밀번호를 재설정하지 않습니다.
 
 ```sql
 SELECT 'posts' AS table_name, COUNT(*) AS rows_count FROM posts
 UNION ALL SELECT 'users', COUNT(*) FROM users
 UNION ALL SELECT 'notices', COUNT(*) FROM notices;
 SELECT role, COUNT(*) AS accounts FROM users GROUP BY role ORDER BY role;
+SELECT COUNT(*) AS orphan_posts FROM posts p
+LEFT JOIN users u ON u.id = p.author_id
+WHERE p.author_id IS NOT NULL AND u.id IS NULL;
+SELECT COUNT(*) AS sample_members FROM users WHERE seed_author IS NOT NULL;
+SELECT COUNT(*) AS sample_posts FROM posts WHERE seed_index IS NOT NULL;
 SELECT COUNT(*) AS orphan_notices FROM notices n
 LEFT JOIN users u ON u.id = n.created_by WHERE u.id IS NULL;
 SELECT COUNT(*) AS rows_count,
   COALESCE(SUM(CRC32(CONCAT_WS(CHAR(31), id, username, display_name,
-    password_hash, role, session_version, UNIX_TIMESTAMP(created_at)))), 0) AS checksum_sum
+    password_hash, role, session_version, COALESCE(CAST(seed_author AS CHAR), '<NULL>'), UNIX_TIMESTAMP(created_at)))), 0) AS checksum_sum
 FROM users;
 SELECT COUNT(*) AS rows_count,
   COALESCE(SUM(CRC32(CONCAT_WS(CHAR(31), id, created_by, mode, title,
@@ -722,7 +735,7 @@ SHOW CREATE TABLE users;
 SHOW CREATE TABLE notices;
 ```
 
-컬럼·기본 키·아이디 유일 키·공지 외래 키도 비교합니다. 전체 검증 SQL은 `402-cloud db migration/sql/migration-validation.sql`에 있습니다. 기존 `compare-post-counts.sh`는 게시글만 비교하므로 위 검증도 함께 수행합니다.
+컬럼·기본 키·아이디 및 샘플 식별자의 유일 키·게시글과 공지의 외래 키도 비교합니다. 자동 작성기를 재개했을 때 기존 회원이 재사용되고 같은 샘플 번호의 글이 중복되지 않는지 확인합니다. 전체 검증 SQL은 `402-cloud db migration/sql/migration-validation.sql`에 있습니다. 기존 `compare-post-counts.sh`는 게시글만 비교하므로 위 검증도 함께 수행합니다.
 
 ## 11. Backend DB_HOST 전환
 

@@ -45,6 +45,7 @@ app.use((req, res, next) => {
 });
 
 require("./accounts")(app, pool);
+require("./sample-posts").registerSampleRoute(app, pool);
 
 app.get("/api/instance", (req, res) => {
   res.json({ instance: instanceName, service: "board-service-backend" });
@@ -88,7 +89,7 @@ app.get("/api/stress", (req, res, next) => {
 app.get("/api/posts", async (req, res, next) => {
   try {
     const [rows] = await pool.query(`
-      SELECT id, title, content, author_name AS authorName, created_at AS createdAt
+      SELECT id, title, content, author_id AS authorId, author_name AS authorName, created_at AS createdAt
       FROM posts
       ORDER BY id DESC
     `);

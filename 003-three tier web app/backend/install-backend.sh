@@ -33,7 +33,7 @@ DB_PASSWORD=${DB_PASSWORD}
 AUTO_POST_ENABLED=${AUTO_POST_ENABLED:-true}
 AUTO_POST_INTERVAL_SECONDS=${AUTO_POST_INTERVAL_SECONDS:-60}
 AUTO_POST_TOTAL=${AUTO_POST_TOTAL:-300}
-AUTO_POST_API_URL=${AUTO_POST_API_URL:-http://127.0.0.1:${PORT:-4000}/api/posts}
+AUTO_POST_API_URL=${AUTO_POST_API_URL:-http://127.0.0.1:${PORT:-4000}/api/internal/sample-posts}
 LAB_STRESS_ENABLED=${LAB_STRESS_ENABLED:-false}
 EOF
     return
@@ -49,7 +49,7 @@ DB_PASSWORD=BoardApp123!
 AUTO_POST_ENABLED=true
 AUTO_POST_INTERVAL_SECONDS=60
 AUTO_POST_TOTAL=300
-AUTO_POST_API_URL=http://127.0.0.1:4000/api/posts
+AUTO_POST_API_URL=http://127.0.0.1:4000/api/internal/sample-posts
 LAB_STRESS_ENABLED=false
 EOF
   echo "Created ${SCRIPT_DIR}/.env template. Fill it out and run again."
@@ -110,7 +110,7 @@ sync_app_files() {
   copy_or_fetch_file "${SCRIPT_DIR}/app/package.json" "${APP_DIR}/package.json" "package.json"
   copy_or_fetch_file "${SCRIPT_DIR}/app/package-lock.json" "${APP_DIR}/package-lock.json" "package-lock.json"
   copy_or_fetch_file "${SCRIPT_DIR}/app/server.js" "${APP_DIR}/server.js" "server.js"
-  for account_file in auth.js accounts.js manage-admin.js; do
+  for account_file in auth.js accounts.js manage-admin.js sample-data.js sample-posts.js backfill-sample-members.js; do
     copy_or_fetch_file "${SCRIPT_DIR}/app/${account_file}" "${APP_DIR}/${account_file}" "${account_file}"
   done
   copy_or_fetch_file "${SCRIPT_DIR}/app/seed-worker.js" "${APP_DIR}/seed-worker.js" "seed-worker.js"
