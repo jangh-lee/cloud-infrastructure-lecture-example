@@ -86,6 +86,8 @@ Private 기본 Route Table에는 다음 경로가 추가됩니다.
 ├── init-scripts.tf
 ├── compute.tf
 ├── outputs.tf
+├── scripts/setup-internal-ssh.sh
+├── templates/bastion-init.sh.tftpl
 └── terraform.tfvars.example
 ```
 
@@ -307,38 +309,51 @@ Start-Process $BOARD_URL
 Public ALB -> Web -> Backend -> MariaDB
 ```
 
-## 10. SSH 접속
+## 10. Bastion에서 내부 서버로 SSH 접속
 
-명령을 출력한 뒤 그대로 복사해 실행합니다.
+내 PC에서 Bastion으로 로그인한 뒤, Bastion에서 Web / Backend / DB로 이동하는 실습입니다. Bastion Init Script가 끝나면 `setup-internal-ssh`와 `web`, `backend`, `db` SSH 별칭을 사용할 수 있습니다.
 
-### Ubuntu / macOS
+1. 내 PC에서 비밀번호와 접속 명령을 확인합니다. 출력된 SSH 명령을 복사해 실행하고 **Bastion 비밀번호**를 입력합니다. Windows PowerShell에서도 같은 명령을 사용합니다.
 
-```bash
-terraform output -raw ssh_bastion_command
-terraform output -raw ssh_web_via_bastion_command
-terraform output -raw ssh_backend_via_bastion_command
-terraform output -raw ssh_db_via_bastion_command
-```
+   ```bash
+   terraform output admin_passwords
+   terraform output -raw ssh_bastion_command
+   terraform output -raw internal_ssh_setup
+   ```
 
-`-J`는 내 PC에서 Bastion을 거쳐 Private 서버에 접속하는 SSH ProxyJump 옵션입니다.
+2. **Bastion에서** 최초 한 번 실행합니다.
 
-### Windows PowerShell
+   ```bash
+   setup-internal-ssh
+   ```
 
-Windows 10/11의 OpenSSH 클라이언트를 사용하면 별도 SSH 프로그램 없이 같은 ProxyJump 접속이 가능합니다.
+   내부 접속 전용 Ed25519 키를 `/root/.ssh/lab_internal`에 생성하고, `ssh-copy-id`로 공개키를 Web → Backend → DB 순서로 등록합니다. 각 서버의 SSH 호스트 키 지문을 확인하고 해당 서버의 **Ncloud 관리자 비밀번호**를 입력합니다. DB 서버에도 MariaDB 비밀번호가 아닌 서버 관리자 비밀번호를 입력합니다.
 
-```powershell
-$BASTION_IP = terraform output -raw bastion_public_ip
-$WEB_IP = terraform output -raw web_private_ip
-$BACKEND_IP = terraform output -raw backend_private_ip
-$DB_IP = terraform output -raw db_private_ip
+3. **Bastion에서** 내부 서버로 이동하고 `hostname`으로 위치를 확인합니다.
 
-ssh "root@$BASTION_IP"
-ssh -J "root@$BASTION_IP" "root@$WEB_IP"
-ssh -J "root@$BASTION_IP" "root@$BACKEND_IP"
-ssh -J "root@$BASTION_IP" "root@$DB_IP"
-```
+   ```bash
+   ssh web
+   hostname
+   exit
 
-처음 연결할 때 `Are you sure you want to continue connecting`이 나오면 서버 주소를 확인하고 `yes`를 입력합니다. 이후 `terraform output admin_passwords`에 표시된 해당 서버의 관리자 비밀번호를 입력합니다. Private 서버의 프롬프트가 나타나면 ProxyJump 통과입니다.
+   ssh backend
+   hostname
+   exit
+
+   ssh db
+   hostname
+   exit
+   ```
+
+   공개키 등록 후에는 서버 비밀번호 입력 없이 접속합니다. `exit`는 Bastion으로 돌아옵니다. 위 별칭은 Bastion의 root 계정에 설정되므로 내 PC에서 실행하지 않습니다.
+
+키는 재실행해도 유지되며, 이미 등록된 공개키는 건너뜁니다. 실패한 서버만 다시 등록하려면 `setup-internal-ssh web`처럼 실행합니다. 키에는 실습 편의를 위해 암호를 설정하지 않으며, 개인키는 Bastion 안에만 생성되어 Terraform state나 Init Script에 포함되지 않습니다. Bastion을 재생성하면 새 키의 공개키 등록이 필요합니다.
+
+이 설정은 **새 서버의 최초 부팅 시** 적용됩니다. 기존 Bastion에는 Terraform Init Script 수정만으로 자동 적용되지 않습니다. 기존 환경은 생성된 Bastion 초기화 스크립트의 설정을 별도로 적용하거나, 필요한 데이터를 보존한 뒤 서버 재생성 계획을 검토합니다.
+
+기존 `ssh_*_via_bastion_command` output은 내 PC에서 사용하는 비밀번호 기반 ProxyJump 명령으로 계속 제공됩니다.
+
+003의 최신 Web 설치 스크립트에는 `board-notice` 명령도 포함됩니다. Bastion에서 `ssh web`으로 이동해 [003 공지 및 점검 화면](003-three-tier-web-app.md#notice-maintenance)을 설정할 수 있습니다. [402 마이그레이션 교안](402-cloud-db-migration.md#0)에는 복사해서 사용하는 사전 공지와 점검 전환 명령이 있습니다.
 
 ## 11. 초기화 상태 확인
 
@@ -380,7 +395,8 @@ sudo mariadb -u root -p -e "SHOW DATABASES;"
 | ALB Target이 `미사용` 또는 `DOWN` | Web Init 로그, Nginx, Web ACG의 LB Subnet `10.10.30.0/24:80` 확인 |
 | Backend Health `ETIMEDOUT` | DB 서버 상태와 DB ACG의 Backend ACG `3306` 허용 확인 |
 | 게시판 URL이 처음에는 `503` | Init Script 완료 전일 수 있으므로 Web 로그와 Target Health를 확인 |
-| SSH 실패 | 현재 관리자 Public IP와 `my_public_ip/32`, `admin_passwords`의 서버별 비밀번호 확인 |
+| SSH 실패 | 현재 관리자 Public IP와 `my_public_ip/32`, `admin_passwords`의 서버별 비밀번호 확인. Bastion에서 `setup-internal-ssh web`으로 실패한 서버만 재등록 |
+| `setup-internal-ssh: command not found` | Bastion Init Script 완료 여부와 `/var/log/lab7-init.log` 확인. 기존 서버는 Init Script 수정만으로 갱신되지 않음 |
 
 Init Script는 서버가 처음 만들어질 때 한 번만 실행됩니다. 코드를 수정한 뒤 다시 설치하려면 전체 환경을 재생성하는 방식이 가장 단순합니다.
 

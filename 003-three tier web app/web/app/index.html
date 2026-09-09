@@ -18,6 +18,20 @@
   </header>
 
   <main class="shell main-content">
+    <aside id="noticeBanner" class="notice-banner" role="status" hidden>
+      <span class="notice-label">공지사항</span>
+      <strong id="noticeTitle"></strong>
+      <p id="noticeMessage"></p>
+    </aside>
+
+    <section id="serviceView" class="service-view" aria-labelledby="serviceTitle" hidden>
+      <span id="serviceLabel" class="notice-label">서비스 안내</span>
+      <h1 id="serviceTitle"></h1>
+      <p id="serviceMessage"></p>
+      <button id="serviceRetry" class="button button-secondary" type="button">다시 확인</button>
+      <p class="service-hint">서비스 상태를 주기적으로 확인하고 있습니다.</p>
+    </section>
+
     <section id="listView" class="view" aria-labelledby="listHeading">
       <div class="page-heading">
         <div>

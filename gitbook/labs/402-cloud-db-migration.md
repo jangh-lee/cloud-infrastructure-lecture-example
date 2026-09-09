@@ -67,6 +67,53 @@ erDiagram
 | `author_name` | `VARCHAR(100)` | 작성자 표시 이름 |
 | `created_at` | `TIMESTAMP` | 생성 시각 |
 
+## 0. 시작 전 공지와 점검 화면 준비
+
+502 기본 구성에서 설치 설정 파일은 `/opt/lab7-setup/web/.env`, `/opt/lab7-setup/backend/.env`, `/opt/lab7-setup/db/.env`에 있습니다. `name_prefix`를 바꿨다면 경로의 `lab7`도 바꿉니다.
+
+공지 내용은 Web 서버 파일에 저장하므로 Source DB, Target DB, Backend가 중단되어도 표시됩니다. 003 또는 502의 최신 Web 설치 스크립트를 적용하면 `board-notice` 명령을 사용할 수 있습니다. 공지는 접속 중인 브라우저에도 최대 5초 후 반영됩니다.
+
+### 0-1. 복사해서 사용할 사전 공지
+
+아래 전체를 **Web 서버에서** 복사해 실행합니다. 502의 SSH 설정을 마쳤다면 Bastion에서 `ssh web`으로 이동합니다. 이 공지는 상단 배너로 표시되며 게시판 이용은 계속 가능합니다.
+
+```bash
+sudo board-notice announce --title '데이터베이스 이전 작업 사전 안내' --message-file - <<'NOTICE'
+안녕하세요. 안정적인 서비스 제공을 위해 데이터베이스 이전 작업을 진행할 예정입니다.
+
+작업이 시작되면 게시글 조회·작성·삭제가 일시적으로 중단됩니다.
+작성 중인 내용은 작업 시작 전에 별도로 보관해 주세요.
+
+작업 완료와 데이터 확인을 마친 뒤 서비스를 다시 열겠습니다.
+이용에 불편을 드려 죄송합니다. 양해 부탁드립니다.
+NOTICE
+```
+
+### 0-2. 서비스 중단 직전에 점검 모드 켜기
+
+**Web 서버에서** 실행합니다. Source MariaDB를 재시작해야 한다면 재시작 전, 그렇지 않다면 [2. Target 초기화](#2-401-cloud-db-target) 전에 실행합니다.
+
+```bash
+sudo board-notice maintenance --title '데이터베이스 이전 작업 중입니다' --message-file - <<'NOTICE'
+현재 데이터베이스 이전 작업으로 게시판 이용이 일시 중단되었습니다.
+
+게시글 조회·작성·삭제는 작업 완료 후 다시 이용하실 수 있습니다.
+데이터 확인을 마치는 대로 서비스를 정상화하겠습니다.
+잠시만 기다려 주세요. 이용에 불편을 드려 죄송합니다.
+NOTICE
+
+sudo board-notice status
+```
+
+점검 모드는 공개 `/api/` 요청을 HTTP 503으로 차단하고 모든 게시판 경로에 점검 화면을 표시합니다. ALB 확인 경로 `/healthz`는 HTTP 200을 유지합니다. **Backend 내부에서 실행되는 자동 작성기는 Web을 거치지 않으므로 아래처럼 별도로 중지해야 합니다.**
+
+```bash
+# Backend 서버에서 실행
+sudo systemctl stop board-service-post-seeder board-service-backend
+```
+
+이 두 서비스를 중지한 뒤부터 데이터 이관이 끝날 때까지 Source와 Target에 앱의 쓰기를 재개하지 않습니다. 계획된 점검은 DB 연결이 회복되어도 자동으로 해제되지 않습니다. 점검 모드를 켜지 않은 상태에서 DB 또는 Backend 연결 장애가 발생하면 별도의 일시적 장애 안내가 자동 표시됩니다.
+
 ## 1. Source DB 준비
 
 Naver Cloud DB for MySQL의 DB 사용자 비밀번호 조건에 맞춰 예시 비밀번호는 8자 이상, 20자 이하인 `MigratePass123!`를 사용합니다.
@@ -202,6 +249,8 @@ SQL
     NAVER Cloud DMS의 Source DB 요구 사항은 [Source DB 및 Target DB 접속 설정](https://guide.ncloud-docs.com/docs/dms-connect), 각 binlog 형식의 차이는 [MariaDB Binary Log Formats](https://mariadb.com/docs/server/server-management/server-monitoring-logs/binary-log/binary-log-formats)에서 확인할 수 있습니다.
 
 ## 2. 401 Cloud DB Target 초기화
+
+먼저 [0. 시작 전 공지와 점검 화면 준비](#0)를 실행하고 브라우저에 점검 안내가 표시되는지 확인합니다. 점검 모드를 유지한 채 아래 작업을 진행합니다.
 
 401에서 Backend가 Target의 `board_service`를 계속 사용하면 데이터베이스를 삭제할 수 없고 DMS 데이터와 기존 쓰기가 섞일 수 있습니다. **Backend 서버**에서 먼저 두 서비스를 중지합니다.
 
@@ -424,6 +473,10 @@ DMS 방식은 Source 쓰기를 중지한 상태에서 복제 지연 `0`과 7번 
 ```bash
 TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com'
 SOURCE_ENV="$HOME/cloud-infrastructure-lecture-example/003-three tier web app/backend/.env"
+# 502 Terraform 기본 구성의 설치 경로
+if [ -f /opt/lab7-setup/backend/.env ]; then
+  SOURCE_ENV=/opt/lab7-setup/backend/.env
+fi
 RUNTIME_ENV='/opt/board-service-backend/.env'
 
 sudo sed -i \
@@ -435,8 +488,7 @@ sudo sed -i \
   "$SOURCE_ENV" "$RUNTIME_ENV"
 
 sudo systemctl restart board-service-backend
-sudo systemctl restart board-service-post-seeder || true
-sudo grep -E '^DB_(HOST|PORT|USER|PASSWORD|NAME)=' "$RUNTIME_ENV"
+sudo grep -E '^DB_(HOST|PORT|USER|NAME)=' "$RUNTIME_ENV"
 ```
 
 확인:
@@ -448,6 +500,22 @@ curl -s http://localhost:4000/api/posts
 ```
 
 서비스가 `active`, Health 응답이 `"status":"ok"`, 게시글 목록이 JSON으로 출력되면 전환이 완료된 것입니다.
+
+검증 중에는 자동 작성기를 중지한 상태로 유지합니다. Web의 점검 모드에서는 공개 `/api/health`도 503을 반환하므로 위 검증은 **Backend의 localhost:4000**에서 실행합니다.
+
+검증을 마친 뒤 **Web 서버에서** 점검과 공지를 해제합니다.
+
+```bash
+sudo board-notice clear
+```
+
+브라우저에서 게시글 조회·작성·삭제가 정상인지 확인합니다. 자동 게시글 생성 실습을 이어갈 경우에만 **Backend 서버에서** 다시 시작합니다.
+
+```bash
+sudo systemctl start board-service-post-seeder
+```
+
+점검을 해제해도 Backend나 DB가 정상화되지 않았다면 자동 장애 안내가 표시됩니다. 이 경우 점검 모드를 다시 켜고 연결 설정과 로그를 확인합니다.
 
 ## 9. 다음 실습: 이관한 DB 백업·복구
 

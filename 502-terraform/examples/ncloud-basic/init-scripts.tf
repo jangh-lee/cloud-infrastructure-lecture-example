@@ -1,17 +1,14 @@
 resource "ncloud_init_script" "bastion" {
   name = "${var.name_prefix}-bastion-init"
 
-  content = <<-EOT
-#!/usr/bin/env bash
-set -euo pipefail
-exec > >(tee -a ${local.init_log}) 2>&1
-
-echo "[${var.name_prefix}] bastion init started at $(date -Is)"
-export DEBIAN_FRONTEND=noninteractive
-apt-get update
-apt-get install -y curl default-mysql-client netcat-openbsd
-echo "[${var.name_prefix}] bastion init completed at $(date -Is)"
-EOT
+  content = templatefile("${path.module}/templates/bastion-init.sh.tftpl", {
+    name_prefix        = var.name_prefix
+    init_log           = local.init_log
+    web_private_ip     = ncloud_network_interface.web.private_ip
+    backend_private_ip = ncloud_network_interface.backend.private_ip
+    db_private_ip      = ncloud_network_interface.db.private_ip
+    setup_script       = file("${path.module}/scripts/setup-internal-ssh.sh")
+  })
 }
 
 resource "ncloud_init_script" "db" {

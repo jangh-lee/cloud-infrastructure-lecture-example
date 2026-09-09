@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+exec > >(tee -a ${init_log}) 2>&1
+
+echo "[${name_prefix}] bastion init started at $(date -Is)"
+export DEBIAN_FRONTEND=noninteractive
+apt-get update
+apt-get install -y curl default-mysql-client netcat-openbsd openssh-client
+
+install -d -m 0700 /root/.ssh /root/.ssh/config.d
+cat > /root/.ssh/config.d/${name_prefix}-internal.conf <<'SSH_CONFIG'
+Host web
+    HostName ${web_private_ip}
+Host backend
+    HostName ${backend_private_ip}
+Host db
+    HostName ${db_private_ip}
+Host web backend db
+    User root
+    IdentityFile /root/.ssh/lab_internal
+    IdentitiesOnly yes
+    ForwardAgent no
+    ConnectTimeout 10
+Host *
+SSH_CONFIG
+chmod 0600 /root/.ssh/config.d/${name_prefix}-internal.conf
+
+# Keep existing SSH settings, while placing these lab aliases first.
+include_line='Include /root/.ssh/config.d/${name_prefix}-internal.conf'
+touch /root/.ssh/config
+if ! grep -qxF "$include_line" /root/.ssh/config; then
+  config_tmp=$(mktemp /root/.ssh/config.XXXXXX)
+  {
+    printf '%s\n\n' "$include_line"
+    cat /root/.ssh/config
+  } > "$config_tmp"
+  mv "$config_tmp" /root/.ssh/config
+fi
+chmod 0600 /root/.ssh/config
+
+# The private key is created interactively on bastion, never by Terraform.
+cat > /usr/local/bin/setup-internal-ssh <<'SETUP_INTERNAL_SSH'
+${setup_script}
+SETUP_INTERNAL_SSH
+chmod 0755 /usr/local/bin/setup-internal-ssh
+
+echo "Run setup-internal-ssh after logging in to bastion as root."
+echo "[${name_prefix}] bastion init completed at $(date -Is)"

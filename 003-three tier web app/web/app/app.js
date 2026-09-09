@@ -3,6 +3,14 @@ const siteTitle = config.SITE_TITLE || "DevForum";
 const pageSize = 15;
 
 const elements = {
+  noticeBanner: document.getElementById("noticeBanner"),
+  noticeTitle: document.getElementById("noticeTitle"),
+  noticeMessage: document.getElementById("noticeMessage"),
+  serviceView: document.getElementById("serviceView"),
+  serviceLabel: document.getElementById("serviceLabel"),
+  serviceTitle: document.getElementById("serviceTitle"),
+  serviceMessage: document.getElementById("serviceMessage"),
+  serviceRetry: document.getElementById("serviceRetry"),
   siteTitle: document.getElementById("siteTitle"),
   healthStatus: document.getElementById("healthStatus"),
   webInstanceInfo: document.getElementById("webInstanceInfo"),
@@ -37,10 +45,98 @@ const state = {
   searchQuery: "",
   currentPage: 1,
   selectedPostId: null,
-  isLoading: false
+  isLoading: false,
+  notice: { mode: "normal", title: "", message: "" },
+  unavailable: false,
+  postsLoaded: false
 };
 
 let toastTimer;
+let serviceCheck;
+
+async function request(url, options = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    return await fetch(url, { ...options, cache: "no-store", signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function serviceBlocked() {
+  return state.notice.mode === "maintenance" || state.unavailable;
+}
+
+function renderNotice() {
+  elements.noticeBanner.hidden = state.notice.mode !== "announce";
+  elements.noticeTitle.textContent = state.notice.title;
+  elements.noticeMessage.textContent = state.notice.message;
+  elements.serviceView.hidden = !serviceBlocked();
+  if (!serviceBlocked()) return;
+  const planned = state.notice.mode === "maintenance";
+  elements.serviceLabel.textContent = planned ? "점검 안내" : "서비스 연결 안내";
+  elements.serviceTitle.textContent = planned ? state.notice.title : "서비스에 일시적인 문제가 발생했습니다";
+  elements.serviceMessage.textContent = planned ? state.notice.message : "현재 게시판에 연결할 수 없습니다. 잠시 후 다시 확인해 주세요.\n작성 중인 내용은 이 창을 유지하면 보존됩니다.";
+  setHealthStatus("status-fail", planned ? "서비스 점검 중" : "서버 연결 안 됨");
+}
+
+async function readNotice() {
+  try {
+    const response = await request("/notice.json");
+    if (!response.ok) return;
+    const notice = await response.json();
+    if (["normal", "announce", "maintenance"].includes(notice.mode)) {
+      state.notice = { mode: notice.mode, title: String(notice.title || "서비스 점검 안내"), message: String(notice.message || "") };
+    }
+  } catch {
+    // Preserve the last known notice when a status request fails.
+  }
+}
+
+async function refreshService() {
+  if (serviceCheck) return serviceCheck;
+  serviceCheck = (async () => {
+    const wasBlocked = serviceBlocked();
+    await readNotice();
+    if (state.notice.mode !== "maintenance") {
+      try {
+        const response = await request("/api/health");
+        state.unavailable = !response.ok;
+        if (response.ok) setHealthStatus("status-ok", "서버 연결됨");
+      } catch {
+        state.unavailable = true;
+      }
+    }
+    renderNotice();
+    if (serviceBlocked()) {
+      state.postsLoaded = false;
+      renderRoute();
+    } else if (wasBlocked || !state.postsLoaded) {
+      await loadPosts();
+    }
+  })();
+  try {
+    await serviceCheck;
+  } finally {
+    serviceCheck = null;
+  }
+}
+
+function apiError(response) {
+  const error = new Error("API request failed");
+  error.unavailable = [502, 503, 504].includes(response.status);
+  return error;
+}
+
+function showConnectionFailure(error) {
+  if (error.unavailable || error.name === "AbortError" || error instanceof TypeError) {
+    state.unavailable = true;
+    state.postsLoaded = false;
+    renderNotice();
+    renderRoute();
+  }
+}
 
 elements.siteTitle.textContent = siteTitle;
 
@@ -200,6 +296,12 @@ function renderDetail(postId) {
 }
 
 function renderRoute() {
+  if (serviceBlocked()) {
+    setVisibleView(null);
+    renderNotice();
+    document.title = `${state.notice.mode === "maintenance" ? "점검 안내" : "서비스 연결 안내"} · ${siteTitle}`;
+    return;
+  }
   const route = getRoute();
   if (route.name === "detail") {
     renderDetail(route.postId);
@@ -219,18 +321,6 @@ function renderRoute() {
   document.title = `게시글 · ${siteTitle}`;
 }
 
-async function checkHealth() {
-  try {
-    const response = await fetch("/api/health");
-    if (!response.ok) {
-      throw new Error("Health check failed");
-    }
-    setHealthStatus("status-ok", "서버 연결됨");
-  } catch (error) {
-    setHealthStatus("status-fail", "서버 연결 안 됨");
-  }
-}
-
 async function checkWebInstance() {
   try {
     const response = await fetch("/web-instance", { cache: "no-store" });
@@ -248,20 +338,23 @@ async function checkWebInstance() {
 }
 
 async function loadPosts({ announce = false } = {}) {
+  if (serviceBlocked()) return;
   state.isLoading = true;
   elements.listStatus.textContent = "";
   renderRoute();
 
   try {
-    const response = await fetch("/api/posts");
+    const response = await request("/api/posts");
     if (!response.ok) {
-      throw new Error("Failed to load posts");
+      throw apiError(response);
     }
     state.posts = await response.json();
+    state.postsLoaded = true;
     if (announce) {
       showToast("게시글을 새로 불러왔습니다.");
     }
   } catch (error) {
+    showConnectionFailure(error);
     elements.listStatus.textContent = "게시글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
   } finally {
     state.isLoading = false;
@@ -271,6 +364,7 @@ async function loadPosts({ announce = false } = {}) {
 
 async function createPost(event) {
   event.preventDefault();
+  if (serviceBlocked()) return;
   const title = elements.titleInput.value.trim();
   const content = elements.contentInput.value.trim();
 
@@ -283,13 +377,13 @@ async function createPost(event) {
   elements.submitButton.textContent = "등록 중";
 
   try {
-    const response = await fetch("/api/posts", {
+    const response = await request("/api/posts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, content, authorName: "비가입 유저" })
     });
     if (!response.ok) {
-      throw new Error("Failed to create post");
+      throw apiError(response);
     }
 
     const createdPost = await response.json();
@@ -299,6 +393,7 @@ async function createPost(event) {
     showToast("게시글이 등록되었습니다.");
     navigate(`/posts/${createdPost.id}`);
   } catch (error) {
+    showConnectionFailure(error);
     elements.formStatus.textContent = "게시글을 등록하지 못했습니다. 다시 시도해 주세요.";
   } finally {
     elements.submitButton.disabled = false;
@@ -307,22 +402,24 @@ async function createPost(event) {
 }
 
 async function deleteSelectedPost() {
+  if (serviceBlocked()) return;
   if (!state.selectedPostId || !window.confirm("이 게시글을 삭제할까요?")) {
     return;
   }
 
   elements.deleteButton.disabled = true;
   try {
-    const response = await fetch(`/api/posts/${state.selectedPostId}`, {
+    const response = await request(`/api/posts/${state.selectedPostId}`, {
       method: "DELETE"
     });
     if (!response.ok) {
-      throw new Error("Failed to delete post");
+      throw apiError(response);
     }
     state.posts = state.posts.filter((post) => String(post.id) !== state.selectedPostId);
     showToast("게시글이 삭제되었습니다.");
     navigate("/");
   } catch (error) {
+    showConnectionFailure(error);
     showToast("게시글을 삭제하지 못했습니다.");
   } finally {
     elements.deleteButton.disabled = false;
@@ -368,6 +465,7 @@ elements.searchInput.addEventListener("search", () => {
   renderPostList();
 });
 elements.refreshButton.addEventListener("click", () => loadPosts({ announce: true }));
+elements.serviceRetry.addEventListener("click", refreshService);
 elements.postForm.addEventListener("submit", createPost);
 elements.deleteButton.addEventListener("click", deleteSelectedPost);
 elements.titleInput.addEventListener("input", updateCharacterCounts);
@@ -375,7 +473,8 @@ elements.contentInput.addEventListener("input", updateCharacterCounts);
 window.addEventListener("popstate", renderRoute);
 
 updateCharacterCounts();
-checkHealth();
 checkWebInstance();
 setInterval(checkWebInstance, 5000);
-loadPosts();
+setVisibleView(null);
+refreshService();
+setInterval(refreshService, 5000);

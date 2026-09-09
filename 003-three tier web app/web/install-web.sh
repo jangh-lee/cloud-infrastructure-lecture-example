@@ -98,7 +98,7 @@ EOF
     chmod 755 "${TEMP_POLICY_RC_D}"
   fi
 
-  apt-get install -y nginx curl
+  apt-get install -y nginx curl python3
 }
 
 case "${COMMAND}" in
@@ -114,6 +114,10 @@ case "${COMMAND}" in
       echo "nginx is not installed. Run: sudo ./install-web.sh install"
       exit 1
     fi
+    if ! command -v python3 >/dev/null 2>&1; then
+      apt-get update
+      apt-get install -y python3
+    fi
     ;;
   status)
     systemctl status nginx --no-pager || true
@@ -128,6 +132,18 @@ esac
 
 
 mkdir -p "${APP_DIR}" "${WEB_ROOT}"
+
+if [[ -f "${SCRIPT_DIR}/board-notice.py" ]]; then
+  install -m 0755 "${SCRIPT_DIR}/board-notice.py" /usr/local/bin/board-notice
+else
+  curl -fsSL "${RAW_BASE%/app}/board-notice.py" -o "${APP_DIR}/board-notice.py"
+  install -m 0755 "${APP_DIR}/board-notice.py" /usr/local/bin/board-notice
+fi
+install -d -m 0755 /var/lib/board-service-notice
+# Reconfiguration must preserve the current notice and maintenance state.
+if [[ ! -f /var/lib/board-service-notice/notice.json ]]; then
+  board-notice clear
+fi
 
 copy_or_fetch_file "${SCRIPT_DIR}/app/index.html" "${APP_DIR}/index.html" "index.html"
 copy_or_fetch_file "${SCRIPT_DIR}/app/styles.css" "${APP_DIR}/styles.css" "styles.css"
@@ -152,6 +168,7 @@ server {
     root ${WEB_ROOT};
     index index.html;
     add_header X-Web-Instance \$hostname always;
+    add_header Cache-Control "no-store" always;
 
     location = /healthz {
         default_type text/plain;
@@ -163,13 +180,24 @@ server {
         return 200 '{"instance":"\$hostname","privateIp":"\$server_addr","service":"board-service-web"}';
     }
 
+    location = /notice.json {
+        alias /var/lib/board-service-notice/notice.json;
+        default_type application/json;
+    }
+
     location /api/ {
+        default_type application/json;
+        if (-f /var/lib/board-service-notice/maintenance) {
+            return 503 '{"code":"MAINTENANCE","message":"Service maintenance in progress"}';
+        }
         proxy_pass ${BACKEND_UPSTREAM};
         proxy_http_version 1.1;
         proxy_set_header Host \$proxy_host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 10s;
     }
 
     location / {
@@ -198,3 +226,4 @@ echo "API upstream : ${BACKEND_UPSTREAM}"
 echo "ALB health   : ${SITE_BASE_URL%/}/healthz"
 echo "Web instance : ${SITE_BASE_URL%/}/web-instance"
 echo "Open browser : http://SERVER_PUBLIC_IP/"
+echo "Notice CLI   : sudo board-notice --help"

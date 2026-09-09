@@ -19,8 +19,15 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   waitForConnections: true,
-  connectionLimit: 10
+  connectionLimit: 10,
+  connectTimeout: 5000
 });
+
+const unavailableCodes = new Set([
+  "ECONNREFUSED", "ECONNRESET", "ETIMEDOUT", "EHOSTUNREACH", "ENETUNREACH",
+  "ENOTFOUND", "EAI_AGAIN", "PROTOCOL_CONNECTION_LOST", "PROTOCOL_SEQUENCE_TIMEOUT",
+  "ER_CON_COUNT_ERROR", "ER_SERVER_SHUTDOWN", "ER_ACCESS_DENIED_ERROR", "ER_BAD_DB_ERROR"
+]);
 
 app.use(express.json());
 app.use((req, res, next) => {
@@ -42,10 +49,11 @@ app.get("/api/instance", (req, res) => {
 
 app.get("/api/health", async (req, res) => {
   try {
-    await pool.query("SELECT 1");
+    await pool.query({ sql: "SELECT 1", timeout: 5000 });
     res.json({ status: "ok", service: "board-service-backend", instance: instanceName });
   } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
+    console.error("DB health check failed", error);
+    res.status(503).json({ status: "error", code: "DB_UNAVAILABLE", message: "Database temporarily unavailable" });
   }
 });
 
@@ -129,6 +137,9 @@ app.delete("/api/posts/:id", async (req, res, next) => {
 
 app.use((error, req, res, next) => {
   console.error(error);
+  if (unavailableCodes.has(error.code)) {
+    return res.status(503).json({ code: "DB_UNAVAILABLE", message: "Database temporarily unavailable" });
+  }
   res.status(500).json({ message: "Internal server error" });
 });
 

@@ -215,6 +215,11 @@ textarea:focus-visible {
   gap: 8px;
 }
 
+.search-form .button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .search-form input,
 .post-form input,
 .post-form textarea {
@@ -791,3 +796,26 @@ textarea:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+/* Notices are served by Web independently of the database. */
+.notice-banner {
+  margin-bottom: 28px;
+  padding: 22px 24px;
+  border: 1px solid #c7d8ef;
+  border-radius: 12px;
+  background: #f2f7ff;
+  color: #1b3555;
+}
+.notice-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #496b94;
+  font-size: 13px;
+  font-weight: 700;
+}
+.notice-banner strong { font-size: 18px; }
+.notice-banner p, .service-view > p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; }
+.notice-banner p { margin: 10px 0 0; }
+.service-view { padding: 72px 24px; text-align: center; }
+.service-view h1 { margin: 12px 0 20px; font-size: clamp(26px, 5vw, 36px); }
+.service-view > p { max-width: 640px; margin: 0 auto 28px; }
+.service-view .service-hint { margin-top: 18px; color: #737b8b; font-size: 13px; }

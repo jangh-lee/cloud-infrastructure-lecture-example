@@ -498,3 +498,43 @@ http://WEB_SERVER_PUBLIC_IP/
 ```
 
 브라우저 개발자 도구의 Network 탭에서 API 요청 주소가 Backend IP가 아니라 `http://WEB_SERVER_PUBLIC_IP/api/...`로 표시되는지 확인합니다. 303에서는 진입 주소가 Public ALB로 바뀌지만 각 Web 서버의 `BACKEND_UPSTREAM`은 같은 고정 Backend Private IP를 유지합니다.
+
+## 공지 및 점검 화면
+
+Web 서버의 `board-notice` 명령으로 공지를 관리합니다. 공지와 점검 상태는 `/var/lib/board-service-notice`에 저장되며 DB 연결 없이 Nginx가 제공합니다. 설치·재설정 시 기존 공지와 점검 상태를 유지합니다.
+
+```bash
+# Web 서버: 사전 공지 배너 (게시판 정상 이용)
+sudo board-notice announce --title '서비스 작업 안내' --message-file - <<'NOTICE'
+잠시 후 데이터베이스 이전 작업을 진행합니다.
+작업 중에는 게시글 조회·작성·삭제가 일시 중단됩니다.
+작성 중인 내용은 미리 보관해 주세요.
+NOTICE
+
+# Web 서버: 점검 화면 전환 및 공개 API 차단
+sudo board-notice maintenance --title '서비스 점검 중입니다' --message-file - <<'NOTICE'
+현재 데이터베이스 이전 작업을 진행하고 있습니다.
+데이터 확인을 마친 뒤 서비스를 다시 열겠습니다.
+이용에 불편을 드려 죄송합니다.
+NOTICE
+
+sudo board-notice status
+```
+
+공지 설정은 접속 중인 브라우저에도 최대 5초 후 반영됩니다. `announce`는 상단 배너, `maintenance`는 모든 게시판 경로의 점검 화면입니다. 점검 중 `/api/`는 HTTP 503, ALB의 `/healthz`는 HTTP 200을 반환합니다. Web이 여러 대라면 각 Web 서버에 같은 공지와 점검 상태를 적용합니다.
+
+**마이그레이션 전에는 Backend 서버에서도 자동 작성기와 API 서비스를 중지합니다.** 자동 작성기는 Web을 거치지 않고 Backend에 직접 요청하므로 Web의 점검 모드만으로는 중지되지 않습니다.
+
+```bash
+# Backend 서버
+sudo systemctl stop board-service-post-seeder board-service-backend
+```
+
+작업 완료 후 Backend를 먼저 시작하고 `http://localhost:4000/api/health`와 `/api/posts`를 확인합니다. Web 서버에서 아래 명령으로 점검을 해제하고, 필요할 때 Backend의 자동 작성기를 다시 시작합니다.
+
+```bash
+# Web 서버: 검증을 마친 뒤 점검과 공지 해제
+sudo board-notice clear
+```
+
+계획된 점검은 관리자가 해제할 때까지 유지됩니다. 점검 모드를 켜지 않은 상태에서 DB/Backend 연결 장애가 발생하면 일시적 장애 안내가 자동 표시되고, 연결이 회복되면 게시판으로 돌아갑니다. 작성 중인 본문은 같은 브라우저 창을 유지하면 보존되며, 실패한 글쓰기·삭제 요청을 자동 재전송하지 않습니다.
