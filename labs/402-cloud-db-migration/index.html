@@ -2109,7 +2109,7 @@
 <li>브라우저에서 게시판의 Web 또는 ALB 주소를 엽니다.</li>
 <li>우측 상단 <strong>관리자 로그인</strong>을 누르고 아이디와 비밀번호에 모두 <code>admin</code>을 입력한 뒤 <strong>로그인</strong>합니다.</li>
 <li><strong>공지 관리</strong> 화면에서 표시 방식을 <strong>사전 공지 · 게시판 상단 배너</strong>로 선택합니다. 이미 로그인했다면 우측 상단 <strong>공지 관리</strong>를 누릅니다.</li>
-<li>아래 제목과 본문을 각각 <strong>공지 제목</strong>, <strong>공지 내용</strong>에 복사해 넣습니다.</li>
+<li>아래 제목과 본문을 각각 <strong>공지 제목</strong>, <strong>공지 내용</strong>에 복사해 넣습니다. 점검 일시는 실제 작업 일정으로 바꿉니다.</li>
 </ol>
 <p><strong>공지 제목</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>데이터베이스 이전 작업 사전 안내
@@ -2117,11 +2117,15 @@
 <p><strong>공지 내용</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>안녕하세요. 안정적인 서비스 제공을 위해 데이터베이스 이전 작업을 진행할 예정입니다.
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>작업이 시작되면 게시글 조회·작성·삭제와 회원 가입·로그인이 일시적으로 중단됩니다.
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>작성 중인 내용은 작업 시작 전에 별도로 보관해 주세요.
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>작업 완료와 데이터 확인을 마친 뒤 서비스를 다시 열겠습니다.
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>이용에 불편을 드려 죄송합니다. 양해 부탁드립니다.
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>- 점검 일시 : 2026년 00월 00일 18:00 ~ 19:00 (1시간)
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>- 점검 내용 : DB 마이그레이션 작업
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>- 고객센터 : 02-1234-1234
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>작업이 시작되면 게시글 조회·작성·삭제와 회원 가입·로그인이 일시적으로 중단됩니다.
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>작성 중인 내용은 작업 시작 전에 별도로 보관해 주세요.
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>작업 완료와 데이터 확인을 마친 뒤 서비스를 다시 열겠습니다.
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>이용에 불편을 드려 죄송합니다. 양해 부탁드립니다.
 </code></pre></div>
 <p>입력을 마치면 <strong>공지 반영</strong>을 누릅니다. <strong>공지 반영이 완료되었습니다.</strong>라는 메시지를 확인한 뒤 관리 창을 닫고, 게시판 상단에 공지 배너가 표시되는지 확인합니다. 이 단계에서는 게시판을 계속 이용할 수 있습니다.</p>
 <h3 id="0-2">0-2. 서비스 중단 직전에 점검 모드 켜기<a class="headerlink" href="#0-2" title="Permanent link">&para;</a></h3>
@@ -2129,7 +2133,7 @@
 <ol>
 <li><code>admin</code>으로 로그인한 상태에서 우측 상단 <strong>공지 관리</strong>를 엽니다.</li>
 <li>표시 방식을 <strong>점검 시작 · 게시판 이용 중단</strong>으로 바꿉니다.</li>
-<li>아래 제목과 본문을 <strong>공지 제목</strong>, <strong>공지 내용</strong>에 넣습니다.</li>
+<li>아래 제목과 본문을 <strong>공지 제목</strong>, <strong>공지 내용</strong>에 넣습니다. 점검 일시는 사전 공지에서 안내한 일정과 맞춥니다.</li>
 </ol>
 <p><strong>공지 제목</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>데이터베이스 이전 작업 중입니다
@@ -2137,9 +2141,13 @@
 <p><strong>공지 내용</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>현재 데이터베이스 이전 작업으로 게시판 이용이 일시 중단되었습니다.
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>게시글 조회·작성·삭제와 회원 가입·로그인은 작업 완료 후 다시 이용하실 수 있습니다.
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>데이터 확인을 마치는 대로 서비스를 정상화하겠습니다.
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>잠시만 기다려 주세요. 이용에 불편을 드려 죄송합니다.
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>- 점검 일시 : 2026년 00월 00일 18:00 ~ 19:00 (1시간)
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>- 점검 내용 : DB 마이그레이션 작업
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>- 고객센터 : 02-1234-1234
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>게시글 조회·작성·삭제와 회원 가입·로그인은 작업 완료 후 다시 이용하실 수 있습니다.
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>데이터 확인을 마치는 대로 서비스를 정상화하겠습니다.
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>잠시만 기다려 주세요. 이용에 불편을 드려 죄송합니다.
 </code></pre></div>
 <p><strong>공지 반영</strong>을 누르고 점검 시작 확인 창에서 <strong>확인</strong>을 선택합니다. <strong>공지 반영이 완료되었습니다.</strong>라는 메시지를 확인한 뒤 관리 창을 닫아 실제 점검 화면이 표시되는지 확인합니다. 반영이 확인되지 않았다면 DB 작업을 시작하지 않습니다.</p>
 <p>점검 모드는 일반 공개 <code>/api/</code> 요청을 HTTP 503으로 차단하고 모든 게시판 경로에 점검 화면을 표시합니다. ALB 확인 경로 <code>/healthz</code>는 HTTP 200을 유지합니다. <code>/api/auth/</code>·<code>/api/admin/</code>는 복구용으로 Backend에 전달되므로 <strong>Backend 중지 전에는 회원 가입·관리자 쓰기도 가능합니다.</strong> <strong>Backend 내부에서 실행되는 자동 작성기는 Web을 거치지 않으므로 아래처럼 별도로 중지해야 합니다.</strong></p>
