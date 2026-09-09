@@ -665,16 +665,22 @@ MYSQL_PWD='BoardAdmin123!' mysql \
 
 Backend 서버에서 접속 정보를 설정한 뒤 Source와 Target에 같은 SQL을 직접 실행해 결과를 비교합니다.
 
+아래 설정은 Backend의 `DB_HOST`를 Target으로 바꾸기 전에 root 셸에서 실행합니다. Source 비밀번호는 Backend가 실제 사용하는 `.env`에서 읽습니다. Terraform으로 설치했다면 교안의 예시 비밀번호와 다를 수 있습니다. Target 비밀번호는 Cloud DB에서 `board_app` 계정을 만들 때 지정한 값으로 맞춥니다.
+
 ```bash
+source /opt/board-service-backend/.env
 SOURCE_DB_HOST='10.10.120.6'
+SOURCE_DB_PASSWORD="$DB_PASSWORD"
 TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com'
-DB_PASSWORD='BoardApp123!'
+TARGET_DB_PASSWORD='BoardApp123!'
 ```
+
+접속 변수는 현재 터미널에서만 유지됩니다. 새로 SSH 접속했다면 위 설정부터 다시 실행합니다. 이미 Backend를 Target으로 전환했다면 `SOURCE_DB_PASSWORD`에 기존 Source의 비밀번호를 지정합니다.
 
 Source DB 조회:
 
 ```bash
-MYSQL_PWD="$DB_PASSWORD" mysql --table \
+MYSQL_PWD="$SOURCE_DB_PASSWORD" mysql --table \
   -h "$SOURCE_DB_HOST" -P 3306 -u board_app board_service <<'SQL'
 SELECT 'SOURCE DB' AS verification_target;
 SHOW COLUMNS FROM posts;
@@ -700,7 +706,7 @@ SQL
 Target Cloud DB 조회:
 
 ```bash
-MYSQL_PWD="$DB_PASSWORD" mysql --table \
+MYSQL_PWD="$TARGET_DB_PASSWORD" mysql --table \
   -h "$TARGET_DB_HOST" -P 3306 -u board_app board_service <<'SQL'
 SELECT 'TARGET DB' AS verification_target;
 SHOW COLUMNS FROM posts;
