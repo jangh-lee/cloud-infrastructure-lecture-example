@@ -358,51 +358,8 @@ Cloud DB for MySQL은 DB 서버 OS에 접속해서 `root@localhost`로 계정을
 | Source Ubuntu DB | `dms_migration` | 위 MariaDB SQL로 생성, DMS Endpoint에서 사용 |
 | Target Cloud DB for MySQL | `board_admin` | Console Manage DB user에서 `DDL`로 생성 |
 | Target Cloud DB for MySQL | `board_app` | Console Manage DB user에서 `CRUD`로 생성 |
-| Target Cloud DB for MySQL | `dms_migration` | Console DB User 관리에서 `READ`로 생성, 이관 결과 조회용 |
 
-### 2-1. Target의 `dms_migration` 계정 생성 및 확인
-
-Target에도 `dms_migration`을 **이관 결과 조회용 계정**으로 준비합니다. Source의 동명 계정과는 별개이며 DB User는 DMS로 자동 이관되지 않습니다. DMS 작업 화면의 `DB User`는 **Source Endpoint의 계정**이고, Target은 생성한 Cloud DB 서비스를 선택합니다. 따라서 아래 Target 계정은 실습 조회용으로 추가하는 계정이며 DMS 실행의 필수 접속 계정은 아닙니다. ([공식 Migration Management](https://guide.ncloud-docs.com/docs/dms-migrationmanagement))
-
-1. 콘솔에서 **Cloud DB for MySQL > DB Server > Target 서버 선택 > DB 관리 > DB User 관리**로 이동합니다.
-2. 아래 값을 입력하고 **DB User 추가 → 저장**을 누릅니다. 이미 같은 `USER_ID`와 `HOST(IP)`가 있으면 기존 설정을 확인합니다.
-
-| 항목 | Target 설정값 |
-| --- | --- |
-| USER_ID | `dms_migration` |
-| HOST(IP) | Backend에서 접속할 대역: `10.10.110.%` |
-| DB 권한 | `READ` — 이관된 테이블 조회·건수 비교 |
-| 암호 | `MigratePass123!` |
-| 시스템 테이블 | 선택 안 함 (`N`) |
-
-3. DB Server 상태가 **운영중**으로 돌아오면 아래 접속 확인을 진행합니다.
-
-`HOST(IP)`에는 **Target에 접속하는 Backend의 IP 또는 대역**을 넣습니다. Target DB 자체의 IP를 넣는 항목이 아닙니다. ACG도 Backend → Target의 TCP `3306`을 허용해야 합니다. Source의 백업·복제 권한과 `mysql.*` 조회 권한은 1단계에서 Source 계정에 부여한 설정입니다. Target 조회용 계정은 위 `READ` 설정을 사용합니다. ([공식 DB User 관리](https://guide.ncloud-docs.com/docs/database-database-5-2#db-user-관리))
-
-**Backend 서버에서 실행합니다.** `TARGET_DB_HOST`를 실제 Target Private 도메인으로 바꾸고, 암호 요청에는 `MigratePass123!`를 입력합니다. 아직 `board_service`가 없는 단계이므로 접속할 데이터베이스는 지정하지 않습니다.
-
-```bash
-TARGET_DB_HOST="db-xxxx.vpc-cdb.ntruss.com"
-
-mysql -h "$TARGET_DB_HOST" -P 3306 -u dms_migration -p \
-  -e 'SELECT CURRENT_USER() AS login_account, @@hostname AS db_server; SHOW GRANTS;'
-```
-
-`login_account`가 `dms_migration@10.10.110.%`인지, `db_server`가 Target 서버인지 확인합니다. `SHOW GRANTS`에서는 사용자 DB에 대한 조회 권한을 확인합니다.
-
-**DMS가 세 테이블의 초기 적재를 끝낸 뒤** 같은 계정으로 건수를 확인합니다.
-
-```bash
-mysql -h "$TARGET_DB_HOST" -P 3306 -u dms_migration -p board_service <<'SQL'
-SELECT 'posts' AS table_name, COUNT(*) AS row_count FROM posts
-UNION ALL
-SELECT 'users', COUNT(*) FROM users
-UNION ALL
-SELECT 'notices', COUNT(*) FROM notices;
-SQL
-```
-
-이 결과를 Source의 건수와 비교합니다. Target 초기화와 수동 복원은 `board_admin`, Backend 애플리케이션 연결은 `board_app`을 계속 사용합니다.
+**Target에는 `dms_migration` 계정을 만들지 않습니다.** DMS는 Source Endpoint에 등록한 Source 계정으로 백업·복제를 수행하고, Target은 Cloud DB 서비스를 선택합니다. Target 초기화·검증에는 `board_admin`, Backend 연결에는 `board_app`을 사용하면 됩니다. ([공식 Migration Management](https://guide.ncloud-docs.com/docs/dms-migrationmanagement))
 
 ## 3. ACG 확인
 
