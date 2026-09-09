@@ -595,40 +595,54 @@ mysql --protocol=TCP --table \
 
 DMS 방식은 Source 쓰기를 중지한 상태에서 복제 지연 `0`과 7번 검증 결과를 확인한 뒤, **Migration Management > 해당 작업 > [Complete]**를 실행합니다. Target이 정상 운영 상태가 된 다음 Backend를 연결합니다. 절차 근거는 [공식 Migration 관리 문서](https://guide.ncloud-docs.com/docs/dms-migrationmanagement)를 참고합니다.
 
-원본 설정과 현재 실행 중인 설정을 모두 Cloud DB 접속 정보로 바꾼 뒤 서비스를 재시작합니다.
+Backend 서버에서 **설치 폴더의 원본 `.env`를 열어 `DB_HOST` 한 줄만 수정한 뒤 설치 스크립트를 다시 실행**합니다. Source와 Target의 DB 이름·포트·`board_app` 계정·비밀번호는 동일하게 맞춘 상태를 기준으로 합니다.
+
+**1. 원본 `.env` 열기**
+
+502 Terraform 기본 구성으로 설치했다면 다음 경로에서 실행합니다. `name_prefix`를 바꿨다면 경로의 `lab7`도 바꿉니다.
 
 ```bash
-TARGET_DB_HOST='db-xxxx.vpc-cdb.ntruss.com'
-SOURCE_ENV="$HOME/cloud-infrastructure-lecture-example/003-three tier web app/backend/.env"
-# 502 Terraform 기본 구성의 설치 경로
-if [ -f /opt/lab7-setup/backend/.env ]; then
-  SOURCE_ENV=/opt/lab7-setup/backend/.env
-fi
-RUNTIME_ENV='/opt/board-service-backend/.env'
-
-sudo sed -i \
-  -e "s|^DB_HOST=.*|DB_HOST=$TARGET_DB_HOST|" \
-  -e 's|^DB_PORT=.*|DB_PORT=3306|' \
-  -e 's|^DB_USER=.*|DB_USER=board_app|' \
-  -e 's|^DB_PASSWORD=.*|DB_PASSWORD=BoardApp123!|' \
-  -e 's|^DB_NAME=.*|DB_NAME=board_service|' \
-  "$SOURCE_ENV" "$RUNTIME_ENV"
-
-sudo systemctl restart board-service-backend
-sudo grep -E '^DB_(HOST|PORT|USER|NAME)=' "$RUNTIME_ENV"
+cd /opt/lab7-setup/backend
+sudo vi .env
 ```
 
-확인:
+003에서 저장소를 clone하여 직접 설치했다면 위 명령 대신 다음 경로에서 엽니다.
 
 ```bash
+cd "$HOME/cloud-infrastructure-lecture-example/003-three tier web app/backend"
+sudo vi .env
+```
+
+두 경로 중 실제 설치한 폴더 한 곳에서 진행합니다. `.env`의 `DB_HOST`를 Target Cloud DB의 **Private 도메인**으로 바꾸고 저장합니다. `db-xxxx.vpc-cdb.ntruss.com`은 실제 Target 도메인으로 바꿉니다.
+
+```env
+DB_HOST=db-xxxx.vpc-cdb.ntruss.com
+```
+
+`vi`에서는 `i`로 편집하고, 수정 후 `Esc` → `:wq` → `Enter`로 저장합니다.
+
+**2. 설치 스크립트 다시 실행**
+
+`.env`를 수정한 같은 폴더에서 실행합니다.
+
+```bash
+sudo ./install-backend.sh
+```
+
+설치 스크립트가 원본 `.env`를 `/opt/board-service-backend/.env`로 복사하고 Backend를 재시작합니다. 따라서 `/opt/board-service-backend/.env`를 별도로 편집할 필요가 없습니다. `AUTO_POST_ENABLED=true`이면 자동 작성기도 함께 시작되므로 DMS **[Complete]와 Target 정상 운영 상태를 확인한 뒤** 실행합니다.
+
+**3. 적용 확인**
+
+```bash
+sudo grep '^DB_HOST=' /opt/board-service-backend/.env
 sudo systemctl is-active board-service-backend
 curl -s http://localhost:4000/api/health
 curl -s http://localhost:4000/api/posts
 ```
 
-서비스가 `active`, Health 응답이 `"status":"ok"`, 게시글 목록이 JSON으로 출력되면 전환이 완료된 것입니다.
+`DB_HOST`가 Target Private 도메인이고, 서비스가 `active`, Health 응답이 `"status":"ok"`, 게시글 목록이 JSON으로 출력되면 전환이 완료된 것입니다. 자동 작성기를 사용하는 경우 새 글이 Target에 추가될 수 있습니다.
 
-검증 중에는 자동 작성기를 중지한 상태로 유지합니다. Web의 점검 모드에서는 공개 `/api/health`도 503을 반환하므로 위 검증은 **Backend의 localhost:4000**에서 실행합니다.
+Web의 점검 모드는 유지한 채 **Backend의 localhost:4000**에서 확인합니다. Web의 점검 모드에서는 공개 `/api/health`도 503을 반환합니다.
 
 검증을 마친 뒤 **게시판 관리자 화면에서** 점검을 해제합니다.
 
@@ -639,11 +653,7 @@ curl -s http://localhost:4000/api/posts
 
 일반 회원도 기존 비밀번호로 로그인되는지 확인합니다. 공지 변경을 포함한 Target의 쓰기는 DMS **[Complete] 이후**, Target으로 연결된 Backend에서만 수행합니다.
 
-브라우저에서 게시글 조회·작성·삭제가 정상인지 확인합니다. 자동 게시글 생성 실습을 이어갈 경우에만 **Backend 서버에서** 다시 시작합니다.
-
-```bash
-sudo systemctl start board-service-post-seeder
-```
+브라우저에서 게시글 조회·작성·삭제가 정상인지 확인합니다. 자동 작성기를 사용하도록 설정했다면 Target DB에 새 게시글이 저장되는지도 확인합니다.
 
 점검을 해제해도 Backend나 DB가 정상화되지 않았다면 자동 장애 안내가 표시됩니다. 이 경우 Backend와 DB의 연결 설정과 로그를 확인합니다.
 
