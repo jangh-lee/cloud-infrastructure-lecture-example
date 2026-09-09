@@ -524,6 +524,8 @@ sudo systemctl start board-service-post-seeder
 
 ### 관리자 계정 생성
 
+실습 관리자 로그인은 **아이디 `admin` / 비밀번호 `admin`**입니다.
+
 최신 DB 설치 스크립트는 세 테이블을 생성합니다. 기존 Source DB를 업데이트할 때는 DB 서버에서 아래 추가 SQL만 실행합니다. 기존 게시글은 유지됩니다. **DMS Target에는 미리 실행하지 않습니다.**
 
 ```bash
@@ -533,14 +535,13 @@ curl -fsSL 'https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lec
 sudo mariadb -u root -p board_service < /tmp/003-sample-members.sql
 ```
 
-Backend와 Web에도 최신 설치 스크립트의 `configure`를 적용한 뒤 **Backend 서버에서** 관리자 계정을 한 번 생성합니다.
+Backend와 Web에도 최신 설치 스크립트의 `configure`를 적용한 뒤 **Backend 서버에서** 아래 명령으로 실습 관리자 계정을 준비합니다. 기존 관리자 계정도 같은 비밀번호로 변경됩니다.
 
 ```bash
 sudo node /opt/board-service-backend/manage-admin.js admin
-sudo cat /var/lib/board-service-backend/initial-admin.txt
 ```
 
-출력된 아이디와 임의 생성 비밀번호로 로그인합니다. 계정이 이미 있으면 덮어쓰지 않습니다. 비밀번호 파일은 root만 읽을 수 있으며 Git에 올리지 않습니다. 로그인은 2시간 동안 유지되고 로그아웃하면 해당 계정의 기존 세션을 만료시킵니다. 실습의 HTTP 주소에서는 일반 쿠키를 사용하며, HTTPS를 구성했다면 Backend `.env`에 `COOKIE_SECURE=true`를 설정합니다.
+게시판의 **관리자 로그인**에서 아이디와 비밀번호 모두 `admin`을 입력합니다. 비밀번호는 DB에 해시로 저장하며, 기존 계정의 ID와 공지 이력은 유지합니다. 비밀번호가 변경되면 기존 로그인 세션은 만료됩니다. 로그인은 2시간 동안 유지되고 로그아웃하면 해당 계정의 기존 세션을 만료시킵니다. 실습의 HTTP 주소에서는 일반 쿠키를 사용하며, HTTPS를 구성했다면 Backend `.env`에 `COOKIE_SECURE=true`를 설정합니다.
 
 ### 관리자 공지 반영
 

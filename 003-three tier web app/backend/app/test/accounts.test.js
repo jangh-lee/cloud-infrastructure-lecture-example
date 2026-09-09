@@ -50,7 +50,7 @@ test('scrypt salts differ; only the correct password verifies', async () => {
 
 test('HTTP member/admin permissions, CSRF, cookie tampering and logout', async (t) => {
   const pool = memoryPool();
-  pool.users.push({ id: 1, username: 'admin', display_name: '관리자', password_hash: await hashPassword('test-admin-password'), role: 'admin', session_version: 0 });
+  pool.users.push({ id: 1, username: 'admin', display_name: '관리자', password_hash: await hashPassword('admin'), role: 'admin', session_version: 0 });
   const app = express();
   app.use(express.json());
   accounts(app, pool);
@@ -80,7 +80,7 @@ test('HTTP member/admin permissions, CSRF, cookie tampering and logout', async (
   assert.equal((await call('/api/admin/notices', { mode: 'normal' }, { cookie: member.cookie, csrfToken: member.data.csrfToken })).status, 403);
   assert.equal((await call('/api/auth/login', { ...signup, admin: true })).status, 403);
 
-  const login = await call('/api/auth/login', { username: 'admin', password: 'test-admin-password', admin: true });
+  const login = await call('/api/auth/login', { username: 'admin', password: 'admin', admin: true });
   assert.equal(login.status, 200);
   assert.match(login.headers.get('set-cookie'), /HttpOnly/);
   assert.match(login.headers.get('set-cookie'), /SameSite=Strict/);
