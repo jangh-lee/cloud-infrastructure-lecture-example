@@ -828,6 +828,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#notice-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        공지 및 점검 화면
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1819,6 +1830,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#notice-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        공지 및 점검 화면
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2285,6 +2307,34 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>브라우저 → Public ALB → Web ASG → 고정 Backend → DB
 </code></pre></div>
 <p>브라우저 진입 주소는 Web 서버 Public IP에서 Public ALB 주소로 바뀝니다. Backend와 DB의 IP는 바뀌지 않습니다.</p>
+<h2 id="notice-maintenance">공지 및 점검 화면<a class="headerlink" href="#notice-maintenance" title="Permanent link">&para;</a></h2>
+<p>Web 서버의 <code>board-notice</code> 명령으로 공지를 관리합니다. 공지와 점검 상태는 <code>/var/lib/board-service-notice</code>에 저장되며 DB 연결 없이 Nginx가 제공합니다. 설치·재설정 시 기존 공지와 점검 상태를 유지합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1"># Web 서버: 사전 공지 배너 (게시판 정상 이용)</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>sudo<span class="w"> </span>board-notice<span class="w"> </span>announce<span class="w"> </span>--title<span class="w"> </span><span class="s1">'서비스 작업 안내'</span><span class="w"> </span>--message-file<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'NOTICE'</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="s">잠시 후 데이터베이스 이전 작업을 진행합니다.</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="s">작업 중에는 게시글 조회·작성·삭제가 일시 중단됩니다.</span>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="s">작성 중인 내용은 미리 보관해 주세요.</span>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="s">NOTICE</span>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="c1"># Web 서버: 점검 화면 전환 및 공개 API 차단</span>
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>sudo<span class="w"> </span>board-notice<span class="w"> </span>maintenance<span class="w"> </span>--title<span class="w"> </span><span class="s1">'서비스 점검 중입니다'</span><span class="w"> </span>--message-file<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'NOTICE'</span>
+<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a><span class="s">현재 데이터베이스 이전 작업을 진행하고 있습니다.</span>
+<a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a><span class="s">데이터 확인을 마친 뒤 서비스를 다시 열겠습니다.</span>
+<a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a><span class="s">이용에 불편을 드려 죄송합니다.</span>
+<a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a><span class="s">NOTICE</span>
+<a id="__codelineno-22-14" name="__codelineno-22-14" href="#__codelineno-22-14"></a>
+<a id="__codelineno-22-15" name="__codelineno-22-15" href="#__codelineno-22-15"></a>sudo<span class="w"> </span>board-notice<span class="w"> </span>status
+</code></pre></div>
+<p>공지 설정은 접속 중인 브라우저에도 최대 5초 후 반영됩니다. <code>announce</code>는 상단 배너, <code>maintenance</code>는 모든 게시판 경로의 점검 화면입니다. 점검 중 <code>/api/</code>는 HTTP 503, ALB의 <code>/healthz</code>는 HTTP 200을 반환합니다. Web이 여러 대라면 각 Web 서버에 같은 공지와 점검 상태를 적용합니다.</p>
+<p><strong>마이그레이션 전에는 Backend 서버에서도 자동 작성기와 API 서비스를 중지합니다.</strong> 자동 작성기는 Web을 거치지 않고 Backend에 직접 요청하므로 Web의 점검 모드만으로는 중지되지 않습니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># Backend 서버</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>board-service-post-seeder<span class="w"> </span>board-service-backend
+</code></pre></div>
+<p>작업 완료 후 Backend를 먼저 시작하고 <code>http://localhost:4000/api/health</code>와 <code>/api/posts</code>를 확인합니다. Web 서버에서 아래 명령으로 점검을 해제하고, 필요할 때 Backend의 자동 작성기를 다시 시작합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># Web 서버: 검증을 마친 뒤 점검과 공지 해제</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>sudo<span class="w"> </span>board-notice<span class="w"> </span>clear
+</code></pre></div>
+<p>계획된 점검은 관리자가 해제할 때까지 유지됩니다. 점검 모드를 켜지 않은 상태에서 DB/Backend 연결 장애가 발생하면 일시적 장애 안내가 자동 표시되고, 연결이 회복되면 게시판으로 돌아갑니다. 작성 중인 본문은 같은 브라우저 창을 유지하면 보존되며, 실패한 글쓰기·삭제 요청을 자동 재전송하지 않습니다.</p>
 
 
 

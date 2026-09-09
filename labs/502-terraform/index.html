@@ -1522,41 +1522,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#10-ssh" class="md-nav__link">
+  <a href="#10-bastion-ssh" class="md-nav__link">
     <span class="md-ellipsis">
       
-        10. SSH 접속
+        10. Bastion에서 내부 서버로 SSH 접속
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="10. SSH 접속">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ubuntu-macos_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Ubuntu / macOS
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#windows-powershell_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Windows PowerShell
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1915,41 +1887,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#10-ssh" class="md-nav__link">
+  <a href="#10-bastion-ssh" class="md-nav__link">
     <span class="md-ellipsis">
       
-        10. SSH 접속
+        10. Bastion에서 내부 서버로 SSH 접속
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="10. SSH 접속">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ubuntu-macos_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Ubuntu / macOS
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#windows-powershell_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Windows PowerShell
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -2248,7 +2192,9 @@
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>├── init-scripts.tf
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>├── compute.tf
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>├── outputs.tf
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>└── terraform.tfvars.example
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>├── scripts/setup-internal-ssh.sh
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>├── templates/bastion-init.sh.tftpl
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>└── terraform.tfvars.example
 </code></pre></div>
 <p><a href="https://github.com/jangh-lee/cloud-infrastructure-lecture-example/tree/main/502-terraform/examples/ncloud-basic">GitHub에서 Terraform 예제 코드 전체 보기</a></p>
 <p><a href="https://registry.terraform.io/providers/NaverCloudPlatform/ncloud/latest/docs">Naver Cloud Terraform Provider 공식 문서</a></p>
@@ -2429,48 +2375,61 @@
 <p>브라우저에서는 <code>terraform output -raw board_url</code>로 출력된 주소를 엽니다. 게시글 조회, 작성, 삭제가 모두 되면 다음 경로가 검증된 것입니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>Public ALB -&gt; Web -&gt; Backend -&gt; MariaDB
 </code></pre></div>
-<h2 id="10-ssh">10. SSH 접속<a class="headerlink" href="#10-ssh" title="Permanent link">&para;</a></h2>
-<p>명령을 출력한 뒤 그대로 복사해 실행합니다.</p>
-<h3 id="ubuntu-macos_2">Ubuntu / macOS<a class="headerlink" href="#ubuntu-macos_2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>ssh_bastion_command
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>ssh_web_via_bastion_command
-<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>ssh_backend_via_bastion_command
-<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>ssh_db_via_bastion_command
+<h2 id="10-bastion-ssh">10. Bastion에서 내부 서버로 SSH 접속<a class="headerlink" href="#10-bastion-ssh" title="Permanent link">&para;</a></h2>
+<p>내 PC에서 Bastion으로 로그인한 뒤, Bastion에서 Web / Backend / DB로 이동하는 실습입니다. Bastion Init Script가 끝나면 <code>setup-internal-ssh</code>와 <code>web</code>, <code>backend</code>, <code>db</code> SSH 별칭을 사용할 수 있습니다.</p>
+<ol>
+<li>내 PC에서 비밀번호와 접속 명령을 확인합니다. 출력된 SSH 명령을 복사해 실행하고 <strong>Bastion 비밀번호</strong>를 입력합니다. Windows PowerShell에서도 같은 명령을 사용합니다.</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>terraform<span class="w"> </span>output<span class="w"> </span>admin_passwords
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>ssh_bastion_command
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>internal_ssh_setup
 </code></pre></div>
-<p><code>-J</code>는 내 PC에서 Bastion을 거쳐 Private 서버에 접속하는 SSH ProxyJump 옵션입니다.</p>
-<h3 id="windows-powershell_3">Windows PowerShell<a class="headerlink" href="#windows-powershell_3" title="Permanent link">&para;</a></h3>
-<p>Windows 10/11의 OpenSSH 클라이언트를 사용하면 별도 SSH 프로그램 없이 같은 ProxyJump 접속이 가능합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nv">$BASTION_IP</span> <span class="p">=</span> <span class="n">terraform</span> <span class="n">output</span> <span class="n">-raw</span> <span class="n">bastion_public_ip</span>
-<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="nv">$WEB_IP</span> <span class="p">=</span> <span class="n">terraform</span> <span class="n">output</span> <span class="n">-raw</span> <span class="n">web_private_ip</span>
-<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="nv">$BACKEND_IP</span> <span class="p">=</span> <span class="n">terraform</span> <span class="n">output</span> <span class="n">-raw</span> <span class="n">backend_private_ip</span>
-<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="nv">$DB_IP</span> <span class="p">=</span> <span class="n">terraform</span> <span class="n">output</span> <span class="n">-raw</span> <span class="n">db_private_ip</span>
-<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>
-<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="n">ssh</span> <span class="s2">"root@$BASTION_IP"</span>
-<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="n">ssh</span> <span class="n">-J</span> <span class="s2">"root@$BASTION_IP"</span> <span class="s2">"root@$WEB_IP"</span>
-<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="n">ssh</span> <span class="n">-J</span> <span class="s2">"root@$BASTION_IP"</span> <span class="s2">"root@$BACKEND_IP"</span>
-<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="n">ssh</span> <span class="n">-J</span> <span class="s2">"root@$BASTION_IP"</span> <span class="s2">"root@$DB_IP"</span>
+<ol>
+<li><strong>Bastion에서</strong> 최초 한 번 실행합니다.</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>setup-internal-ssh
 </code></pre></div>
-<p>처음 연결할 때 <code>Are you sure you want to continue connecting</code>이 나오면 서버 주소를 확인하고 <code>yes</code>를 입력합니다. 이후 <code>terraform output admin_passwords</code>에 표시된 해당 서버의 관리자 비밀번호를 입력합니다. Private 서버의 프롬프트가 나타나면 ProxyJump 통과입니다.</p>
+<p>내부 접속 전용 Ed25519 키를 <code>/root/.ssh/lab_internal</code>에 생성하고, <code>ssh-copy-id</code>로 공개키를 Web → Backend → DB 순서로 등록합니다. 각 서버의 SSH 호스트 키 지문을 확인하고 해당 서버의 <strong>Ncloud 관리자 비밀번호</strong>를 입력합니다. DB 서버에도 MariaDB 비밀번호가 아닌 서버 관리자 비밀번호를 입력합니다.</p>
+<ol>
+<li><strong>Bastion에서</strong> 내부 서버로 이동하고 <code>hostname</code>으로 위치를 확인합니다.</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>ssh<span class="w"> </span>web
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>hostname
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="nb">exit</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>ssh<span class="w"> </span>backend
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>hostname
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="nb">exit</span>
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>ssh<span class="w"> </span>db
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>hostname
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="nb">exit</span>
+</code></pre></div>
+<p>공개키 등록 후에는 서버 비밀번호 입력 없이 접속합니다. <code>exit</code>는 Bastion으로 돌아옵니다. 위 별칭은 Bastion의 root 계정에 설정되므로 내 PC에서 실행하지 않습니다.</p>
+<p>키는 재실행해도 유지되며, 이미 등록된 공개키는 건너뜁니다. 실패한 서버만 다시 등록하려면 <code>setup-internal-ssh web</code>처럼 실행합니다. 키에는 실습 편의를 위해 암호를 설정하지 않으며, 개인키는 Bastion 안에만 생성되어 Terraform state나 Init Script에 포함되지 않습니다. Bastion을 재생성하면 새 키의 공개키 등록이 필요합니다.</p>
+<p>이 설정은 <strong>새 서버의 최초 부팅 시</strong> 적용됩니다. 기존 Bastion에는 Terraform Init Script 수정만으로 자동 적용되지 않습니다. 기존 환경은 생성된 Bastion 초기화 스크립트의 설정을 별도로 적용하거나, 필요한 데이터를 보존한 뒤 서버 재생성 계획을 검토합니다.</p>
+<p>기존 <code>ssh_*_via_bastion_command</code> output은 내 PC에서 사용하는 비밀번호 기반 ProxyJump 명령으로 계속 제공됩니다.</p>
+<p>003의 최신 Web 설치 스크립트에는 <code>board-notice</code> 명령도 포함됩니다. Bastion에서 <code>ssh web</code>으로 이동해 <a href="../003-three-tier-web-app/#notice-maintenance">003 공지 및 점검 화면</a>을 설정할 수 있습니다. <a href="../402-cloud-db-migration/#0">402 마이그레이션 교안</a>에는 복사해서 사용하는 사전 공지와 점검 전환 명령이 있습니다.</p>
 <h2 id="11">11. 초기화 상태 확인<a class="headerlink" href="#11" title="Permanent link">&para;</a></h2>
 <p>게시판이 아직 열리지 않으면 먼저 자동 생성된 확인 명령을 봅니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>terraform<span class="w"> </span>output<span class="w"> </span>verification_commands
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>terraform<span class="w"> </span>output<span class="w"> </span>verification_commands
 </code></pre></div>
 <p>각 서버에서 공통으로 확인할 로그는 <code>/var/log/lab7-init.log</code>입니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>/var/log/lab7-init.log
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>/var/log/lab7-init.log
 </code></pre></div>
 <p>서비스별 확인:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># Web</span>
-<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>nginx<span class="w"> </span>--no-pager
-<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/healthz
-<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/health
-<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>
-<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="c1"># Backend</span>
-<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>board-service-backend<span class="w"> </span>--no-pager
-<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
-<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>
-<a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a><span class="c1"># DB</span>
-<a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>mariadb<span class="w"> </span>--no-pager
-<a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-p<span class="w"> </span>-e<span class="w"> </span><span class="s2">"SHOW DATABASES;"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># Web</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>nginx<span class="w"> </span>--no-pager
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/healthz
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1/api/health
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="c1"># Backend</span>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>board-service-backend<span class="w"> </span>--no-pager
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:4000/api/health
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a><span class="c1"># DB</span>
+<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>mariadb<span class="w"> </span>--no-pager
+<a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a>sudo<span class="w"> </span>mariadb<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-p<span class="w"> </span>-e<span class="w"> </span><span class="s2">"SHOW DATABASES;"</span>
 </code></pre></div>
 <h2 id="12">12. 문제 해결<a class="headerlink" href="#12" title="Permanent link">&para;</a></h2>
 <table>
@@ -2503,18 +2462,22 @@
 </tr>
 <tr>
 <td>SSH 실패</td>
-<td>현재 관리자 Public IP와 <code>my_public_ip/32</code>, <code>admin_passwords</code>의 서버별 비밀번호 확인</td>
+<td>현재 관리자 Public IP와 <code>my_public_ip/32</code>, <code>admin_passwords</code>의 서버별 비밀번호 확인. Bastion에서 <code>setup-internal-ssh web</code>으로 실패한 서버만 재등록</td>
+</tr>
+<tr>
+<td><code>setup-internal-ssh: command not found</code></td>
+<td>Bastion Init Script 완료 여부와 <code>/var/log/lab7-init.log</code> 확인. 기존 서버는 Init Script 수정만으로 갱신되지 않음</td>
 </tr>
 </tbody>
 </table>
 <p>Init Script는 서버가 처음 만들어질 때 한 번만 실행됩니다. 코드를 수정한 뒤 다시 설치하려면 전체 환경을 재생성하는 방식이 가장 단순합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>terraform<span class="w"> </span>destroy<span class="w"> </span>-auto-approve
-<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>terraform<span class="w"> </span>apply<span class="w"> </span>-auto-approve
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>terraform<span class="w"> </span>destroy<span class="w"> </span>-auto-approve
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>terraform<span class="w"> </span>apply<span class="w"> </span>-auto-approve
 </code></pre></div>
 <h2 id="13">13. 삭제<a class="headerlink" href="#13" title="Permanent link">&para;</a></h2>
 <p>NAT Gateway, Public IP, ALB와 서버는 비용이 발생할 수 있으므로 실습이 끝나면 삭제합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="go">terraform destroy</span>
-<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="go">terraform state list</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="go">terraform destroy</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="go">terraform state list</span>
 </code></pre></div>
 <p><code>terraform state list</code>에 아무것도 나오지 않으면 Terraform이 관리하던 실습 리소스가 삭제된 것입니다.</p>
 <h2 id="_2">공식 문서<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>

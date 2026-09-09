@@ -2,90 +2,90 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/SUMMARY/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/001-api-server/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/002-init-script/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/003-three-tier-web-app/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/004-game-server/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/005-ai-rag-studio/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/006-linux-commands/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/007-file-server/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/101-acg-slack-alert/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/201-static-website/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/301-load-balancer/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/302-auto-scaling/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/303-auto-scaling/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/401-cloud-db-mysql/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/402-cloud-db-migration/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/403-database-backup-recovery/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/501-cloud-cli/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/502-terraform/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/503-cost-slack-alert/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/setup/gitbook/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
     <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/setup/github-pages/</loc>
-         <lastmod>2026-09-07</lastmod>
+         <lastmod>2026-09-09</lastmod>
     </url>
 </urlset>
