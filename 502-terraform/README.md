@@ -121,7 +121,7 @@ server_image_number = "104630229"
 server_spec_code     = "s2-g3a"
 
 db_root_password  = "ChangeRootPass123!"
-board_db_password = "ChangeBoardPass123!"
+board_db_password = "BoardApp123!"
 ```
 
 DB 비밀번호와 Login Key는 Terraform state에 저장됩니다. `terraform.tfstate`, `terraform.tfvars`, `lab7-key.pem`을 외부에 공유하지 않습니다.
