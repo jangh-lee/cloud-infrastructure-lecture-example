@@ -1390,10 +1390,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#9-cloud-db-pitr" class="md-nav__link">
+  <a href="#9-cloud-db-failover" class="md-nav__link">
     <span class="md-ellipsis">
       
-        9. 다음 실습: Cloud DB 특정 시점 복구(PITR)
+        9. 다음 실습: Cloud DB Failover 측정
       
     </span>
   </a>
@@ -1434,7 +1434,7 @@
   <span class="md-ellipsis">
     
   
-    403 Cloud DB 특정 시점 복구(PITR)
+    403 Cloud DB Failover 측정
   
 
     
@@ -1876,10 +1876,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#9-cloud-db-pitr" class="md-nav__link">
+  <a href="#9-cloud-db-failover" class="md-nav__link">
     <span class="md-ellipsis">
       
-        9. 다음 실습: Cloud DB 특정 시점 복구(PITR)
+        9. 다음 실습: Cloud DB Failover 측정
       
     </span>
   </a>
@@ -1933,7 +1933,7 @@
 <h1 id="402-cloud-db-migration">402 Cloud DB Migration<a class="headerlink" href="#402-cloud-db-migration" title="Permanent link">&para;</a></h1>
 <h2 id="_1">목표<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <p>003번 게시판 DB를 Ubuntu 서버의 MariaDB/MySQL에서 Naver Cloud <code>Cloud DB for MySQL</code>로 마이그레이션합니다.</p>
-<p><strong>401 생성·연결 → 402 마이그레이션 → 403 특정 시점 복구(PITR)</strong> 순서로 진행합니다. 이관이 끝나면 같은 Cloud DB의 <code>board_service</code>로 403 복구 실습을 진행합니다.</p>
+<p><strong>401 생성·연결 → 402 마이그레이션 → 403 Failover 측정</strong> 순서로 진행합니다. 이관이 끝나면 같은 Cloud DB의 <code>board_service</code>로 403 복구 실습을 진행합니다.</p>
 <div class="admonition warning">
 <p class="admonition-title">401 Cloud DB 재사용</p>
 <p>이 실습은 추가 Cloud DB를 만들지 않고 401에서 생성한 Cloud DB를 Target으로 재사용합니다. DMS 시작 전 Backend와 자동 게시글 서비스를 중지하고 Target의 <code>board_service</code>를 삭제합니다. 401에서 Target에 작성한 데이터가 필요하면 삭제 전에 내보내거나 백업을 확보합니다. 마이그레이션할 003 Source DB의 데이터는 그대로 유지됩니다.</p>
@@ -2784,12 +2784,12 @@
 <p>일반 회원도 기존 비밀번호로 로그인되는지 확인합니다. 공지 변경을 포함한 Target의 쓰기는 DMS <strong>[Complete] 이후</strong>, Target으로 연결된 Backend에서만 수행합니다.</p>
 <p>브라우저에서 게시글 조회·작성·삭제가 정상인지 확인합니다. 자동 작성기를 사용하도록 설정했다면 Target DB에 새 게시글이 저장되는지도 확인합니다.</p>
 <p>점검을 해제해도 Backend나 DB가 정상화되지 않았다면 자동 장애 안내가 표시됩니다. 이 경우 Backend와 DB의 연결 설정과 로그를 확인합니다.</p>
-<h2 id="9-cloud-db-pitr">9. 다음 실습: Cloud DB 특정 시점 복구(PITR)<a class="headerlink" href="#9-cloud-db-pitr" title="Permanent link">&para;</a></h2>
-<p><a href="../403-database-backup-recovery/">403 Cloud DB 특정 시점 복구(PITR)</a>에서 <strong>지금 이관한 Cloud DB</strong>를 그대로 사용합니다. 게시판에 실습용 글 3개를 추가하고 삭제한 뒤, 삭제 전 시점으로 새 Cloud DB를 복구합니다. 데이터를 검증하고 Backend의 <code>.env</code>에서 <code>DB_HOST</code>를 바꿔 설치 스크립트를 다시 실행합니다.</p>
+<h2 id="9-cloud-db-failover">9. 다음 실습: Cloud DB Failover 측정<a class="headerlink" href="#9-cloud-db-failover" title="Permanent link">&para;</a></h2>
+<p><a href="../403-database-backup-recovery/">403 Cloud DB Failover 측정</a>에서 <strong>지금 이관한 Cloud DB</strong>를 그대로 사용합니다. Backend에서 측정 스크립트를 실행하고 콘솔의 Master DB Failover를 진행합니다. DB·Backend의 복구 시간과 성공 응답 데이터의 보존 여부를 화면에서 확인합니다.</p>
 <ul>
 <li>Cloud DB·Backend를 유지하고, Source DB는 이관 검증과 필요한 백업 확보 후 정리합니다.</li>
 <li>DMS 방식은 [Complete]와 Target 정상 운영 상태를 확인한 뒤 403으로 이동합니다.</li>
-<li>403에서는 <strong>HA, 완료된 백업, 실제 복구 가능한 시간 범위</strong>를 먼저 확인합니다. 단일 서버라면 HA로 전환한 뒤 진행합니다.</li>
+<li>403에서는 <strong>HA와 정상 연결</strong>을 먼저 확인합니다. 단일 서버라면 HA로 전환하고, Backend·자동 작성기는 계속 실행합니다.</li>
 </ul>
 <h2 id="_4">참고<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <ul>
