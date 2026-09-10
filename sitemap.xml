@@ -37,10 +37,6 @@
          <lastmod>2026-09-10</lastmod>
     </url>
     <url>
-         <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/101-acg-slack-alert/</loc>
-         <lastmod>2026-09-10</lastmod>
-    </url>
-    <url>
          <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/201-static-website/</loc>
          <lastmod>2026-09-10</lastmod>
     </url>
@@ -77,7 +73,11 @@
          <lastmod>2026-09-10</lastmod>
     </url>
     <url>
-         <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/503-cost-slack-alert/</loc>
+         <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/601-acg-slack-alert/</loc>
+         <lastmod>2026-09-10</lastmod>
+    </url>
+    <url>
+         <loc>https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/602-cost-slack-alert/</loc>
          <lastmod>2026-09-10</lastmod>
     </url>
     <url>
