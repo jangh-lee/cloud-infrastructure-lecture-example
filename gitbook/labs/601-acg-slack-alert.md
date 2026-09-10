@@ -1,4 +1,4 @@
-# 101 ACG Slack Alert
+# 601 ACG Slack Alert
 
 ## 목표
 
@@ -18,13 +18,13 @@ Cloud Functions Trigger
 업로드용 zip 파일:
 
 ```text
-101-acg slack alert/dist/ncp-acg-alert.zip
+601-acg slack alert/dist/ncp-acg-alert.zip
 ```
 
 다시 만들기:
 
 ```bash
-cd "101-acg slack alert"
+cd "601-acg slack alert"
 ./scripts/build-zip.sh
 ```
 
@@ -86,4 +86,4 @@ ACG 변경 내용
 
 ## 참고
 
-상세 자료는 저장소의 `101-acg slack alert/README.md`를 확인합니다.
+상세 자료는 저장소의 `601-acg slack alert/README.md`를 확인합니다.

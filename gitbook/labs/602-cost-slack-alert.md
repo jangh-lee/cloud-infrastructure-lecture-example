@@ -1,4 +1,4 @@
-# 503 Cost Slack Alert
+# 602 Cost Slack Alert
 
 ## 목표
 
@@ -29,13 +29,13 @@ Webhook URL과 Secret Key는 Git에 올리지 않습니다.
 업로드용 zip 파일:
 
 ```text
-503-cost slack alert/dist/ncp-billing.zip
+602-cost slack alert/dist/ncp-billing.zip
 ```
 
 다시 만들기:
 
 ```bash
-cd "503-cost slack alert"
+cd "602-cost slack alert"
 ./scripts/build-zip.sh
 ```
 
@@ -152,13 +152,13 @@ config = Config(
 전체 예제:
 
 ```text
-503-cost slack alert/examples/object-storage-checksum.py
+602-cost slack alert/examples/object-storage-checksum.py
 ```
 
 실행:
 
 ```bash
-cd "503-cost slack alert"
+cd "602-cost slack alert"
 
 python3 -m venv .venv
 source .venv/bin/activate
@@ -174,4 +174,4 @@ python examples/object-storage-checksum.py
 
 ## 참고
 
-- 상세 자료는 저장소의 `503-cost slack alert/README.md`를 확인합니다.
+- 상세 자료는 저장소의 `602-cost slack alert/README.md`를 확인합니다.

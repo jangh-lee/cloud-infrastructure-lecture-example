@@ -1,4 +1,4 @@
-# 503 Cost Slack Alert
+# 602 Cost Slack Alert
 
 Naver Cloud Cost and Usage API로 이번 달 사용 요금을 조회하고, Cloud Functions에서 Slack Incoming Webhook으로 알림을 보내는 실습입니다.
 
@@ -58,13 +58,13 @@ Webhook URL은 비밀번호처럼 취급합니다. Git에 올리지 않습니다
 Cloud Functions 업로드용 소스:
 
 ```text
-503-cost slack alert/function/main.py
+602-cost slack alert/function/main.py
 ```
 
 업로드용 zip 파일:
 
 ```text
-503-cost slack alert/dist/ncp-billing.zip
+602-cost slack alert/dist/ncp-billing.zip
 ```
 
 zip 파일에는 `main.py`, `__main__.py`, `boto3/botocore` 의존성이 함께 들어갑니다. `main.py`가 실제 함수 본체이고, `__main__.py`는 Cloud Functions 런타임 호환을 위한 wrapper입니다.
@@ -74,7 +74,7 @@ zip 파일에는 `main.py`, `__main__.py`, `boto3/botocore` 의존성이 함께 
 로컬에서 zip을 다시 만들려면:
 
 ```bash
-cd "503-cost slack alert"
+cd "602-cost slack alert"
 ./scripts/build-zip.sh
 ```
 
@@ -299,13 +299,13 @@ billing-reports/202608/ncp-billing-20260828.json
 예제 파일:
 
 ```text
-503-cost slack alert/examples/object-storage-checksum.py
+602-cost slack alert/examples/object-storage-checksum.py
 ```
 
 실행 예시:
 
 ```bash
-cd "503-cost slack alert"
+cd "602-cost slack alert"
 
 python3 -m venv .venv
 source .venv/bin/activate

@@ -15,7 +15,6 @@ Naver Cloud 기반 클라우드 인프라 실습 교안입니다.
 | 서버 | 005 | CLOVA Studio AI RAG 앱 | `005-ai rag studio` |
 | 서버 | 006 | Linux 기본 명령어 | `006-linux commands` |
 | 서버 | 007 | FTP/FTPS 파일 서버와 FileZilla | `007-file server` |
-| 네트워크 | 101 | ACG 변경 Slack 알림 | `101-acg slack alert` |
 | 스토리지 | 201 | Object Storage 정적 웹사이트 | `201-static website` |
 | Load Balancer 및 Auto Scaling | 301 | Load Balancer 분산 실습 | `301-load balancer` |
 | Load Balancer 및 Auto Scaling | 302 | 301 Target 서버 이미지 기반 Auto Scaling (1) | `302-auto scaling` |
@@ -25,7 +24,8 @@ Naver Cloud 기반 클라우드 인프라 실습 교안입니다.
 | 데이터베이스 | 403 | Cloud DB Failover 시간·데이터 유실 측정 | `403-database backup recovery` |
 | CLI 및 IaC | 501 | Ncloud CLI로 서버 생성 | `501-cloud cli` |
 | CLI 및 IaC | 502 | Terraform 003 게시판 빠른 환경 구성 | `502-terraform` |
-| CLI 및 IaC | 503 | 비용 조회 Slack 자동화 | `503-cost slack alert` |
+| Function Alert | 601 | ACG 변경 Slack 알림 | `601-acg slack alert` |
+| Function Alert | 602 | 비용 조회 Slack 자동화 | `602-cost slack alert` |
 
 ## 웹 교안 열람
 

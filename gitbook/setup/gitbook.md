@@ -13,7 +13,6 @@ cloud-infrastructure-lecture-example
 ├── 001-api server
 ├── 006-linux commands
 ├── 007-file server
-├── 101-acg slack alert
 ├── 201-static website
 ├── 301-load balancer
 ├── 302-auto scaling
@@ -23,7 +22,8 @@ cloud-infrastructure-lecture-example
 ├── 403-database backup recovery
 ├── 501-cloud cli
 ├── 502-terraform
-├── 503-cost slack alert
+├── 601-acg slack alert
+├── 602-cost slack alert
 └── gitbook
     ├── README.md
     ├── SUMMARY.md

@@ -22,19 +22,13 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 | [`006-linux commands`](./006-linux%20commands/) | 클라우드 엔지니어가 Ubuntu 서버에서 자주 사용하는 리눅스 기본 명령어를 점검 순서대로 익히는 예제입니다. |
 | [`007-file server`](./007-file%20server/) | Ubuntu `vsftpd`와 Explicit FTPS를 구성하고 Windows·macOS FileZilla로 파일을 전송하는 예제입니다. |
 
-### 2. 네트워크 실습
-
-| Folder | Topic |
-| --- | --- |
-| [`101-acg slack alert`](./101-acg%20slack%20alert/) | Cloud Activity Tracer로 ACG 규칙 변경을 감지하고 Slack으로 보안 알림을 보내는 예제입니다. |
-
-### 3. 스토리지 실습
+### 2. 스토리지 실습
 
 | Folder | Topic |
 | --- | --- |
 | [`201-static website`](./201-static%20website/) | Object Storage에서 정적 웹사이트를 퍼블리싱하는 예제입니다. |
 
-### 4. Load Balancer 및 Auto Scaling 실습
+### 3. Load Balancer 및 Auto Scaling 실습
 
 | Folder | Topic |
 | --- | --- |
@@ -42,7 +36,7 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 | [`302-auto scaling`](./302-auto%20scaling/) | 301번 Target 서버로 이미지를 만들고 기존 Load Balancer와 Target Group을 사용해 기본 Auto Scaling을 확인합니다. |
 | [`303-auto scaling`](./303-auto%20scaling/) | 003번 게시판 Web 이미지를 사용해 Public ALB 뒤에서 Web Auto Scaling과 데이터 유지를 확인합니다. |
 
-### 5. 데이터베이스 실습
+### 4. 데이터베이스 실습
 
 | Folder | Topic |
 | --- | --- |
@@ -50,10 +44,16 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 | [`402-cloud db migration`](./402-cloud%20db%20migration/) | 기존 게시판 DB를 Cloud DB for MySQL로 마이그레이션하고 정합성과 Backend 연결을 검증합니다. |
 | [`403-database backup recovery`](./403-database%20backup%20recovery/) | Backend에서 Cloud DB Failover의 복구 시간과 성공 응답 데이터의 유실 여부를 측정합니다. |
 
-### 6. CLI 및 IaC 실습
+### 5. CLI 및 IaC 실습
 
 | Folder | Topic |
 | --- | --- |
 | [`501-cloud cli`](./501-cloud%20cli/) | Ncloud CLI를 설치하고 인증한 뒤 VPC 리소스를 조회하고 서버를 생성하는 예제입니다. |
 | [`502-terraform`](./502-terraform/) | Terraform으로 `lab7-vpc`, Subnet, NAT Gateway, ACG, Bastion, Public ALB와 003 게시판 3-tier 서버를 한 번에 생성하는 예제입니다. |
-| [`503-cost slack alert`](./503-cost%20slack%20alert/) | Cloud Functions에서 Naver Cloud 비용을 조회하고 Slack으로 알림을 보내는 자동화 예제입니다. |
+
+### 6. Function Alert
+
+| Folder | Topic |
+| --- | --- |
+| [`601-acg slack alert`](./601-acg%20slack%20alert/) | Cloud Activity Tracer로 ACG 규칙 변경을 감지하고 Slack으로 보안 알림을 보내는 예제입니다. |
+| [`602-cost slack alert`](./602-cost%20slack%20alert/) | Cloud Functions에서 Naver Cloud 비용을 조회하고 Slack으로 알림을 보내는 자동화 예제입니다. |

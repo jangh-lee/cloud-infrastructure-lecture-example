@@ -9,8 +9,6 @@
   * [005 AI RAG Studio](<005-ai rag studio/README.md>)
   * [006 Linux Commands](<006-linux commands/README.md>)
   * [007 FTP/FTPS 파일 서버](<007-file server/README.md>)
-* 네트워크 실습
-  * [101 ACG Slack Alert](<101-acg slack alert/README.md>)
 * 스토리지 실습
   * [201 Static Website](<201-static website/README.md>)
 * Load Balancer 및 Auto Scaling 실습
@@ -24,5 +22,7 @@
 * CLI 및 IaC 실습
   * [501 Cloud CLI](<501-cloud cli/README.md>)
   * [502 Terraform](502-terraform/README.md)
-  * [503 Cost Slack Alert](<503-cost slack alert/README.md>)
+* Function Alert
+  * [601 ACG Slack Alert](<601-acg slack alert/README.md>)
+  * [602 Cost Slack Alert](<602-cost slack alert/README.md>)
 * [Web Lecture Notes](gitbook/README.md)

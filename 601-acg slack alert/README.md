@@ -1,4 +1,4 @@
-# 101 ACG Slack Alert
+# 601 ACG Slack Alert
 
 Naver Cloud Cloud Activity Tracer(CAT)에서 VPC ACG 규칙 변경 이벤트를 조회하고, 변경 내용을 Slack으로 알림 보내는 Cloud Functions 실습입니다.
 
@@ -29,19 +29,19 @@ Cloud Functions Trigger
 Cloud Functions 업로드용 소스:
 
 ```text
-101-acg slack alert/function/main.py
+601-acg slack alert/function/main.py
 ```
 
 업로드용 zip 파일:
 
 ```text
-101-acg slack alert/dist/ncp-acg-alert.zip
+601-acg slack alert/dist/ncp-acg-alert.zip
 ```
 
 ## 4. zip 파일 만들기
 
 ```bash
-cd "101-acg slack alert"
+cd "601-acg slack alert"
 ./scripts/build-zip.sh
 ```
 
