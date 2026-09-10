@@ -12,4 +12,4 @@ server_image_number = "104630229"
 server_spec_code    = "s2-g3a"
 
 db_root_password  = "ChangeRootPass123!"
-board_db_password = "ChangeBoardPass123!"
+board_db_password = "BoardApp123!"
