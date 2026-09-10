@@ -1,235 +1,162 @@
-# 403 Cloud DB 특정 시점 복구(PITR)
+# 403 Cloud DB Failover 측정
 
-402에서 이관한 Cloud DB의 게시판에 실습용 글 3개를 추가합니다. 정상 시각을 기록한 뒤 그 글만 삭제하고, **삭제 전 시각으로 새 DB를 복구**합니다. 데이터를 대조한 뒤 Backend를 복구한 DB로 전환합니다.
+**Backend에서 스크립트 하나를 실행하고, 콘솔에서 Failover를 누른 뒤 결과를 읽는 실습**입니다. 복잡한 SQL 입력이나 별도 테이블 생성 없이 기존 게시판에 측정용 글을 등록합니다.
+
+확인할 것은 두 가지입니다.
+
+- **얼마나 빨리 다시 사용할 수 있는가:** DB 읽기·쓰기와 Backend 조회가 중단됐다가 복구되는 시간
+- **저장됐다고 응답한 글이 남아 있는가:** 전환 후 같은 글의 ID와 본문을 대조해 유실·불일치 확인
+
+## 1. 먼저 알아둘 것
+
+**RTO는 복구 시간 목표**입니다. 이번 실습에서는 목표를 `180초`로 정하고 실제 관측한 시간이 그 안에 들어오는지 확인합니다. 180초는 실습 예시이며 Naver Cloud의 보장 시간이 아닙니다.
+
+네이버 클라우드의 **DB 관리 > Master DB Failover**로 수동 전환을 시험합니다. 일반적인 **재시작** 버튼으로는 Failover가 수행되지 않습니다. 실제 장애를 자동으로 감지하는 시간까지 측정한 것으로 해석하지 않습니다. [Naver Cloud 공식 Failover 안내](https://guide.ncloud-docs.com/docs/database-database-5-2)
+
+| 준비 항목 | 확인 |
+| --- | --- |
+| Cloud DB | 402에서 연결한 DB, Master와 Standby Master가 모두 정상인 HA 구성 |
+| DMS | 사용했다면 **Complete**로 종료된 상태 |
+| Backend | 게시판 조회가 정상이고 기존 `.env`로 Cloud DB에 연결 중 |
+| DB 주소 | `.env`의 `DB_HOST`에 Cloud DB 서비스의 **Private 도메인** 사용 |
+
+**Backend와 자동 작성기를 계속 켜 둡니다.** Failover 중에는 `DB_HOST`를 바꾸거나 Backend를 재시작하지 않습니다. 같은 서비스 도메인으로 연결이 다시 살아나는지 보는 실습입니다.
+
+공지하려면 관리자 로그인 후 **사전 공지 · 게시글 최상단 고정**으로 테스트 일정과 일시적인 접속 오류 가능성을 안내합니다.
+
+## 2. Backend에서 실행
+
+최신 003 설치 스크립트는 측정 파일도 함께 설치합니다. Backend 서버에서 다음 두 줄을 실행합니다.
+
+```bash
+cd /opt/board-service-backend
+sudo node failover-test.js
+```
+
+**이미 설치한 서버에 파일이 없다면** 다음 명령으로 측정 파일만 추가한 뒤 실행합니다. Backend 재설치는 필요하지 않습니다.
+
+```bash
+sudo curl -fsSL \
+  'https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/003-three%20tier%20web%20app/backend/app/failover-test.js' \
+  -o /opt/board-service-backend/failover-test.js
+cd /opt/board-service-backend
+sudo node failover-test.js
+```
+
+스크립트가 같은 폴더의 `.env`를 읽으므로 비밀번호를 다시 입력하지 않습니다. 비밀번호는 출력이나 측정 결과 파일에 저장하지 않습니다.
+
+## 3. 정상 출력 확인 후 Failover
+
+아래는 **출력 형태를 보여 주기 위한 예시**입니다. 서버 이름·건수·시간은 실제 환경에 따라 다릅니다.
 
 ```text
-정상 데이터 준비 → 복구 시각 확보 → 실습 글 삭제
-                               ↓
-                  지정 시점으로 새 Cloud DB 복구
-                               ↓
-                  데이터 검증 → DB_HOST 변경 → 게시판 재개
+대상 DB: db-xxxx.vpc-cdb.ntruss.com / board_service
+목표: 180초 / 시도 간격: 약 1초 / 요청 제한: 5초
+
+18:00:01 | DB 정상 | API 정상 | 저장 성공 1건 | Master mysql-001
+18:00:03 | DB 정상 | API 정상 | 저장 성공 3건 | Master mysql-001
+[준비 완료] 콘솔 Failover 확인 창을 열고, 여기서 Enter를 누른 다음 콘솔 [예]를 누르세요.
 ```
 
-| 구분 | 이번 실습에서 사용할 대상 |
-| --- | --- |
-| 작업 서버 | 402를 마친 Backend 서버 |
-| 원본 DB | 402의 Target이었던 Cloud DB `board-service` |
-| 데이터 | `board_service`의 `posts`, `users`, `notices` |
-| 삭제 대상 | 작성자가 `403-pitr`인 이번 실습용 글 3개 |
-| 복구 결과 | 별도 Cloud DB 서비스 `board-pitr` |
+1. 정상 출력이 10초 이상 이어지는지 확인합니다.
+2. Naver Cloud 콘솔에서 **Cloud DB for MySQL > DB Server > 현재 Master > DB 관리 > Master DB Failover**를 엽니다.
+3. Backend 터미널에서 **Enter**를 누릅니다.
+4. 바로 콘솔 확인 창의 **예**를 누릅니다.
+5. 터미널 출력을 보면서 기존 Standby가 새 Master가 되는지 콘솔에서도 확인합니다.
 
-**모든 명령은 Backend의 Bash 프롬프트(`root@lab7-backend:~#`)에서 실행합니다.** SQL은 파일로 받아 `mysql`에 전달합니다. 비밀번호 입력 요청에는 해당 DB의 `board_app` 비밀번호를 입력합니다.
+스크립트가 전환을 대신 실행하지는 않습니다. Enter는 측정 시작 표시이고, 콘솔의 **예**가 실제 전환 요청입니다.
 
-## 1. PITR 준비 상태 확인
-
-네이버 클라우드 콘솔의 **VPC > Cloud DB for MySQL**에서 원본 `board-service`를 확인합니다.
-
-- 402의 DMS 작업이 **[Complete]**로 종료됐고 DB가 `운영중`이어야 합니다.
-- Master와 Standby Master로 구성된 **고가용성(HA)**이어야 합니다. Stand Alone이면 **DB 관리 > 고가용성 설정 변경**에서 HA를 켜고 구성이 끝날 때까지 기다립니다.
-- **Backup > 해당 서비스 상세내역**에 완료된 백업이 있어야 합니다.
-- **시점 복원** 창에서 현재 **DB 복원 가능한 시간**을 확인한 뒤 창을 닫습니다.
-
-PITR은 복구 가능한 범위 안에서 **분 단위**로 시각을 지정합니다. 백업 보관일을 7일로 설정했다고 해서 모든 과거 7일이 복구 가능한 것은 아닙니다. 실습할 때 표시되는 시간 범위를 기준으로 진행합니다. [공식 시점 복원 안내](https://guide.ncloud-docs.com/docs/database-database-5-4)
-
-## 2. 점검 안내와 쓰기 중지
-
-게시판 우측 상단 **관리자 로그인 → 공지 관리**에서 아래 내용을 등록하고 표시 방식을 **점검 시작 · 게시판 이용 중단**으로 선택합니다. 공지 반영 완료 메시지와 점검 화면을 확인합니다.
+## 4. 장애와 복구를 화면에서 관찰
 
 ```text
-제목: 데이터 복구 실습에 따른 서비스 점검 안내
-
-안정적인 서비스 운영을 위한 데이터 복구 실습을 진행합니다.
-점검 중에는 게시글 조회·작성과 회원 로그인이 일시 중단됩니다.
-
-- 점검 일시 : 2026년 00월 00일 18:00 ~ 19:00 (1시간)
-- 점검 내용 : Cloud DB 특정 시점 복구(PITR) 실습
-- 고객센터 : 02-1234-1234
+[18:00:15 시작 표시] 지금 콘솔의 Master DB Failover [예]를 누르세요.
+[18:00:20 장애] DB 읽기·쓰기 실패 TIMEOUT
+[18:00:20 장애] Backend 조회 실패
+18:00:21 | DB 실패 | API 실패 | 저장 성공 15건 | Master ?
+...
+[18:01:02 정상] DB 읽기·쓰기 성공
+[18:01:04 정상] Backend 조회 성공
+18:01:05 | DB 정상 | API 정상 | 저장 성공 18건 | Master mysql-002
 ```
 
-날짜와 시간은 실제 일정으로 수정합니다. 공지가 반영된 다음 Backend에서 두 서비스를 중지합니다.
-
-```bash
-sudo systemctl stop board-service-post-seeder || true
-sudo systemctl stop board-service-backend
-sudo systemctl is-active board-service-backend board-service-post-seeder
-```
-
-둘 다 `inactive`인지 확인합니다. 기준값을 기록한 이후에는 복구 DB 검증이 끝날 때까지 서비스를 다시 시작하거나 다른 터미널에서 게시판 데이터를 수정하지 않습니다.
-
-## 3. 실습 SQL 준비와 글 3개 등록
-
-현재 Backend 설정에서 원본 DB 주소를 가져옵니다. 이후 명령도 같은 터미널에서 실행합니다.
-
-```bash
-source /opt/board-service-backend/.env
-ORIGINAL_DB_HOST="$DB_HOST"
-printf '원본 Cloud DB: %s\n' "$ORIGINAL_DB_HOST"
-mysql --version
-```
-
-출력된 주소가 **402에서 연결한 Cloud DB의 Private 도메인**인지 확인합니다. `mysql` 명령이 없다면 `sudo apt-get update && sudo apt-get install -y mysql-client`로 클라이언트를 설치합니다.
-
-실습용 SQL 파일 3개를 받습니다.
-
-```bash
-mkdir -p /tmp/403-pitr
-SQL_BASE='https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/403-database%20backup%20recovery/sql'
-for name in pitr-prepare pitr-verify pitr-delete; do
-  if ! curl -fsSL "$SQL_BASE/$name.sql" -o "/tmp/403-pitr/$name.sql.download"; then
-    printf '다운로드 실패: %s.sql — 다시 실행한 뒤 다음 단계로 진행하세요.\n' "$name"
-    break
-  fi
-  mv "/tmp/403-pitr/$name.sql.download" "/tmp/403-pitr/$name.sql"
-  printf '준비 완료: %s.sql\n' "$name"
-done
-```
-
-3개 모두 `준비 완료`가 출력됐으면 원본 DB에 실습용 글을 추가합니다. 같은 실습 글이 이미 있으면 중복 추가하지 않습니다.
-
-```bash
-mysql --protocol=TCP --default-character-set=utf8mb4 --table \
-  -h "${ORIGINAL_DB_HOST:?3단계에서 원본 DB 주소를 먼저 설정하세요}" \
-  -P 3306 -u board_app -p board_service \
-  < /tmp/403-pitr/pitr-prepare.sql
-```
-
-`[403 PITR] 복구 실습 1`, `2`, `3`이 조회되는지 확인합니다. 이어서 삭제 전 기준값을 파일에 저장합니다.
-
-```bash
-set -o pipefail
-mysql --protocol=TCP --default-character-set=utf8mb4 --table \
-  -h "${ORIGINAL_DB_HOST:?원본 DB 주소를 설정하세요}" \
-  -P 3306 -u board_app -p board_service \
-  < /tmp/403-pitr/pitr-verify.sql | tee /tmp/403-pitr/before.txt
-```
-
-**기준값:** `test_posts=3`, 시험 글의 ID·제목·내용·작성 시각, `posts/users/notices` 행 수, 회원·관리자 수, 게시글 체크섬을 보관합니다.
-
-## 4. 삭제 전 복구 시각 확보
-
-아래 명령은 현재보다 뒤에 있는 **분 경계(초=00)**를 복구 목표 시각으로 저장합니다. 서비스가 중지돼 있으므로 그 시각에도 방금 기록한 데이터가 유지됩니다.
-
-```bash
-mysql --protocol=TCP \
-  -h "${ORIGINAL_DB_HOST:?원본 DB 주소를 설정하세요}" \
-  -P 3306 -u board_app -p board_service -N -B \
-  -e "SET SESSION time_zone='+09:00'; SELECT DATE_FORMAT(NOW() + INTERVAL 2 MINUTE, '%Y-%m-%d %H:%i:00');" \
-  > /tmp/403-pitr/restore-time.txt
-cat /tmp/403-pitr/restore-time.txt
-```
-
-예를 들어 `2026-09-09 18:44:00`이 출력되면 **18:44가 복구 목표**, **18:45 이후가 삭제 가능 시각**입니다. 위 예시 대신 자신의 출력값을 사용합니다. 출력 시각은 한국시간(KST)입니다.
-
-1. 목표 시각에서 1분이 지날 때까지 기다립니다.
-2. 콘솔 **Backup > 원본 상세내역 > 시점 복원**을 열어, 목표 시각이 **DB 복원 가능한 시간**에 포함되는지 확인합니다.
-3. 아직 포함되지 않으면 기다렸다가 새로 확인합니다. 콘솔의 시간대도 출력한 한국시간과 맞춥니다.
-4. 목표 시각이 범위에 들어온 것을 확인한 뒤 팝업을 닫습니다. 복원은 삭제 이후에 실행합니다.
-
-## 5. 실습 글 삭제로 장애 재현
-
-다음 명령은 작성자·내용·제목이 모두 일치하는 **이번 실습용 글 3개만 삭제**합니다. 원본 DB에서 실행하는 단계입니다.
-
-```bash
-PITR_TIME="$(cat /tmp/403-pitr/restore-time.txt)"
-mysql --protocol=TCP --default-character-set=utf8mb4 --table \
-  -h "${ORIGINAL_DB_HOST:?원본 DB 주소를 설정하세요}" \
-  -P 3306 -u board_app -p board_service \
-  --init-command="SET @pitr_time = '$PITR_TIME'" \
-  < /tmp/403-pitr/pitr-delete.sql
-```
-
-| 출력 | 기대값 |
+| 화면 | 의미 |
 | --- | --- |
-| `can_delete` | `1` |
-| `deleted_test_posts` | `3` |
-| `remaining_test_posts` | `0` |
+| `DB 정상` | 측정용 글의 저장 성공 응답을 받고, 다시 조회해 본문까지 확인 |
+| `API 정상` | 실제 Backend의 Health API가 DB를 조회하고 정상 응답 |
+| `DB 실패` / `API 실패` | 해당 요청 실패 또는 5초 제한 초과 |
+| `저장 성공 N건` | DB로부터 COMMIT 성공 응답을 받은 누적 건수 |
+| `Master` | DB 직접 접속 시 확인한 실제 서버 이름 |
 
-`can_delete=0`이면 `restore_time_kst`가 4단계의 목표 시각인지 확인하고, 목표 시각에서 1분이 지난 뒤 다시 실행합니다. 목표 시각이 비어 있거나 잘못됐다면 4단계부터 다시 진행합니다. 이미 삭제했다면 재실행 시 `deleted_test_posts=0`이므로 처음 삭제했을 때의 결과를 보관합니다.
+새 Master에서 DB·API가 연속으로 정상이고 **30초 더 안정적으로 유지되면 자동으로 측정을 끝내고 결과를 출력**합니다. 최대 실행 시간은 10분입니다. 필요하면 `Ctrl+C`를 한 번 눌러 측정 프로그램만 끝낼 수 있습니다.
 
-## 6. 지정 시점으로 새 Cloud DB 복구
+## 5. 결과 읽기
 
-콘솔 **Cloud DB for MySQL > Backup > 원본 `board-service` 상세내역 > 시점 복원**에서 진행합니다.
+아래 숫자는 가상 예시입니다.
 
-| 설정 | 입력·선택 |
+```text
+========== Failover 측정 결과 ==========
+Master 변경    : mysql-001 → mysql-002 (변경 확인)
+DB 읽기·쓰기   : 42.500초 / 목표 180초 이내
+Backend 조회   : 48.200초 / 목표 180초 이내
+저장 성공 응답 : 60건 / 전체 시도 71건
+성공 데이터 유실 : 0건 []
+본문 불일치      : 0건 []
+중복 / 예상 외 글 : 0건 / 0건
+응답 미확인 요청 : 저장됨 1건 / 미저장 10건 (유실과 구분)
+데이터 대조    : 성공 응답 데이터 보존 확인
+쓰기 허용      : 예
+결과 파일      : /var/log/board-failover/실행기록.jsonl.result.json
+원본 기록      : /var/log/board-failover/실행기록.jsonl
+```
+
+**이 예시는 DB는 42.5초, Backend 조회는 48.2초 만에 복구됐고, 성공 응답을 받은 글 60개가 모두 남아 있다는 뜻**입니다.
+
+| 항목 | 통과 기준 |
 | --- | --- |
-| DB 복원 시간 | `/tmp/403-pitr/restore-time.txt`에 저장한 시각 |
-| 신규 DB 서비스로 생성 | 선택 |
-| DB 서비스 이름 | 예: `board-pitr` |
-| DB Server 이름 | 예: `board-pitr` |
-| VPC·Subnet | Backend에서 접근 가능한 같은 VPC의 DB 서브넷 |
-| 고가용성 | 사용 |
+| Master 변경 | 콘솔 역할 변경과 스크립트의 서버 이름 변경이 모두 확인됨 |
+| DB·Backend 복구 시간 | 각각 미리 정한 RTO 목표 이내 |
+| 저장 성공 응답 | 1건 이상 있어야 데이터 검증 가능 |
+| 성공 데이터 유실·본문 불일치·중복·예상 외 글 | 모두 0건 |
+| 쓰기 허용 | `예` |
 
-시점이 맞는지 확인하고 **복원하기/생성**을 실행합니다. 새 서비스가 `운영중`이 되면 **복구한 DB의 Private 도메인**을 기록합니다. 복구 서버 비용이 추가되므로 실습 후 유지할 서비스를 정리합니다. [공식 복원 절차](https://guide.ncloud-docs.com/docs/database-database-5-4)
+### “응답 미확인”은 왜 유실이 아닌가?
 
-복구 DB의 ACG Inbound에 Backend 사설 IP의 TCP `3306`을 허용하고, Backend Outbound에서도 복구 DB의 TCP `3306` 접근을 확인합니다. 복구 DB의 **DB User 관리**에서 `board_app`의 HOST·CRUD 권한과 비밀번호를 원본과 동일하게 맞춥니다.
+예를 들어 16번 글을 저장하는 도중 연결이 끊기면, **DB는 저장했지만 성공 응답만 Backend에 도착하지 않았을 수 있습니다.** 스크립트는 전환 후 해당 글을 찾아 저장 여부를 확인합니다.
 
-`신규 DB 서비스로 생성`을 선택하지 않아 읽기 전용 `Recovery`로 만들었다면, 해당 서버의 **DB 관리 > 신규 DB 서비스 생성**으로 전환한 뒤 다음 단계를 진행합니다. Backend를 쓰기 가능한 DB에 연결해야 합니다.
+따라서 `응답 미확인 중 미저장`을 그대로 유실 건수에 더하지 않습니다. **성공 응답을 받았던 글이 사라졌는지**를 유실 기준으로 봅니다. 전체 게시글 COUNT나 ID의 빈 번호만으로 판단하지 않습니다.
 
-## 7. 삭제 전 데이터가 돌아왔는지 검증
+### 시간이 0초로 안 나오는 경우
 
-Backend에서 복구 DB의 실제 Private 도메인을 입력합니다.
+- **중단 미관측:** 측정 중 실패를 잡지 못했습니다. 중단이 전혀 없었다거나 RTO가 0초라고 단정하지 않습니다.
+- **복구 확인 전 측정 종료:** 정상 응답을 연속 3회 확인하기 전에 측정이 끝났습니다.
+- **시작 표시 없음:** Enter로 전환 시작 표시를 남기지 않았습니다.
 
-```bash
-read -r -p '복구한 Cloud DB Private 도메인: ' RECOVERED_DB_HOST
-mysql --protocol=TCP --default-character-set=utf8mb4 --table \
-  -h "${RECOVERED_DB_HOST:?복구 DB 주소를 입력하세요}" \
-  -P 3306 -u board_app -p board_service \
-  < /tmp/403-pitr/pitr-verify.sql | tee /tmp/403-pitr/restored.txt
-```
+## 6. 스크립트가 하는 일
 
-삭제 전 기록과 복구 DB의 출력값을 대조합니다.
-
-```bash
-cat /tmp/403-pitr/before.txt
-cat /tmp/403-pitr/restored.txt
-```
-
-| 확인 항목 | 통과 기준 |
+| 순서 | 간단한 해설 |
 | --- | --- |
-| 접속 대상 | `connected_server`가 원본과 다른 복구 서버 |
-| 쓰기 가능 상태 | `read_only=0` |
-| 시험 글 | `test_posts=3`, 3개 글의 ID·내용·작성 시각이 삭제 전과 같음 |
-| 게시글 전체 | 행 수, `checksum_sum`, `checksum_xor`가 삭제 전과 같음 |
-| 회원·관리자·공지 | `users/notices` 행 수와 역할별 계정 수가 삭제 전과 같음 |
+| ① 설정 읽기 | 기존 Backend `.env`에서 접속 정보를 읽음 |
+| ② 글 저장·조회 | 약 1초마다 `[Failover]` 제목의 시험 글을 등록하고 COMMIT 응답·본문 확인 |
+| ③ Backend 확인 | 별도로 `localhost:4000/api/health`를 호출해 실제 연결 풀의 DB 조회 확인 |
+| ④ 시간 기록 | 첫 실패 요청 시작부터, 마지막 장애 이후 연속 3회 성공 구간의 첫 완료까지 계산 |
+| ⑤ 데이터 대조 | 성공 응답을 받은 글의 ID·본문을 전환 후 DB와 대조하고 화면에 요약 |
 
-복구한 DB를 삭제 이후의 원본 DB와 비교하면 시험 글 3개 차이가 나는 것이 정상입니다. **삭제 전 `before.txt`가 복구 검증 기준**입니다. 결과가 다르면 Backend 전환 전에 복구 시각·접속 도메인을 확인합니다.
+DB 측정은 매번 새 연결을 만들고, API 측정은 기존 Backend의 연결 풀을 사용합니다. 그래서 DB 접속이 먼저 살아나고 Backend가 나중에 살아날 수 있습니다. Health는 DB 조회 검사이므로 마지막에 회원·관리자 로그인, 게시글 작성도 직접 확인합니다.
 
-## 8. Backend를 복구 DB로 전환
+시간은 **Backend가 관측한 복구 소요 시간**입니다. 실제 장애 순간과 요청 실패를 감지한 순간은 다를 수 있고, 약 1초의 시도 간격과 최대 5초의 요청 시간이 영향을 줍니다. 잠깐 성공했다가 다시 실패하면 마지막 안정 복구까지 포함합니다. 원본 기록에는 요청 시작·응답 시각도 남습니다.
 
-검증이 끝나면 402와 같은 방식으로 **원본 `.env`에서 `DB_HOST`만 바꾸고 설치 스크립트를 다시 실행**합니다.
+측정용 글은 실행별로 다른 작성자 이름을 사용하므로 자동 작성기의 글과 구분됩니다. 결과가 유실 0건이어도 **이번 시험의 성공 응답 데이터가 보존됐다는 의미**이며, 모든 상황에서 데이터 유실이 없다는 보장은 아닙니다.
 
-502 Terraform 기본 설치 경로:
+## 7. 결과 보관과 재검증
 
-```bash
-cd /opt/lab7-setup/backend
-sudo vi .env
+실습 기록에는 **전환 전·후 Master, RTO 목표, DB·Backend 실측 시간, 저장 성공·유실·불일치 건수**를 적습니다. 콘솔 역할 변경 기록과 결과 파일도 함께 보관합니다. 새 시험을 실행하면 별도의 기록 파일이 만들어집니다.
+
+측정을 너무 일찍 종료해 `검증 미완료`가 나왔다면 DB가 정상화된 뒤 **화면에 출력된 재검증 명령**을 복사해 실행합니다.
+
+```text
+sudo node /opt/board-service-backend/failover-test.js --report /var/log/board-failover/해당실행기록.jsonl
 ```
 
-003에서 직접 설치했다면 해당 설치 폴더에서 엽니다.
+재검증은 저장된 글을 다시 대조합니다. 종료 이후의 관측 기록이 생기는 것은 아니므로 복구 시간을 놓쳤다면 새 시험을 진행합니다.
 
-```bash
-cd "$HOME/cloud-infrastructure-lecture-example/003-three tier web app/backend"
-sudo vi .env
-```
-
-둘 중 실제 설치한 폴더 한 곳에서 `DB_HOST`를 7단계의 **복구 DB Private 도메인**으로 변경하고 저장합니다. 그 폴더에서 다음 명령을 실행합니다.
-
-```bash
-sudo ./install-backend.sh
-sudo grep '^DB_HOST=' /opt/board-service-backend/.env
-curl -fsS http://localhost:4000/api/health
-curl -fsS http://localhost:4000/api/posts
-```
-
-`DB_HOST`가 복구 DB이고, Health가 `status: ok`, 게시글 API에 실습 글 3개가 보이면 Backend 연결이 확인된 것입니다. 설치 완료 메시지만으로 DB 연결 성공을 판단하지 않습니다. `AUTO_POST_ENABLED=true`이면 자동 작성기도 함께 시작되어 이때부터 복구 DB의 글 수가 늘 수 있습니다.
-
-## 9. 게시판 재개와 완료 확인
-
-1. 게시판의 **관리자 로그인 → 공지 관리**를 엽니다.
-2. 이관된 기존 관리자 계정으로 로그인하고, **공지 종료 / 점검 해제**를 적용합니다.
-3. 게시판에 `[403 PITR] 복구 실습 1~3`이 다시 보이는지 확인합니다.
-4. 일반 회원 로그인과 새 글 등록도 확인합니다.
-
-**완료 기준:** 삭제됐던 글이 같은 ID로 복원됐고, Backend가 새 DB에서 게시글을 읽고 쓸 수 있어야 합니다. 원본과 복구 DB는 서로 다른 서비스이며, 전환 후 새 데이터는 복구 DB에 쌓입니다.
-
-원본 DB의 정리는 복구 결과와 필요한 백업을 확인한 뒤 진행합니다. 실습 파일은 `/tmp/403-pitr`에 있으며, 서버를 재부팅하면 없어질 수 있으므로 `before.txt`, `restored.txt`, `restore-time.txt`를 실습 기록으로 보관합니다.
+테스트 뒤에는 게시판에 측정용 `[Failover]` 글이 남습니다. 측정 결과를 보관하고 실제 게시판 기능을 확인한 뒤 안내 공지를 종료합니다.

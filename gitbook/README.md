@@ -22,7 +22,7 @@ Naver Cloud 기반 클라우드 인프라 실습 교안입니다.
 | Load Balancer 및 Auto Scaling | 303 | 게시판 Auto Scaling (2) | `303-auto scaling` |
 | 데이터베이스 | 401 | Cloud DB for MySQL 생성 및 게시판 연결 | `401-cloud db mysql` |
 | 데이터베이스 | 402 | Cloud DB for MySQL 마이그레이션 | `402-cloud db migration` |
-| 데이터베이스 | 403 | Cloud DB 특정 시점 복구(PITR) | `403-database backup recovery` |
+| 데이터베이스 | 403 | Cloud DB Failover 시간·데이터 유실 측정 | `403-database backup recovery` |
 | CLI 및 IaC | 501 | Ncloud CLI로 서버 생성 | `501-cloud cli` |
 | CLI 및 IaC | 502 | Terraform 003 게시판 빠른 환경 구성 | `502-terraform` |
 | CLI 및 IaC | 503 | 비용 조회 Slack 자동화 | `503-cost slack alert` |

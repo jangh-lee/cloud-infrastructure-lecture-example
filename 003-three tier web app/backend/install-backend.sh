@@ -110,7 +110,7 @@ sync_app_files() {
   copy_or_fetch_file "${SCRIPT_DIR}/app/package.json" "${APP_DIR}/package.json" "package.json"
   copy_or_fetch_file "${SCRIPT_DIR}/app/package-lock.json" "${APP_DIR}/package-lock.json" "package-lock.json"
   copy_or_fetch_file "${SCRIPT_DIR}/app/server.js" "${APP_DIR}/server.js" "server.js"
-  for account_file in auth.js accounts.js manage-admin.js sample-data.js sample-posts.js backfill-sample-members.js; do
+  for account_file in auth.js accounts.js manage-admin.js sample-data.js sample-posts.js backfill-sample-members.js failover-test.js; do
     copy_or_fetch_file "${SCRIPT_DIR}/app/${account_file}" "${APP_DIR}/${account_file}" "${account_file}"
   done
   copy_or_fetch_file "${SCRIPT_DIR}/app/seed-worker.js" "${APP_DIR}/seed-worker.js" "seed-worker.js"
