@@ -1,0 +1,236 @@
+.ncp-cost-tool {
+  --ncp-ink: #14242b;
+  --ncp-muted: #5d6c72;
+  --ncp-line: #cbd8d7;
+  --ncp-paper: #f8fbf8;
+  --ncp-accent: #007d73;
+  --ncp-accent-dark: #075b55;
+  --ncp-warm: #e5f2cd;
+  color: var(--ncp-ink);
+  display: grid;
+  gap: 1rem;
+  margin: 1.25rem 0 2rem;
+}
+
+.ncp-tool-hero,
+.ncp-tool-panel {
+  border: 1px solid var(--ncp-line);
+  border-radius: 0.4rem;
+  overflow: hidden;
+}
+
+.ncp-tool-hero {
+  background:
+    linear-gradient(90deg, rgba(0, 125, 115, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(0, 125, 115, 0.08) 1px, transparent 1px),
+    var(--ncp-paper);
+  background-size: 22px 22px;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.ncp-tool-hero::after {
+  background: var(--ncp-warm);
+  content: "";
+  height: 0.45rem;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 38%;
+}
+
+.ncp-tool-hero h3,
+.ncp-tool-panel h4 {
+  color: var(--ncp-ink);
+  font-family: "IBM Plex Sans KR", "Noto Sans KR", sans-serif;
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  margin: 0.2rem 0 0.45rem;
+}
+
+.ncp-tool-hero h3 {
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+
+.ncp-tool-hero p,
+.ncp-tool-panel p {
+  margin: 0;
+}
+
+.ncp-tool-kicker,
+.ncp-tool-step {
+  color: var(--ncp-accent-dark);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.ncp-tool-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ncp-tool-panel {
+  background: var(--ncp-paper);
+  padding: 1.15rem;
+}
+
+.ncp-tool-panel label {
+  color: var(--ncp-muted);
+  display: grid;
+  font-size: 0.76rem;
+  font-weight: 650;
+  gap: 0.3rem;
+  margin: 0.75rem 0;
+}
+
+.ncp-tool-panel input,
+.ncp-tool-panel select {
+  background: #fff;
+  border: 1px solid var(--ncp-line);
+  border-radius: 0.25rem;
+  color: var(--ncp-ink);
+  font: 500 0.78rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  min-width: 0;
+  padding: 0.62rem 0.7rem;
+  width: 100%;
+}
+
+.ncp-tool-panel input:focus,
+.ncp-tool-panel select:focus {
+  border-color: var(--ncp-accent);
+  box-shadow: 0 0 0 3px rgba(0, 125, 115, 0.13);
+  outline: none;
+}
+
+.ncp-tool-columns {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ncp-tool-actions {
+  margin: 0.7rem 0;
+}
+
+.ncp-cost-tool .md-button {
+  border-color: var(--ncp-accent);
+  border-radius: 0.25rem;
+  color: var(--ncp-accent-dark);
+  cursor: pointer;
+  font-size: 0.76rem;
+  padding: 0.48rem 0.7rem;
+}
+
+.ncp-cost-tool .md-button--primary {
+  background: var(--ncp-accent);
+  color: #fff;
+}
+
+.ncp-time-output {
+  background: #112d31;
+  border-left: 0.28rem solid var(--ncp-warm);
+  color: #e7f3ef;
+  display: grid;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  gap: 0.25rem;
+  margin-top: 0.9rem;
+  padding: 0.8rem;
+}
+
+.ncp-time-output strong {
+  color: #d9f69d;
+  font-size: 1.05rem;
+}
+
+.ncp-tool-note {
+  color: var(--ncp-muted);
+  font-size: 0.67rem;
+  margin-top: 0.65rem !important;
+}
+
+.ncp-result-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.8rem 0 0.55rem;
+}
+
+.ncp-result-tabs button {
+  background: transparent;
+  border: 1px solid var(--ncp-line);
+  border-radius: 999px;
+  color: var(--ncp-muted);
+  cursor: pointer;
+  font-size: 0.68rem;
+  padding: 0.3rem 0.65rem;
+}
+
+.ncp-result-tabs button.is-active {
+  background: var(--ncp-ink);
+  border-color: var(--ncp-ink);
+  color: #fff;
+}
+
+.ncp-tool-panel pre {
+  margin: 0.45rem 0 0.65rem;
+  max-height: 24rem;
+  overflow: auto;
+}
+
+.ncp-tool-panel pre code {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ncp-tool-proxy {
+  border-top: 0.28rem solid var(--ncp-accent);
+}
+
+.ncp-tool-status {
+  color: var(--ncp-muted);
+  font: 650 0.72rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  margin-top: 0.75rem !important;
+}
+
+.ncp-tool-status[data-kind="success"] {
+  color: #08735f;
+}
+
+.ncp-tool-status[data-kind="error"] {
+  color: #b2332f;
+}
+
+.ncp-tool-status[data-kind="loading"] {
+  color: #986309;
+}
+
+[data-md-color-scheme="slate"] .ncp-cost-tool {
+  --ncp-ink: #e9f4f1;
+  --ncp-muted: #aabbb9;
+  --ncp-line: #3f5558;
+  --ncp-paper: #1c292d;
+  --ncp-accent: #29b8aa;
+  --ncp-accent-dark: #67d8cc;
+  --ncp-warm: #789b3f;
+}
+
+[data-md-color-scheme="slate"] .ncp-tool-panel input,
+[data-md-color-scheme="slate"] .ncp-tool-panel select {
+  background: #132125;
+}
+
+@media (max-width: 720px) {
+  .ncp-tool-grid,
+  .ncp-tool-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .ncp-tool-hero,
+  .ncp-tool-panel {
+    padding: 0.95rem;
+  }
+}
