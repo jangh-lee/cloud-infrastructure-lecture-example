@@ -27,3 +27,4 @@
 * Function Alert
   * [601 ACG Slack Alert](labs/601-acg-slack-alert.md)
   * [602 Cost Slack Alert](labs/602-cost-slack-alert.md)
+  * [603 Cost API Web Tool](labs/603-cost-api-web.md)

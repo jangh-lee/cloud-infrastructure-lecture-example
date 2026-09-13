@@ -67,6 +67,12 @@ plugins:
         labs/402-database-backup-recovery.md: labs/403-database-backup-recovery.md
         labs/403-cloud-db-migration.md: labs/402-cloud-db-migration.md
 
+extra_css:
+  - assets/stylesheets/ncp-cost-api-tool.css
+
+extra_javascript:
+  - assets/javascripts/ncp-cost-api-tool.js
+
 nav:
   - 강의 소개: README.md
   - 운영 준비:
@@ -97,4 +103,5 @@ nav:
       - Function Alert:
           - 601 ACG Slack Alert: labs/601-acg-slack-alert.md
           - 602 Cost Slack Alert: labs/602-cost-slack-alert.md
+          - 603 Cost API Web Tool: labs/603-cost-api-web.md
   - GitBook 목차: SUMMARY.md

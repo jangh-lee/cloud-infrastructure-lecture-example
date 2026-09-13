@@ -25,4 +25,5 @@
 * Function Alert
   * [601 ACG Slack Alert](<601-acg slack alert/README.md>)
   * [602 Cost Slack Alert](<602-cost slack alert/README.md>)
+  * [603 Cost API Web Tool](<603-cost api web/README.md>)
 * [Web Lecture Notes](gitbook/README.md)

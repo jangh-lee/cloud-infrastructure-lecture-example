@@ -57,3 +57,4 @@ https://jangh-lee.github.io/cloud-infrastructure-lecture-example/
 | --- | --- |
 | [`601-acg slack alert`](./601-acg%20slack%20alert/) | Cloud Activity Tracer로 ACG 규칙 변경을 감지하고 Slack으로 보안 알림을 보내는 예제입니다. |
 | [`602-cost slack alert`](./602-cost%20slack%20alert/) | Cloud Functions에서 Naver Cloud 비용을 조회하고 Slack으로 알림을 보내는 자동화 예제입니다. |
+| [`603-cost api web`](./603-cost%20api%20web/) | GitBook에서 timestamp와 Signature V2를 만들고 Cloud Functions 프록시로 월 청구 비용을 바로 조회하는 예제입니다. |
