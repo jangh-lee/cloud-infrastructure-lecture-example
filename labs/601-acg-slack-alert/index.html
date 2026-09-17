@@ -1673,10 +1673,7 @@
 <p>업로드용 zip 파일:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>601-acg slack alert/dist/ncp-acg-alert.zip
 </code></pre></div>
-<p>다시 만들기:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">cd</span><span class="w"> </span><span class="s2">"601-acg slack alert"</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>./scripts/build-zip.sh
-</code></pre></div>
+<p><a href="https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/601-acg%20slack%20alert/dist/ncp-acg-alert.zip"><strong>ncp-acg-alert.zip 바로 다운로드</strong></a></p>
 <h2 id="cloud-functions-action">Cloud Functions Action 생성<a class="headerlink" href="#cloud-functions-action" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1705,14 +1702,14 @@
 </tbody>
 </table>
 <h2 id="_2">기본 파라미터<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">"ncp_access_key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NCP_ACCESS_KEY"</span><span class="p">,</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">"ncp_secret_key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NCP_SECRET_KEY"</span><span class="p">,</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">"slack_webhook_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SLACK_WEBHOOK_URL"</span><span class="p">,</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nt">"state_bucket"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ncp-billing-report-james-260828"</span><span class="p">,</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="nt">"state_object_key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ncp-account-monitoring/processed-history.json"</span><span class="p">,</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="nt">"lookback_minutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">"ncp_access_key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NCP_ACCESS_KEY"</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">"ncp_secret_key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NCP_SECRET_KEY"</span><span class="p">,</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">"slack_webhook_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SLACK_WEBHOOK_URL"</span><span class="p">,</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nt">"state_bucket"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ncp-billing-report-james-260828"</span><span class="p">,</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="nt">"state_object_key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ncp-account-monitoring/processed-history.json"</span><span class="p">,</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="nt">"lookback_minutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">}</span>
 </code></pre></div>
 <h2 id="_3">동작 방식<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <ol>
@@ -1725,20 +1722,20 @@
 </ol>
 <h2 id="_4">상태 파일<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <p>기본 저장 경로:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>ncp-account-monitoring/processed-history.json
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>ncp-account-monitoring/processed-history.json
 </code></pre></div>
 <p>중복 알림 방지를 위해 이미 전송한 <code>historyId</code>를 저장합니다.</p>
 <h2 id="slack">Slack 메시지 예시<a class="headerlink" href="#slack" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>[NCP VPC] ACG 규칙 변경
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>요약
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>리소스: lab3-acg
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>작업: Update ACG Rule (Complete)
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>작업 계정: Main Account
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>발생 시각: 2026-08-29 10:00:00 KST
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>ACG 변경 내용
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>추가 1개 / 삭제 0개
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>[NCP VPC] ACG 규칙 변경
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>요약
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>리소스: lab3-acg
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>작업: Update ACG Rule (Complete)
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>작업 계정: Main Account
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>발생 시각: 2026-08-29 10:00:00 KST
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>ACG 변경 내용
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>추가 1개 / 삭제 0개
 </code></pre></div>
 <h2 id="_5">참고<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <p>상세 자료는 저장소의 <code>601-acg slack alert/README.md</code>를 확인합니다.</p>
