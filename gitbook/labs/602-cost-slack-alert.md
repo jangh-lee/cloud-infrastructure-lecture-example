@@ -32,6 +32,8 @@ Webhook URL과 Secret Key는 Git에 올리지 않습니다.
 602-cost slack alert/dist/ncp-billing.zip
 ```
 
+[**ncp-billing.zip 바로 다운로드**](https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/602-cost%20slack%20alert/dist/ncp-billing.zip)
+
 다시 만들기:
 
 ```bash
