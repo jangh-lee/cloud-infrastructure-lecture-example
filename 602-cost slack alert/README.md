@@ -113,6 +113,7 @@ Action의 기본 파라미터 또는 환경 변수에 아래 값을 넣습니다
   "NCP_ACCESS_KEY": "YOUR_NCP_ACCESS_KEY",
   "NCP_SECRET_KEY": "YOUR_NCP_SECRET_KEY",
   "SLACK_WEBHOOK_URL": "YOUR_SLACK_WEBHOOK_URL",
+  "DEFAULT_SLACK_CHANNEL": "#my-cost-alert",
   "BUDGET_KRW": "10000",
   "ALERT_ONLY_OVER_BUDGET": "false"
 }
@@ -129,7 +130,8 @@ Action의 기본 파라미터 또는 환경 변수에 아래 값을 넣습니다
 | `BUDGET_KRW` | `0` | 예산 기준 금액 |
 | `ALERT_ONLY_OVER_BUDGET` | `false` | `true`면 예산 초과 시에만 Slack 전송 |
 | `PREVIOUS_USE_AMOUNT_KRW` |  | 전일 대비 비교용 이전 금액을 수동으로 넣을 때 사용 |
-| `SLACK_CHANNEL` | Slack Webhook 기본 채널 | Webhook이 허용하는 경우 채널 override |
+| `DEFAULT_SLACK_CHANNEL` | Slack Webhook 기본 채널 | Action 기본 파라미터에 사용자별 기본 알림 채널을 지정. 예: `#my-cost-alert` |
+| `SLACK_CHANNEL` | `DEFAULT_SLACK_CHANNEL` | 실행 요청에서만 기본 채널을 바꿀 때 사용하는 일회성 override |
 | `SLACK_USERNAME` | `NCP Cost Bot` | Slack 표시 이름 |
 | `SAVE_REPORT_TO_OBJECT_STORAGE` | `false` | `true`면 비용 조회 결과를 Object Storage에 JSON으로 저장. `OBJECT_STORAGE_BUCKET`이 있으면 자동으로 활성화 |
 | `OBJECT_STORAGE_BUCKET` |  | 비용 리포트를 저장할 Object Storage 버킷. 이 값이 있으면 전일 리포트 조회와 오늘 리포트 저장을 수행 |
@@ -138,6 +140,18 @@ Action의 기본 파라미터 또는 환경 변수에 아래 값을 넣습니다
 | `OBJECT_STORAGE_REGION` | `kr-standard` | Object Storage region |
 | `OBJECT_STORAGE_ACCESS_KEY` | `NCP_ACCESS_KEY` | Object Storage용 Access Key를 따로 쓸 때 사용 |
 | `OBJECT_STORAGE_SECRET_KEY` | `NCP_SECRET_KEY` | Object Storage용 Secret Key를 따로 쓸 때 사용 |
+
+### 사용자별 기본 Slack 채널
+
+각 사용자가 자신의 Cloud Functions Action을 만들 때 기본 파라미터의 `DEFAULT_SLACK_CHANNEL`만 자신의 채널명으로 바꾸면 됩니다.
+
+```json
+{
+  "DEFAULT_SLACK_CHANNEL": "#james-cost-alert"
+}
+```
+
+테스트나 특정 실행에서만 채널을 바꾸려면 `SLACK_CHANNEL`을 전달합니다. `SLACK_CHANNEL`이 있으면 `DEFAULT_SLACK_CHANNEL`보다 우선합니다. Slack Incoming Webhook이 채널 override를 허용하지 않는 워크스페이스에서는 Webhook을 생성할 때 연결한 기본 채널로 전송됩니다.
 
 ## 8. 테스트 파라미터 예시
 
@@ -148,6 +162,7 @@ Cloud Functions 테스트 실행 시 아래처럼 넣습니다.
   "NCP_ACCESS_KEY": "YOUR_NCP_ACCESS_KEY",
   "NCP_SECRET_KEY": "YOUR_NCP_SECRET_KEY",
   "SLACK_WEBHOOK_URL": "https://hooks.slack.com/services/...",
+  "DEFAULT_SLACK_CHANNEL": "#james-cost-alert",
   "BUDGET_KRW": "5000",
   "ALERT_ONLY_OVER_BUDGET": "false",
   "SAVE_REPORT_TO_OBJECT_STORAGE": "true",

@@ -36,6 +36,7 @@ def main(args):
     period_label = _format_period_label(start_date, end_date)
     budget = _to_float(_get_value(args, "BUDGET_KRW", default="0"))
     alert_only_over_budget = _to_bool(_get_value(args, "ALERT_ONLY_OVER_BUDGET", default="false"))
+    slack_channel = _resolve_slack_channel(args)
     object_storage_bucket = _get_object_storage_bucket(args)
     save_report = _to_bool(_get_value(args, "SAVE_REPORT_TO_OBJECT_STORAGE", default="false")) or bool(object_storage_bucket)
 
@@ -84,7 +85,7 @@ def main(args):
         _send_slack(
             slack_webhook_url,
             message,
-            channel=_get_value(args, "SLACK_CHANNEL", default=""),
+            channel=slack_channel,
             username=_get_value(args, "SLACK_USERNAME", default="NCP Cost Bot"),
         )
 
@@ -100,6 +101,7 @@ def main(args):
         "productCosts": product_costs,
         "budget": budget,
         "overBudget": over_budget,
+        "slackChannel": slack_channel or None,
         "objectStorage": object_storage_result,
     }
 
@@ -357,6 +359,15 @@ def _create_object_storage_client(args, access_key, secret_key):
 
 def _get_object_storage_bucket(args):
     return _get_value(args, "OBJECT_STORAGE_BUCKET", default=_get_value(args, "NCP_OBJECT_STORAGE_BUCKET", default=""))
+
+
+def _resolve_slack_channel(args):
+    """Return a per-run channel override or this Action's configured default."""
+    return _get_value(
+        args,
+        "SLACK_CHANNEL",
+        default=_get_value(args, "DEFAULT_SLACK_CHANNEL", default=""),
+    ).strip()
 
 
 def _report_key(key_prefix, month, day):

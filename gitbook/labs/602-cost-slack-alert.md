@@ -67,12 +67,19 @@ zip 파일에는 `main.py`, `__main__.py`, `boto3/botocore` 의존성이 함께 
   "NCP_ACCESS_KEY": "YOUR_NCP_ACCESS_KEY",
   "NCP_SECRET_KEY": "YOUR_NCP_SECRET_KEY",
   "SLACK_WEBHOOK_URL": "https://hooks.slack.com/services/...",
+  "DEFAULT_SLACK_CHANNEL": "#my-cost-alert",
   "BUDGET_KRW": "10000",
   "ALERT_ONLY_OVER_BUDGET": "false",
   "SAVE_REPORT_TO_OBJECT_STORAGE": "true",
   "OBJECT_STORAGE_BUCKET": "ncp-billing-report-james-260828"
 }
 ```
+
+### 사용자별 기본 Slack 채널
+
+각 사용자는 자신의 Action 기본 파라미터에서 `DEFAULT_SLACK_CHANNEL`을 원하는 채널명으로 설정합니다. 예를 들어 `#james-cost-alert`로 설정하면 이후 실행은 해당 채널로 전송됩니다.
+
+실행할 때만 다른 채널을 쓰려면 `SLACK_CHANNEL`을 전달합니다. `SLACK_CHANNEL`이 있으면 `DEFAULT_SLACK_CHANNEL`보다 우선합니다. 단, Slack Incoming Webhook이 채널 override를 허용하지 않는 워크스페이스에서는 Webhook 생성 시 연결한 기본 채널로 전송됩니다.
 
 ## 스케줄
 
