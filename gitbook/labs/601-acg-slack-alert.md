@@ -21,12 +21,7 @@ Cloud Functions Trigger
 601-acg slack alert/dist/ncp-acg-alert.zip
 ```
 
-다시 만들기:
-
-```bash
-cd "601-acg slack alert"
-./scripts/build-zip.sh
-```
+[**ncp-acg-alert.zip 바로 다운로드**](https://raw.githubusercontent.com/jangh-lee/cloud-infrastructure-lecture-example/main/601-acg%20slack%20alert/dist/ncp-acg-alert.zip)
 
 ## Cloud Functions Action 생성
 
