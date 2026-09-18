@@ -309,6 +309,19 @@ Start-Process $BOARD_URL
 Public ALB -> Web -> Backend -> MariaDB
 ```
 
+### 관리자 로그인
+
+우측 상단 **관리자 로그인**에서 아이디와 비밀번호 모두 `admin`을 입력합니다. Backend Init Script가 `manage-admin.js`를 실행해 계정을 자동으로 만듭니다.
+
+003을 수동으로 설치할 때는 이 명령을 직접 실행해야 하지만, 502는 Init Script에 포함되어 있습니다. 로그인이 되지 않으면 Init Script가 아직 끝나지 않았거나 실패한 경우이며, Bastion에서 `ssh backend`로 이동해 확인합니다.
+
+```bash
+grep -i "lab administrator" /var/log/lab7-init.log
+sudo node /opt/board-service-backend/manage-admin.js admin
+```
+
+`Lab administrator ready: admin / admin`이 출력되면 완료입니다. 여러 번 실행해도 안전하며, 관리자 계정이 이미 있으면 비밀번호만 `admin`으로 되돌립니다.
+
 ## 10. Bastion에서 내부 서버로 SSH 접속
 
 내 PC에서 Bastion으로 로그인한 뒤, Bastion에서 Web / Backend / DB로 이동하는 실습입니다. Bastion Init Script가 끝나면 `setup-internal-ssh`와 `web`, `backend`, `db` SSH 별칭을 사용할 수 있습니다.
@@ -397,6 +410,7 @@ sudo mariadb -u root -p -e "SHOW DATABASES;"
 | 게시판 URL이 처음에는 `503` | Init Script 완료 전일 수 있으므로 Web 로그와 Target Health를 확인 |
 | SSH 실패 | 현재 관리자 Public IP와 `my_public_ip/32`, `admin_passwords`의 서버별 비밀번호 확인. Bastion에서 `setup-internal-ssh web`으로 실패한 서버만 재등록 |
 | `setup-internal-ssh: command not found` | Bastion Init Script 완료 여부와 `/var/log/lab7-init.log` 확인. 기존 서버는 Init Script 수정만으로 갱신되지 않음 |
+| 관리자 `admin` / `admin` 로그인 실패 | Backend의 `/var/log/lab7-init.log`에 `Lab administrator ready`가 있는지 확인. 없으면 Backend에서 `sudo node /opt/board-service-backend/manage-admin.js admin` 실행 |
 
 Init Script는 서버가 처음 만들어질 때 한 번만 실행됩니다. 코드를 수정한 뒤 다시 설치하려면 전체 환경을 재생성하는 방식이 가장 단순합니다.
 

@@ -94,6 +94,25 @@ EOF
 
 chmod +x install-backend.sh
 ./install-backend.sh install
+
+# 실습 관리자 계정(admin/admin)을 만든다. install-backend.sh는 manage-admin.js를
+# 복사만 하고 실행하지 않으므로 여기서 직접 호출해야 게시판 관리자 로그인이 가능하다.
+#
+# 위의 포트 대기만으로는 부족하다. install-db.sh는 MariaDB를 먼저 기동해
+# 3306을 연 뒤(bind-address 변경 직후) 맨 마지막에야 users 테이블을 만들고
+# MariaDB를 한 번 더 재시작한다. 그래서 성공할 때까지 재시도한다.
+echo "[${var.name_prefix}] Creating lab administrator at $(date -Is)"
+for attempt in $(seq 1 60); do
+  if node /opt/board-service-backend/manage-admin.js admin; then
+    break
+  fi
+  if [ "$attempt" -eq 60 ]; then
+    echo "Lab administrator was not created within 300 seconds" >&2
+    exit 1
+  fi
+  sleep 5
+done
+
 echo "[${var.name_prefix}] Backend init completed at $(date -Is)"
 EOT
 }

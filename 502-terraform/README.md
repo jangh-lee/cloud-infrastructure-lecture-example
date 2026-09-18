@@ -235,6 +235,21 @@ Start-Process $BOARD_URL
 terraform output verification_commands
 ```
 
+## 관리자 로그인
+
+게시판 우측 상단 **관리자 로그인**에서 아이디와 비밀번호 모두 `admin`을 입력합니다.
+
+Backend Init Script가 `manage-admin.js`를 실행해 계정을 자동으로 만듭니다. 003을 수동으로 설치할 때는 이 명령을 직접 실행해야 하지만, 502는 Init Script에 포함되어 있습니다.
+
+로그인이 되지 않으면 Init Script가 아직 끝나지 않았거나 실패한 경우입니다. Bastion에서 `ssh backend`로 이동해 확인합니다.
+
+```bash
+grep -i "lab administrator" /var/log/lab7-init.log
+sudo node /opt/board-service-backend/manage-admin.js admin
+```
+
+`Lab administrator ready: admin / admin`이 출력되면 완료입니다. 이 명령은 여러 번 실행해도 안전하며, 관리자 계정이 이미 있으면 비밀번호만 `admin`으로 되돌립니다. 비밀번호가 바뀌면 기존 로그인 세션은 만료됩니다.
+
 ## 공지 및 점검 실습
 
 최신 003 Web 설치 스크립트가 `board-notice` 명령을 함께 설치합니다. Bastion에서 `ssh web`으로 이동한 뒤 공지와 점검 화면을 설정합니다. 명령 예시와 Backend 중지·재개 순서는 [003 공지 안내](../003-three%20tier%20web%20app/README.md#공지-및-점검-화면), 복사해서 사용할 마이그레이션 공지는 [402 교안](https://jangh-lee.github.io/cloud-infrastructure-lecture-example/labs/402-cloud-db-migration/#0)에서 확인합니다.
