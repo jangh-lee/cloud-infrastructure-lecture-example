@@ -143,6 +143,7 @@ terraform output
 
 terraform output -raw board_url
 terraform output -raw ssh_bastion_command
+terraform output -raw internal_ssh_setup_command
 terraform output -raw ssh_web_via_bastion_command
 terraform output -raw ssh_backend_via_bastion_command
 terraform output -raw ssh_db_via_bastion_command
@@ -164,23 +165,19 @@ terraform output next_steps
 
 내 PC에서 Bastion으로 로그인한 뒤, Bastion에서 Web / Backend / DB로 이동하는 실습입니다. Bastion Init Script가 끝나면 `setup-internal-ssh`와 `web`, `backend`, `db` SSH 별칭을 사용할 수 있습니다.
 
-1. 내 PC에서 비밀번호와 접속 명령을 확인합니다. 출력된 SSH 명령을 복사해 실행하고 **Bastion 비밀번호**를 입력합니다. Windows PowerShell에서도 같은 명령을 사용합니다.
+1. 내 PC에서 비밀번호와 SSH 설정 명령을 확인합니다. Windows PowerShell에서도 같은 명령을 사용합니다.
 
    ```bash
    terraform output admin_passwords
-   terraform output -raw ssh_bastion_command
+   terraform output -raw internal_ssh_setup_command
    terraform output -raw internal_ssh_setup
    ```
 
-2. **Bastion에서** 최초 한 번 실행합니다.
+2. 내 PC에서 출력된 `ssh -t root@... /usr/local/bin/setup-internal-ssh` 명령을 최초 한 번 실행합니다. Bastion에 접속해 내부 서버용 키를 등록한 뒤 PC로 돌아옵니다. Bastion에 이미 접속한 상태라면 `setup-internal-ssh`만 실행합니다.
 
-   ```bash
-   setup-internal-ssh
-   ```
+   **Bastion 비밀번호**를 먼저 입력합니다. 내부 접속 전용 Ed25519 키를 `/root/.ssh/lab_internal`에 생성하고, `ssh-copy-id`로 공개키를 Web → Backend → DB 순서로 등록합니다. 각 서버의 SSH 호스트 키 지문을 확인하고 해당 서버의 **Ncloud 관리자 비밀번호**를 입력합니다. DB 서버에도 MariaDB 비밀번호가 아닌 서버 관리자 비밀번호를 입력합니다.
 
-   내부 접속 전용 Ed25519 키를 `/root/.ssh/lab_internal`에 생성하고, `ssh-copy-id`로 공개키를 Web → Backend → DB 순서로 등록합니다. 각 서버의 SSH 호스트 키 지문을 확인하고 해당 서버의 **Ncloud 관리자 비밀번호**를 입력합니다. DB 서버에도 MariaDB 비밀번호가 아닌 서버 관리자 비밀번호를 입력합니다.
-
-3. **Bastion에서** 내부 서버로 이동하고 `hostname`으로 위치를 확인합니다.
+3. 내 PC에서 `terraform output -raw ssh_bastion_command`로 접속 명령을 확인해 Bastion에 로그인합니다. **Bastion에서** 내부 서버로 이동하고 `hostname`으로 위치를 확인합니다.
 
    ```bash
    ssh web

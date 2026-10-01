@@ -100,13 +100,18 @@ output "ssh_bastion_command" {
   value       = "ssh root@${ncloud_public_ip.bastion.public_ip}"
 }
 
+output "internal_ssh_setup_command" {
+  description = "Run on your PC to register SSH keys for Web, Backend and DB through bastion"
+  value       = "ssh -t root@${ncloud_public_ip.bastion.public_ip} /usr/local/bin/setup-internal-ssh"
+}
+
 output "internal_ssh_setup" {
   description = "First-time key registration and server navigation on bastion"
   value       = <<-EOT
 1. On your PC: terraform output admin_passwords
-2. On your PC: ssh root@${ncloud_public_ip.bastion.public_ip}
-3. On bastion: setup-internal-ssh
-   Enter the Web, Backend and DB admin passwords when prompted.
+2. On your PC: ssh -t root@${ncloud_public_ip.bastion.public_ip} /usr/local/bin/setup-internal-ssh
+   Enter the bastion, Web, Backend and DB admin passwords when prompted.
+3. On your PC: ssh root@${ncloud_public_ip.bastion.public_ip}
 4. On bastion: ssh web / ssh backend / ssh db
    Run hostname to identify the server, then exit to return to bastion.
 The internal SSH key is generated on bastion; ${var.name_prefix}-key.pem is only the Ncloud Login Key.
@@ -155,6 +160,9 @@ output "next_steps" {
 2. Check the board: curl -i http://${ncloud_lb.web.domain}/api/health
 3. Open the board: http://${ncloud_lb.web.domain}/
 4. If health is not 200, run: terraform output verification_commands
-5. For bastion-to-private-server SSH practice: terraform output -raw internal_ssh_setup
+5. To set up SSH to Web, Backend and DB in one command on your PC:
+   ssh -t root@${ncloud_public_ip.bastion.public_ip} /usr/local/bin/setup-internal-ssh
+   Enter the bastion, Web, Backend and DB admin passwords when prompted.
+6. To use SSH aliases: ssh root@${ncloud_public_ip.bastion.public_ip}, then ssh web / ssh backend / ssh db
 EOT
 }
