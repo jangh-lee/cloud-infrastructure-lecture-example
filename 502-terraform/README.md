@@ -134,7 +134,7 @@ terraform plan -out=tfplan
 terraform apply tfplan
 ```
 
-`Apply complete!` 이후 서버 내부 Init Script가 끝날 때까지 약 3~10분 걸릴 수 있습니다.
+`Apply complete!`는 클라우드 리소스 생성 완료를 뜻합니다. 서버 내부 Init Script는 그 뒤에도 약 3~10분 실행될 수 있습니다. Windows에서 체크아웃한 파일의 CRLF 줄바꿈은 Terraform 코드가 Init Script 전달 전에 LF로 변환합니다.
 
 ## 접속 정보 Output
 
@@ -226,11 +226,20 @@ Start-Process $BOARD_URL
 
 브라우저에서 `board_url`을 열고 게시글 조회, 작성, 삭제가 모두 되면 `Public ALB -> Web -> Backend -> MariaDB` 경로가 검증된 것입니다.
 
-게시판이 열리지 않으면 다음 output의 명령으로 `/var/log/lab7-init.log`를 확인합니다.
+게시판이 열리지 않으면 먼저 Bastion에서 Naver Cloud 실행 로그를 확인합니다. `/var/log/lab7-init.log`가 없다면 스크립트 본문이 시작되기 전 오류일 수 있습니다.
+
+```powershell
+$bastionIp = terraform output -raw bastion_public_ip
+ssh "root@$bastionIp" 'sudo tail -n 100 /var/log/ncloud-init.log; sudo tail -n 100 /var/log/lab7-init.log'
+```
+
+Web, Backend, DB의 스크립트 로그 확인 명령은 다음 output에 있습니다.
 
 ```bash
 terraform output verification_commands
 ```
+
+Init Script는 새 서버가 처음 부팅할 때만 실행됩니다. 기존 서버에 `terraform apply`를 다시 실행해 `No changes`가 나오면 설치가 재실행되지 않습니다. 서버를 재생성하기 전에 필요한 데이터를 백업하고 `terraform plan`에서 변경 대상을 확인하세요.
 
 ## 관리자 로그인
 

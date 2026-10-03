@@ -232,7 +232,7 @@ terraform plan -out=tfplan
 terraform apply tfplan
 ```
 
-`Apply complete!`가 표시되면 클라우드 리소스 생성은 완료된 것입니다. 각 서버의 Init Script는 서버 내부에서 계속 실행될 수 있으므로 게시판이 열리기까지 약 3~10분 정도 기다립니다.
+`Apply complete!`가 표시되면 클라우드 리소스 생성은 완료된 것입니다. 각 서버의 Init Script는 서버 내부에서 계속 실행될 수 있으므로 게시판이 열리기까지 약 3~10분 정도 기다립니다. Windows에서 체크아웃한 파일의 CRLF 줄바꿈은 Terraform 코드가 Init Script 전달 전에 LF로 변환합니다.
 
 !!! note "Windows에서도 명령은 같습니다"
     위 다섯 줄은 PowerShell에 그대로 복사해 실행합니다. `tfplan`은 실행 파일이 아니라 Terraform이 생성한 실행 계획 파일입니다.
@@ -373,9 +373,10 @@ sudo node /opt/board-service-backend/manage-admin.js admin
 terraform output verification_commands
 ```
 
-각 서버에서 공통으로 확인할 로그는 `/var/log/lab7-init.log`입니다.
+각 서버에서 먼저 Naver Cloud의 실행 로그를 확인합니다. `/var/log/lab7-init.log`가 없다면 스크립트 본문이 시작되기 전 오류일 수 있습니다.
 
 ```bash
+sudo tail -n 100 /var/log/ncloud-init.log
 sudo tail -n 100 /var/log/lab7-init.log
 ```
 
@@ -405,15 +406,15 @@ sudo mariadb -u root -p -e "SHOW DATABASES;"
 | ALB Target이 `미사용` 또는 `DOWN` | Web Init 로그, Nginx, Web ACG의 LB Subnet `10.10.30.0/24:80` 확인 |
 | Backend Health `ETIMEDOUT` | DB 서버 상태와 DB ACG의 Backend ACG `3306` 허용 확인 |
 | 게시판 URL이 처음에는 `503` | Init Script 완료 전일 수 있으므로 Web 로그와 Target Health를 확인 |
+| 네 서버 모두 설치되지 않음 | Bastion의 `/var/log/ncloud-init.log`를 먼저 확인. Windows에서 받은 기존 코드라면 최신 버전으로 갱신하고, 서버가 새로 생성된 실행인지 확인 |
 | SSH 실패 | 현재 관리자 Public IP와 `my_public_ip/32`, `admin_passwords`의 서버별 비밀번호 확인. Bastion에서 `setup-internal-ssh web`으로 실패한 서버만 재등록 |
 | `setup-internal-ssh: command not found` | Bastion Init Script 완료 여부와 `/var/log/lab7-init.log` 확인. 기존 서버는 Init Script 수정만으로 갱신되지 않음 |
 | 관리자 `admin` / `admin` 로그인 실패 | Backend의 `/var/log/lab7-init.log`에 `Lab administrator ready`가 있는지 확인. 없으면 Backend에서 `sudo node /opt/board-service-backend/manage-admin.js admin` 실행 |
 
-Init Script는 서버가 처음 만들어질 때 한 번만 실행됩니다. 코드를 수정한 뒤 다시 설치하려면 전체 환경을 재생성하는 방식이 가장 단순합니다.
+Init Script는 서버가 처음 만들어질 때 한 번만 실행됩니다. 기존 서버에 `terraform apply`를 다시 실행해 `No changes`가 나오면 설치가 재실행되지 않습니다. 서버 재생성이 필요하다면 DB 등 필요한 데이터를 먼저 백업하고 `terraform plan`에서 변경 대상을 확인합니다.
 
 ```bash
-terraform destroy -auto-approve
-terraform apply -auto-approve
+terraform plan
 ```
 
 ## 13. 삭제

@@ -1,20 +1,20 @@
 resource "ncloud_init_script" "bastion" {
   name = "${var.name_prefix}-bastion-init"
 
-  content = templatefile("${path.module}/templates/bastion-init.sh.tftpl", {
+  content = replace(templatefile("${path.module}/templates/bastion-init.sh.tftpl", {
     name_prefix        = var.name_prefix
     init_log           = local.init_log
     web_private_ip     = ncloud_network_interface.web.private_ip
     backend_private_ip = ncloud_network_interface.backend.private_ip
     db_private_ip      = ncloud_network_interface.db.private_ip
     setup_script       = file("${path.module}/scripts/setup-internal-ssh.sh")
-  })
+  }), "\r\n", "\n")
 }
 
 resource "ncloud_init_script" "db" {
   name = "${var.name_prefix}-db-init"
 
-  content = <<-EOT
+  content = replace(<<-EOT
 #!/usr/bin/env bash
 set -euo pipefail
 exec > >(tee -a ${local.init_log}) 2>&1
@@ -45,12 +45,13 @@ chmod +x install-db.sh
 ./install-db.sh
 echo "[${var.name_prefix}] DB init completed at $(date -Is)"
 EOT
+  , "\r\n", "\n")
 }
 
 resource "ncloud_init_script" "backend" {
   name = "${var.name_prefix}-backend-init"
 
-  content = <<-EOT
+  content = replace(<<-EOT
 #!/usr/bin/env bash
 set -euo pipefail
 exec > >(tee -a ${local.init_log}) 2>&1
@@ -115,12 +116,13 @@ done
 
 echo "[${var.name_prefix}] Backend init completed at $(date -Is)"
 EOT
+  , "\r\n", "\n")
 }
 
 resource "ncloud_init_script" "web" {
   name = "${var.name_prefix}-web-init"
 
-  content = <<-EOT
+  content = replace(<<-EOT
 #!/usr/bin/env bash
 set -euo pipefail
 exec > >(tee -a ${local.init_log}) 2>&1
@@ -147,4 +149,5 @@ chmod +x install-web.sh
 ./install-web.sh install
 echo "[${var.name_prefix}] Web init completed at $(date -Is)"
 EOT
+  , "\r\n", "\n")
 }
