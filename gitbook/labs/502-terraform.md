@@ -228,14 +228,14 @@ board_db_password = "BoardApp123!!"
 terraform init
 terraform fmt
 terraform validate
-terraform plan -out=tfplan
-terraform apply tfplan
+terraform plan
+terraform apply
 ```
 
 `Apply complete!`가 표시되면 클라우드 리소스 생성은 완료된 것입니다. 각 서버의 Init Script는 서버 내부에서 계속 실행될 수 있으므로 게시판이 열리기까지 약 3~10분 정도 기다립니다. Windows에서 체크아웃한 파일의 CRLF 줄바꿈은 Terraform 코드가 Init Script 전달 전에 LF로 변환합니다.
 
 !!! note "Windows에서도 명령은 같습니다"
-    위 다섯 줄은 PowerShell에 그대로 복사해 실행합니다. `tfplan`은 실행 파일이 아니라 Terraform이 생성한 실행 계획 파일입니다.
+    위 다섯 줄은 PowerShell에 그대로 복사해 실행합니다.
 
 ## 8. 접속 정보 Output
 

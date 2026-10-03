@@ -130,8 +130,8 @@ DB 비밀번호와 Login Key는 Terraform state에 저장됩니다. `terraform.t
 terraform init
 terraform fmt
 terraform validate
-terraform plan -out=tfplan
-terraform apply tfplan
+terraform plan
+terraform apply
 ```
 
 `Apply complete!`는 클라우드 리소스 생성 완료를 뜻합니다. 서버 내부 Init Script는 그 뒤에도 약 3~10분 실행될 수 있습니다. Windows에서 체크아웃한 파일의 CRLF 줄바꿈은 Terraform 코드가 Init Script 전달 전에 LF로 변환합니다.
