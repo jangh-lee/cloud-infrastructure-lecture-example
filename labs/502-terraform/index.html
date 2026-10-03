@@ -2374,7 +2374,7 @@
 <a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="go">terraform plan -out=tfplan</span>
 <a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="go">terraform apply tfplan</span>
 </code></pre></div>
-<p><code>Apply complete!</code>가 표시되면 클라우드 리소스 생성은 완료된 것입니다. 각 서버의 Init Script는 서버 내부에서 계속 실행될 수 있으므로 게시판이 열리기까지 약 3~10분 정도 기다립니다.</p>
+<p><code>Apply complete!</code>가 표시되면 클라우드 리소스 생성은 완료된 것입니다. 각 서버의 Init Script는 서버 내부에서 계속 실행될 수 있으므로 게시판이 열리기까지 약 3~10분 정도 기다립니다. Windows에서 체크아웃한 파일의 CRLF 줄바꿈은 Terraform 코드가 Init Script 전달 전에 LF로 변환합니다.</p>
 <div class="admonition note">
 <p class="admonition-title">Windows에서도 명령은 같습니다</p>
 <p>위 다섯 줄은 PowerShell에 그대로 복사해 실행합니다. <code>tfplan</code>은 실행 파일이 아니라 Terraform이 생성한 실행 계획 파일입니다.</p>
@@ -2472,8 +2472,9 @@
 <p>게시판이 아직 열리지 않으면 먼저 자동 생성된 확인 명령을 봅니다.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>terraform<span class="w"> </span>output<span class="w"> </span>verification_commands
 </code></pre></div>
-<p>각 서버에서 공통으로 확인할 로그는 <code>/var/log/lab7-init.log</code>입니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>/var/log/lab7-init.log
+<p>각 서버에서 먼저 Naver Cloud의 실행 로그를 확인합니다. <code>/var/log/lab7-init.log</code>가 없다면 스크립트 본문이 시작되기 전 오류일 수 있습니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>/var/log/ncloud-init.log
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>/var/log/lab7-init.log
 </code></pre></div>
 <p>서비스별 확인:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># Web</span>
@@ -2519,6 +2520,10 @@
 <td>Init Script 완료 전일 수 있으므로 Web 로그와 Target Health를 확인</td>
 </tr>
 <tr>
+<td>네 서버 모두 설치되지 않음</td>
+<td>Bastion의 <code>/var/log/ncloud-init.log</code>를 먼저 확인. Windows에서 받은 기존 코드라면 최신 버전으로 갱신하고, 서버가 새로 생성된 실행인지 확인</td>
+</tr>
+<tr>
 <td>SSH 실패</td>
 <td>현재 관리자 Public IP와 <code>my_public_ip/32</code>, <code>admin_passwords</code>의 서버별 비밀번호 확인. Bastion에서 <code>setup-internal-ssh web</code>으로 실패한 서버만 재등록</td>
 </tr>
@@ -2532,9 +2537,8 @@
 </tr>
 </tbody>
 </table>
-<p>Init Script는 서버가 처음 만들어질 때 한 번만 실행됩니다. 코드를 수정한 뒤 다시 설치하려면 전체 환경을 재생성하는 방식이 가장 단순합니다.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>terraform<span class="w"> </span>destroy<span class="w"> </span>-auto-approve
-<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>terraform<span class="w"> </span>apply<span class="w"> </span>-auto-approve
+<p>Init Script는 서버가 처음 만들어질 때 한 번만 실행됩니다. 기존 서버에 <code>terraform apply</code>를 다시 실행해 <code>No changes</code>가 나오면 설치가 재실행되지 않습니다. 서버 재생성이 필요하다면 DB 등 필요한 데이터를 먼저 백업하고 <code>terraform plan</code>에서 변경 대상을 확인합니다.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>terraform<span class="w"> </span>plan
 </code></pre></div>
 <h2 id="13">13. 삭제<a class="headerlink" href="#13" title="Permanent link">&para;</a></h2>
 <p>NAT Gateway, Public IP, ALB와 서버는 비용이 발생할 수 있으므로 실습이 끝나면 삭제합니다.</p>
