@@ -2371,13 +2371,13 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="go">terraform init</span>
 <a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="go">terraform fmt</span>
 <a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="go">terraform validate</span>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="go">terraform plan -out=tfplan</span>
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="go">terraform apply tfplan</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="go">terraform plan</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="go">terraform apply</span>
 </code></pre></div>
 <p><code>Apply complete!</code>가 표시되면 클라우드 리소스 생성은 완료된 것입니다. 각 서버의 Init Script는 서버 내부에서 계속 실행될 수 있으므로 게시판이 열리기까지 약 3~10분 정도 기다립니다. Windows에서 체크아웃한 파일의 CRLF 줄바꿈은 Terraform 코드가 Init Script 전달 전에 LF로 변환합니다.</p>
 <div class="admonition note">
 <p class="admonition-title">Windows에서도 명령은 같습니다</p>
-<p>위 다섯 줄은 PowerShell에 그대로 복사해 실행합니다. <code>tfplan</code>은 실행 파일이 아니라 Terraform이 생성한 실행 계획 파일입니다.</p>
+<p>위 다섯 줄은 PowerShell에 그대로 복사해 실행합니다.</p>
 </div>
 <h2 id="8-output">8. 접속 정보 Output<a class="headerlink" href="#8-output" title="Permanent link">&para;</a></h2>
 <p>전체 접속 정보를 확인합니다.</p>
