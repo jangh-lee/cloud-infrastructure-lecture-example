@@ -212,8 +212,10 @@ server_image_number = "104630229"
 server_spec_code     = "s2-g3a"
 
 db_root_password  = "ChangeRootPass123!"
-board_db_password = "BoardApp123!!"
+board_db_password = "BoardApp123!"
 ```
+
+`board_app`의 실습 기본 비밀번호는 `BoardApp123!`이며 003 게시판, 401 Cloud DB, 402 마이그레이션 예제에서 모두 같은 값을 사용합니다. DB 서버 계정과 Backend `.env`에는 `board_db_password`가 함께 적용됩니다.
 
 `server_image_number`와 `server_spec_code`는 계정에서 사용할 수 있는 Ubuntu G3/KVM 상품 값으로 바꿀 수 있습니다. `terraform.tfvars`, `*.tfstate`, `*.pem`은 `.gitignore`에 포함되어 GitHub에 올라가지 않습니다.
 

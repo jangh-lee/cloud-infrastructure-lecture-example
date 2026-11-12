@@ -77,7 +77,7 @@ variable "board_db_password" {
   description = "Password for the board_app database user"
   type        = string
   sensitive   = true
-  default     = "ChangeBoardPass123!"
+  default     = "BoardApp123!"
 
   validation {
     condition     = length(var.board_db_password) >= 8 && length(var.board_db_password) <= 20
